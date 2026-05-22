@@ -1,0 +1,58 @@
+{% extends 'layout.html' %}
+{% block page_title %}Invoice Generator{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4 align-items-center">
+        <div class="col">
+            <h4 class="fw-bold mb-0">Select Sale to Generate Invoice</h4>
+            <p class="text-muted small">Browse all sales and click "View Invoice" to generate a professional PDF or TXT invoice.</p>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4">ID</th>
+                        <th>Date</th>
+                        <th>Buyer Name</th>
+                        <th>Tag ID</th>
+                        <th>Breed</th>
+                        <th>Sold Price</th>
+                        <th class="text-end pe-4">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sale in sales %}
+                    <tr>
+                        <td class="ps-4">#{{ sale.id }}</td>
+                        <td>{{ sale.date_of_sale }}</td>
+                        <td>
+                            <div class="fw-bold">{{ sale.buyer_name }}</div>
+                            <div class="text-muted small">{{ sale.buyer_city }}</div>
+                        </td>
+                        <td><span class="badge bg-light text-dark border">{{ sale.tag_id }}</span></td>
+                        <td>{{ sale.breed }}</td>
+                        <td><span class="fw-bold text-success">₹{{ "%.2f"|format(sale.sold_price) }}</span></td>
+                        <td class="text-end pe-4">
+                            <a href="{{ url_for('generate_invoice', sales_id=sale.id) }}" class="btn btn-sm btn-primary rounded-pill px-3">
+                                <i class="bi bi-file-earmark-pdf me-1"></i> View Invoice
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center py-5 text-muted">
+                            <i class="bi bi-inbox display-4 d-block mb-3"></i>
+                            No sales records found.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

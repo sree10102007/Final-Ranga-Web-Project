@@ -1,0 +1,105 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-user-plus"></i> Add New Employee</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('employee_add') }}" novalidate>
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label" for="name">Full Name <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="name" name="name" required placeholder="Enter full name">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label" for="phone">Phone Number</label>
+                                <input type="tel" class="form-control" id="phone" name="phone" placeholder="Enter phone number">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label" for="role">Role <span class="text-danger">*</span></label>
+                                <select class="form-select" id="role" name="role" required>
+                                    <option value="">Select Role</option>
+                                    <option value="Manager">Manager</option>
+                                    <option value="Veterinarian">Veterinarian</option>
+                                    <option value="Handler">Handler</option>
+                                    <option value="Cleaner">Cleaner</option>
+                                    <option value="Feeder">Feeder</option>
+                                    <option value="Laborer">Laborer</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label" for="joining_date">Joining Date <span class="text-danger">*</span></label>
+                                <input type="date" class="form-control" id="joining_date" name="joining_date" required id="todayDate">
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label" for="wage_type">Wage Type</label>
+                                <select class="form-select" id="wage_type" name="wage_type">
+                                    <option value="Daily">Daily</option>
+                                    <option value="Weekly">Weekly</option>
+                                    <option value="Monthly">Monthly</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label" for="wage_rate">Wage Rate (₹)</label>
+                                <input type="number" step="0.01" class="form-control" id="wage_rate" name="wage_rate" placeholder="0.00">
+                            </div>
+                        </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label fw-bold small text-muted">AADHAR NUMBER</label>
+                    <input type="text" name="aadhar_no" class="form-control" placeholder="12-digit Aadhar No">
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label fw-bold small text-muted">PAN NUMBER</label>
+                    <input type="text" name="pan_no" class="form-control" placeholder="ABCDE1234F">
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label class="form-label fw-bold small text-muted">BANK NAME</label>
+                    <input type="text" name="bank_name" class="form-control" placeholder="e.g. SBI, HDFC">
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label class="form-label fw-bold small text-muted">ACCOUNT NUMBER</label>
+                    <input type="text" name="account_no" class="form-control" placeholder="Bank Account No">
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label class="form-label fw-bold small text-muted">IFSC CODE</label>
+                    <input type="text" name="ifsc_code" class="form-control" placeholder="SBIN0001234">
+                </div>
+            </div>
+
+                        <div class="mb-3">
+                            <label class="form-label" for="address">Address</label>
+                            <textarea class="form-control" id="address" name="address" rows="3" placeholder="Enter residential address"></textarea>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-between">
+                            <a href="{{ url_for('employees') }}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Add Employee
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

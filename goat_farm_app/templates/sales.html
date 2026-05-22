@@ -1,0 +1,71 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold text-dark mb-0"><i class="bi bi-wallet2 text-success"></i> Sales Records</h2>
+    <div class="d-flex gap-2">
+        <a href="{{ url_for('farm_settings') }}" class="btn btn-outline-success shadow-sm" title="Configure Farm Details"><i class="bi bi-gear"></i> Farm Settings</a>
+        <a href="{{ url_for('sales_add') }}" class="btn btn-success shadow-sm"><i class="bi bi-plus-circle"></i> Log a Sale</a>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm rounded-4 mb-4">
+    <div class="card-body p-4">
+        <form method="GET" action="{{ url_for('sales') }}" class="row g-3 align-items-end">
+            <div class="col-md-9">
+                <label class="form-label text-muted">Search by Tag ID or Buyer</label>
+                <input type="text" name="tag_id" class="form-control" value="{{ request.args.get('tag_id', '') }}" placeholder="Search...">
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-secondary w-100"><i class="bi bi-search"></i> Search</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm rounded-4">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Sr#</th>
+                        <th>Tag ID</th>
+                        <th>Species Details</th>
+                        <th>Weight</th>
+                        <th class="text-success fw-bold">Sold Price (₹)</th>
+                        <th>Date of Sale</th>
+                        <th>Buyer Information</th>
+                        <th class="text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in records %}
+                    <tr>
+                        <td class="ps-4">{{ r.sr_no }}</td>
+                        <td class="fw-bold"><span class="badge bg-success">{{ r.tag_id }}</span></td>
+                        <td><small>{{ r.breed }} ({{ r.breed_percent }}%) - {{ r.gender }}</small></td>
+                        <td>{{ r.weight }} kg</td>
+                        <td class="text-success fw-bold">₹{{ "%.2f"|format(r.sold_price) }}</td>
+                        <td>{{ r.date_of_sale }}</td>
+                        <td><small><strong>{{ r.buyer_name }}</strong><br>{{ r.buyer_contact }}<br><span class="text-muted">{{ r.buyer_city }}</span></small></td>
+                        <td class="text-center">
+                            <a href="{{ url_for('sales_edit', id=r['id']) }}" class="btn btn-sm btn-warning me-1" title="Edit"><i class="bi bi-pencil"></i> Edit</a>
+                            <a href="{{ url_for('generate_invoice', sales_id=r.id) }}" class="btn btn-sm btn-outline-primary me-1" title="View Invoice">
+                                <i class="bi bi-file-earmark-pdf"></i> Invoice
+                            </a>
+                            <form method="POST" action="{{ url_for('sales_delete', id=r['id']) }}" style="display:inline;" onclick="return confirm('Delete this sale record?');">
+                                <button type="submit" class="btn btn-sm btn-danger" title="Delete"><i class="bi bi-trash"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="8" class="text-center py-4 text-muted">No sales records found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

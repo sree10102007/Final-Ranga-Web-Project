@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Goat Farm Management{% endblock %}</title>
+  
+  <!-- Modern Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Icons & Bootstrap -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  
+  <style>
+    :root {
+      --sidebar-width: 280px;
+      --topbar-height: 70px;
+      --accent: #4caf50;
+      --accent-dark: #2e7d32;
+      --bg-light: #f8fafc;
+      --sidebar-bg: #ffffff;
+      --sidebar-text: #334155;
+      --sidebar-hover: #f1f5f9;
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════ SIDEBAR ═══════════ -->
+<nav id="sidebar">
+  <a href="{{ url_for('dashboard') }}" class="sidebar-brand">
+    <span class="brand-icon">🐐</span>
+    <div>
+      <div class="brand-text">Goat Farm</div>
+      <div class="brand-sub">Management System</div>
+    </div>
+  </a>
+
+  <div class="sidebar-scrollable" style="height: calc(100vh - 100px); overflow-y: auto; padding-bottom: 40px;">
+    <!-- Dashboard Direct Link -->
+    <div style="padding-top:10px;">
+      <a href="{{ url_for('dashboard') }}" class="sidebar-direct {% if request.endpoint == 'dashboard' %}active{% endif %}">
+        <span class="link-icon"><i class="bi bi-speedometer2"></i></span> Dashboard
+      </a>
+    </div>
+
+    <!-- GOAT MANAGEMENT MENU -->
+    {% set goat_ep = ['goats','goat_detail','master','master_add','master_edit','kid','kid_add','kid_edit','kit','records','add_record','edit_record'] %}
+    <button class="nav-group-header {% if request.endpoint in goat_ep %}open{% endif %}" onclick="toggleGroup(this)">
+      <span class="group-icon"><i class="bi bi-grid-3x3-gap"></i></span> Goat Management
+      <span class="chevron"><i class="bi bi-chevron-right"></i></span>
+    </button>
+    <div class="nav-group-items {% if request.endpoint in goat_ep %}show{% endif %}">
+      <a href="{{ url_for('goats') }}" class="sidebar-link {% if request.endpoint in ['goats','goat_detail'] %}active{% endif %}"><span class="link-icon"><i class="bi bi-list-ul"></i></span> Goats Directory</a>
+      <a href="{{ url_for('master') }}" class="sidebar-link {% if request.endpoint in ['master','master_add','master_edit'] %}active{% endif %}"><span class="link-icon"><i class="bi bi-journal-text"></i></span> Master Register</a>
+      <a href="{{ url_for('kid') }}" class="sidebar-link {% if request.endpoint in ['kid','kid_add','kid_edit'] %}active{% endif %}"><span class="link-icon"><i class="bi bi-emoji-smile"></i></span> Kid Details</a>
+      <a href="{{ url_for('records') }}" class="sidebar-link {% if request.endpoint in ['records','add_record','edit_record'] %}active{% endif %}"><span class="link-icon"><i class="bi bi-card-list"></i></span> Income/Expense</a>
+    </div>
+
+    <!-- HEALTH RECORDS MENU -->
+    {% set health_ep = ['medicine','medicine_add','medicine_edit','vaccine','vaccine_add','vaccine_edit','mortality','mortality_add','mortality_edit','doctor','doctor_add','doctor_edit'] %}
+    <button class="nav-group-header {% if request.endpoint in health_ep %}open{% endif %}" onclick="toggleGroup(this)">
+      <span class="group-icon"><i class="bi bi-heart-pulse"></i></span> Health Records
+      <span class="chevron"><i class="bi bi-chevron-right"></i></span>
+    </button>
+    <div class="nav-group-items {% if request.endpoint in health_ep %}show{% endif %}">
+      <a href="{{ url_for('medicine') }}" class="sidebar-link {% if request.endpoint in ['medicine','medicine_add','medicine_edit'] %}active{% endif %}"><span class="link-icon"><i class="bi bi-capsule"></i></span> Medicine Log</a>
+      <a href="{{ url_for('vaccine') }}" class="sidebar-link {% if request.endpoint in ['vaccine','vaccine_add','vaccine_edit'] %}active{% endif %}"><span class="link-icon"><i class="bi bi-bandaid"></i></span> Vaccine Records</a>
+      <a href="{{ url_for('mortality') }}" class="sidebar-link {% if request.endpoint in ['mortality','mortality_add','mortality_edit'] %}active{% endif %}"><span class="link-icon"><i class="bi bi-x-circle"></i></span> Mortality Log</a>
+      <a href="{{ url_for('doctor') }}" class="sidebar-link {% if request.endpoint in ['doctor','doctor_add','doctor_edit'] %}active{% endif %}"><span class="link-icon"><i class="bi bi-person-badge"></i></span> Doctors</a>
+    </div>
+
+    <!-- PURCHASE & SALES MENU -->
+    {% set sales_ep = ['sales','sales_add','sales_edit','purchases','purchase_add','purchase_edit','invoice','equipment_purchases'] %}
+    <button class="nav-group-header {% if request.endpoint in sales_ep %}open{% endif %}" onclick="toggleGroup(this)">
+      <span class="group-icon"><i class="bi bi-bag-check"></i></span> Purchase & Sales
+      <span class="chevron"><i class="bi bi-chevron-right"></i></span>
+    </button>
+    <div class="nav-group-items {% if request.endpoint in sales_ep %}show{% endif %}">
+      <a href="{{ url_for('sales') }}" class="sidebar-link {% if request.endpoint in ['sales','sales_add','sales_edit'] %}active{% endif %}"><span class="link-icon"><i class="bi bi-receipt"></i></span> Sales Records</a>
+      <a href="{{ url_for('purchases') }}" class="sidebar-link {% if request.endpoint in ['purchases','purchase_add','purchase_edit'] %}active{% endif %}"><span class="link-icon"><i class="bi bi-cart3"></i></span> Purchases</a>
+      <a href="{{ url_for('generate_invoice') }}" class="sidebar-link {% if request.endpoint == 'generate_invoice' %}active{% endif %}"><span class="link-icon"><i class="bi bi-file-earmark-pdf"></i></span> Invoice Generator</a>
+      <a href="{{ url_for('equipment_purchases') }}" class="sidebar-link {% if request.endpoint == 'equipment_purchases' %}active{% endif %}"><span class="link-icon"><i class="bi bi-cpu"></i></span> Equipment Purchases</a>
+    </div>
+
+    <!-- FARM OPERATIONS MENU -->
+    {% set farm_ep = ['feed','feed_add','feed_edit','expenses','expense_add','equipment','equipment_add','equipment_edit','equipment_detail','pnl'] %}
+    <button class="nav-group-header {% if request.endpoint in farm_ep %}open{% endif %}" onclick="toggleGroup(this)">
+      <span class="group-icon"><i class="bi bi-gear-wide-connected"></i></span> Farm Operations
+      <span class="chevron"><i class="bi bi-chevron-right"></i></span>
+    </button>
+    <div class="nav-group-items {% if request.endpoint in farm_ep %}show{% endif %}">
+      <a href="{{ url_for('feed') }}" class="sidebar-link {% if request.endpoint in ['feed','feed_add','feed_edit'] %}active{% endif %}"><span class="link-icon"><i class="bi bi-basket3"></i></span> Feed Inventory</a>
+      <a href="{{ url_for('expenses') }}" class="sidebar-link {% if request.endpoint in ['expenses','expense_add'] %}active{% endif %}"><span class="link-icon"><i class="bi bi-wallet2"></i></span> Expenses</a>
+      <a href="{{ url_for('equipment') }}" class="sidebar-link {% if request.endpoint in ['equipment','equipment_add','equipment_edit','equipment_detail'] %}active{% endif %}"><span class="link-icon"><i class="bi bi-tools"></i></span> Equipment</a>
+      <a href="{{ url_for('pnl') }}" class="sidebar-link {% if request.endpoint == 'pnl' %}active{% endif %}"><span class="link-icon"><i class="bi bi-pie-chart-fill"></i></span> Finances (P&L)</a>
+    </div>
+
+    <!-- HR MANAGEMENT MENU -->
+    {% set hr_ep = ['employees','employee_add','employee_edit','employee_detail','attendance_view','attendance_summary','wages_list','wages_edit','salary_calculate'] %}
+    <button class="nav-group-header {% if request.endpoint in hr_ep %}open{% endif %}" onclick="toggleGroup(this)">
+      <span class="group-icon"><i class="bi bi-people"></i></span> HR Management
+      <span class="chevron"><i class="bi bi-chevron-right"></i></span>
+    </button>
+    <div class="nav-group-items {% if request.endpoint in hr_ep %}show{% endif %}">
+      <a href="{{ url_for('employees') }}" class="sidebar-link {% if request.endpoint in ['employees','employee_add','employee_edit','employee_detail'] %}active{% endif %}"><span class="link-icon"><i class="bi bi-person-lines-fill"></i></span> Employees</a>
+      <a href="{{ url_for('attendance_view') }}" class="sidebar-link {% if request.endpoint in ['attendance_view','attendance_summary'] %}active{% endif %}"><span class="link-icon"><i class="bi bi-calendar-check"></i></span> Attendance</a>
+      <a href="{{ url_for('wages_list') }}" class="sidebar-link {% if request.endpoint in ['wages_list','wages_edit'] %}active{% endif %}"><span class="link-icon"><i class="bi bi-cash-stack"></i></span> Wages</a>
+      <a href="{{ url_for('salary_calculate') }}" class="sidebar-link {% if request.endpoint == 'salary_calculate' %}active{% endif %}"><span class="link-icon"><i class="bi bi-calculator"></i></span> Salary Calculation</a>
+    </div>
+
+    <!-- REPORTS MENU -->
+    {% set rep_ep = ['salary_report','attendance_summary','pnl_report'] %}
+    <button class="nav-group-header {% if request.endpoint in rep_ep %}open{% endif %}" onclick="toggleGroup(this)">
+      <span class="group-icon"><i class="bi bi-bar-chart-line"></i></span> Reports
+      <span class="chevron"><i class="bi bi-chevron-right"></i></span>
+    </button>
+    <div class="nav-group-items {% if request.endpoint in rep_ep %}show{% endif %}">
+      <a href="{{ url_for('salary_report') }}" class="sidebar-link {% if request.endpoint == 'salary_report' %}active{% endif %}"><span class="link-icon"><i class="bi bi-file-earmark-bar-graph"></i></span> Salary Report</a>
+      <a href="{{ url_for('attendance_summary') }}" class="sidebar-link {% if request.endpoint == 'attendance_summary' %}active{% endif %}"><span class="link-icon"><i class="bi bi-calendar3"></i></span> Attendance Summary</a>
+      <a href="{{ url_for('pnl_report') }}" class="sidebar-link {% if request.endpoint == 'pnl_report' %}active{% endif %}"><span class="link-icon"><i class="bi bi-file-earmark-spreadsheet"></i></span> P&L Report</a>
+    </div>
+
+    <!-- SETTINGS & ACCOUNT -->
+    <div class="mt-4">
+      <a href="{{ url_for('farm_settings') }}" class="sidebar-direct {% if request.endpoint == 'farm_settings' %}active{% endif %}">
+        <span class="link-icon"><i class="bi bi-gear"></i></span> Farm Settings
+      </a>
+      <a href="{{ url_for('logout') }}" class="sidebar-direct">
+        <span class="link-icon"><i class="bi bi-box-arrow-right"></i></span> Logout
+      </a>
+    </div>
+  </div>
+</nav>
+
+<!-- TOP BAR -->
+<div id="topbar">
+  <button class="sidebar-toggle" onclick="toggleSidebar()">🐐</button>
+  <div class="topbar-title">{% block page_title %}{% endblock %}</div>
+  
+  <form action="{{ url_for('dashboard') }}" method="GET" class="topbar-search d-none d-md-flex">
+    <i class="bi bi-search text-muted"></i>
+    <input type="text" name="search" class="border-0 bg-transparent w-100" style="outline:none;" placeholder="Quick search tags or records..." value="{{ request.args.get('search', '') }}">
+    <button type="submit" style="display:none;"></button>
+  </form>
+
+  <div class="ms-auto d-flex align-items-center gap-3">
+    <a href="{{ url_for('farm_settings') }}" class="topbar-user">
+      <div class="user-avatar">AD</div>
+      <span class="d-none d-sm-inline">{{ session.username or 'Admin' }}</span>
+    </a>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<main id="main-content">
+  <div class="page-body">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show border-0 shadow-sm rounded-3 mb-4" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+    
+    {% block content %}{% endblock %}
+  </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('mobile-open');
+  }
+
+  function toggleGroup(btn) {
+    btn.classList.toggle('open');
+    let items = btn.nextElementSibling;
+    items.classList.toggle('show');
+  }
+
+  // Auto-hide alerts
+  setTimeout(function() {
+    let alerts = document.querySelectorAll('.alert');
+    alerts.forEach(function(alert) {
+      let bsAlert = new bootstrap.Alert(alert);
+      bsAlert.close();
+    });
+  }, 5000);
+</script>
+
+</body>
+</html>

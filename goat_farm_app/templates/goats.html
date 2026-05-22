@@ -1,0 +1,49 @@
+{% extends 'layout.html' %}
+
+{% block page_title %}Goat Directory{% endblock %}
+
+{% block content %}
+<div class="page-header mb-4">
+    <div>
+        <h2 class="fw-800 text-dark mb-1">Goat Directory</h2>
+        <p class="text-muted mb-0">Overview of all registered goats and their financial status.</p>
+    </div>
+</div>
+
+<div class="row g-4">
+    {% for goat in goats %}
+    <div class="col-md-4 col-xl-3">
+        <div class="card border-0 h-100 rounded-4">
+            <div class="card-body text-center p-4">
+                <div class="mb-3 d-inline-flex align-items-center justify-content-center bg-success bg-opacity-10 rounded-4" style="width: 70px; height: 70px;">
+                    <i class="bi bi-tag-fill text-success fs-2"></i>
+                </div>
+                <h4 class="fw-800 mb-1" style="color: #1a2e1a;">{{ goat.tag_number }}</h4>
+                <p class="text-muted small mb-4">Activity Records: {{ goat.total_records }}</p>
+                
+                <div class="p-3 bg-light rounded-3 mb-3">
+                    <div class="d-flex justify-content-between align-items-center small mb-1">
+                        <span class="text-muted">Total P/L:</span>
+                        <span class="fw-800 {% if (goat.total_income - goat.total_expense) >= 0 %}text-success{% else %}text-danger{% endif %}">
+                            ₹{{ "%.2f"|format(goat.total_income - goat.total_expense) }}
+                        </span>
+                    </div>
+                </div>
+
+                <a href="{{ url_for('goat_detail', tag_number=goat.tag_number) }}" class="btn btn-success w-100 shadow-sm">
+                    View Details
+                </a>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-12 text-center py-5">
+        <div class="mb-3">
+            <i class="bi bi-info-circle text-muted" style="font-size: 3rem; opacity: 0.3;"></i>
+        </div>
+        <p class="text-muted fs-5">No goats registered in the directory yet.</p>
+        <a href="{{ url_for('master_add') }}" class="btn btn-success mt-2">Add First Goat</a>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,90 @@
+{% extends 'layout.html' %}
+
+{% block page_title %}Master Inventory Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-header mb-4">
+    <h2 class="fw-800 text-dark mb-1">Master Inventory</h2>
+    <p class="text-muted mb-0">Overview of your current stocks across feed, medicines, and vaccines.</p>
+</div>
+
+<div class="row g-4 mb-4">
+    <!-- Feed Stock -->
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white border-0 pt-4 pb-2">
+                <h5 class="fw-bold text-warning"><i class="bi bi-box-seam me-2"></i>Feed Stock</h5>
+            </div>
+            <div class="card-body">
+                {% if feed_stock %}
+                <ul class="list-group list-group-flush">
+                    {% for item in feed_stock %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                        <span class="fw-bold">{{ item.feed_name }}</span>
+                        <span class="badge bg-warning-subtle text-warning fs-6">{{ "%.2f"|format(item.stock or 0) }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <div class="text-muted text-center py-4">No feed stock data available.</div>
+                {% endif %}
+            </div>
+            <div class="card-footer bg-white border-0 text-center pb-4">
+                <a href="{{ url_for('purchase_feed') }}" class="btn btn-sm btn-outline-warning">Purchase Feed</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Medicine Stock -->
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white border-0 pt-4 pb-2">
+                <h5 class="fw-bold text-info"><i class="bi bi-capsule me-2"></i>Medicine Purchases (Total)</h5>
+            </div>
+            <div class="card-body">
+                {% if med_purchases %}
+                <ul class="list-group list-group-flush">
+                    {% for item in med_purchases %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                        <span class="fw-bold">{{ item.medicine_name }}</span>
+                        <span class="badge bg-info-subtle text-info fs-6">{{ item.stock }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <div class="text-muted text-center py-4">No medicine purchases recorded.</div>
+                {% endif %}
+            </div>
+            <div class="card-footer bg-white border-0 text-center pb-4">
+                <a href="{{ url_for('purchase_medicine') }}" class="btn btn-sm btn-outline-info">Purchase Medicine</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vaccine Stock -->
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white border-0 pt-4 pb-2">
+                <h5 class="fw-bold" style="color: #7b1fa2;"><i class="bi bi-shield-check me-2"></i>Vaccine Purchases (Total)</h5>
+            </div>
+            <div class="card-body">
+                {% if vac_purchases %}
+                <ul class="list-group list-group-flush">
+                    {% for item in vac_purchases %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                        <span class="fw-bold">{{ item.vaccine_name }}</span>
+                        <span class="badge fs-6" style="background: #f3e5f5; color: #7b1fa2;">{{ item.stock }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <div class="text-muted text-center py-4">No vaccine purchases recorded.</div>
+                {% endif %}
+            </div>
+            <div class="card-footer bg-white border-0 text-center pb-4">
+                <a href="{{ url_for('purchase_vaccine') }}" class="btn btn-sm btn-outline-primary" style="color: #7b1fa2; border-color: #7b1fa2;">Purchase Vaccine</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

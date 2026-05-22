@@ -1,0 +1,131 @@
+{% extends 'layout.html' %}
+
+{% block page_title %}Employee Attendance{% endblock %}
+
+{% block content %}
+<div class="page-header mb-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
+    <div>
+        <h2 class="fw-800 text-dark mb-1">Employee Attendance</h2>
+        <p class="text-muted mb-0">Mark and track daily attendance of farm staff.</p>
+    </div>
+    <button type="button" class="btn btn-success shadow-sm" data-bs-toggle="modal" data-bs-target="#markAttendanceModal">
+        <i class="bi bi-calendar-check me-2"></i>Mark Attendance
+    </button>
+</div>
+
+<!-- Filter Section -->
+<div class="card border-0 mb-4 shadow-sm rounded-4">
+    <div class="card-body">
+        <form method="GET" action="{{ url_for('attendance_view') }}" class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label small fw-bold text-muted">Filter by Date</label>
+                <input type="date" name="date" class="form-control" value="{{ date_filter }}">
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">Apply Filter</button>
+            </div>
+            <div class="col-md-2">
+                <a href="{{ url_for('attendance_view') }}" class="btn btn-light w-100">Clear</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Attendance Records Table -->
+<div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0 align-middle">
+            <thead class="bg-light text-muted small fw-bold">
+                <tr>
+                    <th class="ps-4">Employee</th>
+                    <th>Role</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Notes</th>
+                    <th class="text-end pe-4">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in records %}
+                <tr>
+                    <td class="ps-4">
+                        <div class="fw-bold text-dark">{{ record.name }}</div>
+                        <div class="small text-muted">ID: #{{ record.employee_id }}</div>
+                    </td>
+                    <td><span class="badge bg-light text-dark border">{{ record.role }}</span></td>
+                    <td>{{ record.date }}</td>
+                    <td>
+                        {% if record.status == 'Present' %}
+                            <span class="badge bg-success">Present</span>
+                        {% elif record.status == 'Half Day' %}
+                            <span class="badge bg-warning text-dark">Half Day</span>
+                        {% elif record.status == 'Absent' %}
+                            <span class="badge bg-danger">Absent</span>
+                        {% else %}
+                            <span class="badge bg-secondary">{{ record.status }}</span>
+                        {% endif %}
+                    </td>
+                    <td><span class="text-muted small">{{ record.notes or '-' }}</span></td>
+                    <td class="text-end pe-4">
+                        <!-- Add edit/delete buttons if necessary or leave blank -->
+                        <span class="text-muted small"><i class="bi bi-check2-all text-success"></i> Recorded</span>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" class="text-center py-5 text-muted">
+                        <i class="bi bi-calendar-x d-block mb-3" style="font-size: 2.5rem; opacity: 0.5;"></i>
+                        No attendance records found{% if date_filter %} for {{ date_filter }}{% endif %}.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Mark Attendance Modal -->
+<div class="modal fade" id="markAttendanceModal" tabindex="-1" aria-labelledby="markAttendanceModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 rounded-4 shadow">
+            <div class="modal-header border-bottom-0 pb-0">
+                <h5 class="modal-title fw-bold" id="markAttendanceModalLabel">Mark Attendance</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" action="{{ url_for('attendance_add') }}" class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label fw-bold small text-muted">EMPLOYEE <span class="text-danger">*</span></label>
+                        <select name="employee_id" class="form-select" required>
+                            <option value="">-- Select Employee --</option>
+                            {% for emp in employees %}
+                            <option value="{{ emp.id }}">{{ emp.name }} ({{ emp.role }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold small text-muted">DATE <span class="text-danger">*</span></label>
+                        <input type="date" name="date" class="form-control" required value="{{ date_filter or '' }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold small text-muted">STATUS <span class="text-danger">*</span></label>
+                        <select name="status" class="form-select" required>
+                            <option value="Present">Present</option>
+                            <option value="Half Day">Half Day</option>
+                            <option value="Absent">Absent</option>
+                            <option value="On Leave">On Leave</option>
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-bold small text-muted">NOTES</label>
+                        <input type="text" name="notes" class="form-control" placeholder="Optional notes...">
+                    </div>
+                    <div class="col-12 pt-3">
+                        <button type="submit" class="btn btn-success w-100 fw-bold">Save Attendance</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

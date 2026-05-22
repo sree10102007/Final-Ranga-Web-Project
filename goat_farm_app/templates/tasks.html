@@ -1,0 +1,210 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="mb-3"><i class="fas fa-tasks"></i> Task Management</h1>
+        </div>
+    </div>
+
+    <!-- Status Filter -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="GET" class="row g-3">
+                <div class="col-md-9">
+                    <select class="form-select" name="status">
+                        <option value="">All Statuses</option>
+                        {% for status_item in statuses %}
+                        <option value="{{ status_item }}" {% if status_filter == status_item %}selected{% endif %}>{{ status_item }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-outline-primary w-100">
+                        <i class="fas fa-search"></i> Filter
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Assign Task -->
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><i class="fas fa-plus"></i> Assign Task</h5>
+        </div>
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('task_add') }}">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <select class="form-select" name="employee_id" required>
+                            <option value="">Select Employee</option>
+                            {% for emp in employees %}
+                            <option value="{{ emp.id }}">{{ emp.employee_id }} - {{ emp.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <input type="text" class="form-control" name="task_name" placeholder="Task Name (required)" required>
+                    </div>
+                    <div class="col-md-2">
+                        <input type="date" class="form-control" name="due_date" required>
+                    </div>
+                    <div class="col-md-2">
+                        <select class="form-select" name="priority">
+                            <option value="Low">Low</option>
+                            <option value="Medium" selected>Medium</option>
+                            <option value="High">High</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-check"></i> Assign
+                        </button>
+                    </div>
+                    <div class="col-md-12">
+                        <input type="date" class="form-control" name="assigned_date" placeholder="Assigned Date">
+                    </div>
+                    <div class="col-md-12">
+                        <textarea class="form-control" name="description" rows="2" placeholder="Task Description (optional)"></textarea>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Tasks -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-list"></i> Tasks</h5>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Employee</th>
+                        <th>Task Name</th>
+                        <th>Priority</th>
+                        <th>Assigned Date</th>
+                        <th>Due Date</th>
+                        <th>Status</th>
+                        <th>Progress</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if records %}
+                        {% for rec in records %}
+                        <tr>
+                            <td>
+                                <strong>{{ rec.name }}</strong><br>
+                                <small class="text-muted">{{ rec.employee_id }}</small>
+                            </td>
+                            <td>{{ rec.task_name }}</td>
+                            <td>
+                                {% if rec.priority == 'High' %}
+                                <span class="badge bg-danger">High</span>
+                                {% elif rec.priority == 'Medium' %}
+                                <span class="badge bg-warning">Medium</span>
+                                {% else %}
+                                <span class="badge bg-info">Low</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ rec.assigned_date or '-' }}</td>
+                            <td>{{ rec.due_date }}</td>
+                            <td>
+                                <span class="badge bg-secondary">{{ rec.status }}</span>
+                            </td>
+                            <td>
+                                <div class="progress" style="height: 20px;">
+                                    <div class="progress-bar" style="width: {{ rec.completion_percentage }}%">
+                                        {{ rec.completion_percentage }}%
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <form action="{{ url_for('task_update', task_id=rec.id) }}" method="POST" style="display:inline;">
+                                    <select class="form-select form-select-sm mb-1" name="status" style="width: auto;" onchange="this.form.submit()">
+                                        <option value="">Change</option>
+                                        <option value="Pending" {% if rec.status == 'Pending' %}selected{% endif %}>Pending</option>
+                                        <option value="In Progress" {% if rec.status == 'In Progress' %}selected{% endif %}>In Progress</option>
+                                        <option value="Completed" {% if rec.status == 'Completed' %}selected{% endif %}>Completed</option>
+                                    </select>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                    <tr>
+                        <td colspan="8" class="text-center text-muted py-4">
+                            <i class="fas fa-inbox"></i> No tasks found
+                        </td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Summary -->
+    <div class="row mt-4">
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h6 class="text-muted mb-2">Total Tasks</h6>
+                    <h3 class="text-primary">{{ records|length }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h6 class="text-muted mb-2">Pending</h6>
+                    <h3 class="text-warning">
+                        {% set pending_count = namespace(value=0) %}
+                        {% for rec in records %}
+                            {% if rec.status == 'Pending' %}
+                                {% set pending_count.value = pending_count.value + 1 %}
+                            {% endif %}
+                        {% endfor %}
+                        {{ pending_count.value }}
+                    </h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h6 class="text-muted mb-2">In Progress</h6>
+                    <h3 class="text-info">
+                        {% set progress_count = namespace(value=0) %}
+                        {% for rec in records %}
+                            {% if rec.status == 'In Progress' %}
+                                {% set progress_count.value = progress_count.value + 1 %}
+                            {% endif %}
+                        {% endfor %}
+                        {{ progress_count.value }}
+                    </h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h6 class="text-muted mb-2">Completed</h6>
+                    <h3 class="text-success">
+                        {% set completed_count = namespace(value=0) %}
+                        {% for rec in records %}
+                            {% if rec.status == 'Completed' %}
+                                {% set completed_count.value = completed_count.value + 1 %}
+                            {% endif %}
+                        {% endfor %}
+                        {{ completed_count.value }}
+                    </h3>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold text-success mb-0"><i class="bi bi-cash-coin"></i> Enter Sales Record</h2>
+            <a href="{{ url_for('sales') }}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Back to Sales</a>
+        </div>
+        
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-body p-4 p-md-5">
+                <form method="POST" action="{{ url_for('sales_add') }}">
+                    
+                    <h5 class="text-success border-bottom pb-2 mb-3">Goat Details</h5>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-3"><label class="form-label text-muted">Sr#</label><input type="text" class="form-control" name="sr_no" value="{{ next_sr }}"></div>
+                        <div class="col-md-9"><label class="form-label text-muted">Tag ID *</label><input type="text" class="form-control border-success" name="tag_id" required></div>
+                        <div class="col-md-4"><label class="form-label text-muted">Breed</label><input type="text" class="form-control" name="breed"></div>
+                        <div class="col-md-4"><label class="form-label text-muted">Breed %</label><input type="text" class="form-control" name="breed_percent"></div>
+                        <div class="col-md-4">
+                            <label class="form-label text-muted">Gender</label>
+                            <select class="form-select" name="gender">
+                                <option value=""></option>
+                                <option value="M">Male</option>
+                                <option value="F">Female</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <h5 class="text-success border-bottom pb-2 mb-3">Transaction Details</h5>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4"><label class="form-label text-muted">Weight (KG)</label><input type="number" step="0.01" class="form-control" name="weight"></div>
+                        <div class="col-md-4">
+                            <label class="form-label text-muted">Sold Price *</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light">₹</span>
+                                <input type="number" step="0.01" class="form-control border-success" name="sold_price" required>
+                            </div>
+                        </div>
+                        <div class="col-md-4"><label class="form-label text-muted">Date of Sale *</label><input type="date" class="form-control" name="date_of_sale" required></div>
+                    </div>
+
+                    <h5 class="text-success border-bottom pb-2 mb-3">Buyer Information</h5>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-12"><label class="form-label text-muted">Buyer Name</label><input type="text" class="form-control" name="buyer_name"></div>
+                        <div class="col-md-6"><label class="form-label text-muted">Buyer City</label><input type="text" class="form-control" name="buyer_city"></div>
+                        <div class="col-md-6"><label class="form-label text-muted">Contact Details</label><input type="text" class="form-control" name="buyer_contact" placeholder="Phone or email"></div>
+                    </div>
+                    
+                    <div class="col-12 mt-4">
+                        <button type="submit" class="btn btn-success btn-lg w-100 shadow-sm"><i class="bi bi-wallet2"></i> Record Sale</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

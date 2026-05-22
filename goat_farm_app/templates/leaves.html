@@ -1,0 +1,148 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="mb-3"><i class="fas fa-calendar-times"></i> Leave Management</h1>
+        </div>
+    </div>
+
+    <!-- Status Filter -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="GET" class="row g-3">
+                <div class="col-md-9">
+                    <select class="form-select" name="status">
+                        <option value="">All Statuses</option>
+                        {% for status_item in statuses %}
+                        <option value="{{ status_item }}" {% if status_filter == status_item %}selected{% endif %}>{{ status_item }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-outline-primary w-100">
+                        <i class="fas fa-search"></i> Filter
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Quick Add Leave -->
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><i class="fas fa-plus"></i> Request Leave</h5>
+        </div>
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('leave_add') }}">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label">Employee</label>
+                        <select class="form-select" name="employee_id" required>
+                            <option value="">Select Employee</option>
+                            {% for emp in employees %}
+                            <option value="{{ emp.id }}">{{ emp.employee_id }} - {{ emp.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Leave Type</label>
+                        <select class="form-select" name="leave_type" required>
+                            <option value="">Select</option>
+                            <option value="Sick Leave">Sick Leave</option>
+                            <option value="Casual Leave">Casual Leave</option>
+                            <option value="Earned Leave">Earned Leave</option>
+                            <option value="Unpaid Leave">Unpaid Leave</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Start Date</label>
+                        <input type="date" class="form-control" name="start_date" required>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">End Date</label>
+                        <input type="date" class="form-control" name="end_date" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Reason</label>
+                        <input type="text" class="form-control" name="reason" placeholder="Leave reason">
+                    </div>
+                    <div class="col-md-12 mt-3">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-check"></i> Submit Request
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Leave Requests -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-list"></i> Leave Requests</h5>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Employee ID</th>
+                        <th>Name</th>
+                        <th>Leave Type</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>Reason</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if records %}
+                        {% for rec in records %}
+                        <tr>
+                            <td><strong>{{ rec.employee_id }}</strong></td>
+                            <td>{{ rec.name }}</td>
+                            <td>{{ rec.leave_type }}</td>
+                            <td>{{ rec.start_date }}</td>
+                            <td>{{ rec.end_date }}</td>
+                            <td>{{ rec.reason or '-' }}</td>
+                            <td>
+                                {% if rec.status == 'Approved' %}
+                                <span class="badge bg-success">Approved</span>
+                                {% elif rec.status == 'Rejected' %}
+                                <span class="badge bg-danger">Rejected</span>
+                                {% else %}
+                                <span class="badge bg-warning">Pending</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if rec.status == 'Pending' %}
+                                <form action="{{ url_for('leave_status', leave_id=rec.id, status='Approved') }}" method="POST" style="display:inline;">
+                                    <button type="submit" class="btn btn-sm btn-success" title="Approve">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                </form>
+                                <form action="{{ url_for('leave_status', leave_id=rec.id, status='Rejected') }}" method="POST" style="display:inline;">
+                                    <button type="submit" class="btn btn-sm btn-danger" title="Reject">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </form>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                    <tr>
+                        <td colspan="8" class="text-center text-muted py-4">
+                            <i class="fas fa-inbox"></i> No leave requests found
+                        </td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

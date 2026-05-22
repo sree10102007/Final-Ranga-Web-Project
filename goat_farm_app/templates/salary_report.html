@@ -1,0 +1,142 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="mb-3"><i class="fas fa-file-invoice-dollar"></i> Monthly Salary Report</h1>
+        </div>
+    </div>
+
+    <!-- Month Filter -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="GET" class="row g-3">
+                <div class="col-md-9">
+                    <input type="month" class="form-control" name="month" value="{{ month }}">
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-outline-primary w-100">
+                        <i class="fas fa-search"></i> Filter
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Salary Summary -->
+    <div class="card mb-4">
+        <div class="card-header bg-success text-white">
+            <h5 class="mb-0"><i class="fas fa-chart-pie"></i> Payroll Summary</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="text-center">
+                        <h6 class="text-muted">Total Employees</h6>
+                        <h3 class="text-primary">{{ employees|length }}</h3>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="text-center">
+                        <h6 class="text-muted">Total Monthly Salary</h6>
+                        <h3 class="text-success">
+                            ₹ {% set total = namespace(value=0) %}
+                            {% for emp in employees %}
+                                {% if emp.monthly_salary %}
+                                    {% set total.value = total.value + (emp.monthly_salary or 0) %}
+                                {% endif %}
+                            {% endfor %}
+                            {{ "{:,.0f}".format(total.value) }}
+                        </h3>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="text-center">
+                        <h6 class="text-muted">Total Bonus</h6>
+                        <h3 class="text-info">
+                            ₹ {% set bonus_total = namespace(value=0) %}
+                            {% for emp in employees %}
+                                {% if emp.bonus %}
+                                    {% set bonus_total.value = bonus_total.value + (emp.bonus or 0) %}
+                                {% endif %}
+                            {% endfor %}
+                            {{ "{:,.0f}".format(bonus_total.value) }}
+                        </h3>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="text-center">
+                        <h6 class="text-muted">Total Pending</h6>
+                        <h3 class="text-danger">
+                            ₹ {% set pending_total = namespace(value=0) %}
+                            {% for emp in employees %}
+                                {% if emp.pending_payment %}
+                                    {% set pending_total.value = pending_total.value + (emp.pending_payment or 0) %}
+                                {% endif %}
+                            {% endfor %}
+                            {{ "{:,.0f}".format(pending_total.value) }}
+                        </h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Salary Details -->
+    <div class="card">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Employee ID</th>
+                        <th>Name</th>
+                        <th>Role</th>
+                        <th>Daily Wage</th>
+                        <th>Weekly Salary</th>
+                        <th>Monthly Salary</th>
+                        <th>Overtime Rate</th>
+                        <th>Bonus</th>
+                        <th>Advance Salary</th>
+                        <th>Pending Payment</th>
+                        <th>Total Payable</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if employees %}
+                        {% for emp in employees %}
+                        <tr>
+                            <td><strong>{{ emp.employee_id }}</strong></td>
+                            <td>{{ emp.name }}</td>
+                            <td>{{ emp.role }}</td>
+                            <td>₹ {{ emp.daily_wage or '0' }}</td>
+                            <td>₹ {{ emp.weekly_salary or '0' }}</td>
+                            <td>₹ {{ emp.monthly_salary or '0' }}</td>
+                            <td>₹ {{ emp.overtime_rate or '0' }}/hr</td>
+                            <td>₹ {{ emp.bonus or '0' }}</td>
+                            <td>₹ {{ emp.advance_salary or '0' }}</td>
+                            <td>
+                                {% if emp.pending_payment and emp.pending_payment > 0 %}
+                                <span class="badge bg-danger">₹ {{ emp.pending_payment }}</span>
+                                {% else %}
+                                <span class="text-success">-</span>
+                                {% endif %}
+                            </td>
+                            <td class="fw-bold">
+                                ₹ {{ "{:,.0f}".format((emp.monthly_salary or 0) + (emp.bonus or 0) - (emp.advance_salary or 0)) }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                    <tr>
+                        <td colspan="11" class="text-center text-muted py-4">
+                            <i class="fas fa-inbox"></i> No employees found
+                        </td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

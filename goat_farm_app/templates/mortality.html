@@ -1,0 +1,67 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold text-dark mb-0"><i class="bi bi-x-circle text-danger"></i> Mortality Logs</h2>
+    <a href="{{ url_for('mortality_add') }}" class="btn btn-danger shadow-sm"><i class="bi bi-plus-circle"></i> Add Mortality Record</a>
+</div>
+
+<div class="card border-0 shadow-sm rounded-4 mb-4">
+    <div class="card-body p-4">
+        <form method="GET" action="{{ url_for('mortality') }}" class="row g-3 align-items-end">
+            <div class="col-md-9">
+                <label class="form-label text-muted">Search by Tag ID</label>
+                <input type="text" name="tag_id" class="form-control" value="{{ request.args.get('tag_id', '') }}" placeholder="Search...">
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-secondary w-100"><i class="bi bi-search"></i> Search</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm rounded-4">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" style="min-width: 1500px;">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Sr#</th>
+                        <th>Tag ID</th>
+                        <th>General Info</th>
+                        <th>Lifespan</th>
+                        <th>Weight</th>
+                        <th>Valuation & Claims</th>
+                        <th>Insurance Dates</th>
+                        <th>Cause of Death</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in records %}
+                    <tr>
+                        <td class="ps-4">{{ r.sr_no }}</td>
+                        <td class="fw-bold"><span class="badge bg-dark">{{ r.tag_id }}</span></td>
+                        <td><small>{{ r.breed }} {{ r.breed_percent }}%<br>{{ r.gender }}</small></td>
+                        <td><small>B: {{ r.birth_date }}<br>D: <strong class="text-danger">{{ r.expired_date }}</strong><br>Age: {{ r.total_age_month }} Mo</small></td>
+                        <td>{{ r.weight_kgs }} kg</td>
+                        <td><small>Val: ₹{{ "%.2f"|format(r.current_value) if r.current_value else 0 }}<br><span class="text-success">Claim: ₹{{ "%.2f"|format(r.claim_amount) if r.claim_amount else 0 }}</span></small></td>
+                        <td><small>Info: {{ r.insurance_inform_date }}<br>Claim: {{ r.insurance_claim_date }}</small></td>
+                        <td class="text-muted fst-italic">{{ r.cause_of_death }}</td>
+                        <td>
+                            <a href="{{ url_for('mortality_edit', id=r['id']) }}" class="btn btn-sm btn-warning me-2"><i class="bi bi-pencil"></i></a>
+                            <form method="POST" action="{{ url_for('mortality_delete', id=r['id']) }}" style="display:inline;" onclick="return confirm('Delete this record?');">
+                                <button type="submit" class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="9" class="text-center py-4 text-muted">No mortality records found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

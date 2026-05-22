@@ -1,0 +1,60 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold text-danger mb-0"><i class="bi bi-x-octagon"></i> Add Mortality Record</h2>
+            <a href="{{ url_for('mortality') }}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Back to Logs</a>
+        </div>
+        
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-body p-4 p-md-5">
+                <form method="POST" action="{{ url_for('mortality_add') }}">
+                    
+                    <h5 class="text-danger mb-3 border-bottom pb-2">Identification</h5>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-2"><label class="form-label text-muted">Sr#</label><input type="text" class="form-control" name="sr_no" value="{{ next_sr }}"></div>
+                        <div class="col-md-4"><label class="form-label text-muted">Tag ID *</label><input type="text" class="form-control border-danger" name="tag_id" required></div>
+                        <div class="col-md-3"><label class="form-label text-muted">Breed</label><input type="text" class="form-control" name="breed"></div>
+                        <div class="col-md-3"><label class="form-label text-muted">Breed %</label><input type="text" class="form-control" name="breed_percent"></div>
+                    </div>
+
+                    <h5 class="text-danger mb-3 border-bottom pb-2">Life Info</h5>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-2">
+                            <label class="form-label text-muted">Gender</label>
+                            <select class="form-select" name="gender">
+                                <option value=""></option><option value="M">Male</option><option value="F">Female</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3"><label class="form-label text-muted">Birth Date</label><input type="date" class="form-control" name="birth_date"></div>
+                        <div class="col-md-3"><label class="form-label text-muted">Expired Date</label><input type="date" class="form-control border-danger" name="expired_date"></div>
+                        <div class="col-md-2"><label class="form-label text-muted">Age (Months)</label><input type="text" class="form-control" name="total_age_month" placeholder="e.g. 14"></div>
+                        <div class="col-md-2"><label class="form-label text-muted">Weight (KGS)</label><input type="number" step="0.01" class="form-control" name="weight_kgs"></div>
+                    </div>
+
+                    <h5 class="text-danger mb-3 border-bottom pb-2">Insurance & Financials</h5>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-3"><label class="form-label text-muted">Current Value (₹)</label><input type="number" step="0.01" class="form-control" name="current_value"></div>
+                        <div class="col-md-3"><label class="form-label text-muted">Insurance Inform Date</label><input type="date" class="form-control" name="insurance_inform_date"></div>
+                        <div class="col-md-3"><label class="form-label text-muted">Insurance Claim Date</label><input type="date" class="form-control" name="insurance_claim_date"></div>
+                        <div class="col-md-3"><label class="form-label text-muted">Claim Amount (₹)</label><input type="number" step="0.01" class="form-control" name="claim_amount"></div>
+                    </div>
+                    
+                    <h5 class="text-danger mb-3 border-bottom pb-2">Cause Of Death</h5>
+                    <div class="row g-3 mb-4">
+                        <div class="col-12">
+                            <label class="form-label text-muted">Description/Reason</label>
+                            <textarea class="form-control border-danger" name="cause_of_death" rows="3" placeholder="Explain the symptoms or cause of mortality..."></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="col-12 mt-4">
+                        <button type="submit" class="btn btn-danger btn-lg w-100 shadow-sm"><i class="bi bi-x-circle"></i> Save Mortality Record</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

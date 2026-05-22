@@ -1,0 +1,83 @@
+{% extends 'layout.html' %}
+
+{% block page_title %}Edit Goat Purchase{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-800 text-dark mb-0"><i class="bi bi-pencil-square text-success me-2"></i>Edit Goat Purchase</h2>
+            <a href="{{ url_for('purchases') }}" class="btn btn-outline-secondary rounded-pill px-4">
+                <i class="bi bi-arrow-left me-2"></i>Back to Purchases
+            </a>
+        </div>
+        
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+            <div class="card-header bg-success text-white p-4">
+                <h5 class="mb-0 fw-bold">Purchase Details for Tag: {{ record.tag_id }}</h5>
+            </div>
+            <div class="card-body p-4 p-md-5">
+                <form method="POST">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-muted small text-uppercase">Seller Name</label>
+                            <input type="text" name="seller_name" class="form-control form-control-lg bg-light border-0 shadow-none" value="{{ record.seller_name or '' }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-muted small text-uppercase">Invoice Details</label>
+                            <input type="text" name="invoice_details" class="form-control form-control-lg bg-light border-0 shadow-none" value="{{ record.invoice_details or '' }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold text-muted small text-uppercase">Date of Purchase</label>
+                            <input type="date" name="purchase_date" class="form-control form-control-lg bg-light border-0 shadow-none" value="{{ record.purchase_date or '' }}" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold text-muted small text-uppercase">Goat Tag ID</label>
+                            <input type="text" name="tag_id" class="form-control form-control-lg bg-light border-0 shadow-none" value="{{ record.tag_id or '' }}" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold text-muted small text-uppercase">Price (₹)</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-0">₹</span>
+                                <input type="number" step="0.01" name="price" class="form-control form-control-lg bg-light border-0 shadow-none" value="{{ record.price or '' }}" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-5 pt-4 border-top d-flex flex-wrap gap-3">
+                        <button type="submit" class="btn btn-success btn-lg px-5 rounded-pill fw-bold shadow-sm">
+                            <i class="bi bi-check2-circle me-2"></i>Save Changes
+                        </button>
+                        <button type="button" class="btn btn-outline-danger btn-lg px-5 rounded-pill shadow-sm ms-auto" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                            <i class="bi bi-trash3 me-2"></i>Delete Record
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow rounded-4">
+            <div class="modal-header bg-danger text-white border-0 p-4">
+                <h5 class="modal-title fw-bold">Confirm Deletion</h5>
+                <button type="button" class="btn-close btn-close-white shadow-none" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4 text-center">
+                <i class="bi bi-exclamation-triangle-fill text-danger display-1 mb-3 d-block"></i>
+                <h4 class="fw-bold text-dark">Are you sure?</h4>
+                <p class="text-muted mb-0">You are about to delete this purchase record. This action is permanent and cannot be undone.</p>
+            </div>
+            <div class="modal-footer border-0 p-4 pt-0">
+                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                <form method="POST" action="{{ url_for('purchase_delete', id=record.id) }}">
+                    <button type="submit" class="btn btn-danger rounded-pill px-4 fw-bold">Delete permanently</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

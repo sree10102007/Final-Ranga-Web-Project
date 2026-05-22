@@ -1,0 +1,95 @@
+{% extends 'layout.html' %}
+
+{% block page_title %}Kid Records{% endblock %}
+
+{% block content %}
+<div class="page-header mb-4 d-flex justify-content-between align-items-center">
+    <div>
+        <h2 class="fw-800 text-dark mb-1">Kid Records</h2>
+        <p class="text-muted mb-0">Manage newborn and growing kids on the farm.</p>
+    </div>
+    <a href="{{ url_for('kid_add') }}" class="btn btn-success shadow-sm"><i class="bi bi-plus-circle me-2"></i>Add Kid Record</a>
+</div>
+
+<div class="card border-0 mb-4">
+    <div class="card-body">
+        <form method="GET" action="{{ url_for('kid') }}" class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label small fw-bold text-muted">Search by Kid ID</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-0"><i class="bi bi-search"></i></span>
+                    <input type="text" name="kid_id" class="form-control border-0 bg-light" placeholder="e.g. K-001">
+                    <button class="btn btn-success" type="submit">Search</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card border-0 overflow-hidden">
+    <div class="table-responsive">
+        <table class="table mb-0 align-middle">
+            <thead class="table-light text-muted small fw-bold">
+                <tr>
+                    <th>S.No</th>
+                    <th>Kid ID</th>
+                    <th>Breed</th>
+                    <th>Gender</th>
+                    <th>Birth Details</th>
+                    <th>Parents</th>
+                    <th>Insurance</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in records %}
+                <tr>
+                    <td>{{ record.s_no }}</td>
+                    <td><span class="badge bg-success-subtle text-success border border-success border-opacity-10">{{ record.kid_id }}</span></td>
+                    <td>
+                        <div class="fw-bold">{{ record.breed }}</div>
+                        <div class="small text-muted">{{ record.breed_percent or 'N/A' }} | {{ record.color or 'N/A' }}</div>
+                    </td>
+                    <td>
+                        {% if record.gender == 'Male' %}
+                            <span class="text-primary"><i class="bi bi-gender-male"></i> Male</span>
+                        {% else %}
+                            <span class="text-danger"><i class="bi bi-gender-female"></i> Female</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div>{{ record.birth_date }}</div>
+                        <div class="small text-muted">{{ record.birth_weight or 0 }} kg | {{ record.age_month or 0 }} mo</div>
+                    </td>
+                    <td>
+                        <div class="small">M: {{ record.mother_id or 'Unknown' }}</div>
+                        <div class="small">F: {{ record.father_id or 'Unknown' }}</div>
+                    </td>
+                    <td>
+                        {% if record.insurance_policy_no %}
+                            <span class="badge bg-info text-dark"><i class="bi bi-shield-check me-1"></i>Insured</span>
+                            <div class="small text-muted mt-1">{{ record.insurance_company }}</div>
+                        {% else %}
+                            <span class="text-muted small">Not Insured</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-end">
+                        <a href="{{ url_for('kid_edit', id=record.id) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                        <form action="{{ url_for('kid_delete', id=record.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Delete this kid record?');">
+                            <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                        </form>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="8" class="text-center py-5 text-muted">
+                        <i class="bi bi-bug d-block mb-2" style="font-size: 2rem; opacity: 0.3;"></i>
+                        No kid records found.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

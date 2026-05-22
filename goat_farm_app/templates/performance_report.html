@@ -1,0 +1,142 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="mb-3"><i class="fas fa-star"></i> Worker Performance Report</h1>
+        </div>
+    </div>
+
+    <!-- Performance Summary -->
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><i class="fas fa-chart-pie"></i> Performance Summary</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="text-center">
+                        <h6 class="text-muted">Total Employees</h6>
+                        <h3 class="text-primary">{{ employees|length }}</h3>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="text-center">
+                        <h6 class="text-muted">Avg Attendance</h6>
+                        <h3 class="text-success">
+                            {% set total_att = namespace(value=0) %}
+                            {% set count_att = namespace(value=0) %}
+                            {% for emp in employees %}
+                                {% if emp.attendance_count and emp.attendance_count > 0 %}
+                                    {% set total_att.value = total_att.value + (emp.present_count or 0) %}
+                                    {% set count_att.value = count_att.value + 1 %}
+                                {% endif %}
+                            {% endfor %}
+                            {% if count_att.value > 0 %}
+                                {{ "{:.1f}".format((total_att.value / count_att.value)) }}
+                            {% else %}
+                                0
+                            {% endif %}
+                        </h3>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="text-center">
+                        <h6 class="text-muted">Total Hours Logged</h6>
+                        <h3 class="text-info">
+                            {% set total_hrs = namespace(value=0) %}
+                            {% for emp in employees %}
+                                {% if emp.total_hours_worked %}
+                                    {% set total_hrs.value = total_hrs.value + (emp.total_hours_worked or 0) %}
+                                {% endif %}
+                            {% endfor %}
+                            {{ "{:,.0f}".format(total_hrs.value) }} hrs
+                        </h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Performance Details -->
+    <div class="card">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Employee ID</th>
+                        <th>Name</th>
+                        <th>Role</th>
+                        <th>Joining Date</th>
+                        <th>Attendance</th>
+                        <th>Present</th>
+                        <th>Total Hours</th>
+                        <th>Rating</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if employees %}
+                        {% for emp in employees %}
+                        <tr>
+                            <td><strong>{{ emp.employee_id }}</strong></td>
+                            <td>{{ emp.name }}</td>
+                            <td>{{ emp.role }}</td>
+                            <td>{{ emp.joining_date }}</td>
+                            <td>
+                                <span class="badge bg-info">{{ emp.attendance_count or 0 }}</span>
+                            </td>
+                            <td>
+                                <span class="badge bg-success">{{ emp.present_count or 0 }}</span>
+                            </td>
+                            <td>
+                                {{ "{:.1f}".format(emp.total_hours_worked or 0) }} hrs
+                            </td>
+                            <td>
+                                {% if emp.present_count and emp.attendance_count and emp.attendance_count > 0 %}
+                                    {% set attendance_pct = (emp.present_count / emp.attendance_count * 100) %}
+                                    {% if attendance_pct >= 80 %}
+                                    <span class="badge bg-success"><i class="fas fa-star"></i> Excellent</span>
+                                    {% elif attendance_pct >= 60 %}
+                                    <span class="badge bg-info"><i class="fas fa-star"></i> Good</span>
+                                    {% elif attendance_pct >= 40 %}
+                                    <span class="badge bg-warning"><i class="fas fa-star-half-alt"></i> Average</span>
+                                    {% else %}
+                                    <span class="badge bg-danger"><i class="fas fa-star"></i> Needs Improvement</span>
+                                    {% endif %}
+                                {% else %}
+                                <span class="badge bg-secondary">-</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                    <tr>
+                        <td colspan="8" class="text-center text-muted py-4">
+                            <i class="fas fa-inbox"></i> No performance data found
+                        </td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Performance Ratings -->
+    <div class="alert alert-info mt-4" role="alert">
+        <h6 class="alert-heading">Performance Ratings (Based on Attendance)</h6>
+        <p class="mb-2">
+            <span class="badge bg-success"><i class="fas fa-star"></i> Excellent</span> - 80% attendance or above
+        </p>
+        <p class="mb-2">
+            <span class="badge bg-info"><i class="fas fa-star"></i> Good</span> - 60-79% attendance
+        </p>
+        <p class="mb-2">
+            <span class="badge bg-warning"><i class="fas fa-star-half-alt"></i> Average</span> - 40-59% attendance
+        </p>
+        <p class="mb-0">
+            <span class="badge bg-danger"><i class="fas fa-star"></i> Needs Improvement</span> - Below 40% attendance
+        </p>
+    </div>
+</div>
+{% endblock %}

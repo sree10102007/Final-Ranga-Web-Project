@@ -1,0 +1,149 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="fw-bold text-dark mb-1">Farm Settings</h2>
+            <p class="text-muted">Configure your farm details for invoice generation</p>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body p-4">
+                    <form method="POST" action="{{ url_for('farm_settings') }}">
+                        <h5 class="fw-bold text-dark mb-3 border-bottom pb-2">Farm Information</h5>
+                        
+                        <div class="mb-3">
+                            <label for="farm_name" class="form-label fw-semibold">Farm Name</label>
+                            <input type="text" class="form-control" id="farm_name" name="farm_name" 
+                                   value="{{ settings['farm_name'] if settings else '' }}" placeholder="Enter farm name" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="address" class="form-label fw-semibold">Farm Address</label>
+                            <textarea class="form-control" id="address" name="address" rows="2" 
+                                      placeholder="Enter complete address" required>{{ settings['address'] if settings else '' }}</textarea>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="phone" class="form-label fw-semibold">Phone Number</label>
+                                <input type="tel" class="form-control" id="phone" name="phone" 
+                                       value="{{ settings['phone'] if settings else '' }}" placeholder="Enter contact number">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="email" class="form-label fw-semibold">Email Address</label>
+                                <input type="email" class="form-control" id="email" name="email" 
+                                       value="{{ settings['email'] if settings else '' }}" placeholder="Enter email">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="gst_no" class="form-label fw-semibold">GST Number</label>
+                            <input type="text" class="form-control" id="gst_no" name="gst_no" 
+                                   value="{{ settings['gst_no'] if settings else '' }}" placeholder="Enter GSTIN">
+                        </div>
+
+                        <h5 class="fw-bold text-dark mb-3 border-bottom pb-2 mt-4">Bank Details</h5>
+
+                        <div class="mb-3">
+                            <label for="bank_name" class="form-label fw-semibold">Bank Name</label>
+                            <input type="text" class="form-control" id="bank_name" name="bank_name" 
+                                   value="{{ settings['bank_name'] if settings else '' }}" placeholder="Enter bank name">
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="account_no" class="form-label fw-semibold">Account Number</label>
+                                <input type="text" class="form-control" id="account_no" name="account_no" 
+                                       value="{{ settings['account_no'] if settings else '' }}" placeholder="Enter account number">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="ifsc_code" class="form-label fw-semibold">IFSC Code</label>
+                                <input type="text" class="form-control" id="ifsc_code" name="ifsc_code" 
+                                       value="{{ settings['ifsc_code'] if settings else '' }}" placeholder="Enter IFSC code">
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-success btn-lg fw-bold">
+                                <i class="bi bi-check-circle"></i> Save Settings
+                            </button>
+                            <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> Back to Dashboard
+                            </a>
+                        </div>
+                    </form>
+
+                    <!-- Danger Zone: Clear All Data -->
+                    <hr class="my-5">
+                    <h5 class="fw-bold text-danger mb-3 border-bottom pb-2">Danger Zone</h5>
+                    <p class="text-muted mb-3">
+                        <strong>Warning:</strong> This action will permanently delete all data from the system including goats, records, sales, medicines, vaccines, doctors, and more. This action cannot be undone.
+                    </p>
+                    <button type="button" class="btn btn-outline-danger btn-lg fw-bold w-100" data-bs-toggle="modal" data-bs-target="#clearDataModal">
+                        <i class="bi bi-exclamation-triangle"></i> Clear All Data
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Clear Data Confirmation Modal -->
+    <div class="modal fade" id="clearDataModal" tabindex="-1" aria-labelledby="clearDataModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="clearDataModalLabel">
+                        <i class="bi bi-exclamation-triangle"></i> Confirm Data Deletion
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-danger mb-3">
+                        <strong>This action is permanent!</strong> All data will be deleted and cannot be recovered.
+                    </div>
+                    <p class="mb-3">To confirm deletion, type <strong>YES</strong> in the field below:</p>
+                    <form id="clearDataForm" method="POST" action="{{ url_for('clear_all_data') }}">
+                        <input type="text" id="clearConfirmation" class="form-control form-control-lg" 
+                               placeholder="Type YES to confirm" autocomplete="off">
+                        <input type="hidden" id="confirmationHidden" name="confirmation" value="">
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" id="confirmClearBtn" onclick="submitClearData()">Delete All Data</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function submitClearData() {
+    const input = document.getElementById('clearConfirmation').value.toLowerCase();
+    const hidden = document.getElementById('confirmationHidden');
+    
+    if (input === 'yes') {
+        hidden.value = 'yes';
+        document.getElementById('clearDataForm').submit();
+    } else {
+        alert('Please type YES to confirm deletion.');
+    }
+}
+
+// Allow pressing Enter to submit
+document.addEventListener('DOMContentLoaded', function() {
+    const clearConfirmation = document.getElementById('clearConfirmation');
+    if (clearConfirmation) {
+        clearConfirmation.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                submitClearData();
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

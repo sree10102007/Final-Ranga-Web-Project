@@ -1,0 +1,110 @@
+{% extends 'layout.html' %}
+
+{% block page_title %}Feed Inventory{% endblock %}
+
+{% block content %}
+<div class="page-header mb-4 d-flex justify-content-between align-items-center">
+    <div>
+        <h2 class="fw-800 text-dark mb-1">Feed Inventory</h2>
+        <p class="text-muted mb-0">Track daily feed consumption, wastage, and auto-calculated closing stock.</p>
+    </div>
+    <a href="{{ url_for('feed_add') }}" class="btn btn-success shadow-sm"><i class="bi bi-plus-circle me-2"></i>Add Daily Record</a>
+</div>
+
+<div class="card border-0 mb-4">
+    <div class="card-body">
+        <form method="GET" action="{{ url_for('feed') }}" class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label small fw-bold text-muted">Search Feed Name</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-0"><i class="bi bi-search"></i></span>
+                    <input type="text" name="feed_name" class="form-control border-0 bg-light" placeholder="e.g. Corn" value="{{ feed_search }}">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label small fw-bold text-muted">Filter by Month</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-0"><i class="bi bi-calendar-month"></i></span>
+                    <input type="month" name="month" class="form-control border-0 bg-light" value="{{ month_filter }}">
+                </div>
+            </div>
+            <div class="col-md-4 d-flex align-items-end">
+                <button type="submit" class="btn btn-success w-100">Apply Filters</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="stat-card" style="background: linear-gradient(135deg, #1e88e5, #1565c0);">
+            <i class="bi bi-box-seam stat-icon"></i>
+            <div class="stat-label text-white-50">Total Purchased Qty</div>
+            <div class="stat-value text-white">{{ "%.2f"|format(summary.total_purchased or 0) }}</div>
+            <div class="stat-sub text-white-50">For filtered period</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card" style="background: linear-gradient(135deg, #f57f17, #fbc02d);">
+            <i class="bi bi-basket stat-icon"></i>
+            <div class="stat-label text-white-50">Total Consumed Qty</div>
+            <div class="stat-value text-white">{{ "%.2f"|format(summary.total_used or 0) }}</div>
+            <div class="stat-sub text-white-50">For filtered period</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card expense" style="background: linear-gradient(135deg, #e53935, #c62828);">
+            <i class="bi bi-currency-rupee stat-icon"></i>
+            <div class="stat-label text-white-50">Total Purchase Cost</div>
+            <div class="stat-value text-white">₹{{ "%.2f"|format(summary.total_cost or 0) }}</div>
+            <div class="stat-sub text-white-50">For filtered period</div>
+        </div>
+    </div>
+</div>
+
+<div class="card border-0 overflow-hidden">
+    <div class="table-responsive">
+        <table class="table mb-0 align-middle">
+            <thead class="table-light text-muted small fw-bold">
+                <tr>
+                    <th>Date</th>
+                    <th>Feed Name</th>
+                    <th>Opening</th>
+                    <th>Purchased</th>
+                    <th>Consumed</th>
+                    <th>Wastage</th>
+                    <th>Closing</th>
+                    <th>Purchase Cost</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in records %}
+                <tr>
+                    <td class="fw-bold">{{ record.purchase_date }}</td>
+                    <td><span class="badge bg-warning text-dark border border-warning">{{ record.feed_name }}</span></td>
+                    <td>{{ record.opening_stock or 0 }}</td>
+                    <td class="text-success fw-bold">+{{ record.purchased_qty or 0 }}</td>
+                    <td class="text-danger fw-bold">-{{ record.used_qty or 0 }}</td>
+                    <td><span class="badge bg-primary fs-6">{{ record.closing_stock or 0 }}</span></td>
+                    <td class="text-danger">₹{{ record.total_cost or 0 }}</td>
+                    <td class="text-end">
+                        <a href="{{ url_for('feed_edit', id=record.id) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                        <form action="{{ url_for('feed_delete', id=record.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Delete this record?');">
+                            <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                        </form>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="9" class="text-center py-5 text-muted">
+                        <i class="bi bi-box-seam d-block mb-2" style="font-size: 2rem; opacity: 0.3;"></i>
+                        No feed records found.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

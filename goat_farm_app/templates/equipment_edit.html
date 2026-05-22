@@ -1,0 +1,71 @@
+{% extends 'layout.html' %}
+
+{% block page_title %}Edit Equipment{% endblock %}
+
+{% block content %}
+<div class="page-header mb-4">
+    <h2 class="fw-800 text-dark mb-1">Edit Equipment</h2>
+    <p class="text-muted mb-0">Update details for an existing equipment record.</p>
+</div>
+
+<div class="card border-0">
+    <div class="card-body p-4">
+        <form method="POST" action="{{ url_for('equipment_edit', id=record.id) }}" class="row g-4">
+            
+            <div class="col-md-6">
+                <label class="form-label fw-bold small text-muted">EQUIPMENT NAME <span class="text-danger">*</span></label>
+                <input type="text" name="equipment_name" class="form-control" required value="{{ record.equipment_name }}">
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label fw-bold small text-muted">EQUIPMENT TYPE</label>
+                <input type="text" name="type" class="form-control" value="{{ record.type or '' }}">
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label fw-bold small text-muted">SUPPLIER</label>
+                <input type="text" name="supplier" class="form-control" value="{{ record.supplier or '' }}">
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label fw-bold small text-muted">CONDITION</label>
+                <select name="condition_status" class="form-select">
+                    <option value="Good" {% if record.status == 'Good' %}selected{% endif %}>Good</option>
+                    <option value="Needs Repair" {% if record.status == 'Needs Repair' %}selected{% endif %}>Needs Repair</option>
+                    <option value="Out of Service" {% if record.status == 'Out of Service' %}selected{% endif %}>Out of Service</option>
+                </select>
+            </div>
+            
+            <div class="col-md-4">
+                <label class="form-label fw-bold small text-muted">PURCHASE DATE</label>
+                <input type="date" name="purchase_date" class="form-control" value="{{ record.purchase_date }}">
+            </div>
+            
+            <div class="col-md-4">
+                <label class="form-label fw-bold small text-muted">PURCHASE COST (₹)</label>
+                <input type="number" step="0.01" name="purchase_cost" class="form-control" value="{{ record.purchase_cost }}">
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label fw-bold small text-muted">NEXT SERVICE DUE DATE</label>
+                <input type="date" name="service_due_date" class="form-control" value="{{ record.service_due_date }}">
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label fw-bold small text-muted">ASSIGNED TO</label>
+                <input type="text" name="assigned_employee" class="form-control" value="{{ record.assigned_employee }}">
+            </div>
+            
+            <div class="col-12">
+                <label class="form-label fw-bold small text-muted">NOTES</label>
+                <textarea name="notes" class="form-control" rows="3">{{ record.notes }}</textarea>
+            </div>
+            
+            <div class="col-12 mt-4">
+                <button type="submit" class="btn btn-primary px-5 py-2 fw-bold">Update Equipment</button>
+                <a href="{{ url_for('equipment') }}" class="btn btn-light px-4 py-2 ms-2">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

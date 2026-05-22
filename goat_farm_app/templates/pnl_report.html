@@ -1,0 +1,101 @@
+{% extends 'layout.html' %}
+
+{% block page_title %}P&L Report{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="page-header mb-4 d-flex justify-content-between align-items-center">
+        <div>
+            <h2 class="fw-800 text-dark mb-1">Financial Report</h2>
+            <p class="text-muted mb-0">Detailed Profit & Loss statement for the year {{ year }}.</p>
+        </div>
+        <form class="d-flex gap-2">
+            <select name="year" class="form-select border-0 shadow-sm rounded-pill px-3" onchange="this.form.submit()">
+                {% for y in range(2023, 2031) %}
+                <option value="{{ y }}" {% if year|int == y %}selected{% endif %}>{{ y }}</option>
+                {% endfor %}
+            </select>
+        </form>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4">Month</th>
+                        <th class="text-end">Income</th>
+                        <th class="text-end">Expenses</th>
+                        <th class="text-end">Net Profit</th>
+                        <th class="text-end pe-4">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in data %}
+                    <tr>
+                        <td class="ps-4 fw-bold text-dark">{{ row.month_name }}</td>
+                        <td class="text-end text-success">₹{{ "{:,.2f}".format(row.sales) }}</td>
+                        <td class="text-end text-danger">₹{{ "{:,.2f}".format(row.total_exp) }}</td>
+                        <td class="text-end fw-bold {% if row.profit >= 0 %}text-success{% else %}text-danger{% endif %}">
+                            ₹{{ "{:,.2f}".format(row.profit) }}
+                        </td>
+                        <td class="text-end pe-4">
+                            {% if row.profit > 0 %}
+                                <span class="badge bg-success-subtle text-success px-3 rounded-pill">Profit</span>
+                            {% elif row.profit < 0 %}
+                                <span class="badge bg-danger-subtle text-danger px-3 rounded-pill">Loss</span>
+                            {% else %}
+                                <span class="badge bg-light text-muted px-3 rounded-pill">Break-even</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot class="bg-light fw-800 h5">
+                    <tr>
+                        <td class="ps-4">Annual Total</td>
+                        <td class="text-end text-success">₹{{ "{:,.2f}".format(total_sales_yr) }}</td>
+                        <td class="text-end text-danger">₹{{ "{:,.2f}".format(total_expenses_yr) }}</td>
+                        <td class="text-end {% if total_sales_yr - total_expenses_yr >= 0 %}text-success{% else %}text-danger{% endif %} pe-4" colspan="2">
+                            ₹{{ "{:,.2f}".format(total_sales_yr - total_expenses_yr) }}
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+    <!-- Detailed Expense Breakdown -->
+    <div class="row">
+        <div class="col-12">
+            <h5 class="fw-bold mb-3">Expense Breakdown (Annual)</h5>
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+                        <div class="small text-muted mb-1">Goat Purchases</div>
+                        <div class="h5 fw-bold mb-0">₹{{ "{:,.2f}".format(breakdown.goat_purchases) }}</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+                        <div class="small text-muted mb-1">Feed & Fodder</div>
+                        <div class="h5 fw-bold mb-0">₹{{ "{:,.2f}".format(breakdown.feed_purchases) }}</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+                        <div class="small text-muted mb-1">Medicine & Vaccine</div>
+                        <div class="h5 fw-bold mb-0">₹{{ "{:,.2f}".format(breakdown.med_purchases + breakdown.vac_purchases) }}</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+                        <div class="small text-muted mb-1">Staff Salaries</div>
+                        <div class="h5 fw-bold mb-0">₹{{ "{:,.2f}".format(breakdown.salaries) }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

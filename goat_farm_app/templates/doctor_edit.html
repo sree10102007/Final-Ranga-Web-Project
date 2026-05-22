@@ -1,0 +1,83 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold text-dark mb-0"><i class="bi bi-person-nurse text-danger"></i> Edit Doctor Details</h2>
+    <a href="{{ url_for('doctor') }}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Back to Doctors</a>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-body p-4">
+                <form method="POST" action="{{ url_for('doctor_edit', id=doctor['id']) }}">
+                    <h5 class="fw-bold text-dark mb-3 border-bottom pb-2">Personal Information</h5>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="doctor_name" class="form-label fw-semibold">Doctor/Veterinarian Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="doctor_name" name="doctor_name" required value="{{ doctor['doctor_name'] }}" placeholder="Enter full name">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="specialization" class="form-label fw-semibold">Specialization</label>
+                            <input type="text" class="form-control" id="specialization" name="specialization" value="{{ doctor['specialization'] or '' }}" placeholder="e.g., Veterinarian, Animal Health">
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="contact_number" class="form-label fw-semibold">Contact Number <span class="text-danger">*</span></label>
+                            <input type="tel" class="form-control" id="contact_number" name="contact_number" required value="{{ doctor['contact_number'] or '' }}" placeholder="Enter phone number">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="email" class="form-label fw-semibold">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" value="{{ doctor['email'] or '' }}" placeholder="Enter email address">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="registration_number" class="form-label fw-semibold">Registration/License Number</label>
+                        <input type="text" class="form-control" id="registration_number" name="registration_number" value="{{ doctor['registration_number'] or '' }}" placeholder="Enter registration number">
+                    </div>
+
+                    <h5 class="fw-bold text-dark mb-3 border-bottom pb-2 mt-4">Clinic/Practice Information</h5>
+
+                    <div class="mb-3">
+                        <label for="clinic_name" class="form-label fw-semibold">Clinic/Hospital Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="clinic_name" name="clinic_name" required value="{{ doctor['clinic_name'] or '' }}" placeholder="Enter clinic/hospital name">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="clinic_address" class="form-label fw-semibold">Clinic Address</label>
+                        <textarea class="form-control" id="clinic_address" name="clinic_address" rows="2" placeholder="Enter complete clinic address">{{ doctor['clinic_address'] or '' }}</textarea>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="clinic_city" class="form-label fw-semibold">City</label>
+                            <input type="text" class="form-control" id="clinic_city" name="clinic_city" value="{{ doctor['clinic_city'] or '' }}" placeholder="Enter city name">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="availability" class="form-label fw-semibold">Availability</label>
+                            <input type="text" class="form-control" id="availability" name="availability" value="{{ doctor['availability'] or '' }}" placeholder="e.g., Mon-Fri 9AM-6PM, Emergency 24/7">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="notes" class="form-label fw-semibold">Additional Notes</label>
+                        <textarea class="form-control" id="notes" name="notes" rows="3" placeholder="Any additional information or specialties">{{ doctor['notes'] or '' }}</textarea>
+                    </div>
+
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-danger btn-lg fw-bold">
+                            <i class="bi bi-check-circle"></i> Update Doctor Details
+                        </button>
+                        <a href="{{ url_for('doctor') }}" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,82 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold text-warning mb-0"><i class="bi bi-pencil-square"></i> Edit Mortality Record</h2>
+            <a href="{{ url_for('mortality') }}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Back to Logs</a>
+        </div>
+        
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-body p-4 p-md-5">
+                <form method="POST">
+                    
+                    <h5 class="text-warning mb-3 border-bottom pb-2">Identification</h5>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-2"><label class="form-label text-muted">Sr#</label><input type="text" class="form-control" name="sr_no" value="{{ record['sr_no'] or '' }}"></div>
+                        <div class="col-md-4"><label class="form-label text-muted">Tag ID *</label><input type="text" class="form-control border-warning" name="tag_id" value="{{ record['tag_id'] or '' }}" required></div>
+                        <div class="col-md-3"><label class="form-label text-muted">Breed</label><input type="text" class="form-control" name="breed" value="{{ record['breed'] or '' }}"></div>
+                        <div class="col-md-3"><label class="form-label text-muted">Breed %</label><input type="text" class="form-control" name="breed_percent" value="{{ record['breed_percent'] or '' }}"></div>
+                    </div>
+
+                    <h5 class="text-warning mb-3 border-bottom pb-2">Life Info</h5>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-2">
+                            <label class="form-label text-muted">Gender</label>
+                            <select class="form-select" name="gender">
+                                <option value=""></option><option value="M" {% if record['gender'] == 'M' %}selected{% endif %}>Male</option><option value="F" {% if record['gender'] == 'F' %}selected{% endif %}>Female</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3"><label class="form-label text-muted">Birth Date</label><input type="date" class="form-control" name="birth_date" value="{{ record['birth_date'] or '' }}"></div>
+                        <div class="col-md-3"><label class="form-label text-muted">Expired Date</label><input type="date" class="form-control border-warning" name="expired_date" value="{{ record['expired_date'] or '' }}"></div>
+                        <div class="col-md-2"><label class="form-label text-muted">Age (Months)</label><input type="text" class="form-control" name="total_age_month" value="{{ record['total_age_month'] or '' }}" placeholder="e.g. 14"></div>
+                        <div class="col-md-2"><label class="form-label text-muted">Weight (KGS)</label><input type="number" step="0.01" class="form-control" name="weight_kgs" value="{{ record['weight_kgs'] or '' }}"></div>
+                    </div>
+
+                    <h5 class="text-warning mb-3 border-bottom pb-2">Insurance & Financials</h5>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-3"><label class="form-label text-muted">Current Value (₹)</label><input type="number" step="0.01" class="form-control" name="current_value" value="{{ record['current_value'] or '' }}"></div>
+                        <div class="col-md-3"><label class="form-label text-muted">Insurance Inform Date</label><input type="date" class="form-control" name="insurance_inform_date" value="{{ record['insurance_inform_date'] or '' }}"></div>
+                        <div class="col-md-3"><label class="form-label text-muted">Insurance Claim Date</label><input type="date" class="form-control" name="insurance_claim_date" value="{{ record['insurance_claim_date'] or '' }}"></div>
+                        <div class="col-md-3"><label class="form-label text-muted">Claim Amount (₹)</label><input type="number" step="0.01" class="form-control" name="claim_amount" value="{{ record['claim_amount'] or '' }}"></div>
+                    </div>
+                    
+                    <h5 class="text-warning mb-3 border-bottom pb-2">Cause Of Death</h5>
+                    <div class="row g-3 mb-4">
+                        <div class="col-12">
+                            <label class="form-label text-muted">Description/Reason</label>
+                            <textarea class="form-control border-warning" name="cause_of_death" rows="3" placeholder="Explain the symptoms or cause of mortality...">{{ record['cause_of_death'] or '' }}</textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="col-12 mt-4 d-flex gap-2">
+                        <button type="submit" class="btn btn-warning btn-lg flex-grow-1 shadow-sm">Update Record</button>
+                        <button type="button" class="btn btn-danger btn-lg" data-bs-toggle="modal" data-bs-target="#deleteModal"><i class="bi bi-trash"></i> Delete</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Confirm Delete</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this mortality record? This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="POST" action="{{ url_for('mortality_delete', id=record['id']) }}" style="display:inline;">
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

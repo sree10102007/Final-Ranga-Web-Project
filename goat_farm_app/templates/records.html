@@ -1,0 +1,60 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold text-success">Financial Records</h2>
+    <a href="{{ url_for('add_record') }}" class="btn btn-primary shadow-sm"><i class="bi bi-plus-circle"></i> Add Record</a>
+</div>
+<div class="card shadow-sm border-0 rounded-4">
+    <div class="card-body">
+        <form method="GET" class="row g-3 mb-4">
+            <div class="col-md-4">
+                <input type="text" name="tag_number" class="form-control" placeholder="Search Tag ID..." value="{{ request.args.get('tag_number', '') }}">
+            </div>
+            <div class="col-md-3">
+                <input type="date" name="start_date" class="form-control" value="{{ request.args.get('start_date', '') }}">
+            </div>
+            <div class="col-md-3">
+                <input type="date" name="end_date" class="form-control" value="{{ request.args.get('end_date', '') }}">
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-secondary w-100">Filter</button>
+            </div>
+        </form>
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>S.No</th>
+                    <th>Date</th>
+                    <th>Tag Number</th>
+                    <th>Category</th>
+                    <th>Type</th>
+                    <th>Amount</th>
+                    <th>Notes</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in records %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ r.date }}</td>
+                    <td><span class="badge bg-success">{{ r.tag_number }}</span></td>
+                    <td><span class="badge {% if r.category == 'income' %}bg-success{% else %}bg-danger{% endif %}">{{ r.category }}</span></td>
+                    <td>{{ r.type }}</td>
+                    <td class="fw-bold {% if r.category == 'income' %}text-success{% else %}text-danger{% endif %}">₹{{ "%.2f"|format(r.amount) }}</td>
+                    <td><small>{{ r.notes }}</small></td>
+                    <td>
+                        <a href="{{ url_for('edit_record', id=r.id) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i> Edit</a>
+                        <form action="{{ url_for('delete_record', id=r.id) }}" method="POST" style="display:inline;">
+                            <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure?')"><i class="bi bi-trash"></i></button>
+                        </form>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="8" class="text-center text-muted py-4">No records found.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

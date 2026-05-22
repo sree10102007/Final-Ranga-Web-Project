@@ -1,0 +1,105 @@
+{% extends 'layout.html' %}
+
+{% block page_title %}Edit Kid Record{% endblock %}
+
+{% block content %}
+<div class="page-header mb-4">
+    <h2 class="fw-800 text-dark mb-1">Edit Kid Record</h2>
+    <p class="text-muted mb-0">Update details of an existing kid record.</p>
+</div>
+
+<div class="card border-0">
+    <div class="card-body p-4">
+        <form method="POST" action="{{ url_for('kid_edit', id=record.id) }}" class="row g-4">
+            
+            <h5 class="text-success fw-bold border-bottom pb-2 mb-3">Basic Details</h5>
+            <div class="col-md-4">
+                <label class="form-label fw-bold small text-muted">S.NO <span class="text-danger">*</span></label>
+                <input type="number" name="s_no" class="form-control" required value="{{ record.s_no }}">
+            </div>
+            
+            <div class="col-md-4">
+                <label class="form-label fw-bold small text-muted">KID ID <span class="text-danger">*</span></label>
+                <input type="text" name="kid_id" class="form-control" required value="{{ record.kid_id }}">
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label fw-bold small text-muted">GENDER <span class="text-danger">*</span></label>
+                <select name="gender" class="form-select" required>
+                    <option value="Male" {% if record.gender == 'Male' %}selected{% endif %}>Male</option>
+                    <option value="Female" {% if record.gender == 'Female' %}selected{% endif %}>Female</option>
+                </select>
+            </div>
+            
+            <div class="col-md-4">
+                <label class="form-label fw-bold small text-muted">BREED <span class="text-danger">*</span></label>
+                <input type="text" name="breed" class="form-control" required value="{{ record.breed }}">
+            </div>
+            
+            <div class="col-md-4">
+                <label class="form-label fw-bold small text-muted">BREED %</label>
+                <input type="text" name="breed_percent" class="form-control" value="{{ record.breed_percent }}">
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label fw-bold small text-muted">COLOR</label>
+                <input type="text" name="color" class="form-control" value="{{ record.color }}">
+            </div>
+            
+            <h5 class="text-success fw-bold border-bottom pb-2 mt-5 mb-3">Birth Details</h5>
+
+            <div class="col-md-3">
+                <label class="form-label fw-bold small text-muted">BIRTH DATE <span class="text-danger">*</span></label>
+                <input type="date" name="birth_date" class="form-control" required value="{{ record.birth_date }}">
+            </div>
+            
+            <div class="col-md-3">
+                <label class="form-label fw-bold small text-muted">AGE (MONTHS)</label>
+                <input type="number" step="0.1" name="age_month" class="form-control" value="{{ record.age_month }}">
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label fw-bold small text-muted">BIRTH WEIGHT (KG)</label>
+                <input type="number" step="0.01" name="birth_weight" class="form-control" value="{{ record.birth_weight }}">
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label fw-bold small text-muted">LITTER SIZE</label>
+                <input type="number" name="litter_size" class="form-control" value="{{ record.litter_size }}">
+            </div>
+            
+            <div class="col-md-6">
+                <label class="form-label fw-bold small text-muted">MOTHER ID</label>
+                <input type="text" name="mother_id" class="form-control" value="{{ record.mother_id }}">
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label fw-bold small text-muted">FATHER ID</label>
+                <input type="text" name="father_id" class="form-control" value="{{ record.father_id }}">
+            </div>
+
+            <h5 class="text-success fw-bold border-bottom pb-2 mt-5 mb-3">Insurance Details (Optional)</h5>
+
+            <div class="col-md-4">
+                <label class="form-label fw-bold small text-muted">POLICY NUMBER</label>
+                <input type="text" name="insurance_policy_no" class="form-control" value="{{ record.insurance_policy_no }}">
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label fw-bold small text-muted">INSURANCE COMPANY</label>
+                <input type="text" name="insurance_company" class="form-control" value="{{ record.insurance_company }}">
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label fw-bold small text-muted">EXPIRY DATE</label>
+                <input type="date" name="insurance_expiry" class="form-control" value="{{ record.insurance_expiry }}">
+            </div>
+            
+            <div class="col-12 mt-4 border-top pt-4">
+                <button type="submit" class="btn btn-primary px-5 py-2 fw-bold">Update Kid Record</button>
+                <a href="{{ url_for('kid') }}" class="btn btn-light px-4 py-2 ms-2">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

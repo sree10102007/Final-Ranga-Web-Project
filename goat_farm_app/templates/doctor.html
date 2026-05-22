@@ -1,0 +1,88 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold text-dark mb-0"><i class="bi bi-person-nurse text-danger"></i> Doctor & Veterinarian Details</h2>
+    <a href="{{ url_for('doctor_add') }}" class="btn btn-danger shadow-sm"><i class="bi bi-plus-circle"></i> Add Doctor</a>
+</div>
+
+<div class="card border-0 shadow-sm rounded-4 mb-4">
+    <div class="card-body p-4">
+        <form method="GET" action="{{ url_for('doctor') }}" class="row g-3 align-items-end">
+            <div class="col-md-9">
+                <label class="form-label text-muted">Search by Doctor Name, Clinic or Contact</label>
+                <input type="text" name="search" class="form-control" value="{{ request.args.get('search', '') }}" placeholder="Search...">
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-secondary w-100"><i class="bi bi-search"></i> Search</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm rounded-4">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Doctor Name</th>
+                        <th>Specialization</th>
+                        <th>Contact Number</th>
+                        <th>Email</th>
+                        <th>Clinic Name</th>
+                        <th>Clinic City</th>
+                        <th>Availability</th>
+                        <th class="text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in records %}
+                    <tr>
+                        <td class="ps-4"><strong>{{ r.doctor_name }}</strong></td>
+                        <td>
+                            {% if r.specialization %}
+                                <span class="badge bg-info">{{ r.specialization }}</span>
+                            {% else %}
+                                <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+                        <td><small>{{ r.contact_number if r.contact_number else '—' }}</small></td>
+                        <td><small>{{ r.email if r.email else '—' }}</small></td>
+                        <td><small>{{ r.clinic_name if r.clinic_name else '—' }}</small></td>
+                        <td><small>{{ r.clinic_city if r.clinic_city else '—' }}</small></td>
+                        <td>
+                            {% if r.availability %}
+                                <small class="text-success">{{ r.availability }}</small>
+                            {% else %}
+                                <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            <a href="{{ url_for('doctor_edit', id=r.id) }}" class="btn btn-sm btn-outline-primary me-1" title="Edit">
+                                <i class="bi bi-pencil"></i> Edit
+                            </a>
+                            <form method="POST" action="{{ url_for('doctor_delete', id=r.id) }}" style="display:inline;">
+                                <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure?')" title="Delete">
+                                    <i class="bi bi-trash"></i> Delete
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="8" class="text-center py-4 text-muted">No doctor records found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="mt-4">
+    <div class="alert alert-info alert-dismissible fade show" role="alert">
+        <i class="bi bi-info-circle"></i> <strong>Tip:</strong> Store veterinarian and doctor contact details here for quick reference during medical emergencies or consultations.
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+</div>
+{% endblock %}
