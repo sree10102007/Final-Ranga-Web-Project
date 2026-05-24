@@ -1,0 +1,128 @@
+{% extends 'layout.html' %}
+
+{% block page_title %}Eligible to Sell{% endblock %}
+
+{% block content %}
+<div class="page-header mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h2 class="fw-800 text-dark mb-1">Eligible to Sell</h2>
+            <p class="text-muted mb-0">Goats weighing more than 25 kg and ready for sale.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <form method="POST" action="{{ url_for('populate_eligible') }}" class="d-inline">
+                <button type="submit" class="btn btn-success" title="Auto-populate with goats > 25kg">
+                    <i class="bi bi-plus-circle"></i> Auto Populate List
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% if eligible_goats %}
+<div class="card border-0 rounded-4 shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th class="fw-800 text-dark ps-4">Tag ID</th>
+                    <th class="fw-800 text-dark">Breed</th>
+                    <th class="fw-800 text-dark">Gender</th>
+                    <th class="fw-800 text-dark">Weight (kg)</th>
+                    <th class="fw-800 text-dark">Status</th>
+                    <th class="fw-800 text-dark">Date Added</th>
+                    <th class="fw-800 text-dark text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for goat in eligible_goats %}
+                <tr>
+                    <td class="ps-4">
+                        <span class="badge bg-success bg-opacity-20 text-success fw-700">{{ goat.tag_id }}</span>
+                    </td>
+                    <td>
+                        <span class="text-dark fw-600">{{ goat.breed or 'N/A' }}</span>
+                    </td>
+                    <td>
+                        <span class="text-dark">
+                            {% if goat.gender == 'Male' %}
+                                <i class="bi bi-venus-fill text-danger"></i> {{ goat.gender }}
+                            {% elif goat.gender == 'Female' %}
+                                <i class="bi bi-mars-fill text-info"></i> {{ goat.gender }}
+                            {% else %}
+                                {{ goat.gender or 'N/A' }}
+                            {% endif %}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge bg-info bg-opacity-15 text-info">{{ goat.weight_kg or 'N/A' }} kg</span>
+                    </td>
+                    <td>
+                        <span class="badge 
+                            {% if goat.status == 'Active' %}bg-success
+                            {% elif goat.status == 'Sold' %}bg-warning
+                            {% elif goat.status == 'Expired' %}bg-danger
+                            {% else %}bg-secondary{% endif %} bg-opacity-20">
+                            {{ goat.status or 'Unknown' }}
+                        </span>
+                    </td>
+                    <td>
+                        <small class="text-muted">{{ goat.date_added }}</small>
+                    </td>
+                    <td class="text-center">
+                        <a href="{{ url_for('goat_detail', tag_number=goat.tag_id) }}" class="btn btn-sm btn-outline-primary" title="View Details">
+                            <i class="bi bi-eye"></i>
+                        </a>
+                        <a href="{{ url_for('sales_add') }}?tag_id={{ goat.tag_id }}" class="btn btn-sm btn-outline-success" title="Record Sale">
+                            <i class="bi bi-cash-coin"></i>
+                        </a>
+                        <form method="POST" action="{{ url_for('remove_eligible', tag_id=goat.tag_id) }}" class="d-inline" onsubmit="return confirm('Remove this goat from eligible list?');">
+                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Remove from List">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="card-footer bg-light border-top d-flex justify-content-between align-items-center p-4">
+        <span class="text-muted fw-600">
+            <i class="bi bi-info-circle"></i> Total Eligible Goats: <strong>{{ eligible_goats|length }}</strong>
+        </span>
+        <a href="{{ url_for('master') }}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left"></i> Back to Master Records
+        </a>
+    </div>
+</div>
+{% else %}
+<div class="card border-0 rounded-4 shadow-sm">
+    <div class="card-body text-center py-5">
+        <div class="mb-3">
+            <i class="bi bi-inbox" style="font-size: 3rem; opacity: 0.3; color: #999;"></i>
+        </div>
+        <p class="text-muted fs-5 mb-0">No goats are currently eligible for sale.</p>
+        <small class="text-muted d-block mt-2">Goats must weigh more than 25 kg and have an Active status.</small>
+        
+        <form method="POST" action="{{ url_for('populate_eligible') }}" class="d-inline mt-4">
+            <button type="submit" class="btn btn-success">
+                <i class="bi bi-plus-circle"></i> Auto Populate Eligible Goats
+            </button>
+        </form>
+    </div>
+</div>
+{% endif %}
+
+<style>
+.table-hover tbody tr:hover {
+    background-color: #f8fafc;
+    transition: background-color 0.15s ease-in-out;
+}
+
+.btn-outline-primary:hover, .btn-outline-success:hover, .btn-outline-danger:hover {
+    transition: all 0.2s ease-in-out;
+}
+</style>
+{% endblock %}

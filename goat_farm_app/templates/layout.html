@@ -51,7 +51,7 @@
     </div>
 
     <!-- GOAT MANAGEMENT MENU -->
-    {% set goat_ep = ['goats','goat_detail','master','master_add','master_edit','kid','kid_add','kid_edit','kit','records','add_record','edit_record'] %}
+    {% set goat_ep = ['goats','goat_detail','master','master_add','master_edit','kid','kid_add','kid_edit','kit','records','add_record','edit_record','eligible_to_sell','populate_eligible','add_to_eligible','remove_eligible'] %}
     <button class="nav-group-header {% if request.endpoint in goat_ep %}open{% endif %}" onclick="toggleGroup(this)">
       <span class="group-icon"><i class="bi bi-grid-3x3-gap"></i></span> Goat Management
       <span class="chevron"><i class="bi bi-chevron-right"></i></span>
@@ -61,6 +61,7 @@
       <a href="{{ url_for('master') }}" class="sidebar-link {% if request.endpoint in ['master','master_add','master_edit'] %}active{% endif %}"><span class="link-icon"><i class="bi bi-journal-text"></i></span> Master Register</a>
       <a href="{{ url_for('kid') }}" class="sidebar-link {% if request.endpoint in ['kid','kid_add','kid_edit'] %}active{% endif %}"><span class="link-icon"><i class="bi bi-emoji-smile"></i></span> Kid Details</a>
       <a href="{{ url_for('records') }}" class="sidebar-link {% if request.endpoint in ['records','add_record','edit_record'] %}active{% endif %}"><span class="link-icon"><i class="bi bi-card-list"></i></span> Income/Expense</a>
+      <a href="{{ url_for('eligible_to_sell') }}" class="sidebar-link {% if request.endpoint in ['eligible_to_sell','populate_eligible','add_to_eligible','remove_eligible'] %}active{% endif %}"><span class="link-icon"><i class="bi bi-check-circle"></i></span> Eligible to Sell</a>
     </div>
 
     <!-- HEALTH RECORDS MENU -->

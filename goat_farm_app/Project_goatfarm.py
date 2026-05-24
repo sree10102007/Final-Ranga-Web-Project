@@ -271,6 +271,27 @@ def init_db():
                 notes TEXT
             )
         ''')
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS eligible_to_sell (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                tag_id TEXT UNIQUE NOT NULL,
+                tag_no TEXT NOT NULL,
+                breed TEXT,
+                gender TEXT,
+                weight_kg REAL,
+                date_added DATE,
+                FOREIGN KEY (tag_id) REFERENCES master_records(tag_no)
+            )
+        ''')
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS user_login_tracking (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                last_login_date DATE DEFAULT NULL,
+                has_seen_weight_notification INTEGER DEFAULT 0,
+                FOREIGN KEY (user_id) REFERENCES users(id)
+            )
+        ''')
         # Check if admin user exists
         user = conn.execute('SELECT * FROM users WHERE username = ?', ('admin',)).fetchone()
         if not user:
@@ -299,6 +320,29 @@ def login():
         if user and check_password_hash(user['password'], password):
             session['user_id'] = user['id']
             session['username'] = user['username']
+            
+            # Update login tracking
+            login_tracking = db.execute('SELECT * FROM user_login_tracking WHERE user_id = ?', (user['id'],)).fetchone()
+            today = datetime.now().strftime('%Y-%m-%d')
+            
+            if not login_tracking:
+                # First login ever - create tracking record
+                db.execute('INSERT INTO user_login_tracking (user_id, last_login_date, has_seen_weight_notification) VALUES (?, ?, ?)',
+                          (user['id'], today, 0))
+                session['show_weight_notification'] = True
+            else:
+                # Check if this is a different day
+                last_login = login_tracking['last_login_date']
+                if last_login != today:
+                    # New day login - reset notification flag
+                    db.execute('UPDATE user_login_tracking SET last_login_date = ?, has_seen_weight_notification = ? WHERE user_id = ?',
+                              (today, 0, user['id']))
+                    session['show_weight_notification'] = True
+                else:
+                    session['show_weight_notification'] = False
+            
+            db.commit()
+            
             flash('Logged in successfully.', 'success')
             return redirect(url_for('dashboard'))
         else:
@@ -401,22 +445,49 @@ def dashboard():
     expense = exp_goat + exp_feed + exp_med + exp_vac + exp_salary + exp_maint + exp_gen
     profit = income - expense
     
-    # 2. Goat Search Logic
+    # 3. Weight Notification Logic
+    heavy_goats = []
+    show_weight_notification = session.get('show_weight_notification', False)
+    if show_weight_notification:
+        heavy_goats = db.execute("SELECT tag_no, color, weight_kg FROM master_records WHERE weight_kg >= 25 AND status = 'Active' ORDER BY weight_kg DESC").fetchall()
+        # Clear the notification flag after displaying
+        if 'user_id' in session:
+            db.execute('UPDATE user_login_tracking SET has_seen_weight_notification = 1 WHERE user_id = ?', (session['user_id'],))
+            db.commit()
+        session.pop('show_weight_notification', None)
+    
+    # 4. Goat Search Logic - Enhanced to support last 4 digits and pattern matching
     searched_goat = None
     if search_q:
+        search_q_stripped = search_q.strip()
         # Check for exact tag match first
-        searched_goat = db.execute("SELECT * FROM master_records WHERE tag_no = ?", (search_q.strip(),)).fetchone()
+        searched_goat = db.execute("SELECT * FROM master_records WHERE tag_no = ?", (search_q_stripped,)).fetchone()
         
-        # General list search
+        # If no exact match, try searching by last 4 digits
+        if not searched_goat and len(search_q_stripped) == 4 and search_q_stripped.isdigit():
+            searched_goat = db.execute("SELECT * FROM master_records WHERE tag_no LIKE ? ORDER BY tag_no DESC LIMIT 1", (f"%{search_q_stripped}",)).fetchone()
+        
+        # General list search with tag_no LIKE and breed LIKE
         goats = db.execute("SELECT * FROM master_records WHERE tag_no LIKE ? OR breed LIKE ? ORDER BY id ASC", 
-                          (f"%{search_q}%", f"%{search_q}%")).fetchall()
+                          (f"%{search_q_stripped}%", f"%{search_q_stripped}%")).fetchall()
+        
+        # Also search by last 4 digits if search_q is 4 digits
+        if len(search_q_stripped) == 4 and search_q_stripped.isdigit():
+            last_4_digits_goats = db.execute("SELECT * FROM master_records WHERE tag_no LIKE ? ORDER BY id ASC", (f"%{search_q_stripped}",)).fetchall()
+            # Merge results, avoiding duplicates
+            goat_tag_nos = {g['tag_no'] for g in goats}
+            for g in last_4_digits_goats:
+                if g['tag_no'] not in goat_tag_nos:
+                    goats = list(goats) + [g]
+                    goat_tag_nos.add(g['tag_no'])
     else:
         goats = db.execute("SELECT * FROM master_records ORDER BY id ASC LIMIT 10").fetchall()
         
     return render_template('dashboard.html', 
         income=income, expense=expense, profit=profit, 
         total_goats=total_goats, total_kids=total_kids, total_employees=total_employees,
-        goats=goats, search_q=search_q, searched_goat=searched_goat)
+        goats=goats, search_q=search_q, searched_goat=searched_goat,
+        heavy_goats=heavy_goats, show_weight_notification=show_weight_notification)
 
 @app.route('/records')
 def records():
@@ -523,6 +594,9 @@ def delete_record(id):
 def goats():
     db = get_db()
     
+    # Get search parameter
+    search_q = request.args.get('search', '')
+    
     # Get all goats from master records and their financial summary
     goats_summary = db.execute('''
         WITH AllRecords AS (
@@ -548,7 +622,27 @@ def goats():
         ORDER BY CAST(m.tag_no AS INTEGER) ASC
     ''').fetchall()
     
-    return render_template('goats.html', goats=goats_summary)
+    # Filter by search query if provided - Enhanced to support last 4 digits
+    if search_q:
+        search_q_stripped = search_q.strip()
+        filtered_goats = []
+        
+        if len(search_q_stripped) == 4 and search_q_stripped.isdigit():
+            # Search by last 4 digits
+            for goat in goats_summary:
+                if goat['tag_number'].endswith(search_q_stripped):
+                    filtered_goats.append(goat)
+        
+        # Also search by full tag match or partial match
+        for goat in goats_summary:
+            if (search_q_stripped in goat['tag_number'] or 
+                goat['tag_number'].endswith(search_q_stripped)):
+                if goat not in filtered_goats:
+                    filtered_goats.append(goat)
+        
+        goats_summary = filtered_goats
+    
+    return render_template('goats.html', goats=goats_summary, search_q=search_q)
 
 @app.route('/goat/<tag_number>')
 def goat_detail(tag_number):
@@ -641,6 +735,9 @@ def sales_add():
         # LOGIC FIX: Update status in master_records
         db.execute("UPDATE master_records SET status = 'Sold', selling_date = ?, selling_price = ? WHERE tag_no = ?",
                    (f.get('date_of_sale'), f.get('sold_price'), f.get('tag_id')))
+        
+        # Remove from eligible_to_sell list when sold
+        db.execute("DELETE FROM eligible_to_sell WHERE tag_id = ?", (f.get('tag_id'),))
         
         db.commit()
         flash('Sales record added successfully!', 'success')
@@ -1255,6 +1352,86 @@ def health():
     vaccine_count = db.execute('SELECT COUNT(*) FROM vaccine_records').fetchone()[0]
     doctor_count = db.execute('SELECT COUNT(*) FROM doctor_details').fetchone()[0]
     return render_template('health.html', vaccine_count=vaccine_count, doctor_count=doctor_count)
+
+@app.route('/eligible_to_sell')
+def eligible_to_sell():
+    db = get_db()
+    # Get all goats marked as eligible to sell
+    eligible_goats = db.execute('''
+        SELECT ets.*, mr.breed, mr.gender, mr.weight_kg, mr.status
+        FROM eligible_to_sell ets
+        LEFT JOIN master_records mr ON ets.tag_id = mr.tag_no
+        ORDER BY ets.date_added DESC
+    ''').fetchall()
+    return render_template('eligible_to_sell.html', eligible_goats=eligible_goats)
+
+@app.route('/populate_eligible', methods=['POST'])
+def populate_eligible():
+    """Auto-populate eligible goats - those weighing more than 25 kg and not yet sold"""
+    db = get_db()
+    
+    # Get all goats with weight > 25 kg and status != 'Sold'
+    goats = db.execute('''
+        SELECT tag_no, breed, gender, weight_kg
+        FROM master_records
+        WHERE weight_kg > 25 AND status != 'Sold' AND status IS NOT NULL
+    ''').fetchall()
+    
+    today = datetime.now().strftime('%Y-%m-%d')
+    count_added = 0
+    
+    for goat in goats:
+        try:
+            db.execute('''
+                INSERT INTO eligible_to_sell (tag_id, tag_no, breed, gender, weight_kg, date_added)
+                VALUES (?, ?, ?, ?, ?, ?)
+            ''', (goat['tag_no'], goat['tag_no'], goat['breed'], goat['gender'], goat['weight_kg'], today))
+            count_added += 1
+        except sqlite3.IntegrityError:
+            # Already exists, skip
+            pass
+    
+    db.commit()
+    flash(f'{count_added} eligible goat(s) added to the list!', 'success')
+    return redirect(url_for('eligible_to_sell'))
+
+@app.route('/add_to_eligible/<tag_id>', methods=['POST'])
+def add_to_eligible(tag_id):
+    """Manually add a goat to eligible list"""
+    db = get_db()
+    
+    # Get goat details
+    goat = db.execute('SELECT tag_no, breed, gender, weight_kg FROM master_records WHERE tag_no = ?', (tag_id,)).fetchone()
+    
+    if not goat:
+        flash('Goat not found!', 'danger')
+        return redirect(url_for('master'))
+    
+    if goat['weight_kg'] is None or goat['weight_kg'] < 25:
+        flash('Goat must weigh more than 25 kg to be eligible for sale!', 'warning')
+        return redirect(url_for('master'))
+    
+    today = datetime.now().strftime('%Y-%m-%d')
+    try:
+        db.execute('''
+            INSERT INTO eligible_to_sell (tag_id, tag_no, breed, gender, weight_kg, date_added)
+            VALUES (?, ?, ?, ?, ?, ?)
+        ''', (goat['tag_no'], goat['tag_no'], goat['breed'], goat['gender'], goat['weight_kg'], today))
+        db.commit()
+        flash(f'Goat {tag_id} added to eligible for sale list!', 'success')
+    except sqlite3.IntegrityError:
+        flash(f'Goat {tag_id} is already in the eligible list!', 'info')
+    
+    return redirect(url_for('eligible_to_sell'))
+
+@app.route('/remove_eligible/<tag_id>', methods=['POST'])
+def remove_eligible(tag_id):
+    """Remove a goat from eligible list"""
+    db = get_db()
+    db.execute('DELETE FROM eligible_to_sell WHERE tag_id = ?', (tag_id,))
+    db.commit()
+    flash(f'Goat {tag_id} removed from eligible for sale list!', 'success')
+    return redirect(url_for('eligible_to_sell'))
 
 @app.route('/search')
 def search():
