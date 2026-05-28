@@ -1,15 +1,137 @@
 {% extends "layout.html" %}
 
+{% block page_title %}Monthly Salary Report{% endblock %}
+
 {% block content %}
+<style>
+@media print {
+    /* Hide layout chrome, form elements, normal header, and summary boxes during printing */
+    .sidebar, .navbar, .d-print-none, form, .btn, .alert, i, .fas, .bi, .btn-group {
+        display: none !important;
+    }
+    
+    @page {
+        size: A4 portrait; /* Perfect for portrait view */
+        margin: 1.5cm 1cm 1.5cm 1cm;
+    }
+    
+    /* Ensure content area is full width on standard A4 paper */
+    body, .main-content, .container, .container-fluid {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #fff !important;
+        color: #000 !important;
+        font-family: 'Outfit', 'Inter', sans-serif !important;
+    }
+    
+    .card {
+        border: none !important;
+        box-shadow: none !important;
+        background: transparent !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    
+    .card-body {
+        padding: 0 !important;
+    }
+    
+    /* Print-specific table styles optimized for A4 paper */
+    table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+        margin-top: 20px !important;
+        font-size: 11px !important; /* Larger text for perfect readability on A4 */
+        table-layout: fixed !important; /* Strictly enforce column widths! */
+    }
+    
+    .table-responsive {
+        overflow: visible !important;
+        overflow-x: visible !important;
+    }
+    
+    th, td {
+        border: 1px solid #333 !important; /* Clear black borders for crisp printout */
+        padding: 8px 5px !important; /* Comfortable padding */
+        text-align: center !important; /* Perfectly centered text */
+        vertical-align: middle !important;
+        white-space: nowrap !important; /* Prevent awkward wrapping inside cells */
+    }
+    
+    th {
+        background-color: #f0f0f0 !important;
+        color: #000 !important;
+        font-weight: bold !important;
+        text-transform: uppercase !important;
+        font-size: 10.5px !important;
+        letter-spacing: 0.3px !important;
+    }
+    
+    /* Strict Column Width Allocations */
+    th:nth-child(1), td:nth-child(1) { width: 5% !important; }   /* Sr# */
+    th:nth-child(2), td:nth-child(2) { width: 25% !important; }  /* Name */
+    th:nth-child(3), td:nth-child(3) { width: 16% !important; }  /* Role */
+    th:nth-child(4), td:nth-child(4) { width: 11% !important; }  /* Daily Wage */
+    th:nth-child(5), td:nth-child(5) { width: 11% !important; }  /* Days Worked */
+    th:nth-child(6), td:nth-child(6) { width: 11% !important; }  /* Paying Amount */
+    th:nth-child(7), td:nth-child(7) { width: 11% !important; }  /* Paid Amount */
+    th:nth-child(8), td:nth-child(8) { width: 11% !important; }  /* Balance Due */
+    
+    /* Strip all backgrounds, shadows and border radii from badges for crisp printing */
+    .badge {
+        background: transparent !important;
+        color: #000 !important;
+        border: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        font-size: 11.5px !important;
+        font-weight: bold !important;
+        display: inline !important;
+    }
+    
+    .text-success, .text-danger, .text-info, .text-dark, .fw-bold {
+        color: #000 !important;
+        font-weight: bold !important;
+    }
+    
+    /* Adjust table row heights and borders */
+    tr {
+        page-break-inside: avoid !important;
+        height: auto !important;
+    }
+}
+</style>
+
 <div class="container mt-4">
-    <div class="row mb-4">
-        <div class="col-md-8">
-            <h1 class="mb-3"><i class="fas fa-file-invoice-dollar"></i> Monthly Salary Report</h1>
+    <!-- Printable Header (Only visible when printing / PDF saving) -->
+    <div id="printable-header" class="d-none d-print-block text-center mb-4 pb-3 border-bottom border-dark">
+        <h2 class="fw-bold mb-1 text-uppercase text-dark">{{ farm.farm_name }}</h2>
+        <h6 class="mb-2 text-dark">{{ farm.address }}</h6>
+        <div class="mt-3 fs-5 text-dark fw-bold">MONTHLY SALARY REPORT</div>
+        <div class="text-secondary small">Month: <strong>{{ month }}</strong></div>
+    </div>
+
+    <div class="row mb-4 align-items-center d-print-none">
+        <div class="col-md-7">
+            <h1 class="mb-0 fw-bold"><i class="fas fa-file-invoice-dollar text-success me-2"></i>Monthly Salary Report</h1>
+            <p class="text-muted mb-0">Generated salary statements for month: <strong>{{ month }}</strong></p>
+        </div>
+        <div class="col-md-5 text-md-end mt-3 mt-md-0">
+            <div class="btn-group shadow-sm rounded-3 overflow-hidden">
+                <button onclick="window.print()" class="btn btn-primary fw-bold px-3 py-2">
+                    <i class="fas fa-print me-2"></i>Print / PDF
+                </button>
+                <button onclick="downloadWord()" class="btn btn-success fw-bold px-3 py-2">
+                    <i class="fas fa-file-word me-2"></i>Word Document
+                </button>
+            </div>
         </div>
     </div>
 
     <!-- Month Filter -->
-    <div class="card mb-4">
+    <div class="card mb-4 d-print-none">
         <div class="card-body">
             <form method="GET" class="row g-3">
                 <div class="col-md-9">
@@ -25,58 +147,34 @@
     </div>
 
     <!-- Salary Summary -->
-    <div class="card mb-4">
-        <div class="card-header bg-success text-white">
-            <h5 class="mb-0"><i class="fas fa-chart-pie"></i> Payroll Summary</h5>
+    <div class="card mb-4 border-0 shadow-sm rounded-4 d-print-none">
+        <div class="card-header bg-success text-white border-0 py-3 rounded-top-4">
+            <h5 class="mb-0 fw-bold"><i class="fas fa-chart-pie"></i> Payroll & Salary Summary</h5>
         </div>
-        <div class="card-body">
-            <div class="row">
+        <div class="card-body py-4">
+            <div class="row g-3">
                 <div class="col-md-3">
                     <div class="text-center">
-                        <h6 class="text-muted">Total Employees</h6>
-                        <h3 class="text-primary">{{ employees|length }}</h3>
+                        <h6 class="text-muted small fw-bold text-uppercase">Total Employees</h6>
+                        <h3 class="text-primary fw-800">{{ employees|length }}</h3>
                     </div>
                 </div>
                 <div class="col-md-3">
-                    <div class="text-center">
-                        <h6 class="text-muted">Total Monthly Salary</h6>
-                        <h3 class="text-success">
-                            ₹ {% set total = namespace(value=0) %}
-                            {% for emp in employees %}
-                                {% if emp.monthly_salary %}
-                                    {% set total.value = total.value + (emp.monthly_salary or 0) %}
-                                {% endif %}
-                            {% endfor %}
-                            {{ "{:,.0f}".format(total.value) }}
-                        </h3>
+                    <div class="text-center border-start">
+                        <h6 class="text-muted small fw-bold text-uppercase">Total Payable</h6>
+                        <h3 class="text-info fw-800">₹ {{ "{:,.2f}".format(total_payable) }}</h3>
                     </div>
                 </div>
                 <div class="col-md-3">
-                    <div class="text-center">
-                        <h6 class="text-muted">Total Bonus</h6>
-                        <h3 class="text-info">
-                            ₹ {% set bonus_total = namespace(value=0) %}
-                            {% for emp in employees %}
-                                {% if emp.bonus %}
-                                    {% set bonus_total.value = bonus_total.value + (emp.bonus or 0) %}
-                                {% endif %}
-                            {% endfor %}
-                            {{ "{:,.0f}".format(bonus_total.value) }}
-                        </h3>
+                    <div class="text-center border-start">
+                        <h6 class="text-muted small fw-bold text-uppercase">Total Paid</h6>
+                        <h3 class="text-success fw-800">₹ {{ "{:,.2f}".format(total_paid) }}</h3>
                     </div>
                 </div>
                 <div class="col-md-3">
-                    <div class="text-center">
-                        <h6 class="text-muted">Total Pending</h6>
-                        <h3 class="text-danger">
-                            ₹ {% set pending_total = namespace(value=0) %}
-                            {% for emp in employees %}
-                                {% if emp.pending_payment %}
-                                    {% set pending_total.value = pending_total.value + (emp.pending_payment or 0) %}
-                                {% endif %}
-                            {% endfor %}
-                            {{ "{:,.0f}".format(pending_total.value) }}
-                        </h3>
+                    <div class="text-center border-start">
+                        <h6 class="text-muted small fw-bold text-uppercase">Total Pending</h6>
+                        <h3 class="text-danger fw-800">₹ {{ "{:,.2f}".format(total_pending) }}</h3>
                     </div>
                 </div>
             </div>
@@ -84,53 +182,39 @@
     </div>
 
     <!-- Salary Details -->
-    <div class="card">
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
         <div class="table-responsive">
-            <table class="table table-hover mb-0">
-                <thead class="table-light">
+            <table id="printable-table" class="table table-hover mb-0 align-middle">
+                <thead class="bg-light text-muted small fw-bold text-center">
                     <tr>
-                        <th>Employee ID</th>
-                        <th>Name</th>
-                        <th>Role</th>
-                        <th>Daily Wage</th>
-                        <th>Weekly Salary</th>
-                        <th>Monthly Salary</th>
-                        <th>Overtime Rate</th>
-                        <th>Bonus</th>
-                        <th>Advance Salary</th>
-                        <th>Pending Payment</th>
-                        <th>Total Payable</th>
+                        <th class="text-center py-3">Sr#</th>
+                        <th class="text-center py-3">Name</th>
+                        <th class="text-center py-3">Role</th>
+                        <th class="text-center py-3">Daily Wage</th>
+                        <th class="text-center py-3">Days Worked</th>
+                        <th class="text-center py-3">Paying Amount</th>
+                        <th class="text-center py-3">Paid Amount</th>
+                        <th class="text-center py-3">Balance Due</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% if employees %}
                         {% for emp in employees %}
-                        <tr>
-                            <td><strong>{{ emp.employee_id }}</strong></td>
-                            <td>{{ emp.name }}</td>
-                            <td>{{ emp.role }}</td>
-                            <td>₹ {{ emp.daily_wage or '0' }}</td>
-                            <td>₹ {{ emp.weekly_salary or '0' }}</td>
-                            <td>₹ {{ emp.monthly_salary or '0' }}</td>
-                            <td>₹ {{ emp.overtime_rate or '0' }}/hr</td>
-                            <td>₹ {{ emp.bonus or '0' }}</td>
-                            <td>₹ {{ emp.advance_salary or '0' }}</td>
-                            <td>
-                                {% if emp.pending_payment and emp.pending_payment > 0 %}
-                                <span class="badge bg-danger">₹ {{ emp.pending_payment }}</span>
-                                {% else %}
-                                <span class="text-success">-</span>
-                                {% endif %}
-                            </td>
-                            <td class="fw-bold">
-                                ₹ {{ "{:,.0f}".format((emp.monthly_salary or 0) + (emp.bonus or 0) - (emp.advance_salary or 0)) }}
-                            </td>
+                        <tr class="text-center">
+                            <td class="py-3"><span class="badge bg-secondary-subtle text-secondary fw-bold px-3 py-2 rounded-pill border">{{ emp.sr_no or emp.id }}</span></td>
+                            <td class="py-3"><span class="fw-bold text-dark">{{ emp.name }}</span></td>
+                            <td class="py-3"><span class="badge bg-light text-dark border px-3 py-1">{{ emp.role }}</span></td>
+                            <td class="py-3 fw-bold text-dark">₹ {{ "%.2f"|format(emp.daily_wage) }}</td>
+                            <td class="py-3 text-secondary">{{ emp.days_worked }} days</td>
+                            <td class="py-3 text-info fw-bold">₹ {{ "%.2f"|format(emp.paying_amount) }}</td>
+                            <td class="py-3 text-success fw-bold">₹ {{ "%.2f"|format(emp.paid_amount) }}</td>
+                            <td class="py-3 text-danger fw-bold">₹ {{ "%.2f"|format(emp.balance_due) }}</td>
                         </tr>
                         {% endfor %}
                     {% else %}
                     <tr>
-                        <td colspan="11" class="text-center text-muted py-4">
-                            <i class="fas fa-inbox"></i> No employees found
+                        <td colspan="8" class="text-center text-muted py-5">
+                            <i class="fas fa-inbox fa-2x mb-3 d-block opacity-50"></i> No calculated salaries found for this month.
                         </td>
                     </tr>
                     {% endif %}
@@ -139,4 +223,58 @@
         </div>
     </div>
 </div>
+
+<script>
+function downloadWord() {
+    var headerElement = document.getElementById('printable-header');
+    var tableElement = document.getElementById('printable-table');
+    
+    if (!headerElement || !tableElement) {
+        alert("Report elements not found!");
+        return;
+    }
+    
+    // Get table innerHTML and clean up tags that are not needed
+    var tableHtml = tableElement.innerHTML;
+    
+    var docContent = 
+        '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">' +
+        '<head><title>Salary Report</title>' +
+        '<style>' +
+        'body { font-family: "Arial", sans-serif; margin: 1in; }' +
+        'table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 11px; }' +
+        'th, td { border: 1px solid #000000; padding: 8px 6px; text-align: center; }' +
+        'th { background-color: #f2f2f2; font-weight: bold; }' +
+        'h2, h6 { text-align: center; margin: 5px 0; }' +
+        '.text-uppercase { text-transform: uppercase; }' +
+        '.fw-bold { font-weight: bold; }' +
+        'i, .bi, .fa, .fas { display: none !important; }' +
+        '</style>' +
+        '</head>' +
+        '<body>' +
+        '<div style="text-align: center; margin-bottom: 20px;">' +
+        '<h2>' + '{{ farm.farm_name }}' + '</h2>' +
+        '<h6>' + '{{ farm.address }}' + '</h6>' +
+        '<h3 style="margin-top: 15px;">MONTHLY SALARY REPORT</h3>' +
+        '<p style="color: #666;">Month: <b>' + '{{ month }}' + '</b></p>' +
+        '</div>' +
+        '<table>' +
+        tableHtml +
+        '</table>' +
+        '</body>' +
+        '</html>';
+        
+    var blob = new Blob(['\ufeff' + docContent], {
+        type: 'application/msword;charset=utf-8'
+    });
+    
+    var url = URL.createObjectURL(blob);
+    var link = document.createElement('a');
+    link.href = url;
+    link.download = 'Monthly_Salary_Report_' + '{{ month }}' + '.doc';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+</script>
 {% endblock %}

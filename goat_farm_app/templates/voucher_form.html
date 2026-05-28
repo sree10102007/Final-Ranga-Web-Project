@@ -1,0 +1,246 @@
+{% extends 'layout.html' %}
+
+{% block title %}{{ action }} {{ v_type|capitalize }} Voucher - Ranga Farms{% endblock %}
+{% block page_title %}{{ action|upper }} {{ v_type|upper }} VOUCHER{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8 col-xl-7">
+        <div class="d-flex align-items-center gap-3 mb-4">
+            <a href="{{ url_for('voucher_register', v_type=v_type) }}" class="btn btn-outline-secondary rounded-circle" style="width: 40px; height: 40px; padding: 0; line-height: 38px;">
+                <i class="bi bi-arrow-left"></i>
+            </a>
+            <div>
+                <h3 class="fw-bold mb-0 text-success">{{ action }} {{ v_type|capitalize }} Voucher</h3>
+                <p class="text-muted small mb-0">Ledger details for transactional auto-allocation</p>
+            </div>
+        </div>
+        
+        <div class="card border-0 shadow-lg rounded-4 overflow-hidden mb-5">
+            <!-- Simulated Bill Dotted Header Line -->
+            <div class="bg-success text-white p-4 d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="fw-bold mb-1"><i class="bi bi-receipt-cutoff me-2"></i>RANGA FARMS VOUCHER</h5>
+                    <span class="small opacity-75">Voucher Type: {{ v_type|upper }}</span>
+                </div>
+                <div class="text-end">
+                    <span class="badge bg-white bg-opacity-25 fs-6 font-monospace">
+                        {% if action == 'Edit' %}EDITING RECORD #{{ record.id }}{% else %}NEW ENTRY{% endif %}
+                    </span>
+                </div>
+            </div>
+            
+            <div class="card-body p-5">
+                <form method="POST" action="">
+                    <!-- ── Present Date (Automatically Set if Add) ── -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small fw-bold">DATE OF PURCHASE</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="bi bi-calendar3"></i></span>
+                                <input type="date" name="purchase_date" class="form-control" required
+                                       value="{% if record %}{{ record.purchase_date }}{% else %}{{ today }}{% endif %}">
+                            </div>
+                            <small class="text-muted">Present date auto-populated for convenience</small>
+                        </div>
+                    </div>
+                    
+                    <hr class="border-light my-4">
+                    
+                    <!-- ── GOAT VOUCHER FIELDS ── -->
+                    {% if v_type == 'goat' %}
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label text-muted small fw-bold">GOAT TAG ID</label>
+                                <input type="text" name="tag_id" class="form-control" required placeholder="e.g. GT-502"
+                                       value="{% if record %}{{ record.tag_id }}{% endif %}" {% if action == 'Edit' %}readonly{% endif %}>
+                                {% if action == 'Edit' %}<small class="text-muted">Tag ID cannot be altered once registered.</small>{% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label text-muted small fw-bold">PURCHASE PRICE (₹)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light">₹</span>
+                                    <input type="number" step="0.01" name="price" class="form-control" required placeholder="0.00"
+                                           value="{% if record %}{{ record.price }}{% endif %}">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label text-muted small fw-bold">SELLER/SUPPLIER NAME</label>
+                                <input type="text" name="seller_name" class="form-control" placeholder="e.g. Village Market Supplier"
+                                       value="{% if record %}{{ record.seller_name }}{% endif %}">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label text-muted small fw-bold">BREED</label>
+                                <input type="text" name="breed" class="form-control" placeholder="e.g. Boer, Sirohi, Barbari" required
+                                       value="{% if record %}{{ record.breed }}{% endif %}">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label text-muted small fw-bold">GENDER</label>
+                                <select name="gender" class="form-select" required>
+                                    <option value="Male" {% if record and record.gender == 'Male' %}selected{% endif %}>Male</option>
+                                    <option value="Female" {% if record and record.gender == 'Female' %}selected{% endif %}>Female</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label text-muted small fw-bold">WEIGHT (KG)</label>
+                                <div class="input-group">
+                                    <input type="number" step="0.1" name="weight" class="form-control" placeholder="0.0"
+                                           value="{% if record %}{{ record.weight }}{% endif %}">
+                                    <span class="input-group-text bg-light">kg</span>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label text-muted small fw-bold">INVOICE & LEDGER DETAILS</label>
+                                <textarea name="notes" class="form-control" rows="3" placeholder="Enter other purchase specifications...">{% if record %}{{ record.notes }}{% endif %}</textarea>
+                            </div>
+                        </div>
+                    
+                    <!-- ── FEED VOUCHER FIELDS ── -->
+                    {% elif v_type == 'feed' %}
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label text-muted small fw-bold">FEED NAME / TYPE</label>
+                                <input type="text" name="feed_name" class="form-control" required placeholder="e.g. Alfalfa Hay, Concentrate, Maize"
+                                       value="{% if record %}{{ record.feed_name }}{% endif %}">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label text-muted small fw-bold">TOTAL VOUCHER COST (₹)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light">₹</span>
+                                    <input type="number" step="0.01" name="cost" class="form-control" required placeholder="0.00"
+                                           value="{% if record %}{{ record.cost }}{% endif %}">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label text-muted small fw-bold">PURCHASE QUANTITY</label>
+                                <input type="number" step="0.01" name="quantity" class="form-control" required placeholder="0.00"
+                                       value="{% if record %}{{ record.quantity }}{% endif %}">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label text-muted small fw-bold">MEASUREMENT UNIT</label>
+                                <select name="unit" class="form-select">
+                                    <option value="KG" {% if record and record.unit == 'KG' %}selected{% endif %}>Kilograms (KG)</option>
+                                    <option value="Bags" {% if record and record.unit == 'Bags' %}selected{% endif %}>Bags</option>
+                                    <option value="Tons" {% if record and record.unit == 'Tons' %}selected{% endif %}>Tons</option>
+                                </select>
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label text-muted small fw-bold">SUPPLIER</label>
+                                <input type="text" name="supplier" class="form-control" placeholder="e.g. Modern Feeds Ltd."
+                                       value="{% if record %}{{ record.supplier }}{% endif %}">
+                            </div>
+                        </div>
+                    
+                    <!-- ── HEALTH VOUCHER FIELDS (Meds + Vaccines) ── -->
+                    {% elif v_type == 'health' %}
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label text-muted small fw-bold">HEALTH VOUCHER SUB-TYPE</label>
+                                <select name="sub_type" id="sub_type" class="form-select" onchange="toggleHealthFields()">
+                                    <option value="medicine" {% if record and record.sub_type == 'medicine' %}selected{% endif %}>Medicine Voucher</option>
+                                    <option value="vaccine" {% if record and record.sub_type == 'vaccine' %}selected{% endif %}>Vaccine Voucher</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label text-muted small fw-bold">TOTAL VOUCHER COST (₹)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light">₹</span>
+                                    <input type="number" step="0.01" name="cost" class="form-control" required placeholder="0.00"
+                                           value="{% if record %}{{ record.cost }}{% endif %}">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label text-muted small fw-bold" id="label-health-name">SUPPLY NAME (MEDICINE/VACCINE)</label>
+                                <input type="text" name="health_name" class="form-control" required placeholder="e.g. Dewormer, FMD Vaccine"
+                                       value="{% if record %}{{ record.health_name }}{% endif %}">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label text-muted small fw-bold">PURCHASE QUANTITY</label>
+                                <input type="number" step="0.01" name="quantity" class="form-control" required placeholder="0.00"
+                                       value="{% if record %}{{ record.quantity }}{% endif %}">
+                            </div>
+                            <div class="col-md-6" id="field-dose-unit">
+                                <label class="form-label text-muted small fw-bold">DOSE UNIT (For Medicines)</label>
+                                <input type="text" name="dose_unit" class="form-control" placeholder="e.g. ml, tablets, vial"
+                                       value="{% if record %}{{ record.dose_unit }}{% endif %}">
+                            </div>
+                            <div class="col-md-6" id="field-supplier-health">
+                                <label class="form-label text-muted small fw-bold">SUPPLIER/PHARMACY</label>
+                                <input type="text" name="supplier" class="form-control" placeholder="e.g. Veterinary Care Supplies"
+                                       value="{% if record %}{{ record.supplier }}{% endif %}">
+                            </div>
+                        </div>
+                        
+                        <script>
+                            function toggleHealthFields() {
+                                var subType = document.getElementById('sub_type').value;
+                                var doseField = document.getElementById('field-dose-unit');
+                                var labelName = document.getElementById('label-health-name');
+                                
+                                if (subType === 'vaccine') {
+                                    doseField.style.display = 'none';
+                                    labelName.innerText = "VACCINE NAME";
+                                } else {
+                                    doseField.style.display = 'block';
+                                    labelName.innerText = "MEDICINE NAME";
+                                }
+                            }
+                            // Run once on load
+                            document.addEventListener("DOMContentLoaded", toggleHealthFields);
+                        </script>
+                    
+                    <!-- ── OTHER PURCHASES (Assets / Equipment) FIELDS ── -->
+                    {% elif v_type == 'other' %}
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label text-muted small fw-bold">ASSET/EQUIPMENT NAME</label>
+                                <input type="text" name="name" class="form-control" required placeholder="e.g. Automatic Milking Machine, Electric Fence"
+                                       value="{% if record %}{{ record.name }}{% endif %}">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label text-muted small fw-bold">ASSET CATEGORY</label>
+                                <select name="type" class="form-select">
+                                    <option value="Other Things" {% if not record or record.type == 'Other Things' %}selected{% endif %}>Other Things</option>
+                                    <option value="Equipment" {% if record and record.type == 'Equipment' %}selected{% endif %}>Equipment</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label text-muted small fw-bold">TOTAL VOUCHER COST (₹)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light">₹</span>
+                                    <input type="number" step="0.01" name="cost" class="form-control" required placeholder="0.00"
+                                           value="{% if record %}{{ record.cost }}{% endif %}">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label text-muted small fw-bold">SUPPLIER</label>
+                                <input type="text" name="supplier" class="form-control" placeholder="e.g. Agri-Tech Instruments"
+                                       value="{% if record %}{{ record.supplier }}{% endif %}">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label text-muted small fw-bold">INITIAL STATUS</label>
+                                <select name="status" class="form-select">
+                                    <option value="Good" {% if not record or record.status == 'Good' %}selected{% endif %}>Good</option>
+                                    <option value="Needs Repair" {% if record and record.status == 'Needs Repair' %}selected{% endif %}>Needs Repair</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label text-muted small fw-bold">VOUCHER & LEDGER DESCRIPTION</label>
+                                <textarea name="notes" class="form-control" rows="3" placeholder="Enter purchase reasons, serial numbers, warranty, or other specifications...">{% if record %}{{ record.notes }}{% endif %}</textarea>
+                            </div>
+                        </div>
+                    {% endif %}
+                    
+                    <!-- Submit Buttons -->
+                    <div class="d-flex justify-content-end gap-3 mt-5">
+                        <a href="{{ url_for('voucher_register', v_type=v_type) }}" class="btn btn-light border px-4 py-2 rounded-pill">Cancel</a>
+                        <button type="submit" class="btn btn-success px-5 py-2 rounded-pill shadow-sm fw-bold">
+                            <i class="bi bi-check2-circle me-2"></i>Save Voucher
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

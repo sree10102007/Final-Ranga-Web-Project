@@ -1,0 +1,268 @@
+{% extends 'layout.html' %}
+
+{% block title %}{{ action }} {{ s_type|capitalize }} Sale - Ranga Farms{% endblock %}
+{% block page_title %}{{ action|upper }} {{ s_type|upper }} SALE{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div class="d-flex align-items-center gap-3">
+                <a href="{{ url_for('sales_register', s_type=s_type) }}" class="btn btn-outline-secondary rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; padding: 0;">
+                    <i class="bi bi-arrow-left fs-5"></i>
+                </a>
+                <h2 class="fw-bold text-success mb-0">
+                    <i class="bi bi-cash-coin me-2"></i>{{ action }} {{ s_type|capitalize }} Sale
+                </h2>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-body p-4 p-md-5">
+                <form method="POST" action="{% if record %}{{ url_for('sales_edit', s_type=s_type, id=record.id) }}{% else %}{{ url_for('sales_add', s_type=s_type) }}{% endif %}" id="salesForm">
+                    
+                    {% if s_type == 'goat' %}
+                    <!-- Goat Sales Section -->
+                    <h5 class="text-success border-bottom pb-2 mb-3 fw-bold">GOAT DETAILS</h5>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-3">
+                            <label class="form-label text-muted small fw-bold">RECORD NO</label>
+                            <input type="text" class="form-control" name="sr_no" readonly
+                                   value="{% if record %}{{ record.sr_no }}{% else %}{{ next_sr }}{% endif %}">
+                        </div>
+                        <div class="col-md-9">
+                            <label class="form-label text-muted small fw-bold">TAG ID * <span id="tag-status-badge"></span></label>
+                            <div class="input-group">
+                                <input type="text" class="form-control border-success rounded-start-pill" name="tag_id" id="tag_id_input" required 
+                                       placeholder="Enter Tag ID to search" value="{% if record %}{{ record.tag_id }}{% endif %}">
+                                <button type="button" class="btn btn-success rounded-end-pill px-4" id="lookupBtn">
+                                    <i class="bi bi-search"></i>
+                                </button>
+                            </div>
+                            <div id="tag-feedback" class="small mt-1"></div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label text-muted small fw-bold">BREED (MANUAL ENTRY)</label>
+                            <input type="text" class="form-control" name="breed" id="field_breed" placeholder="e.g. Boer, Jamunapari"
+                                   value="{% if record %}{{ record.breed }}{% endif %}">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label text-muted small fw-bold">BREED PERCENTAGE</label>
+                            <input type="text" class="form-control" name="breed_percent" id="field_breed_percent" placeholder="e.g. 100%, 50%"
+                                   value="{% if record %}{{ record.breed_percent }}{% endif %}">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label text-muted small fw-bold">GENDER (MALE/FEMALE)</label>
+                            <select class="form-select" name="gender" id="field_gender" required>
+                                <option value=""></option>
+                                <option value="Male" {% if record and record.gender == 'Male' %}selected{% endif %}>Male</option>
+                                <option value="Female" {% if record and record.gender == 'Female' %}selected{% endif %}>Female</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <h5 class="text-success border-bottom pb-2 mb-3 fw-bold">TRANSACTION DETAILS</h5>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <label class="form-label text-muted small fw-bold">WEIGHT (KG)</label>
+                            <input type="number" step="0.01" class="form-control" name="weight" id="field_weight"
+                                   value="{% if record %}{{ record.weight }}{% endif %}">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label text-muted small fw-bold">SOLD PRICE *</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-success">₹</span>
+                                <input type="number" step="0.01" class="form-control border-success" name="sold_price" required
+                                       value="{% if record %}{{ record.sold_price }}{% endif %}">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label text-muted small fw-bold">DATE OF SALE *</label>
+                            <input type="date" class="form-control" name="date_of_sale" required
+                                   value="{% if record %}{{ record.date_of_sale }}{% else %}{{ today }}{% endif %}">
+                        </div>
+                    </div>
+
+                    {% else %}
+                    <!-- Other Sales Section -->
+                    <h5 class="text-success border-bottom pb-2 mb-3 fw-bold">REVENUE ITEM DETAILS</h5>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-12">
+                            <label class="form-label text-muted small fw-bold">ITEM DESCRIPTION *</label>
+                            <input type="text" class="form-control border-success" name="item_name" required placeholder="e.g. Goat Litter Manure, Raw Milk"
+                                   value="{% if record %}{{ record.item_name }}{% endif %}">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label text-muted small fw-bold">QUANTITY *</label>
+                            <input type="number" step="0.01" class="form-control" name="quantity" id="field_qty" required placeholder="0.0"
+                                   value="{% if record %}{{ record.quantity }}{% endif %}" oninput="recalcTotal()">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label text-muted small fw-bold">UNIT OF MEASURE *</label>
+                            <input type="text" class="form-control" name="unit" required placeholder="e.g. Bags, Liters, KGs"
+                                   value="{% if record %}{{ record.unit }}{% endif %}">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label text-muted small fw-bold">PRICE PER UNIT *</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-success">₹</span>
+                                <input type="number" step="0.01" class="form-control" name="price_per_unit" id="field_price" required placeholder="0.00"
+                                       value="{% if record %}{{ record.price_per_unit }}{% endif %}" oninput="recalcTotal()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <h5 class="text-success border-bottom pb-2 mb-3 fw-bold">FINANCIAL TRANSACTION</h5>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small fw-bold">TOTAL AMOUNT (AUTO-CALCULATED)</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-success">₹</span>
+                                <input type="number" step="0.01" class="form-control border-success fw-bold text-success" name="total_amount" id="field_total" readonly
+                                       value="{% if record %}{{ record.total_amount }}{% endif %}">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small fw-bold">DATE OF SALE *</label>
+                            <input type="date" class="form-control" name="date_of_sale" required
+                                   value="{% if record %}{{ record.date_of_sale }}{% else %}{{ today }}{% endif %}">
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Common Buyer Information -->
+                    <h5 class="text-success border-bottom pb-2 mb-3 fw-bold">BUYER INFORMATION</h5>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-12">
+                            <label class="form-label text-muted small fw-bold">BUYER FULL NAME</label>
+                            <input type="text" class="form-control" name="buyer_name" placeholder="e.g. Ramesh Kumar"
+                                   value="{% if record %}{{ record.buyer_name }}{% endif %}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small fw-bold">BUYER CITY</label>
+                            <input type="text" class="form-control" name="buyer_city" placeholder="e.g. Coimbatore"
+                                   value="{% if record %}{{ record.buyer_city }}{% endif %}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small fw-bold">BUYER CONTACT DETAILS</label>
+                            <input type="text" class="form-control" name="buyer_contact" placeholder="e.g. Phone Number or Email"
+                                   value="{% if record %}{{ record.buyer_contact }}{% endif %}">
+                        </div>
+                        {% if s_type == 'other' %}
+                        <div class="col-md-12">
+                            <label class="form-label text-muted small fw-bold">REMARKS / NOTES</label>
+                            <textarea class="form-control" name="notes" rows="2" placeholder="Describe items, deliveries or transport terms...">{% if record %}{{ record.notes }}{% endif %}</textarea>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-12 mt-4">
+                        <button type="submit" class="btn btn-success btn-lg w-100 shadow-sm rounded-pill py-3" id="submitBtn">
+                            <i class="bi bi-wallet2 me-2"></i>Record Sales Transaction
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// ── Auto Calculate Total for Other Sales ─────────────────────────────────────
+function recalcTotal() {
+    var qty = parseFloat(document.getElementById('field_qty').value) || 0;
+    var price = parseFloat(document.getElementById('field_price').value) || 0;
+    document.getElementById('field_total').value = (qty * price).toFixed(2);
+}
+
+// ── Live Goat Auto-Fill Lookup ───────────────────────────────────────────────
+function lookupGoat() {
+    var tagInput = document.getElementById('tag_id_input');
+    if (!tagInput) return;
+    
+    var tagId = tagInput.value.trim();
+    var feedback = document.getElementById('tag-feedback');
+    var badge = document.getElementById('tag-status-badge');
+    var submitBtn = document.getElementById('submitBtn');
+
+    if (!tagId) {
+        feedback.innerHTML = '';
+        badge.innerHTML = '';
+        submitBtn.disabled = true;
+        
+        // Reset auto-fill fields
+        document.getElementById('field_breed').value = '';
+        document.getElementById('field_breed_percent').value = '';
+        document.getElementById('field_weight').value = '';
+        document.getElementById('field_gender').value = '';
+        return;
+    }
+
+    fetch('/api/goat_lookup/' + encodeURIComponent(tagId))
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.found) {
+                // Auto-fill fields
+                document.getElementById('field_breed').value        = data.breed || '';
+                document.getElementById('field_breed_percent').value = data.breed_percent || '';
+                document.getElementById('field_weight').value       = data.weight_kg || '';
+                
+                var genderSel = document.getElementById('field_gender');
+                // Ensure gender is normalized to "Male" or "Female"
+                if (data.gender === 'Male' || data.gender === 'M' || data.gender === 'm') {
+                    genderSel.value = 'Male';
+                } else if (data.gender === 'Female' || data.gender === 'F' || data.gender === 'f') {
+                    genderSel.value = 'Female';
+                } else {
+                    genderSel.value = '';
+                }
+
+                if (data.already_sold) {
+                    feedback.innerHTML = '<span class="text-danger"><i class="bi bi-x-circle-fill"></i> Warning: This goat is already marked as <strong>SOLD</strong>. Cannot duplicate sales records.</span>';
+                    badge.innerHTML = '<span class="badge bg-danger ms-1">Already Sold</span>';
+                    submitBtn.disabled = true;
+                } else if (data.already_expired) {
+                    feedback.innerHTML = '<span class="text-danger"><i class="bi bi-x-circle-fill"></i> Warning: This goat is marked as <strong>EXPIRED</strong>. Cannot create sales.</span>';
+                    badge.innerHTML = '<span class="badge bg-secondary ms-1">Expired</span>';
+                    submitBtn.disabled = true;
+                } else {
+                    feedback.innerHTML = '<span class="text-success"><i class="bi bi-check-circle-fill"></i> Goat found — details auto-filled. Current status: <strong>' + data.status + '</strong></span>';
+                    badge.innerHTML = '<span class="badge bg-success ms-1">Active</span>';
+                    submitBtn.disabled = false;
+                }
+            } else {
+                feedback.innerHTML = '<span class="text-danger"><i class="bi bi-x-circle-fill"></i> Error: No goat exists with this tag id. Please verify or register it first.</span>';
+                badge.innerHTML = '<span class="badge bg-danger ms-1">Invalid Tag</span>';
+                submitBtn.disabled = true;
+            }
+        })
+        .catch(function(err) {
+            feedback.innerHTML = '<span class="text-danger">Lookup query failed. Please verify tag exists.</span>';
+            submitBtn.disabled = true;
+        });
+}
+
+// Bind lookup triggers
+document.addEventListener("DOMContentLoaded", function() {
+    var lookupBtn = document.getElementById('lookupBtn');
+    if (lookupBtn) {
+        lookupBtn.addEventListener('click', lookupGoat);
+    }
+    
+    var tagInput = document.getElementById('tag_id_input');
+    if (tagInput) {
+        tagInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') { 
+                e.preventDefault(); 
+                lookupGoat(); 
+            }
+        });
+        tagInput.addEventListener('blur', lookupGoat);
+        // Trigger lookup if tag is already filled (e.g., when editing)
+        if (tagInput.value) {
+            lookupGoat();
+        }
+    }
+});
+</script>
+{% endblock %}

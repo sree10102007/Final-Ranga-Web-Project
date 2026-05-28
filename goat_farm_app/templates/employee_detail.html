@@ -94,41 +94,30 @@
         <!-- Quick Stats -->
         <div class="col-md-8">
             <div class="row">
-                <div class="col-md-6 mb-3">
-                    <div class="card text-center">
+                <div class="col-md-4 mb-3">
+                    <div class="card text-center h-100 shadow-sm border-0">
                         <div class="card-body">
                             <i class="fas fa-check text-success fa-2x mb-2"></i>
-                            <h6 class="text-muted">Present Days</h6>
-                            <h3 class="text-success">{{ total_present }}</h3>
+                            <h6 class="text-muted small fw-bold">Present Days</h6>
+                            <h3 class="text-success fw-bold">{{ total_present }}</h3>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-6 mb-3">
-                    <div class="card text-center">
-                        <div class="card-body">
-                            <i class="fas fa-times text-danger fa-2x mb-2"></i>
-                            <h6 class="text-muted">Absent Days</h6>
-                            <h3 class="text-danger">{{ total_absent }}</h3>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <div class="card text-center">
+                <div class="col-md-4 mb-3">
+                    <div class="card text-center h-100 shadow-sm border-0">
                         <div class="card-body">
                             <i class="fas fa-calendar text-warning fa-2x mb-2"></i>
-                            <h6 class="text-muted">Approved Leaves</h6>
-                            <h3 class="text-warning">{{ total_leaves }}</h3>
+                            <h6 class="text-muted small fw-bold">Approved Leaves</h6>
+                            <h3 class="text-warning fw-bold">{{ total_leaves }}</h3>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-6 mb-3">
-                    <div class="card text-center">
+                <div class="col-md-4 mb-3">
+                    <div class="card text-center h-100 shadow-sm border-0">
                         <div class="card-body">
                             <i class="fas fa-money-bill text-info fa-2x mb-2"></i>
-                            <h6 class="text-muted">Salary Status</h6>
-                            <h3 class="text-info">
+                            <h6 class="text-muted small fw-bold">Salary Status</h6>
+                            <h3 class="text-info fw-bold">
                                 {% if wages and wages.pending_payment > 0 %}
                                 <span class="text-danger">Pending</span>
                                 {% else %}
@@ -168,10 +157,8 @@
                                     <td>
                                         {% if rec.status == 'Present' %}
                                         <span class="badge bg-success">Present</span>
-                                        {% elif rec.status == 'Absent' %}
-                                        <span class="badge bg-danger">Absent</span>
                                         {% else %}
-                                        <span class="badge bg-warning">{{ rec.status }}</span>
+                                        <span class="badge bg-info text-dark">Leave</span>
                                         {% endif %}
                                     </td>
                                     <td>{{ rec.notes or '-' }}</td>

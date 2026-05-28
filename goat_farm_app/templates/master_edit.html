@@ -35,6 +35,18 @@
                             </select>
                         </div>
                         <div class="col-md-4"><label class="form-label text-muted">Color</label><input type="text" class="form-control" name="color" value="{{ record['color'] or '' }}"></div>
+                        <div class="col-md-4">
+                            <label class="form-label text-muted">Age (Years)</label>
+                            <input type="number" class="form-control border-warning" name="age_years" value="{{ record['age_years'] or 0 }}" min="0">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label text-muted">Age (Months)</label>
+                            <input type="number" class="form-control border-warning" name="age_months" value="{{ record['age_months'] or 0 }}" min="0" max="11">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label text-muted">Age (Days)</label>
+                            <input type="number" class="form-control border-warning" name="age_days" value="{{ record['age_days'] or 0 }}" min="0" max="30">
+                        </div>
                     </div>
 
                     <!-- Section 2: Financial & Physical -->
@@ -49,12 +61,12 @@
                     <!-- Section 3: Medical -->
                     <h5 class="text-warning border-bottom pb-2 mb-3">3. Medical & Feed</h5>
                     <div class="row g-3 mb-4">
-                        <div class="col-md-3"><label class="form-label text-muted">Vaccination</label><input type="text" class="form-control" name="vaccination" value="{{ record['vaccination'] or '' }}"></div>
-                        <div class="col-md-3"><label class="form-label text-muted">Vac. Period</label><input type="text" class="form-control" name="vaccination_period" value="{{ record['vaccination_period'] or '' }}"></div>
-                        <div class="col-md-3"><label class="form-label text-muted">Medicine</label><input type="text" class="form-control" name="medicine" value="{{ record['medicine'] or '' }}"></div>
-                        <div class="col-md-3"><label class="form-label text-muted">Med. Period</label><input type="text" class="form-control" name="medicine_period" value="{{ record['medicine_period'] or '' }}"></div>
-                        <div class="col-md-6"><label class="form-label text-muted">Feed Type</label><input type="text" class="form-control" name="feed" value="{{ record['feed'] or '' }}"></div>
-                        <div class="col-md-6"><label class="form-label text-muted">Feed Amount</label><input type="text" class="form-control" name="feed_amount" value="{{ record['feed_amount'] or '' }}"></div>
+                        <div class="col-md-4"><label class="form-label text-muted">Vaccination</label><input type="text" class="form-control" name="vaccination" value="{{ record['vaccination'] or '' }}"></div>
+                        <div class="col-md-4"><label class="form-label text-muted">Vac. Period</label><input type="date" class="form-control" name="vaccination_period" value="{{ record['vaccination_period'] or '' }}"></div>
+                        <div class="col-md-4"><label class="form-label text-muted">Vac. Next Due</label><input type="date" class="form-control" name="vaccination_next_due" value="{{ record['vaccination_next_due'] or '' }}"></div>
+                        <div class="col-md-6"><label class="form-label text-muted">Medicine</label><input type="text" class="form-control" name="medicine" value="{{ record['medicine'] or '' }}"></div>
+                        <div class="col-md-6"><label class="form-label text-muted">Med. Period</label><input type="date" class="form-control" name="medicine_period" value="{{ record['medicine_period'] or '' }}"></div>
+                        <div class="col-md-12"><label class="form-label text-muted">Feed Type</label><input type="text" class="form-control" name="feed" value="{{ record['feed'] or '' }}"></div>
                     </div>
 
                     <!-- Section 4: Breeding -->
@@ -72,18 +84,18 @@
                     <!-- Section 5: Exit (Sales / Mortality) -->
                     <h5 class="text-warning border-bottom pb-2 mb-3">5. End of Lifecycle (Sale or Mortality)</h5>
                     <div class="row g-3 mb-4">
-                        <div class="col-md-4"><label class="form-label text-muted">Selling Date</label><input type="date" class="form-control" name="selling_date" value="{{ record['selling_date'] or '' }}"></div>
+                        <div class="col-md-4"><label class="form-label text-muted">Selling Date</label><input type="date" class="form-control no-auto-date" data-no-auto-date="true" name="selling_date" value="{{ record['selling_date'] or '' }}"></div>
                         <div class="col-md-4"><label class="form-label text-muted">Selling Weight</label><input type="number" step="0.01" class="form-control" name="selling_weight" value="{{ record['selling_weight'] or '' }}"></div>
                         <div class="col-md-4"><label class="form-label text-muted">Selling Price (₹)</label><input type="number" step="0.01" class="form-control" name="selling_price" value="{{ record['selling_price'] or '' }}"></div>
                         
                         <div class="col-12 mt-3 mb-2"><strong class="text-danger small text-uppercase block">OR Mortality Stats</strong></div>
                         
-                        <div class="col-md-4"><label class="form-label text-muted">Mortality Date</label><input type="date" class="form-control" name="mortality_date" value="{{ record['mortality_date'] or '' }}"></div>
+                        <div class="col-md-4"><label class="form-label text-muted">Mortality Date</label><input type="date" class="form-control no-auto-date" data-no-auto-date="true" name="mortality_date" value="{{ record['mortality_date'] or '' }}"></div>
                         <div class="col-md-4"><label class="form-label text-muted">Mortality Weight</label><input type="number" step="0.01" class="form-control" name="mortality_weight" value="{{ record['mortality_weight'] or '' }}"></div>
                         <div class="col-md-4"><label class="form-label text-muted">Reason</label><input type="text" class="form-control" name="mortality_reason" value="{{ record['mortality_reason'] or '' }}"></div>
                         
-                        <div class="col-md-4"><label class="form-label text-muted">Insurance Inform Date</label><input type="date" class="form-control" name="insurance_inform_date" value="{{ record['insurance_inform_date'] or '' }}"></div>
-                        <div class="col-md-4"><label class="form-label text-muted">Insurance Claim Date</label><input type="date" class="form-control" name="insurance_claim_date" value="{{ record['insurance_claim_date'] or '' }}"></div>
+                        <div class="col-md-4"><label class="form-label text-muted">Insurance Inform Date</label><input type="date" class="form-control no-auto-date" data-no-auto-date="true" name="insurance_inform_date" value="{{ record['insurance_inform_date'] or '' }}"></div>
+                        <div class="col-md-4"><label class="form-label text-muted">Insurance Claim Date</label><input type="date" class="form-control no-auto-date" data-no-auto-date="true" name="insurance_claim_date" value="{{ record['insurance_claim_date'] or '' }}"></div>
                         <div class="col-md-4"><label class="form-label text-muted">Claim Amount (₹)</label><input type="number" step="0.01" class="form-control" name="insurance_claim_amount" value="{{ record['insurance_claim_amount'] or '' }}"></div>
                     </div>
 

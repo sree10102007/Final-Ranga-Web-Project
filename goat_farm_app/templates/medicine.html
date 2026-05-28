@@ -35,17 +35,6 @@
     </div>
 </div>
 
-<div class="row mb-4">
-    <div class="col-md-4">
-        <div class="stat-card expense" style="background: linear-gradient(135deg, #ef5350, #d32f2f);">
-            <i class="bi bi-capsule stat-icon"></i>
-            <div class="stat-label">Total Medicine Cost</div>
-            <div class="stat-value">₹{{ "%.2f"|format(total_cost) }}</div>
-            <div class="stat-sub">For filtered period</div>
-        </div>
-    </div>
-</div>
-
 <div class="card border-0 overflow-hidden">
     <div class="table-responsive">
         <table class="table mb-0">
@@ -54,8 +43,6 @@
                     <th>Date</th>
                     <th>Goat Tag</th>
                     <th>Medicine Details</th>
-                    <th>Doctor</th>
-                    <th>Cost</th>
                     <th class="text-end">Actions</th>
                 </tr>
             </thead>
@@ -73,18 +60,16 @@
                         <div class="small text-muted fst-italic">Note: {{ record.notes }}</div>
                         {% endif %}
                     </td>
-                    <td>{{ record.doctor_name or 'N/A' }}</td>
-                    <td class="fw-bold text-danger">₹{{ "%.2f"|format(record.cost) }}</td>
                     <td class="text-end">
-                        <a href="{{ url_for('medicine_edit', id=record.id) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                        <a href="{{ url_for('medicine_edit', id=record.id) }}" class="btn btn-sm btn-warning text-dark me-2" title="Edit"><i class="bi bi-pencil"></i></a>
                         <form action="{{ url_for('medicine_delete', id=record.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Delete this record?');">
-                            <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                            <button type="submit" class="btn btn-sm btn-danger" title="Delete"><i class="bi bi-trash"></i></button>
                         </form>
                     </td>
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="6" class="text-center py-5 text-muted">
+                    <td colspan="4" class="text-center py-5 text-muted">
                         <i class="bi bi-capsule d-block mb-2" style="font-size: 2rem; opacity: 0.3;"></i>
                         No medicine records found.
                     </td>

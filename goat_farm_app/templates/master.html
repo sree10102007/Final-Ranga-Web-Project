@@ -58,7 +58,7 @@
                             </span>
                         </td>
                         <td><small>{{ r.breed }}<br>{{ r.breed_percent }}%</small></td>
-                        <td class="small">{% if r.gender|lower == 'm' %}Male{% elif r.gender|lower == 'f' %}Female{% else %}{{ r.gender }}{% endif %}<br><span class="text-muted">{{ r.color }}</span></td>
+                        <td class="small">{% if r.gender|lower == 'm' %}Male{% elif r.gender|lower == 'f' %}Female{% else %}{{ r.gender }}{% endif %}<br><span class="text-muted">{{ r.color }}</span><br><span class="badge bg-info bg-opacity-10 text-info fw-bold border border-info border-opacity-10 mt-1">{{ r.age_str or 'N/A' }}</span></td>
                         <td>{{ r.weight_kg }} kg</td>
                         <td><small>{{ r.purchase_date }}<br>₹{{ r.purchase_amount }}</small></td>
                         <td><small>Claim: ₹{{ r.insurance_claim_amount }}<br>{{ r.insurance_inform_date }}</small></td>

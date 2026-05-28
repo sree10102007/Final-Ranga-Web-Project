@@ -10,8 +10,15 @@
                 </div>
                 <div class="card-body">
                     <form method="POST" action="{{ url_for('employee_add') }}" novalidate>
-                        <div class="row">
-                            <div class="col-md-12 mb-3">
+                        <!-- Serial Number - auto-incremented -->
+                        <div class="row mb-3">
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold" for="sr_no">Serial No. <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control fw-bold text-primary"
+                                       id="sr_no" name="sr_no" value="{{ next_sr }}"
+                                       style="font-size:1.1rem; letter-spacing:1px;" required>
+                            </div>
+                            <div class="col-md-9">
                                 <label class="form-label" for="name">Full Name <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="name" name="name" required placeholder="Enter full name">
                             </div>

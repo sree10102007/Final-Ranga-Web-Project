@@ -48,7 +48,7 @@
                             <td class="text-muted small">{{ record.description }}</td>
                             <td class="text-end">
                                 <form action="{{ url_for('breed_delete', id=record.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Delete this breed?');">
-                                    <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                                    <button type="submit" class="btn btn-sm btn-danger" title="Delete"><i class="bi bi-trash"></i></button>
                                 </form>
                             </td>
                         </tr>

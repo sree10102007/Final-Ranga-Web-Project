@@ -2,50 +2,18 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div class="d-flex align-items-center gap-3">
-        <a href="{{ url_for('goats') }}" class="btn btn-outline-secondary rounded-circle" style="width: 40px; height: 40px; padding: 0; line-height: 38px;"><i class="bi bi-arrow-left"></i></a>
-        <h2 class="fw-bold text-success mb-0"><i class="bi bi-tag"></i> Goat Details: {{ tag_number }}</h2>
-    </div>
-</div>
-
-<div class="row g-4 mb-4">
-    <div class="col-md-4">
-        <div class="card border-success border-2 shadow-sm h-100 rounded-4">
-            <div class="card-body p-3 d-flex justify-content-between align-items-center">
-                <div>
-                    <h6 class="text-muted text-uppercase mb-1" style="font-size: 0.8rem;">Total Income</h6>
-                    <h4 class="text-success mb-0">₹{{ "%.2f"|format(income) }}</h4>
-                </div>
-                <i class="bi bi-arrow-down-circle text-success opacity-50 fs-1"></i>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card border-danger border-2 shadow-sm h-100 rounded-4">
-            <div class="card-body p-3 d-flex justify-content-between align-items-center">
-                <div>
-                    <h6 class="text-muted text-uppercase mb-1" style="font-size: 0.8rem;">Total Expense</h6>
-                    <h4 class="text-danger mb-0">₹{{ "%.2f"|format(expense) }}</h4>
-                </div>
-                <i class="bi bi-arrow-up-circle text-danger opacity-50 fs-1"></i>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card border-primary border-2 shadow-sm h-100 rounded-4">
-            <div class="card-body p-3 d-flex justify-content-between align-items-center">
-                <div>
-                    <h6 class="text-muted text-uppercase mb-1" style="font-size: 0.8rem;">Net Profit</h6>
-                    <h4 class="{% if profit >= 0 %}text-primary{% else %}text-danger{% endif %} mb-0">₹{{ "%.2f"|format(profit) }}</h4>
-                </div>
-                <i class="bi bi-piggy-bank text-primary opacity-50 fs-1"></i>
-            </div>
-        </div>
+        <a href="{{ url_for('goats') }}" class="btn btn-outline-secondary rounded-circle" style="width: 40px; height: 40px; padding: 0; line-height: 38px; display: inline-flex; align-items: center; justify-content: center;"><i class="bi bi-arrow-left"></i></a>
+        <h2 class="fw-bold text-success mb-0"><i class="bi bi-tag"></i> Goat Details: {{ tag_number }}
+            <span class="badge ms-2 {% if goat.status == 'Active' %}bg-primary{% elif goat.status == 'Sold' %}bg-warning{% else %}bg-danger{% endif %}" style="font-size: 1rem; vertical-align: middle;">
+                {{ goat.status or 'Active' }}
+            </span>
+        </h2>
     </div>
 </div>
 
 <div class="card border-0 shadow-sm rounded-4">
     <div class="card-header bg-white border-bottom p-4 rounded-top-4">
-        <h5 class="mb-0 fw-bold"><i class="bi bi-clock-history"></i> Unified History & Transactions</h5>
+        <h5 class="mb-0 fw-bold"><i class="bi bi-clock-history"></i> Unified History</h5>
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">
@@ -53,9 +21,7 @@
                 <thead class="table-light">
                     <tr>
                         <th class="ps-4">Date</th>
-                        <th>Category</th>
                         <th>Type</th>
-                        <th class="text-end pe-4">Amount</th>
                         <th>Notes</th>
                     </tr>
                 </thead>
@@ -63,20 +29,12 @@
                     {% for record in history %}
                     <tr>
                         <td class="ps-4 fw-medium">{{ record.date }}</td>
-                        <td>
-                            {% if record.category == 'income' %}
-                                <span class="badge bg-success-subtle text-success">Income</span>
-                            {% else %}
-                                <span class="badge bg-danger-subtle text-danger">Expense</span>
-                            {% endif %}
-                        </td>
                         <td>{{ record.type }}</td>
-                        <td class="text-end pe-4 fw-semibold">₹{{ "%.2f"|format(record.amount) }}</td>
                         <td>{{ record.notes }}</td>
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="5" class="text-center py-4 text-muted">No records found for this goat.</td>
+                        <td colspan="3" class="text-center py-4 text-muted">No records found for this goat.</td>
                     </tr>
                     {% endfor %}
                 </tbody>

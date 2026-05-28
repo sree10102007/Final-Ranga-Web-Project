@@ -1,0 +1,265 @@
+{% extends 'layout.html' %}
+
+{% block title %}{{ v_type|capitalize }} Voucher Register - Ranga Farms{% endblock %}
+{% block page_title %}{{ v_type|upper }} VOUCHER REGISTER{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+    <div class="d-flex align-items-center gap-3">
+        <a href="{{ url_for('vouchers') }}" class="btn btn-outline-secondary rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; padding: 0;">
+            <i class="bi bi-arrow-left fs-5"></i>
+        </a>
+        <div>
+            <h2 class="fw-bold text-success mb-0" id="register-title">
+                {% if v_type == 'goat' %}Goat Purchase Vouchers
+                {% elif v_type == 'feed' %}Feed Purchase Vouchers
+                {% elif v_type == 'health' %}Health Supplies Vouchers (Meds & Vaccines)
+                {% elif v_type == 'other' %}Other Asset Purchase Vouchers
+                {% endif %}
+            </h2>
+            <p class="text-muted small mb-0">Master Register grouped month-wise</p>
+        </div>
+    </div>
+    <a href="{{ url_for('voucher_add', v_type=v_type) }}" class="btn btn-success shadow-sm rounded-pill px-4 py-2">
+        <i class="bi bi-plus-circle me-2"></i>Create New {{ v_type|capitalize }} Voucher
+    </a>
+</div>
+
+<!-- Calendar Month & Year Filters Bar (Up to 2060) -->
+{% if grouped_records %}
+<div class="card border-0 shadow-sm rounded-4 mb-4" style="background: #f8fafc; border: 1px solid #edf2f7 !important;">
+    <div class="card-body p-3">
+        <div class="row g-3 align-items-center">
+            <div class="col-md-3 d-flex align-items-center gap-2">
+                <div class="bg-success bg-opacity-10 p-2 rounded-3 d-inline-flex">
+                    <i class="bi bi-funnel text-success fs-5"></i>
+                </div>
+                <span class="fw-bold text-dark">Filter Register:</span>
+            </div>
+            
+            <!-- Calendar Months Dropdown -->
+            <div class="col-sm-6 col-md-3">
+                <select id="filter-month-select" class="form-select rounded-pill" onchange="applyCalendarFilter()">
+                    <option value="all">Show All Months</option>
+                    <option value="01">January</option>
+                    <option value="02">February</option>
+                    <option value="03">March</option>
+                    <option value="04">April</option>
+                    <option value="05">May</option>
+                    <option value="06">June</option>
+                    <option value="07">July</option>
+                    <option value="08">August</option>
+                    <option value="09">September</option>
+                    <option value="10">October</option>
+                    <option value="11">November</option>
+                    <option value="12">December</option>
+                </select>
+            </div>
+            
+            <!-- Calendar Years Dropdown (up to 2060) -->
+            <div class="col-sm-6 col-md-3">
+                <select id="filter-year-select" class="form-select rounded-pill" onchange="applyCalendarFilter()">
+                    <option value="all">Show All Years</option>
+                    {% for y in range(2020, 2061) %}
+                    <option value="{{ y }}">{{ y }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Clear button -->
+            <div class="col-md-3 text-md-end">
+                <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3" onclick="resetFilters()">
+                    Reset Filters
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- No Match Helper Message -->
+<div id="filter-no-results" class="card border-0 shadow-sm rounded-4 text-center py-5 my-4" style="display: none;">
+    <div class="mb-3">
+        <i class="bi bi-calendar-x text-muted" style="font-size: 3rem; opacity: 0.35;"></i>
+    </div>
+    <h5 class="text-muted fw-bold">No Vouchers Found</h5>
+    <p class="text-muted small mx-auto mb-0" style="max-width: 400px;">No vouchers in this register match the selected month and year combination.</p>
+</div>
+
+{% if grouped_records %}
+    {% for month, records in grouped_records.items() %}
+    <div class="month-section mb-5" data-month-name="{{ month }}">
+        <h4 class="fw-800 text-dark mb-3 border-bottom pb-2 d-flex align-items-center">
+            <i class="bi bi-calendar-event text-success me-2"></i> {{ month }}
+            <span class="badge bg-secondary-subtle text-secondary fs-6 ms-3 rounded-pill">{{ records|length }} Vouchers</span>
+        </h4>
+        
+        <div class="row g-4">
+            {% for r in records %}
+            <!-- Card Item carrying voucher date for dynamic script parsing -->
+            <div class="col-md-6 col-lg-4 voucher-card-item" data-voucher-date="{{ r.date }}">
+                <!-- Premium Printed Voucher Slip Design -->
+                <div class="card voucher-slip border-0 shadow-sm rounded-4 overflow-hidden position-relative">
+                    <div class="voucher-top-bar" style="
+                        height: 6px; 
+                        {% if v_type == 'goat' %}background: #10b981;
+                        {% elif v_type == 'feed' %}background: #f59e0b;
+                        {% elif v_type == 'health' %}background: #3b82f6;
+                        {% else %}background: #8b5cf6;{% endif %}
+                    "></div>
+                    
+                    <div class="card-body p-4">
+                        <!-- Voucher Header -->
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <span class="badge text-uppercase font-monospace mb-1 bg-light text-dark border">
+                                    VOC-{% if v_type == 'goat' %}GT{% elif v_type == 'feed' %}FD{% elif v_type == 'health' %}{% if r.sub_type == 'medicine' %}MD{% else %}VC{% endif %}{% else %}AS{% endif %}-{{ r.id }}
+                                </span>
+                                <h5 class="fw-bold text-dark mb-0 mt-1">{{ r.title }}</h5>
+                            </div>
+                            {% if r.sub_type %}
+                            <span class="badge {% if r.sub_type == 'medicine' %}bg-info-subtle text-info{% else %}bg-primary-subtle text-primary{% endif %} rounded-pill text-uppercase">
+                                {{ r.sub_type }}
+                            </span>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Voucher Body Details -->
+                        <p class="text-muted small mb-3">{{ r.subtitle }}</p>
+                        
+                        <!-- Dotted Receipt Divider Line -->
+                        <div class="receipt-divider my-3"></div>
+                        
+                        <!-- Voucher Amount & Date -->
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div>
+                                <div class="text-muted small">Date of Issue</div>
+                                <div class="fw-semibold text-dark small"><i class="bi bi-clock me-1"></i>{{ r.date }}</div>
+                            </div>
+                            <div class="text-end">
+                                <div class="text-muted small">Voucher Amount</div>
+                                <div class="fw-800 fs-4 text-success">₹{{ "%.2f"|format(r.amount) }}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-light rounded-3 p-3 mb-4 small text-muted font-monospace" style="min-height: 50px;">
+                            <i class="bi bi-chat-right-text me-2"></i>{{ r.notes }}
+                        </div>
+                        
+                        <!-- Voucher Actions -->
+                        <div class="d-flex justify-content-between align-items-center pt-2 border-top border-light">
+                            <span class="small text-muted italic">Verified Payment</span>
+                            <div class="d-flex gap-2">
+                                <!-- Alter / Update -->
+                                <a href="{% if r.sub_type %}{{ url_for('voucher_edit', v_type=v_type, sub_type=r.sub_type, id=r.id) }}{% else %}{{ url_for('voucher_edit', v_type=v_type, id=r.id) }}{% endif %}" 
+                                   class="btn btn-sm btn-outline-warning border rounded-pill px-3" title="Alter Voucher">
+                                    <i class="bi bi-pencil-square me-1"></i>Alter
+                                </a>
+                                
+                                <!-- Delete -->
+                                <form action="{% if r.sub_type %}{{ url_for('voucher_delete', v_type=v_type, sub_type=r.sub_type, id=r.id) }}{% else %}{{ url_for('voucher_delete', v_type=v_type, id=r.id) }}{% endif %}" 
+                                      method="POST" class="m-0 d-inline" 
+                                      onsubmit="return confirm('WARNING: Are you sure you want to permanently delete this Voucher? This will reverse any linked ledger changes.');">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger border rounded-pill px-3" title="Delete Voucher">
+                                        <i class="bi bi-trash-fill me-1"></i>Delete
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+{% else %}
+    <div class="card border-0 shadow-sm rounded-4 text-center py-5">
+        <div class="mb-3">
+            <i class="bi bi-receipt text-muted" style="font-size: 4rem; opacity: 0.25;"></i>
+        </div>
+        <h4 class="text-muted">No Vouchers Recorded</h4>
+        <p class="text-muted mx-auto" style="max-width: 500px;">There are no vouchers recorded under this category yet. Click the button above to log your first payment voucher.</p>
+        <a href="{{ url_for('voucher_add', v_type=v_type) }}" class="btn btn-success mt-2 rounded-pill px-4">Create First Voucher</a>
+    </div>
+{% endif %}
+
+<style>
+    .voucher-slip {
+        background-color: #ffffff;
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+    .voucher-slip:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+    }
+    .receipt-divider {
+        height: 1px;
+        border-top: 2px dashed #e2e8f0;
+    }
+    .month-section {
+        transition: opacity 0.3s ease;
+    }
+</style>
+
+<script>
+function applyCalendarFilter() {
+    const selectedMonth = document.getElementById('filter-month-select').value; // 'all' or '01'-'12'
+    const selectedYear = document.getElementById('filter-year-select').value;   // 'all' or '2020'-'2060'
+
+    const cards = document.querySelectorAll('.voucher-card-item');
+    const sections = document.querySelectorAll('.month-section');
+    
+    let totalVisible = 0;
+
+    sections.forEach(section => {
+        let sectionVisibleCards = 0;
+        const sectionCards = section.querySelectorAll('.voucher-card-item');
+        
+        sectionCards.forEach(card => {
+            const dateStr = card.getAttribute('data-voucher-date');
+            if (!dateStr) return;
+            
+            const dateParts = dateStr.split('-');
+            if (dateParts.length < 2) return;
+            
+            const cardYear = dateParts[0];
+            const cardMonth = dateParts[1]; // '01', '02', etc.
+            
+            const matchesMonth = (selectedMonth === 'all' || cardMonth === selectedMonth);
+            const matchesYear = (selectedYear === 'all' || cardYear === selectedYear);
+            
+            if (matchesMonth && matchesYear) {
+                card.style.display = 'block';
+                sectionVisibleCards++;
+                totalVisible++;
+            } else {
+                card.style.display = 'none';
+            }
+        });
+        
+        // Hide entire month section header if no matching cards are present inside it
+        if (sectionVisibleCards > 0) {
+            section.style.display = 'block';
+            section.style.opacity = '1';
+        } else {
+            section.style.display = 'none';
+        }
+    });
+
+    // Toggle No Results alert
+    const noResultsEl = document.getElementById('filter-no-results');
+    if (totalVisible === 0 && cards.length > 0) {
+        noResultsEl.style.display = 'block';
+    } else {
+        noResultsEl.style.display = 'none';
+    }
+}
+
+function resetFilters() {
+    document.getElementById('filter-month-select').value = 'all';
+    document.getElementById('filter-year-select').value = 'all';
+    applyCalendarFilter();
+}
+</script>
+{% endblock %}

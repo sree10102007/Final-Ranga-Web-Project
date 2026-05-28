@@ -28,33 +28,18 @@
             </div>
             
             <div class="col-md-6">
-                <label class="form-label fw-bold small text-muted">DOCTOR NAME</label>
-                <input type="text" name="doctor_name" class="form-control" list="doctorNames" value="{{ record.doctor_name }}">
-                <datalist id="doctorNames">
-                    {% for doc in doctors %}
-                    <option value="{{ doc.doctor_name }}">
-                    {% endfor %}
-                </datalist>
-            </div>
-            
-            <div class="col-md-6">
                 <label class="form-label fw-bold small text-muted">MEDICINE NAME <span class="text-danger">*</span></label>
                 <input type="text" name="medicine_name" class="form-control" required value="{{ record.medicine_name }}">
             </div>
             
-            <div class="col-md-4">
+            <div class="col-md-6">
                 <label class="form-label fw-bold small text-muted">DOSE</label>
                 <input type="text" name="dose" class="form-control" value="{{ record.dose }}">
             </div>
             
-            <div class="col-md-4">
+            <div class="col-md-6">
                 <label class="form-label fw-bold small text-muted">QUANTITY GIVEN</label>
                 <input type="text" name="quantity" class="form-control" value="{{ record.quantity }}">
-            </div>
-            
-            <div class="col-md-4">
-                <label class="form-label fw-bold small text-muted">COST (₹) <span class="text-danger">*</span></label>
-                <input type="number" step="0.01" name="cost" class="form-control" required value="{{ record.cost }}">
             </div>
             
             <div class="col-12">

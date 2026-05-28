@@ -1,131 +1,120 @@
 {% extends 'layout.html' %}
 
-{% block page_title %}Employee Attendance{% endblock %}
+{% block page_title %}Daily Attendance Sheet{% endblock %}
 
 {% block content %}
-<div class="page-header mb-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
-    <div>
-        <h2 class="fw-800 text-dark mb-1">Employee Attendance</h2>
-        <p class="text-muted mb-0">Mark and track daily attendance of farm staff.</p>
-    </div>
-    <button type="button" class="btn btn-success shadow-sm" data-bs-toggle="modal" data-bs-target="#markAttendanceModal">
-        <i class="bi bi-calendar-check me-2"></i>Mark Attendance
-    </button>
-</div>
-
-<!-- Filter Section -->
-<div class="card border-0 mb-4 shadow-sm rounded-4">
-    <div class="card-body">
-        <form method="GET" action="{{ url_for('attendance_view') }}" class="row g-3 align-items-end">
-            <div class="col-md-4">
-                <label class="form-label small fw-bold text-muted">Filter by Date</label>
-                <input type="date" name="date" class="form-control" value="{{ date_filter }}">
-            </div>
-            <div class="col-md-2">
-                <button type="submit" class="btn btn-primary w-100">Apply Filter</button>
-            </div>
-            <div class="col-md-2">
-                <a href="{{ url_for('attendance_view') }}" class="btn btn-light w-100">Clear</a>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- Attendance Records Table -->
-<div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-    <div class="table-responsive">
-        <table class="table table-hover mb-0 align-middle">
-            <thead class="bg-light text-muted small fw-bold">
-                <tr>
-                    <th class="ps-4">Employee</th>
-                    <th>Role</th>
-                    <th>Date</th>
-                    <th>Status</th>
-                    <th>Notes</th>
-                    <th class="text-end pe-4">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for record in records %}
-                <tr>
-                    <td class="ps-4">
-                        <div class="fw-bold text-dark">{{ record.name }}</div>
-                        <div class="small text-muted">ID: #{{ record.employee_id }}</div>
-                    </td>
-                    <td><span class="badge bg-light text-dark border">{{ record.role }}</span></td>
-                    <td>{{ record.date }}</td>
-                    <td>
-                        {% if record.status == 'Present' %}
-                            <span class="badge bg-success">Present</span>
-                        {% elif record.status == 'Half Day' %}
-                            <span class="badge bg-warning text-dark">Half Day</span>
-                        {% elif record.status == 'Absent' %}
-                            <span class="badge bg-danger">Absent</span>
-                        {% else %}
-                            <span class="badge bg-secondary">{{ record.status }}</span>
-                        {% endif %}
-                    </td>
-                    <td><span class="text-muted small">{{ record.notes or '-' }}</span></td>
-                    <td class="text-end pe-4">
-                        <!-- Add edit/delete buttons if necessary or leave blank -->
-                        <span class="text-muted small"><i class="bi bi-check2-all text-success"></i> Recorded</span>
-                    </td>
-                </tr>
-                {% else %}
-                <tr>
-                    <td colspan="6" class="text-center py-5 text-muted">
-                        <i class="bi bi-calendar-x d-block mb-3" style="font-size: 2.5rem; opacity: 0.5;"></i>
-                        No attendance records found{% if date_filter %} for {{ date_filter }}{% endif %}.
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-</div>
-
-<!-- Mark Attendance Modal -->
-<div class="modal fade" id="markAttendanceModal" tabindex="-1" aria-labelledby="markAttendanceModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 rounded-4 shadow">
-            <div class="modal-header border-bottom-0 pb-0">
-                <h5 class="modal-title fw-bold" id="markAttendanceModalLabel">Mark Attendance</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form method="POST" action="{{ url_for('attendance_add') }}" class="row g-3">
-                    <div class="col-12">
-                        <label class="form-label fw-bold small text-muted">EMPLOYEE <span class="text-danger">*</span></label>
-                        <select name="employee_id" class="form-select" required>
-                            <option value="">-- Select Employee --</option>
-                            {% for emp in employees %}
-                            <option value="{{ emp.id }}">{{ emp.name }} ({{ emp.role }})</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold small text-muted">DATE <span class="text-danger">*</span></label>
-                        <input type="date" name="date" class="form-control" required value="{{ date_filter or '' }}">
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold small text-muted">STATUS <span class="text-danger">*</span></label>
-                        <select name="status" class="form-select" required>
-                            <option value="Present">Present</option>
-                            <option value="Half Day">Half Day</option>
-                            <option value="Absent">Absent</option>
-                            <option value="On Leave">On Leave</option>
-                        </select>
-                    </div>
-                    <div class="col-12">
-                        <label class="form-label fw-bold small text-muted">NOTES</label>
-                        <input type="text" name="notes" class="form-control" placeholder="Optional notes...">
-                    </div>
-                    <div class="col-12 pt-3">
-                        <button type="submit" class="btn btn-success w-100 fw-bold">Save Attendance</button>
-                    </div>
-                </form>
-            </div>
+<div class="container-fluid mt-4">
+    <!-- Header -->
+    <div class="row align-items-center mb-4">
+        <div class="col-md-7">
+            <h2 class="fw-800 text-dark mb-1"><i class="bi bi-grid-3x3-gap-fill text-success me-2"></i>Daily Attendance Sheet</h2>
+            <p class="text-muted mb-0">Record and manage daily attendance for all active employees in a clean sheet layout.</p>
+        </div>
+        <div class="col-md-5 mt-3 mt-md-0">
+            <form method="GET" action="{{ url_for('attendance_view') }}" class="d-flex align-items-center justify-content-md-end gap-2">
+                <label class="form-label text-nowrap fw-bold text-muted mb-0 me-2"><i class="bi bi-calendar-event-fill me-1"></i>Select Date:</label>
+                <div class="input-group" style="max-width: 250px;">
+                    <input type="date" name="date" class="form-control fw-bold border-0 bg-light shadow-sm py-2" value="{{ date_filter }}" onchange="this.form.submit()">
+                </div>
+            </form>
         </div>
     </div>
+
+    <!-- Attendance Form Sheet -->
+    <form method="POST" action="{{ url_for('attendance_save') }}">
+        <!-- Hidden input for date so it submits for the selected date -->
+        <input type="hidden" name="date" value="{{ date_filter }}">
+        
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0 align-middle">
+                    <thead class="bg-light text-muted small fw-bold text-uppercase">
+                        <tr>
+                            <th class="ps-4 py-2" style="width: 80px; font-size: 0.75rem;">Sr#</th>
+                            <th class="py-2" style="font-size: 0.75rem;">Employee Name</th>
+                            <th class="py-2" style="font-size: 0.75rem;">Role</th>
+                            <th class="py-2 text-center" style="min-width: 400px; font-size: 0.75rem;">Mark Attendance Status</th>
+                            <th class="py-2" style="min-width: 200px; font-size: 0.75rem;">Notes / Remarks</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if employees %}
+                            {% for emp in employees %}
+                            <tr>
+                                <!-- Serial No -->
+                                <td class="ps-4 py-1">
+                                    <span class="badge bg-secondary-subtle text-secondary fw-bold px-2 py-1 rounded-pill" style="font-size: 0.75rem;">
+                                        {{ emp.sr_no or emp.id }}
+                                    </span>
+                                </td>
+                                
+                                <!-- Employee Name -->
+                                <td class="py-1">
+                                    <div class="fw-bold text-dark" style="font-size: 0.9rem;">{{ emp.name }}</div>
+                                </td>
+                                
+                                <!-- Role -->
+                                <td class="py-1">
+                                    <span class="badge bg-light text-dark border px-2 py-1 fw-600 rounded-pill" style="font-size: 0.7rem;">
+                                        {{ emp.role }}
+                                    </span>
+                                </td>
+                                
+                                <!-- Attendance Selector Button Group -->
+                                <td class="text-center py-1">
+                                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; max-width: 240px; margin: 0 auto; padding: 2px 0;">
+                                        {% set cur_status = existing_map[emp.id].status if emp.id in existing_map else 'Present' %}
+                                        
+                                        <!-- Present -->
+                                        <div>
+                                            <input type="radio" class="btn-check" name="status_{{ emp.id }}" id="present_{{ emp.id }}" value="Present" {% if cur_status != 'Leave' %}checked{% endif %}>
+                                            <label class="btn btn-outline-success btn-sm w-100 fw-600 rounded-pill shadow-sm" style="font-size: 12px; padding: 4px 0;" for="present_{{ emp.id }}">
+                                                <i class="bi bi-check-circle-fill me-1" style="font-size: 11px;"></i>Present
+                                            </label>
+                                        </div>
+                                        
+                                        <!-- Leave -->
+                                        <div>
+                                            <input type="radio" class="btn-check" name="status_{{ emp.id }}" id="leave_{{ emp.id }}" value="Leave" {% if cur_status == 'Leave' %}checked{% endif %}>
+                                            <label class="btn btn-outline-info btn-sm w-100 fw-600 rounded-pill shadow-sm text-dark" style="font-size: 12px; padding: 4px 0;" for="leave_{{ emp.id }}">
+                                                <i class="bi bi-question-circle-fill me-1" style="font-size: 11px;"></i>Leave
+                                            </label>
+                                        </div>
+                                    </div>
+                                </td>
+                                
+                                <!-- Notes / Remarks -->
+                                <td class="py-1">
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text bg-light text-muted border-0 py-0.5"><i class="bi bi-pencil" style="font-size: 0.75rem;"></i></span>
+                                        <input type="text" class="form-control form-control-sm border-0 bg-light py-0.5" style="font-size: 0.8rem;" name="notes_{{ emp.id }}" value="{{ existing_map[emp.id].notes if emp.id in existing_map and existing_map[emp.id].notes else '' }}" placeholder="Reason/remarks...">
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center py-5 text-muted">
+                                    <i class="bi bi-people d-block mb-3" style="font-size: 3rem; opacity: 0.5;"></i>
+                                    No active employees found. Add employees in <a href="{{ url_for('employees') }}" class="fw-bold">Employee Directory</a> first.
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Save Bar -->
+        {% if employees %}
+        <div class="row mt-4 mb-5">
+            <div class="col-12 text-center">
+                <button type="submit" class="btn btn-success px-5 py-3 fw-bold rounded-pill shadow-lg" style="font-size: 1.1rem; letter-spacing: 0.5px;">
+                    <i class="bi bi-cloud-check-fill me-2 fs-5"></i>Save Daily Attendance Sheet
+                </button>
+            </div>
+        </div>
+        {% endif %}
+    </form>
 </div>
 {% endblock %}

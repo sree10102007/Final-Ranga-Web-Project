@@ -74,9 +74,9 @@
                         {% endif %}
                     </td>
                     <td class="text-end">
-                        <a href="{{ url_for('kid_edit', id=record.id) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                        <a href="{{ url_for('kid_edit', id=record.id) }}" class="btn btn-sm btn-warning text-dark me-2" title="Edit"><i class="bi bi-pencil"></i></a>
                         <form action="{{ url_for('kid_delete', id=record.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Delete this kid record?');">
-                            <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                            <button type="submit" class="btn btn-sm btn-danger" title="Delete"><i class="bi bi-trash"></i></button>
                         </form>
                     </td>
                 </tr>

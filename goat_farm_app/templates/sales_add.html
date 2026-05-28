@@ -6,20 +6,27 @@
             <h2 class="fw-bold text-success mb-0"><i class="bi bi-cash-coin"></i> Enter Sales Record</h2>
             <a href="{{ url_for('sales') }}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Back to Sales</a>
         </div>
-        
+
         <div class="card border-0 shadow-sm rounded-4">
             <div class="card-body p-4 p-md-5">
-                <form method="POST" action="{{ url_for('sales_add') }}">
-                    
+                <form method="POST" action="{{ url_for('sales_add') }}" id="salesForm">
+
                     <h5 class="text-success border-bottom pb-2 mb-3">Goat Details</h5>
                     <div class="row g-3 mb-4">
                         <div class="col-md-3"><label class="form-label text-muted">Sr#</label><input type="text" class="form-control" name="sr_no" value="{{ next_sr }}"></div>
-                        <div class="col-md-9"><label class="form-label text-muted">Tag ID *</label><input type="text" class="form-control border-success" name="tag_id" required></div>
-                        <div class="col-md-4"><label class="form-label text-muted">Breed</label><input type="text" class="form-control" name="breed"></div>
-                        <div class="col-md-4"><label class="form-label text-muted">Breed %</label><input type="text" class="form-control" name="breed_percent"></div>
+                        <div class="col-md-9">
+                            <label class="form-label text-muted">Tag ID * <span id="tag-status-badge"></span></label>
+                            <div class="input-group">
+                                <input type="text" class="form-control border-success" name="tag_id" id="tag_id_input" required placeholder="Enter Tag ID to auto-fill goat details">
+                                <button type="button" class="btn btn-outline-success" id="lookupBtn"><i class="bi bi-search"></i> Lookup</button>
+                            </div>
+                            <div id="tag-feedback" class="small mt-1"></div>
+                        </div>
+                        <div class="col-md-4"><label class="form-label text-muted">Breed</label><input type="text" class="form-control" name="breed" id="field_breed"></div>
+                        <div class="col-md-4"><label class="form-label text-muted">Breed %</label><input type="text" class="form-control" name="breed_percent" id="field_breed_percent"></div>
                         <div class="col-md-4">
                             <label class="form-label text-muted">Gender</label>
-                            <select class="form-select" name="gender">
+                            <select class="form-select" name="gender" id="field_gender">
                                 <option value=""></option>
                                 <option value="M">Male</option>
                                 <option value="F">Female</option>
@@ -29,7 +36,7 @@
 
                     <h5 class="text-success border-bottom pb-2 mb-3">Transaction Details</h5>
                     <div class="row g-3 mb-4">
-                        <div class="col-md-4"><label class="form-label text-muted">Weight (KG)</label><input type="number" step="0.01" class="form-control" name="weight"></div>
+                        <div class="col-md-4"><label class="form-label text-muted">Weight (KG)</label><input type="number" step="0.01" class="form-control" name="weight" id="field_weight"></div>
                         <div class="col-md-4">
                             <label class="form-label text-muted">Sold Price *</label>
                             <div class="input-group">
@@ -37,7 +44,7 @@
                                 <input type="number" step="0.01" class="form-control border-success" name="sold_price" required>
                             </div>
                         </div>
-                        <div class="col-md-4"><label class="form-label text-muted">Date of Sale *</label><input type="date" class="form-control" name="date_of_sale" required></div>
+                        <div class="col-md-4"><label class="form-label text-muted">Date of Sale *</label><input type="date" class="form-control" name="date_of_sale" id="date_of_sale" required value="{{ today_date }}"></div>
                     </div>
 
                     <h5 class="text-success border-bottom pb-2 mb-3">Buyer Information</h5>
@@ -46,13 +53,73 @@
                         <div class="col-md-6"><label class="form-label text-muted">Buyer City</label><input type="text" class="form-control" name="buyer_city"></div>
                         <div class="col-md-6"><label class="form-label text-muted">Contact Details</label><input type="text" class="form-control" name="buyer_contact" placeholder="Phone or email"></div>
                     </div>
-                    
+
                     <div class="col-12 mt-4">
-                        <button type="submit" class="btn btn-success btn-lg w-100 shadow-sm"><i class="bi bi-wallet2"></i> Record Sale</button>
+                        <button type="submit" class="btn btn-success btn-lg w-100 shadow-sm" id="submitBtn"><i class="bi bi-wallet2"></i> Record Sale</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+// ── Live Goat Auto-Fill ──────────────────────────────────────────────────────
+function lookupGoat() {
+    var tagId = document.getElementById('tag_id_input').value.trim();
+    var feedback = document.getElementById('tag-feedback');
+    var badge = document.getElementById('tag-status-badge');
+    var submitBtn = document.getElementById('submitBtn');
+
+    if (!tagId) return;
+
+    fetch('/api/goat_lookup/' + encodeURIComponent(tagId))
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.found) {
+                // Auto-fill fields
+                document.getElementById('field_breed').value        = data.breed || '';
+                document.getElementById('field_breed_percent').value = data.breed_percent || '';
+                document.getElementById('field_weight').value       = data.weight_kg || '';
+                var genderSel = document.getElementById('field_gender');
+                genderSel.value = data.gender || '';
+
+                if (data.already_sold) {
+                    feedback.innerHTML = '<span class="text-danger"><i class="bi bi-x-circle-fill"></i> This goat is already <strong>SOLD</strong>. Cannot create a duplicate sale.</span>';
+                    badge.innerHTML = '<span class="badge bg-danger ms-1">Already Sold</span>';
+                    submitBtn.disabled = true;
+                } else if (data.already_expired) {
+                    feedback.innerHTML = '<span class="text-danger"><i class="bi bi-x-circle-fill"></i> This goat is marked as <strong>EXPIRED</strong>. Cannot sell.</span>';
+                    badge.innerHTML = '<span class="badge bg-secondary ms-1">Expired</span>';
+                    submitBtn.disabled = true;
+                } else {
+                    feedback.innerHTML = '<span class="text-success"><i class="bi bi-check-circle-fill"></i> Goat found — details auto-filled. Status: <strong>' + data.status + '</strong></span>';
+                    badge.innerHTML = '<span class="badge bg-success ms-1">Active</span>';
+                    submitBtn.disabled = false;
+                }
+            } else {
+                // Clear fields
+                document.getElementById('field_breed').value        = '';
+                document.getElementById('field_breed_percent').value = '';
+                document.getElementById('field_weight').value       = '';
+                document.getElementById('field_gender').value       = '';
+                feedback.innerHTML = '<span class="text-warning"><i class="bi bi-exclamation-triangle-fill"></i> Goat not found in Master Records. Please register the goat first.</span>';
+                badge.innerHTML = '<span class="badge bg-warning text-dark ms-1">Not Found</span>';
+                submitBtn.disabled = false; // Allow server-side validation to handle
+            }
+        })
+        .catch(function(err) {
+            feedback.innerHTML = '<span class="text-muted">Lookup failed. Please fill in manually.</span>';
+        });
+}
+
+// Trigger on button click
+document.getElementById('lookupBtn').addEventListener('click', lookupGoat);
+
+// Trigger on Enter key or when leaving the tag field
+document.getElementById('tag_id_input').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') { e.preventDefault(); lookupGoat(); }
+});
+document.getElementById('tag_id_input').addEventListener('blur', lookupGoat);
+</script>
 {% endblock %}

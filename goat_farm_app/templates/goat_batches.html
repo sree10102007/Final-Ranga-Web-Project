@@ -1,0 +1,155 @@
+{% extends 'layout.html' %}
+
+{% block page_title %}Goat Batches{% endblock %}
+
+{% block content %}
+<style>
+    .batch-tab {
+        border-radius: 12px;
+        font-weight: 700;
+        padding: 0.75rem 1.5rem;
+        transition: all 0.3s ease;
+        border: none !important;
+        color: #64748b;
+    }
+    
+    .nav-tabs .nav-link.active {
+        background-color: #2e7d32 !important;
+        color: #ffffff !important;
+        box-shadow: 0 4px 15px rgba(46, 125, 50, 0.2);
+    }
+    
+    .nav-tabs {
+        border-bottom: 2px solid rgba(46, 125, 50, 0.1);
+        gap: 0.5rem;
+    }
+
+    .batch-card {
+        background: #ffffff;
+        border: 1px solid rgba(46, 125, 50, 0.08);
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.02);
+        transition: all 0.3s ease;
+    }
+    
+    .batch-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 15px 40px rgba(46, 125, 50, 0.05);
+    }
+    
+    .stat-badge {
+        font-size: 0.75rem;
+        padding: 0.35rem 0.75rem;
+        border-radius: 50px;
+    }
+    
+    .record-type-badge {
+        font-size: 0.75rem;
+        font-weight: 700;
+        padding: 0.25rem 0.6rem;
+        border-radius: 6px;
+    }
+</style>
+
+<div class="container-fluid py-2">
+    <!-- Header -->
+    <div class="page-header mb-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+            <h2 class="fw-800 text-dark mb-1">Age Batches & Groups</h2>
+            <p class="text-muted mb-0">Categorized distribution of goats and kids grouped dynamically by age.</p>
+        </div>
+    </div>
+
+    <!-- Summary Stats Row -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm rounded-4" style="background: linear-gradient(135deg, #e8f5e9, #c8e6c9);">
+                <div class="card-body p-4 text-center">
+                    <h6 class="text-success fw-bold text-uppercase mb-2">Batch 1 (0 - 6 Months)</h6>
+                    <h2 class="fw-800 text-success-dark mb-0">{{ batch_0_6m|length }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm rounded-4" style="background: linear-gradient(135deg, #e3f2fd, #bbdefb);">
+                <div class="card-body p-4 text-center">
+                    <h6 class="text-primary fw-bold text-uppercase mb-2">Batch 2 (6 Months - 1 Year)</h6>
+                    <h2 class="fw-800 text-primary-dark mb-0">{{ batch_6m_1y|length }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm rounded-4" style="background: linear-gradient(135deg, #fff3e0, #ffe0b2);">
+                <div class="card-body p-4 text-center">
+                    <h6 class="text-warning fw-bold text-uppercase mb-2">Batch 3 (1 Year - 2 Years)</h6>
+                    <h2 class="fw-800 text-warning-dark mb-0">{{ batch_1y_2y|length }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm rounded-4" style="background: linear-gradient(135deg, #f3e5f5, #e1bee7);">
+                <div class="card-body p-4 text-center">
+                    <h6 class="text-purple fw-bold text-uppercase mb-2" style="color: #6a1b9a;">Batch 4 (Above 2 Years)</h6>
+                    <h2 class="fw-800 mb-0" style="color: #4a148c;">{{ batch_above_2y|length }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Navigation Tabbed Content -->
+    <div class="batch-card p-4">
+        <ul class="nav nav-tabs mb-4" id="batchTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active batch-tab" id="batch0-6-tab" data-bs-toggle="tab" data-bs-target="#batch0-6" type="button" role="tab">
+                    <i class="bi bi-flower1 me-2"></i>Batch 1 (0 - 6 Months)
+                    <span class="badge bg-light text-dark ms-2">{{ batch_0_6m|length }}</span>
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link batch-tab" id="batch6-12-tab" data-bs-toggle="tab" data-bs-target="#batch6-12" type="button" role="tab">
+                    <i class="bi bi-egg-fried me-2"></i>Batch 2 (6 Months - 1 Year)
+                    <span class="badge bg-light text-dark ms-2">{{ batch_6m_1y|length }}</span>
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link batch-tab" id="batch1-2-tab" data-bs-toggle="tab" data-bs-target="#batch1-2" type="button" role="tab">
+                    <i class="bi bi-award me-2"></i>Batch 3 (1 Year - 2 Years)
+                    <span class="badge bg-light text-dark ms-2">{{ batch_1y_2y|length }}</span>
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link batch-tab" id="batch2plus-tab" data-bs-toggle="tab" data-bs-target="#batch2plus" type="button" role="tab">
+                    <i class="bi bi-shield-shaded me-2"></i>Batch 4 (Above 2 Years)
+                    <span class="badge bg-light text-dark ms-2">{{ batch_above_2y|length }}</span>
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="batchTabsContent">
+            <!-- Batch 1: 0 - 6 Months -->
+            <div class="tab-pane fade show active" id="batch0-6" role="tabpanel">
+                {% set current_batch = batch_0_6m %}
+                {% include 'goat_batch_table.html' %}
+            </div>
+
+            <!-- Batch 2: 6 Months - 1 Year -->
+            <div class="tab-pane fade" id="batch6-12" role="tabpanel">
+                {% set current_batch = batch_6m_1y %}
+                {% include 'goat_batch_table.html' %}
+            </div>
+
+            <!-- Batch 3: 1 Year - 2 Years -->
+            <div class="tab-pane fade" id="batch1-2" role="tabpanel">
+                {% set current_batch = batch_1y_2y %}
+                {% include 'goat_batch_table.html' %}
+            </div>
+
+            <!-- Batch 4: Above 2 Years -->
+            <div class="tab-pane fade" id="batch2plus" role="tabpanel">
+                {% set current_batch = batch_above_2y %}
+                {% include 'goat_batch_table.html' %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

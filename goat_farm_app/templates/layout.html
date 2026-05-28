@@ -51,7 +51,7 @@
     </div>
 
     <!-- GOAT MANAGEMENT MENU -->
-    {% set goat_ep = ['goats','goat_detail','master','master_add','master_edit','kid','kid_add','kid_edit','kit','records','add_record','edit_record','eligible_to_sell','populate_eligible','add_to_eligible','remove_eligible'] %}
+    {% set goat_ep = ['goats','goat_detail','master','master_add','master_edit','kid','kid_add','kid_edit','kit','records','add_record','edit_record','eligible_to_sell','populate_eligible','add_to_eligible','remove_eligible','goat_batches'] %}
     <button class="nav-group-header {% if request.endpoint in goat_ep %}open{% endif %}" onclick="toggleGroup(this)">
       <span class="group-icon"><i class="bi bi-grid-3x3-gap"></i></span> Goat Management
       <span class="chevron"><i class="bi bi-chevron-right"></i></span>
@@ -60,7 +60,7 @@
       <a href="{{ url_for('goats') }}" class="sidebar-link {% if request.endpoint in ['goats','goat_detail'] %}active{% endif %}"><span class="link-icon"><i class="bi bi-list-ul"></i></span> Goats Directory</a>
       <a href="{{ url_for('master') }}" class="sidebar-link {% if request.endpoint in ['master','master_add','master_edit'] %}active{% endif %}"><span class="link-icon"><i class="bi bi-journal-text"></i></span> Master Register</a>
       <a href="{{ url_for('kid') }}" class="sidebar-link {% if request.endpoint in ['kid','kid_add','kid_edit'] %}active{% endif %}"><span class="link-icon"><i class="bi bi-emoji-smile"></i></span> Kid Details</a>
-      <a href="{{ url_for('records') }}" class="sidebar-link {% if request.endpoint in ['records','add_record','edit_record'] %}active{% endif %}"><span class="link-icon"><i class="bi bi-card-list"></i></span> Income/Expense</a>
+      <a href="{{ url_for('goat_batches') }}" class="sidebar-link {% if request.endpoint in ['goat_batches'] %}active{% endif %}"><span class="link-icon"><i class="bi bi-tags"></i></span> Goat Batches</a>
       <a href="{{ url_for('eligible_to_sell') }}" class="sidebar-link {% if request.endpoint in ['eligible_to_sell','populate_eligible','add_to_eligible','remove_eligible'] %}active{% endif %}"><span class="link-icon"><i class="bi bi-check-circle"></i></span> Eligible to Sell</a>
     </div>
 
@@ -77,34 +77,32 @@
       <a href="{{ url_for('doctor') }}" class="sidebar-link {% if request.endpoint in ['doctor','doctor_add','doctor_edit'] %}active{% endif %}"><span class="link-icon"><i class="bi bi-person-badge"></i></span> Doctors</a>
     </div>
 
-    <!-- PURCHASE & SALES MENU -->
-    {% set sales_ep = ['sales','sales_add','sales_edit','purchases','purchase_add','purchase_edit','invoice','equipment_purchases'] %}
+    <!-- VOUCHERS & SALES MENU -->
+    {% set sales_ep = ['sales','sales_register','sales_add','sales_edit','vouchers','voucher_register','voucher_add','voucher_edit'] %}
     <button class="nav-group-header {% if request.endpoint in sales_ep %}open{% endif %}" onclick="toggleGroup(this)">
-      <span class="group-icon"><i class="bi bi-bag-check"></i></span> Purchase & Sales
+      <span class="group-icon"><i class="bi bi-bag-check"></i></span> Vouchers & Sales
       <span class="chevron"><i class="bi bi-chevron-right"></i></span>
     </button>
     <div class="nav-group-items {% if request.endpoint in sales_ep %}show{% endif %}">
-      <a href="{{ url_for('sales') }}" class="sidebar-link {% if request.endpoint in ['sales','sales_add','sales_edit'] %}active{% endif %}"><span class="link-icon"><i class="bi bi-receipt"></i></span> Sales Records</a>
-      <a href="{{ url_for('purchases') }}" class="sidebar-link {% if request.endpoint in ['purchases','purchase_add','purchase_edit'] %}active{% endif %}"><span class="link-icon"><i class="bi bi-cart3"></i></span> Purchases</a>
-      <a href="{{ url_for('generate_invoice') }}" class="sidebar-link {% if request.endpoint == 'generate_invoice' %}active{% endif %}"><span class="link-icon"><i class="bi bi-file-earmark-pdf"></i></span> Invoice Generator</a>
-      <a href="{{ url_for('equipment_purchases') }}" class="sidebar-link {% if request.endpoint == 'equipment_purchases' %}active{% endif %}"><span class="link-icon"><i class="bi bi-cpu"></i></span> Equipment Purchases</a>
+      <a href="{{ url_for('sales') }}" class="sidebar-link {% if request.endpoint in ['sales','sales_register','sales_add','sales_edit'] %}active{% endif %}"><span class="link-icon"><i class="bi bi-receipt"></i></span> Sales Records</a>
+      <a href="{{ url_for('vouchers') }}" class="sidebar-link {% if request.endpoint in ['vouchers','voucher_register','voucher_add','voucher_edit'] %}active{% endif %}"><span class="link-icon"><i class="bi bi-cart3"></i></span> Vouchers Dashboard</a>
     </div>
 
     <!-- FARM OPERATIONS MENU -->
-    {% set farm_ep = ['feed','feed_add','feed_edit','expenses','expense_add','equipment','equipment_add','equipment_edit','equipment_detail','pnl'] %}
+    {% set farm_ep = ['feed','feed_add','feed_edit','stock_inventory','expenses','expense_add','equipment','equipment_add','equipment_edit','equipment_detail'] %}
     <button class="nav-group-header {% if request.endpoint in farm_ep %}open{% endif %}" onclick="toggleGroup(this)">
       <span class="group-icon"><i class="bi bi-gear-wide-connected"></i></span> Farm Operations
       <span class="chevron"><i class="bi bi-chevron-right"></i></span>
     </button>
     <div class="nav-group-items {% if request.endpoint in farm_ep %}show{% endif %}">
-      <a href="{{ url_for('feed') }}" class="sidebar-link {% if request.endpoint in ['feed','feed_add','feed_edit'] %}active{% endif %}"><span class="link-icon"><i class="bi bi-basket3"></i></span> Feed Inventory</a>
+      <a href="{{ url_for('feed') }}" class="sidebar-link {% if request.endpoint in ['feed','feed_add','feed_edit'] %}active{% endif %}"><span class="link-icon"><i class="bi bi-people-fill"></i></span> Batch Allocation Center</a>
+      <a href="{{ url_for('stock_inventory') }}" class="sidebar-link {% if request.endpoint in ['stock_inventory'] %}active{% endif %}"><span class="link-icon"><i class="bi bi-box-seam"></i></span> Stock Inventory & Purchases</a>
       <a href="{{ url_for('expenses') }}" class="sidebar-link {% if request.endpoint in ['expenses','expense_add'] %}active{% endif %}"><span class="link-icon"><i class="bi bi-wallet2"></i></span> Expenses</a>
-      <a href="{{ url_for('equipment') }}" class="sidebar-link {% if request.endpoint in ['equipment','equipment_add','equipment_edit','equipment_detail'] %}active{% endif %}"><span class="link-icon"><i class="bi bi-tools"></i></span> Equipment</a>
-      <a href="{{ url_for('pnl') }}" class="sidebar-link {% if request.endpoint == 'pnl' %}active{% endif %}"><span class="link-icon"><i class="bi bi-pie-chart-fill"></i></span> Finances (P&L)</a>
+      <a href="{{ url_for('equipment') }}" class="sidebar-link {% if request.endpoint in ['equipment','equipment_add','equipment_edit','equipment_detail'] %}active{% endif %}"><span class="link-icon"><i class="bi bi-tools"></i></span> Fixed Assets</a>
     </div>
 
     <!-- HR MANAGEMENT MENU -->
-    {% set hr_ep = ['employees','employee_add','employee_edit','employee_detail','attendance_view','attendance_summary','wages_list','wages_edit','salary_calculate'] %}
+    {% set hr_ep = ['employees','employee_add','employee_edit','employee_detail','attendance_view','attendance_summary','salary_calculate'] %}
     <button class="nav-group-header {% if request.endpoint in hr_ep %}open{% endif %}" onclick="toggleGroup(this)">
       <span class="group-icon"><i class="bi bi-people"></i></span> HR Management
       <span class="chevron"><i class="bi bi-chevron-right"></i></span>
@@ -112,12 +110,11 @@
     <div class="nav-group-items {% if request.endpoint in hr_ep %}show{% endif %}">
       <a href="{{ url_for('employees') }}" class="sidebar-link {% if request.endpoint in ['employees','employee_add','employee_edit','employee_detail'] %}active{% endif %}"><span class="link-icon"><i class="bi bi-person-lines-fill"></i></span> Employees</a>
       <a href="{{ url_for('attendance_view') }}" class="sidebar-link {% if request.endpoint in ['attendance_view','attendance_summary'] %}active{% endif %}"><span class="link-icon"><i class="bi bi-calendar-check"></i></span> Attendance</a>
-      <a href="{{ url_for('wages_list') }}" class="sidebar-link {% if request.endpoint in ['wages_list','wages_edit'] %}active{% endif %}"><span class="link-icon"><i class="bi bi-cash-stack"></i></span> Wages</a>
       <a href="{{ url_for('salary_calculate') }}" class="sidebar-link {% if request.endpoint == 'salary_calculate' %}active{% endif %}"><span class="link-icon"><i class="bi bi-calculator"></i></span> Salary Calculation</a>
     </div>
 
     <!-- REPORTS MENU -->
-    {% set rep_ep = ['salary_report','attendance_summary','pnl_report'] %}
+    {% set rep_ep = ['salary_report','attendance_summary'] %}
     <button class="nav-group-header {% if request.endpoint in rep_ep %}open{% endif %}" onclick="toggleGroup(this)">
       <span class="group-icon"><i class="bi bi-bar-chart-line"></i></span> Reports
       <span class="chevron"><i class="bi bi-chevron-right"></i></span>
@@ -125,7 +122,6 @@
     <div class="nav-group-items {% if request.endpoint in rep_ep %}show{% endif %}">
       <a href="{{ url_for('salary_report') }}" class="sidebar-link {% if request.endpoint == 'salary_report' %}active{% endif %}"><span class="link-icon"><i class="bi bi-file-earmark-bar-graph"></i></span> Salary Report</a>
       <a href="{{ url_for('attendance_summary') }}" class="sidebar-link {% if request.endpoint == 'attendance_summary' %}active{% endif %}"><span class="link-icon"><i class="bi bi-calendar3"></i></span> Attendance Summary</a>
-      <a href="{{ url_for('pnl_report') }}" class="sidebar-link {% if request.endpoint == 'pnl_report' %}active{% endif %}"><span class="link-icon"><i class="bi bi-file-earmark-spreadsheet"></i></span> P&L Report</a>
     </div>
 
     <!-- SETTINGS & ACCOUNT -->
@@ -141,21 +137,10 @@
 </nav>
 
 <!-- TOP BAR -->
-<div id="topbar">
+<div id="topbar" class="d-print-none">
   <button class="sidebar-toggle" onclick="toggleSidebar()">🐐</button>
-  <div class="topbar-title">{% block page_title %}{% endblock %}</div>
-  
-  <form action="{{ url_for('dashboard') }}" method="GET" class="topbar-search d-none d-md-flex">
-    <i class="bi bi-search text-muted"></i>
-    <input type="text" name="search" class="border-0 bg-transparent w-100" style="outline:none;" placeholder="Quick search tags or records..." value="{{ request.args.get('search', '') }}">
-    <button type="submit" style="display:none;"></button>
-  </form>
-
-  <div class="ms-auto d-flex align-items-center gap-3">
-    <a href="{{ url_for('farm_settings') }}" class="topbar-user">
-      <div class="user-avatar">AD</div>
-      <span class="d-none d-sm-inline">{{ session.username or 'Admin' }}</span>
-    </a>
+  <div class="topbar-title text-center text-uppercase fw-bold" style="letter-spacing: 1px;">
+    {% block page_title %}{% endblock %}
   </div>
 </div>
 
@@ -197,7 +182,87 @@
       bsAlert.close();
     });
   }, 5000);
+
+  // ── AUTO DATE: Set today's date on all empty date inputs ────────────────────
+  (function() {
+    var today = new Date();
+    var yyyy = today.getFullYear();
+    var mm   = String(today.getMonth() + 1).padStart(2, '0');
+    var dd   = String(today.getDate()).padStart(2, '0');
+    var todayStr = yyyy + '-' + mm + '-' + dd;
+
+    // Run immediately for static forms
+    function setDates() {
+      const skipNames = ['selling_date', 'mortality_date', 'insurance_inform_date', 'insurance_claim_date'];
+      document.querySelectorAll('input[type="date"]').forEach(function(input) {
+        // Exclude specific lifecycle dates from auto-setting to today's date
+        if (input.classList.contains('no-auto-date') || 
+            input.dataset.noAutoDate === 'true' || 
+            skipNames.includes(input.name)) {
+          return;
+        }
+        // Only set if the field has no default value already set by the server
+        if (!input.value) {
+          input.value = todayStr;
+        }
+      });
+    }
+    setDates();
+
+    // Also observe DOM changes for dynamically inserted date fields
+    var observer = new MutationObserver(function() { setDates(); });
+    observer.observe(document.body, { childList: true, subtree: true });
+  })();
 </script>
+
+{% if just_logged_in %}
+<script>
+  (function(){
+    const username = "{{ session.username|e }}" || 'User';
+
+    // Browser native notification
+    try {
+      if ("Notification" in window) {
+        if (Notification.permission === 'granted') {
+          new Notification('Login successful', { body: `Welcome back, ${username}!` });
+        } else if (Notification.permission !== 'denied') {
+          Notification.requestPermission().then(function(permission) {
+            if (permission === 'granted') {
+              new Notification('Login successful', { body: `Welcome back, ${username}!` });
+            }
+          });
+        }
+      }
+    } catch (e) {
+      console.warn('Notification API not available', e);
+    }
+
+    // Also show a Bootstrap toast for in-page feedback
+    const toastEl = document.createElement('div');
+    toastEl.className = 'toast align-items-center text-bg-success border-0 position-fixed bottom-0 end-0 m-3';
+    toastEl.setAttribute('role','alert');
+    toastEl.innerHTML = `<div class="d-flex"><div class="toast-body">Logged in successfully. Welcome back, ${username}!</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div>`;
+    document.body.appendChild(toastEl);
+    const toast = new bootstrap.Toast(toastEl, { delay: 4000 });
+    toast.show();
+  })();
+</script>
+{% endif %}
+
+
+{% if eligible_sales_count and eligible_sales_count > 0 and session.get('show_eligible_toast') == 'shown' %}
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1080;">
+  <div id="eligibleSalesToast" class="toast show align-items-center text-bg-warning border-0 shadow-lg" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="false">
+    <div class="d-flex p-2">
+      <div class="toast-body small fw-bold text-dark">
+        🐐 {{ eligible_sales_count }} goats ready for sale (weight ≥ 25 kg)!
+        <a href="{{ url_for('eligible_to_sell') }}" class="text-dark text-decoration-underline ms-1">View List</a>
+      </div>
+      <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close" onclick="document.getElementById('eligibleSalesToast').classList.remove('show')"></button>
+    </div>
+  </div>
+</div>
+{% endif %}
 
 </body>
 </html>

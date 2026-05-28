@@ -1,11 +1,11 @@
 {% extends 'layout.html' %}
 
-{% block page_title %}Edit Equipment{% endblock %}
+{% block page_title %}Edit Asset / Material{% endblock %}
 
 {% block content %}
 <div class="page-header mb-4">
-    <h2 class="fw-800 text-dark mb-1">Edit Equipment</h2>
-    <p class="text-muted mb-0">Update details for an existing equipment record.</p>
+    <h2 class="fw-800 text-dark mb-1">Edit Asset / Material</h2>
+    <p class="text-muted mb-0">Update details for an existing asset or material record.</p>
 </div>
 
 <div class="card border-0">
@@ -13,13 +13,16 @@
         <form method="POST" action="{{ url_for('equipment_edit', id=record.id) }}" class="row g-4">
             
             <div class="col-md-6">
-                <label class="form-label fw-bold small text-muted">EQUIPMENT NAME <span class="text-danger">*</span></label>
-                <input type="text" name="equipment_name" class="form-control" required value="{{ record.equipment_name }}">
+                <label class="form-label fw-bold small text-muted">ASSET / MATERIAL NAME <span class="text-danger">*</span></label>
+                <input type="text" name="equipment_name" class="form-control" required value="{{ record.name }}">
             </div>
 
             <div class="col-md-6">
-                <label class="form-label fw-bold small text-muted">EQUIPMENT TYPE</label>
-                <input type="text" name="type" class="form-control" value="{{ record.type or '' }}">
+                <label class="form-label fw-bold small text-muted">ASSET CATEGORY</label>
+                <select name="type" class="form-select" required>
+                    <option value="Equipment" {% if record.type == 'Equipment' %}selected{% endif %}>Equipment</option>
+                    <option value="Other Things" {% if record.type == 'Other Things' %}selected{% endif %}>Other Things</option>
+                </select>
             </div>
 
             <div class="col-md-6">
@@ -32,7 +35,6 @@
                 <select name="condition_status" class="form-select">
                     <option value="Good" {% if record.status == 'Good' %}selected{% endif %}>Good</option>
                     <option value="Needs Repair" {% if record.status == 'Needs Repair' %}selected{% endif %}>Needs Repair</option>
-                    <option value="Out of Service" {% if record.status == 'Out of Service' %}selected{% endif %}>Out of Service</option>
                 </select>
             </div>
             
@@ -62,7 +64,7 @@
             </div>
             
             <div class="col-12 mt-4">
-                <button type="submit" class="btn btn-primary px-5 py-2 fw-bold">Update Equipment</button>
+                <button type="submit" class="btn btn-primary px-5 py-2 fw-bold">Update Asset / Material</button>
                 <a href="{{ url_for('equipment') }}" class="btn btn-light px-4 py-2 ms-2">Cancel</a>
             </div>
         </form>

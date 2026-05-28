@@ -1,11 +1,11 @@
 {% extends 'layout.html' %}
 
-{% block page_title %}Add Equipment{% endblock %}
+{% block page_title %}Add Asset / Material{% endblock %}
 
 {% block content %}
 <div class="page-header mb-4">
-    <h2 class="fw-800 text-dark mb-1">Add Equipment</h2>
-    <p class="text-muted mb-0">Record new farm machinery or tools.</p>
+    <h2 class="fw-800 text-dark mb-1">Add Asset / Material</h2>
+    <p class="text-muted mb-0">Record new farm assets, machinery, tools, or materials.</p>
 </div>
 
 <div class="card border-0">
@@ -13,8 +13,16 @@
         <form method="POST" action="{{ url_for('equipment_add') }}" class="row g-4">
             
             <div class="col-md-6">
-                <label class="form-label fw-bold small text-muted">EQUIPMENT NAME <span class="text-danger">*</span></label>
-                <input type="text" name="equipment_name" class="form-control" required placeholder="e.g. Tractor, Milking Machine">
+                <label class="form-label fw-bold small text-muted">ASSET / MATERIAL NAME <span class="text-danger">*</span></label>
+                <input type="text" name="equipment_name" class="form-control" required placeholder="e.g. Tractor, Milking Machine, Fencing Wire">
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label fw-bold small text-muted">ASSET CATEGORY</label>
+                <select name="type" class="form-select" required>
+                    <option value="Equipment" selected>Equipment</option>
+                    <option value="Other Things">Other Things</option>
+                </select>
             </div>
 
             <div class="col-md-6">
@@ -22,7 +30,6 @@
                 <select name="condition_status" class="form-select">
                     <option value="Good">Good</option>
                     <option value="Needs Repair">Needs Repair</option>
-                    <option value="Out of Service">Out of Service</option>
                 </select>
             </div>
             
@@ -52,7 +59,7 @@
             </div>
             
             <div class="col-12 mt-4">
-                <button type="submit" class="btn btn-success px-5 py-2 fw-bold">Save Equipment</button>
+                <button type="submit" class="btn btn-success px-5 py-2 fw-bold">Save Asset / Material</button>
                 <a href="{{ url_for('equipment') }}" class="btn btn-light px-4 py-2 ms-2">Cancel</a>
             </div>
         </form>

@@ -1,0 +1,82 @@
+<div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+        <thead class="table-light text-muted small fw-bold">
+            <tr>
+                <th>ID / Tag No</th>
+                <th>Type</th>
+                <th>Breed</th>
+                <th>Gender</th>
+                <th>Color</th>
+                <th>Weight (KG)</th>
+                <th>DOB / Purchase Date</th>
+                <th>Current Age</th>
+                <th class="text-end">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for animal in current_batch %}
+            <tr>
+                <td>
+                    <span class="badge bg-success-subtle text-success border border-success border-opacity-10 fw-bold fs-6">
+                        {{ animal.identifier }}
+                    </span>
+                </td>
+                <td>
+                    {% if animal.record_type == 'Kid' %}
+                        <span class="record-type-badge bg-info bg-opacity-10 text-info border border-info border-opacity-10">
+                            <i class="bi bi-balloon me-1"></i>Kid
+                        </span>
+                    {% else %}
+                        <span class="record-type-badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-10">
+                            <i class="bi bi-gender-ambiguous me-1"></i>Adult Goat
+                        </span>
+                    {% endif %}
+                </td>
+                <td>
+                    <div class="fw-bold">{{ animal.breed or 'Unknown' }}</div>
+                    {% if animal.breed_percent %}
+                        <small class="text-muted">{{ animal.breed_percent }}% Pure</small>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if animal.gender|lower in ['male', 'm'] %}
+                        <span class="text-primary"><i class="bi bi-gender-male me-1"></i>Male</span>
+                    {% else %}
+                        <span class="text-danger"><i class="bi bi-gender-female me-1"></i>Female</span>
+                    {% endif %}
+                </td>
+                <td><span class="text-muted">{{ animal.color or 'N/A' }}</span></td>
+                <td>
+                    <span class="fw-bold">{{ animal.weight or '0.0' }}</span> kg
+                </td>
+                <td>
+                    <div class="small">{{ animal.dob or 'N/A' }}</div>
+                </td>
+                <td>
+                    <span class="badge bg-success bg-opacity-10 text-success fw-bold border border-success border-opacity-10">
+                        {{ animal.age_str or 'N/A' }}
+                    </span>
+                </td>
+                <td class="text-end">
+                    {% if animal.record_type == 'Goat' %}
+                        <a href="{{ url_for('goat_detail', tag_number=animal.identifier) }}" class="btn btn-sm btn-success rounded-pill px-3 shadow-sm">
+                            <i class="bi bi-eye me-1"></i>Profile
+                        </a>
+                    {% else %}
+                        <a href="{{ url_for('kid_edit', id=animal.id) }}" class="btn btn-sm btn-outline-info rounded-pill px-3">
+                            <i class="bi bi-pencil me-1"></i>Edit Kid
+                        </a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="9" class="text-center py-5 text-muted">
+                    <i class="bi bi-archive d-block mb-2" style="font-size: 2.5rem; opacity: 0.3;"></i>
+                    No goats or kids found in this age batch.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

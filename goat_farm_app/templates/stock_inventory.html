@@ -1,0 +1,264 @@
+{% extends 'layout.html' %}
+
+{% block page_title %}Feed & Medical Stock Control{% endblock %}
+
+{% block content %}
+<style>
+    .dashboard-card {
+        border: none;
+        border-radius: 20px;
+        background: #ffffff;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+        transition: all 0.3s ease;
+    }
+    .stock-pill {
+        border-radius: 12px;
+        transition: all 0.2s ease;
+        background-color: #f8f9fa;
+        border: 1px solid rgba(0,0,0,0.06);
+    }
+    .stock-pill:hover {
+        background-color: #f1f3f5;
+        border-color: rgba(25, 135, 84, 0.2);
+    }
+    .badge-no-stock {
+        background-color: #dc3545;
+        color: white;
+        padding: 4px 10px;
+        font-size: 0.75rem;
+        border-radius: 20px;
+        animation: pulse-danger 2s infinite;
+    }
+    @keyframes pulse-danger {
+        0% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.03); opacity: 0.85; }
+        100% { transform: scale(1); opacity: 1; }
+    }
+</style>
+
+<!-- HEADER -->
+<div class="page-header mb-4">
+    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+        <div class="d-flex align-items-center gap-3">
+            <div class="bg-success bg-opacity-10 text-success p-3 rounded-4">
+                <i class="bi bi-box-seam fs-1"></i>
+            </div>
+            <div>
+                <h2 class="fw-800 text-success-dark mb-1">Stock Inventory & Purchasing</h2>
+                <p class="text-muted mb-0">Monitor current farm stock levels, buy supplies, and record agricultural cash flow expenses.</p>
+            </div>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{{ url_for('feed') }}" class="btn btn-success rounded-pill px-4 py-2 fw-semibold">
+                <i class="bi bi-people me-1"></i>Batch Allocation Center
+            </a>
+            <button class="btn btn-outline-success rounded-pill px-4 py-2 fw-semibold" data-bs-toggle="modal" data-bs-target="#quickBuyModal">
+                <i class="bi bi-cart-plus me-1"></i>Buy New Item
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-5">
+    
+    <!-- 🌾 FEED STOCK CARD -->
+    <div class="col-lg-4">
+        <div class="card dashboard-card p-4 h-100 border-top border-success border-5">
+            <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-2">
+                <h5 class="fw-bold text-success mb-0"><i class="bi bi-basket3 me-2"></i>Feed Stock</h5>
+                <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-2 py-1">{{ feed_stocks|length }} Items</span>
+            </div>
+            
+            <div class="d-flex flex-column gap-2 mb-4">
+                {% for feed_name, stock in feed_stocks.items() %}
+                <div class="stock-pill p-3 d-flex align-items-center justify-content-between">
+                    <div>
+                        <span class="fw-bold text-dark d-block mb-1">{{ feed_name }}</span>
+                        <span class="fs-4 fw-bold text-success">{{ "%.2f"|format(stock.closing_stock) }} <small class="fs-6 text-muted">{{ stock.unit }}</small></span>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        {% if stock.closing_stock <= 0 %}
+                            <span class="badge-no-stock">No Stock</span>
+                        {% endif %}
+                        <button class="btn btn-sm btn-success rounded-pill px-3" onclick="openBuyModal('feed', '{{ feed_name }}', '{{ stock.unit }}')">Buy</button>
+                    </div>
+                </div>
+                {% else %}
+                    <div class="text-muted text-center py-4 bg-light rounded-3">No feed stocks registered.</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- 💊 MEDICINE STOCK CARD -->
+    <div class="col-lg-4">
+        <div class="card dashboard-card p-4 h-100 border-top border-primary border-5">
+            <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-2">
+                <h5 class="fw-bold text-primary mb-0"><i class="bi bi-capsule me-2"></i>Medicine Stock</h5>
+                <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-2 py-1">{{ med_stocks|length }} Items</span>
+            </div>
+            
+            <div class="d-flex flex-column gap-2 mb-4">
+                {% for med_name, stock in med_stocks.items() %}
+                <div class="stock-pill p-3 d-flex align-items-center justify-content-between">
+                    <div>
+                        <span class="fw-bold text-dark d-block mb-1">{{ med_name }}</span>
+                        <span class="fs-4 fw-bold text-primary">{{ "%.2f"|format(stock.closing_stock) }} <small class="fs-6 text-muted">{{ stock.unit }}</small></span>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        {% if stock.closing_stock <= 0 %}
+                            <span class="badge-no-stock">No Stock</span>
+                        {% endif %}
+                        <button class="btn btn-sm btn-primary rounded-pill px-3" onclick="openBuyModal('medicine', '{{ med_name }}', '{{ stock.unit }}')">Buy</button>
+                    </div>
+                </div>
+                {% else %}
+                    <div class="text-muted text-center py-4 bg-light rounded-3">No medicine stocks registered.</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- 💉 VACCINE STOCK CARD -->
+    <div class="col-lg-4">
+        <div class="card dashboard-card p-4 h-100 border-top border-info border-5">
+            <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-2">
+                <h5 class="fw-bold text-info mb-0"><i class="bi bi-patch-check me-2"></i>Vaccine Stock</h5>
+                <span class="badge bg-info bg-opacity-10 text-info rounded-pill px-2 py-1">{{ vac_stocks|length }} Items</span>
+            </div>
+            
+            <div class="d-flex flex-column gap-2 mb-4">
+                {% for vac_name, stock in vac_stocks.items() %}
+                <div class="stock-pill p-3 d-flex align-items-center justify-content-between">
+                    <div>
+                        <span class="fw-bold text-dark d-block mb-1">{{ vac_name }}</span>
+                        <span class="fs-4 fw-bold text-info">{{ "%.2f"|format(stock.closing_stock) }} <small class="fs-6 text-muted">{{ stock.unit }}</small></span>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        {% if stock.closing_stock <= 0 %}
+                            <span class="badge-no-stock">No Stock</span>
+                        {% endif %}
+                        <button class="btn btn-sm btn-info text-white rounded-pill px-3" onclick="openBuyModal('vaccine', '{{ vac_name }}', '{{ stock.unit }}')">Buy</button>
+                    </div>
+                </div>
+                {% else %}
+                    <div class="text-muted text-center py-4 bg-light rounded-3">No vaccine stocks registered.</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- 🛒 BUY / ACQUIRE STOCK MODAL -->
+<div class="modal fade" id="quickBuyModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <form action="{{ url_for('buy_stock') }}" method="POST">
+            <div class="modal-content border-0 shadow-lg rounded-4">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title fw-bold" id="buyModalTitle"><i class="bi bi-cart-plus me-2"></i>Buy & Add Stock</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    
+                    <div class="mb-3">
+                        <label class="form-label small text-muted fw-bold">Stock Item Type</label>
+                        <select name="item_type" id="buy_item_type" class="form-select" onchange="updateBuyUnit()" required>
+                            <option value="feed">Feed Stock (KG)</option>
+                            <option value="medicine">Medicine Stock (Doses)</option>
+                            <option value="vaccine">Vaccine Stock (Doses)</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small text-muted fw-bold">Item Name</label>
+                        <input type="text" name="item_name" id="buy_item_name" class="form-control" placeholder="e.g. Corn, Paracetamol, ET Vaccine" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label small text-muted fw-bold">Quantity (KGs / Doses)</label>
+                        <div class="input-group">
+                            <input type="number" step="0.01" name="quantity" class="form-control" placeholder="0.00" required>
+                            <span class="input-group-text bg-light border" id="buy_unit_label">KG</span>
+                            <input type="hidden" name="unit" id="buy_unit_hidden" value="KG">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label small text-muted fw-bold">Total Cost (₹)</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border">₹</span>
+                            <input type="number" step="0.01" name="cost" class="form-control" placeholder="0.00" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small text-muted fw-bold">Supplier</label>
+                        <input type="text" name="supplier" class="form-control" placeholder="e.g. Ranga Agro Suppliers / Veterinary Hospital">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small text-muted fw-bold">Purchase Date</label>
+                        <input type="date" name="purchase_date" id="purchase_date" class="form-control" required>
+                    </div>
+
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success px-4">Buy & Log Expense</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function getTodayString() {
+        const d = new Date();
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+    function openBuyModal(type, name, unit) {
+        document.getElementById('buy_item_type').value = type;
+        document.getElementById('buy_item_name').value = name;
+        document.getElementById('buy_unit_label').textContent = unit;
+        document.getElementById('buy_unit_hidden').value = unit;
+        
+        const header = document.querySelector('#quickBuyModal .modal-header');
+        header.className = "modal-header text-white";
+        if(type === 'feed') {
+            header.classList.add('bg-success');
+            document.getElementById('buyModalTitle').innerHTML = '<i class="bi bi-basket3-fill me-2"></i>Buy Feed';
+        } else if(type === 'medicine') {
+            header.classList.add('bg-primary');
+            document.getElementById('buyModalTitle').innerHTML = '<i class="bi bi-capsule me-2"></i>Buy Medicine';
+        } else {
+            header.classList.add('bg-info');
+            document.getElementById('buyModalTitle').innerHTML = '<i class="bi bi-patch-check me-2"></i>Buy Vaccine';
+        }
+        
+        const myModal = new bootstrap.Modal(document.getElementById('quickBuyModal'));
+        myModal.show();
+    }
+
+    function updateBuyUnit() {
+        const type = document.getElementById('buy_item_type').value;
+        const label = document.getElementById('buy_unit_label');
+        const hidden = document.getElementById('buy_unit_hidden');
+        if(type === 'feed') {
+            label.textContent = "KG";
+            hidden.value = "KG";
+        } else {
+            label.textContent = "Doses";
+            hidden.value = "Doses";
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        document.getElementById('purchase_date').value = getTodayString();
+    });
+</script>
+{% endblock %}

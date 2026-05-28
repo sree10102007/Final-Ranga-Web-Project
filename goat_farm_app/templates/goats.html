@@ -6,7 +6,7 @@
 <div class="page-header mb-4">
     <div>
         <h2 class="fw-800 text-dark mb-1">Goat Directory</h2>
-        <p class="text-muted mb-0">Overview of all registered goats and their financial status.</p>
+        <p class="text-muted mb-0">Overview of all registered goats.</p>
     </div>
 </div>
 
@@ -33,16 +33,13 @@
                     <i class="bi bi-tag-fill text-success fs-2"></i>
                 </div>
                 <h4 class="fw-800 mb-1" style="color: #1a2e1a;">{{ goat.tag_number }}</h4>
-                <p class="text-muted small mb-4">Activity Records: {{ goat.total_records }}</p>
-                
-                <div class="p-3 bg-light rounded-3 mb-3">
-                    <div class="d-flex justify-content-between align-items-center small mb-1">
-                        <span class="text-muted">Total P/L:</span>
-                        <span class="fw-800 {% if (goat.total_income - goat.total_expense) >= 0 %}text-success{% else %}text-danger{% endif %}">
-                            ₹{{ "%.2f"|format(goat.total_income - goat.total_expense) }}
-                        </span>
-                    </div>
+                <div class="mb-2">
+                    <span class="badge {% if goat.status == 'Active' %}bg-primary{% elif goat.status == 'Sold' %}bg-warning{% else %}bg-danger{% endif %}">
+                        {{ goat.status or 'Active' }}
+                    </span>
                 </div>
+                <p class="text-muted small mb-1">Activity Records: {{ goat.total_records }}</p>
+                <div class="mb-3"><span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-10 fw-bold">{{ goat.age_str or 'N/A' }}</span></div>
 
                 <a href="{{ url_for('goat_detail', tag_number=goat.tag_number) }}" class="btn btn-success w-100 shadow-sm">
                     View Details

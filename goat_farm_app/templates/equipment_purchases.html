@@ -71,7 +71,7 @@
                 {% if records %}
                 <tfoot class="bg-light fw-bold">
                     <tr>
-                        <td colspan="4" class="ps-4">Total Equipment Expenditure</td>
+                        <td colspan="5" class="ps-4">Total Equipment Expenditure</td>
                         <td class="text-end pe-4 text-success">₹{{ "{:,.2f}".format(records|sum(attribute='purchase_cost')) }}</td>
                     </tr>
                 </tfoot>

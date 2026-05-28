@@ -266,11 +266,6 @@ body {
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04), 0 2px 4px rgba(0,0,0,0.02);
   transition: var(--transition);
 }
-.card:hover {
-  transform: translateY(-5px);
-  background: #ffffff !important;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08);
-}
 
 /* ── Cards ── */
 .card {
@@ -281,8 +276,7 @@ body {
   transition: var(--transition);
 }
 .card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 10px 30px rgba(0,0,0,0.07);
+  box-shadow: 0 12px 35px rgba(0,0,0,0.09);
 }
 
 /* ── Stat Cards ── */
@@ -293,9 +287,12 @@ body {
   position: relative;
   overflow: hidden;
   box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-  transition: transform 0.3s ease;
+  transition: var(--transition);
+  cursor: default;
 }
-.stat-card:hover { transform: scale(1.02); }
+.stat-card:hover {
+  box-shadow: 0 12px 28px rgba(0,0,0,0.15);
+}
 
 .stat-card .stat-label {
   font-size: 1.1rem;
@@ -341,7 +338,9 @@ body {
   line-height: 1;
 }
 .sidebar-toggle:hover {
-  background: #f8faf8;
+  background: #ffffff;
+  border-color: #c8dac8;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 
 /* ── Responsive ── */

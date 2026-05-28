@@ -41,11 +41,13 @@ def migrate():
         purchase_cost REAL,
         supplier TEXT,
         status TEXT,
-        notes TEXT
+        notes TEXT,
+        assigned_employee TEXT,
+        service_due_date DATE
     )''')
     conn.commit()
-    for col in ['name', 'type', 'purchase_date', 'purchase_cost', 'supplier', 'status', 'notes']:
-        add_column('equipment', col, 'TEXT' if col != 'purchase_cost' else 'REAL')
+    for col in ['name', 'type', 'purchase_date', 'purchase_cost', 'supplier', 'status', 'notes', 'assigned_employee', 'service_due_date']:
+        add_column('equipment', col, 'TEXT' if col not in ['purchase_cost', 'purchase_date', 'service_due_date'] else 'REAL' if col == 'purchase_cost' else 'DATE')
 
     # --- 2. EQUIPMENT SERVICES (es) ---
     print("Checking equipment_services table...")

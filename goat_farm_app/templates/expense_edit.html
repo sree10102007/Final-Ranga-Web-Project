@@ -1,5 +1,5 @@
 {% extends 'layout.html' %}
-{% block page_title %}Record Farm Expense{% endblock %}
+{% block page_title %}Alter Expense Record{% endblock %}
 {% block content %}
 <div class="container py-4">
     <div class="row justify-content-center">
@@ -7,8 +7,8 @@
             <!-- Header section -->
             <div class="d-flex align-items-center justify-content-between mb-4">
                 <div>
-                    <h3 class="fw-800 text-dark mb-1 tracking-tight">Record Farm Expense</h3>
-                    <p class="text-muted small mb-0">Record details of operational, maintenance, or labor expenses spent for the farm.</p>
+                    <h3 class="fw-800 text-dark mb-1 tracking-tight">Alter Expense Record</h3>
+                    <p class="text-muted small mb-0">Modify operational, maintenance, or labor expense records spent for the farm.</p>
                 </div>
                 <a href="{{ url_for('expenses') }}" class="btn btn-outline-secondary rounded-pill px-3">
                     <i class="bi bi-arrow-left me-1"></i> Back to Expenses
@@ -23,13 +23,13 @@
                         <div class="row mb-3">
                             <div class="col-md-6 mb-3 mb-md-0">
                                 <label class="form-label small fw-bold text-dark">Category <span class="text-danger">*</span></label>
-                                <input type="text" name="category" class="form-control rounded-3" placeholder="Enter category (e.g. Labor, Feed, Maintenance)" required>
+                                <input type="text" name="category" class="form-control rounded-3" placeholder="Enter category" value="{{ record['category'] }}" required>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label small fw-bold text-dark">Money Spent (Amount) <span class="text-danger">*</span></label>
                                 <div class="input-group">
                                     <span class="input-group-text bg-light">₹</span>
-                                    <input type="number" step="0.01" name="amount" class="form-control rounded-end-3" placeholder="0.00" required>
+                                    <input type="number" step="0.01" name="amount" class="form-control rounded-end-3" placeholder="0.00" value="{{ record['amount'] }}" required>
                                 </div>
                             </div>
                         </div>
@@ -38,30 +38,37 @@
                         <div class="row mb-3">
                             <div class="col-md-6 mb-3 mb-md-0">
                                 <label class="form-label small fw-bold text-dark">Expense Date <span class="text-danger">*</span></label>
-                                <input type="date" name="expense_date" class="form-control rounded-3" required>
+                                <input type="date" name="expense_date" class="form-control rounded-3" value="{{ record['date'] }}" required>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label small fw-bold text-dark">Bill No / Reference</label>
-                                <input type="text" name="bill_reference" class="form-control rounded-3" placeholder="Enter Bill / Receipt Number">
+                                <input type="text" name="bill_reference" class="form-control rounded-3" placeholder="Enter Bill / Receipt Number" value="{{ record['receipt_no'] or '' }}">
                             </div>
                         </div>
 
                         <!-- Choose File of Bill row -->
                         <div class="mb-4">
                             <label class="form-label small fw-bold text-dark">Attachment (Choose file of the bill)</label>
+                            {% if record['bill_file'] %}
+                            <div class="d-flex align-items-center gap-2 mb-2 p-2 bg-light rounded-3">
+                                <i class="bi bi-file-earmark-pdf text-success"></i>
+                                <span class="small text-muted font-monospace">{{ record['bill_file'].split('/')[-1] }}</span>
+                                <a href="{{ record['bill_file'] }}" target="_blank" class="badge bg-success-subtle text-success text-decoration-none">View Current File</a>
+                            </div>
+                            {% endif %}
                             <input type="file" name="attachment" class="form-control rounded-3">
-                            <div class="form-text small text-muted">Upload invoice, receipt, or bill files (PDF, JPEG, PNG formats).</div>
+                            <div class="form-text small text-muted">Upload a new file to replace the current attachment (PDF, JPEG, PNG formats).</div>
                         </div>
 
                         <!-- Description row -->
                         <div class="mb-4">
                             <label class="form-label small fw-bold text-dark">Money Spent Details (Description) <span class="text-muted">(Optional)</span></label>
-                            <textarea name="description" class="form-control rounded-3" rows="3" placeholder="Describe what the money was spent for..."></textarea>
+                            <textarea name="description" class="form-control rounded-3" rows="3" placeholder="Describe what the money was spent for...">{{ record['description'] or '' }}</textarea>
                         </div>
 
                         <div class="d-grid mt-4">
                             <button type="submit" class="btn btn-success rounded-pill py-2.5 shadow-sm fw-bold">
-                                <i class="bi bi-check-circle me-1"></i> Save Expense Record
+                                <i class="bi bi-check-circle me-1"></i> Save Altered Changes
                             </button>
                         </div>
                     </form>

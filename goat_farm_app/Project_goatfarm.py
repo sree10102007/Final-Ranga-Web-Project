@@ -2,7 +2,7 @@ import os
 import sqlite3
 import random
 from datetime import datetime
-from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file, jsonify, g
 from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
@@ -10,9 +10,92 @@ app.secret_key = 'dev_secret_key_for_goat_farm'
 DB_FILE = os.path.join(app.root_path, 'database.db')
 
 def get_db():
-    conn = sqlite3.connect(DB_FILE)
-    conn.row_factory = sqlite3.Row
-    return conn
+    db = getattr(g, '_database', None)
+    if db is None:
+        db = g._database = sqlite3.connect(DB_FILE, timeout=30.0)
+        db.row_factory = sqlite3.Row
+        try:
+            db.execute("PRAGMA journal_mode=WAL;")
+        except Exception:
+            pass
+    return db
+
+@app.teardown_appcontext
+def close_connection(exception):
+    db = getattr(g, '_database', None)
+    if db is not None:
+        db.close()
+
+def calculate_age_str(dob_str):
+    if not dob_str:
+        return 'N/A'
+    try:
+        from datetime import datetime
+        dob = datetime.strptime(dob_str, '%Y-%m-%d').date()
+        today = datetime.now().date()
+        if dob > today:
+            return 'Newborn'
+        
+        years = today.year - dob.year
+        months = today.month - dob.month
+        days = today.day - dob.day
+        
+        if days < 0:
+            months -= 1
+            import calendar
+            prev_month = today.month - 1 if today.month > 1 else 12
+            prev_year = today.year if today.month > 1 else today.year - 1
+            days_in_prev = calendar.monthrange(prev_year, prev_month)[1]
+            days += days_in_prev
+            
+        if months < 0:
+            years -= 1
+            months += 12
+            
+        total_days_diff = (today - dob).days
+        
+        if total_days_diff < 30:
+            # Under 30 days: show exact age in days till only 30
+            return f"{total_days_diff} day{'s' if total_days_diff != 1 else ''}"
+        elif years < 1:
+            # Over 30 days, but under 12 months (less than 1 year): show months only (no days!)
+            if months > 0:
+                return f"{months} mo{'s' if months > 1 else ''}"
+            return "1 mo"
+        else:
+            # 1 year or older: show years and current month (no days!)
+            parts = []
+            parts.append(f"{years} yr{'s' if years > 1 else ''}")
+            if months > 0:
+                parts.append(f"{months} mo{'s' if months > 1 else ''}")
+            return ", ".join(parts)
+    except Exception:
+        return 'N/A'
+
+def parse_dob_to_age_dict(dob_str):
+    if not dob_str:
+        return {'years': 0, 'months': 0, 'days': 0}
+    try:
+        from datetime import datetime
+        dob = datetime.strptime(dob_str, '%Y-%m-%d').date()
+        today = datetime.now().date()
+        if dob > today:
+            return {'years': 0, 'months': 0, 'days': 0}
+        
+        years = today.year - dob.year
+        months = today.month - dob.month
+        days = today.day - dob.day
+        
+        if days < 0:
+            months -= 1
+            days += 30
+        if months < 0:
+            years -= 1
+            months += 12
+            
+        return {'years': max(0, years), 'months': max(0, months), 'days': max(0, days)}
+    except Exception:
+        return {'years': 0, 'months': 0, 'days': 0}
 
 def init_db():
     with get_db() as conn:
@@ -40,15 +123,19 @@ def init_db():
                 si_no TEXT, tag_no TEXT NOT NULL, breed TEXT, breed_percent TEXT,
                 status TEXT, sold TEXT, expired TEXT, gender TEXT, purchase_date DATE,
                 color TEXT, weight_kg REAL, purchase_amount REAL, insurance_date DATE,
-                vaccination TEXT, vaccination_period TEXT, medicine TEXT, medicine_period TEXT,
+                vaccination TEXT, vaccination_period TEXT, vaccination_next_due DATE, medicine TEXT, medicine_period TEXT,
                 feed TEXT, feed_amount TEXT, mating_date DATE, mating_goat_no TEXT,
                 goat_week_period TEXT, delivery_date DATE, new_goat_gender TEXT,
                 new_goat_color TEXT, birth_weight REAL, selling_date DATE, selling_weight REAL,
                 selling_price REAL, mortality_date DATE, mortality_weight REAL,
                 mortality_reason TEXT, insurance_claim_amount REAL, insurance_inform_date DATE,
-                insurance_claim_date DATE
+                insurance_claim_date DATE, dob DATE
             )
         ''')
+        try:
+            conn.execute('ALTER TABLE master_records ADD COLUMN vaccination_next_due DATE')
+        except Exception:
+            pass
         conn.execute('''
             CREATE TABLE IF NOT EXISTS sales_records (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -63,6 +150,22 @@ def init_db():
                 buyer_name TEXT,
                 buyer_city TEXT,
                 buyer_contact TEXT
+            )
+        ''')
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS other_sales_records (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                sr_no TEXT,
+                item_name TEXT NOT NULL,
+                quantity REAL,
+                unit TEXT,
+                price_per_unit REAL,
+                total_amount REAL,
+                date_of_sale DATE,
+                buyer_name TEXT,
+                buyer_city TEXT,
+                buyer_contact TEXT,
+                notes TEXT
             )
         ''')
         conn.execute('''
@@ -107,6 +210,23 @@ def init_db():
                 opening_stock REAL DEFAULT 0,
                 purchased_qty REAL DEFAULT 0,
                 used_qty REAL DEFAULT 0,
+                wastage_qty REAL DEFAULT 0,
+                closing_stock REAL DEFAULT 0,
+                unit TEXT,
+                cost_per_unit REAL DEFAULT 0,
+                total_cost REAL DEFAULT 0,
+                purchase_date DATE,
+                supplier TEXT
+            )
+        ''')
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS medicine_inventory (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                medicine_name TEXT NOT NULL,
+                opening_stock REAL DEFAULT 0,
+                purchased_qty REAL DEFAULT 0,
+                used_qty REAL DEFAULT 0,
+                wastage_qty REAL DEFAULT 0,
                 closing_stock REAL DEFAULT 0,
                 unit TEXT,
                 cost_per_unit REAL DEFAULT 0,
@@ -116,6 +236,27 @@ def init_db():
                 alert_level REAL DEFAULT 0
             )
         ''')
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS vaccine_inventory (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                vaccine_name TEXT NOT NULL,
+                opening_stock REAL DEFAULT 0,
+                purchased_qty REAL DEFAULT 0,
+                used_qty REAL DEFAULT 0,
+                wastage_qty REAL DEFAULT 0,
+                closing_stock REAL DEFAULT 0,
+                unit TEXT,
+                cost_per_unit REAL DEFAULT 0,
+                total_cost REAL DEFAULT 0,
+                purchase_date DATE,
+                supplier TEXT,
+                alert_level REAL DEFAULT 0
+            )
+        ''')
+        try:
+            conn.execute('ALTER TABLE feed_inventory ADD COLUMN wastage_qty REAL DEFAULT 0')
+        except sqlite3.OperationalError:
+            pass
         conn.execute('''
             CREATE TABLE IF NOT EXISTS kid_records (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -151,7 +292,32 @@ def init_db():
         except sqlite3.OperationalError:
             pass
 
+        try:
+            conn.execute("ALTER TABLE master_records ADD COLUMN dob DATE")
+        except sqlite3.OperationalError:
+            pass
+
         add_column("feed_inventory", "purchase_id", "INTEGER")
+        add_column("medicine_inventory", "purchase_id", "INTEGER")
+        add_column("vaccine_inventory", "purchase_id", "INTEGER")
+
+        # Ensure equipment table has all required fields
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS equipment (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT,
+                type TEXT,
+                purchase_date DATE,
+                purchase_cost REAL,
+                supplier TEXT,
+                status TEXT,
+                notes TEXT,
+                assigned_employee TEXT,
+                service_due_date DATE
+            )
+        ''')
+        add_column("equipment", "assigned_employee", "TEXT")
+        add_column("equipment", "service_due_date", "DATE")
 
         conn.execute('''
             CREATE TABLE IF NOT EXISTS medicine_history (
@@ -300,13 +466,21 @@ def init_db():
         conn.commit()
 
 # Initialize DB on startup
-init_db()
+with app.app_context():
+    init_db()
 
 @app.before_request
 def require_login():
     allowed_routes = ['login', 'static', 'register', 'verify_otp', 'goats', 'goat_detail']
     if request.endpoint not in allowed_routes and 'user_id' not in session:
         return redirect(url_for('login'))
+        
+    # Progress toast status for single pop-up per login session
+    status = session.get('show_eligible_toast')
+    if status == 'showing':
+        session['show_eligible_toast'] = 'shown'
+    elif status == 'shown':
+        session['show_eligible_toast'] = 'done'
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -321,25 +495,20 @@ def login():
             session['user_id'] = user['id']
             session['username'] = user['username']
             
+            # Setup toast popups to display exactly once per login session
+            session['show_eligible_toast'] = 'showing'
+            session['show_weight_notification'] = True
+            
             # Update login tracking
             login_tracking = db.execute('SELECT * FROM user_login_tracking WHERE user_id = ?', (user['id'],)).fetchone()
             today = datetime.now().strftime('%Y-%m-%d')
             
             if not login_tracking:
-                # First login ever - create tracking record
                 db.execute('INSERT INTO user_login_tracking (user_id, last_login_date, has_seen_weight_notification) VALUES (?, ?, ?)',
                           (user['id'], today, 0))
-                session['show_weight_notification'] = True
             else:
-                # Check if this is a different day
-                last_login = login_tracking['last_login_date']
-                if last_login != today:
-                    # New day login - reset notification flag
-                    db.execute('UPDATE user_login_tracking SET last_login_date = ?, has_seen_weight_notification = ? WHERE user_id = ?',
-                              (today, 0, user['id']))
-                    session['show_weight_notification'] = True
-                else:
-                    session['show_weight_notification'] = False
+                db.execute('UPDATE user_login_tracking SET last_login_date = ?, has_seen_weight_notification = ? WHERE user_id = ?',
+                          (today, 0, user['id']))
             
             db.commit()
             
@@ -456,32 +625,37 @@ def dashboard():
             db.commit()
         session.pop('show_weight_notification', None)
     
-    # 4. Goat Search Logic - Enhanced to support last 4 digits and pattern matching
+    # 4. Goat Search Logic - Enhanced to support last 4, 3, or 2 digits and pattern matching
     searched_goat = None
     if search_q:
         search_q_stripped = search_q.strip()
-        # Check for exact tag match first
-        searched_goat = db.execute("SELECT * FROM master_records WHERE tag_no = ?", (search_q_stripped,)).fetchone()
+        # 1. Exact Tag No Match
+        searched_goat_raw = db.execute("SELECT * FROM master_records WHERE tag_no = ?", (search_q_stripped,)).fetchone()
         
-        # If no exact match, try searching by last 4 digits
-        if not searched_goat and len(search_q_stripped) == 4 and search_q_stripped.isdigit():
-            searched_goat = db.execute("SELECT * FROM master_records WHERE tag_no LIKE ? ORDER BY tag_no DESC LIMIT 1", (f"%{search_q_stripped}",)).fetchone()
+        # 2. Suffix Match for 2, 3, or 4 digits
+        if not searched_goat_raw and search_q_stripped.isdigit() and len(search_q_stripped) in [2, 3, 4]:
+            searched_goat_raw = db.execute("SELECT * FROM master_records WHERE tag_no LIKE ? ORDER BY id DESC LIMIT 1", (f"%{search_q_stripped}",)).fetchone()
+            
+        # 3. Substring search if still not found
+        if not searched_goat_raw:
+            searched_goat_raw = db.execute("SELECT * FROM master_records WHERE tag_no LIKE ? OR breed LIKE ? ORDER BY id DESC LIMIT 1", 
+                                      (f"%{search_q_stripped}%", f"%{search_q_stripped}%")).fetchone()
         
-        # General list search with tag_no LIKE and breed LIKE
-        goats = db.execute("SELECT * FROM master_records WHERE tag_no LIKE ? OR breed LIKE ? ORDER BY id ASC", 
+        if searched_goat_raw:
+            searched_goat = dict(searched_goat_raw)
+            searched_goat['age_str'] = calculate_age_str(searched_goat.get('dob'))
+        
+        # General list search for all matches
+        goats_raw = db.execute("SELECT * FROM master_records WHERE tag_no LIKE ? OR breed LIKE ? ORDER BY id ASC", 
                           (f"%{search_q_stripped}%", f"%{search_q_stripped}%")).fetchall()
-        
-        # Also search by last 4 digits if search_q is 4 digits
-        if len(search_q_stripped) == 4 and search_q_stripped.isdigit():
-            last_4_digits_goats = db.execute("SELECT * FROM master_records WHERE tag_no LIKE ? ORDER BY id ASC", (f"%{search_q_stripped}",)).fetchall()
-            # Merge results, avoiding duplicates
-            goat_tag_nos = {g['tag_no'] for g in goats}
-            for g in last_4_digits_goats:
-                if g['tag_no'] not in goat_tag_nos:
-                    goats = list(goats) + [g]
-                    goat_tag_nos.add(g['tag_no'])
     else:
-        goats = db.execute("SELECT * FROM master_records ORDER BY id ASC LIMIT 10").fetchall()
+        goats_raw = db.execute("SELECT * FROM master_records ORDER BY id ASC LIMIT 10").fetchall()
+        
+    goats = []
+    for g in goats_raw:
+        g_dict = dict(g)
+        g_dict['age_str'] = calculate_age_str(g_dict.get('dob'))
+        goats.append(g_dict)
         
     return render_template('dashboard.html', 
         income=income, expense=expense, profit=profit, 
@@ -598,7 +772,7 @@ def goats():
     search_q = request.args.get('search', '')
     
     # Get all goats from master records and their financial summary
-    goats_summary = db.execute('''
+    goats_summary_raw = db.execute('''
         WITH AllRecords AS (
             SELECT tag_number as tag_no, date, category, amount FROM goats_data
             UNION ALL
@@ -613,6 +787,8 @@ def goats():
             SELECT tag_no, purchase_date as date, 'expense' as category, IFNULL(purchase_amount, 0) as amount FROM master_records WHERE purchase_date IS NOT NULL
         )
         SELECT m.tag_no as tag_number, 
+               m.status,
+               m.dob,
                COUNT(a.amount) as total_records,
                IFNULL(SUM(CASE WHEN a.category = 'income' THEN a.amount ELSE 0 END), 0) as total_income,
                IFNULL(SUM(CASE WHEN a.category = 'expense' THEN a.amount ELSE 0 END), 0) as total_expense
@@ -621,6 +797,12 @@ def goats():
         GROUP BY m.tag_no
         ORDER BY CAST(m.tag_no AS INTEGER) ASC
     ''').fetchall()
+    
+    goats_summary = []
+    for g in goats_summary_raw:
+        g_dict = dict(g)
+        g_dict['age_str'] = calculate_age_str(g_dict.get('dob'))
+        goats_summary.append(g_dict)
     
     # Filter by search query if provided - Enhanced to support last 4 digits
     if search_q:
@@ -647,6 +829,13 @@ def goats():
 @app.route('/goat/<tag_number>')
 def goat_detail(tag_number):
     db = get_db()
+    goat_raw = db.execute('SELECT * FROM master_records WHERE tag_no = ?', (tag_number,)).fetchone()
+    if not goat_raw:
+        flash('This goat record does not exist or has been deleted.', 'danger')
+        return redirect(url_for('goats'))
+    
+    goat = dict(goat_raw)
+    goat['age_str'] = calculate_age_str(goat.get('dob'))
     
     history_query = '''
     SELECT date, category, type, amount, notes FROM goats_data WHERE tag_number = ?
@@ -668,7 +857,85 @@ def goat_detail(tag_number):
     expense = sum(r['amount'] for r in history if r['category'] == 'expense')
     profit = income - expense
     
-    return render_template('goat_detail.html', tag_number=tag_number, income=income, expense=expense, profit=profit, history=history)
+    return render_template('goat_detail.html', tag_number=tag_number, goat=goat, income=income, expense=expense, profit=profit, history=history)
+
+@app.route('/goat_batches')
+def goat_batches():
+    db = get_db()
+    
+    # 1. Fetch active goats from master records
+    goats_raw = db.execute('''
+        SELECT id, tag_no as identifier, breed, breed_percent, gender, color, weight_kg as weight, dob, purchase_date, status, 'Goat' as record_type
+        FROM master_records 
+        WHERE status = 'Active'
+    ''').fetchall()
+    
+    # 2. Fetch kids from kid records
+    kids_raw = db.execute('''
+        SELECT id, kid_id as identifier, breed, breed_percent, gender, color, birth_weight as weight, birth_date as dob, birth_date as purchase_date, 'Active' as status, 'Kid' as record_type
+        FROM kid_records
+    ''').fetchall()
+    
+    # Combined list
+    all_animals = []
+    today = datetime.now().date()
+    
+    for row in goats_raw:
+        animal = dict(row)
+        dob_str = animal.get('dob')
+        days_old = 9999
+        if dob_str:
+            try:
+                dob_date = datetime.strptime(dob_str, '%Y-%m-%d').date()
+                days_old = (today - dob_date).days
+            except Exception:
+                pass
+        animal['days_old'] = days_old
+        animal['age_str'] = calculate_age_str(dob_str)
+        all_animals.append(animal)
+        
+    for row in kids_raw:
+        animal = dict(row)
+        dob_str = animal.get('dob')
+        days_old = 9999
+        if dob_str:
+            try:
+                dob_date = datetime.strptime(dob_str, '%Y-%m-%d').date()
+                days_old = (today - dob_date).days
+            except Exception:
+                pass
+        animal['days_old'] = days_old
+        animal['age_str'] = calculate_age_str(dob_str)
+        all_animals.append(animal)
+        
+    # Grouping
+    batch_0_6m = []
+    batch_6m_1y = []
+    batch_1y_2y = []
+    batch_above_2y = []
+    
+    for animal in all_animals:
+        days = animal['days_old']
+        if days <= 182:
+            batch_0_6m.append(animal)
+        elif days <= 365:
+            batch_6m_1y.append(animal)
+        elif days <= 730:
+            batch_1y_2y.append(animal)
+        else:
+            batch_above_2y.append(animal)
+            
+    # Sort by age (youngest first)
+    batch_0_6m.sort(key=lambda x: x['days_old'])
+    batch_6m_1y.sort(key=lambda x: x['days_old'])
+    batch_1y_2y.sort(key=lambda x: x['days_old'])
+    batch_above_2y.sort(key=lambda x: x['days_old'])
+    
+    return render_template('goat_batches.html',
+                           batch_0_6m=batch_0_6m,
+                           batch_6m_1y=batch_6m_1y,
+                           batch_1y_2y=batch_1y_2y,
+                           batch_above_2y=batch_above_2y)
 
 @app.route('/master_add', methods=['GET', 'POST'])
 def master_add():
@@ -676,28 +943,125 @@ def master_add():
     if request.method == 'POST':
         f = request.form
         db = get_db()
+        
+        # Calculate DOB from entered Age
+        try:
+            from datetime import timedelta
+            age_years = int(f.get('age_years') or 0)
+            age_months = int(f.get('age_months') or 0)
+            age_days = int(f.get('age_days') or 0)
+            total_days = age_years * 365 + age_months * 30 + age_days
+            dob_date = datetime.now().date() - timedelta(days=total_days)
+            dob_str = dob_date.strftime('%Y-%m-%d')
+        except Exception:
+            dob_str = None
+
         db.execute('''
             INSERT INTO master_records (
                 si_no, tag_no, breed, breed_percent, status, sold, expired, gender, purchase_date, color,
-                weight_kg, purchase_amount, insurance_date, vaccination, vaccination_period, medicine,
+                weight_kg, purchase_amount, insurance_date, vaccination, vaccination_period, vaccination_next_due, medicine,
                 medicine_period, feed, feed_amount, mating_date, mating_goat_no, goat_week_period,
                 delivery_date, new_goat_gender, new_goat_color, birth_weight, selling_date,
                 selling_weight, selling_price, mortality_date, mortality_weight, mortality_reason,
-                insurance_claim_amount, insurance_inform_date, insurance_claim_date, kit_status
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                insurance_claim_amount, insurance_inform_date, insurance_claim_date, kit_status, dob
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', (
             f.get('si_no'), f.get('tag_no'), f.get('breed'), f.get('breed_percent'), f.get('status'),
             f.get('sold'), f.get('expired'), f.get('gender'), f.get('purchase_date'), f.get('color'),
             f.get('weight_kg'), f.get('purchase_amount'), f.get('insurance_date'), f.get('vaccination'),
-            f.get('vaccination_period'), f.get('medicine'), f.get('medicine_period'), f.get('feed'),
+            f.get('vaccination_period'), f.get('vaccination_next_due') or None, f.get('medicine'), f.get('medicine_period'), f.get('feed'),
             f.get('feed_amount'), f.get('mating_date'), f.get('mating_goat_no'), f.get('goat_week_period'),
             f.get('delivery_date'), f.get('new_goat_gender'), f.get('new_goat_color'), f.get('birth_weight'),
-            f.get('selling_date'), f.get('selling_weight'), f.get('selling_price'), f.get('mortality_date'),
+            f.get('selling_date') or None, f.get('selling_weight'), f.get('selling_price'), f.get('mortality_date') or None,
             f.get('mortality_weight'), f.get('mortality_reason'), f.get('insurance_claim_amount'),
-            f.get('insurance_inform_date'), f.get('insurance_claim_date'), 1 if f.get('kit_status') else 0
+            f.get('insurance_inform_date') or None, f.get('insurance_claim_date') or None, 1 if f.get('kit_status') else 0, dob_str
         ))
+        # Connected Auto-Entry Generation Logic
+        tag_no = f.get('tag_no')
+        p_date = f.get('purchase_date') or datetime.now().strftime('%Y-%m-%d')
+        purchase_amt = f.get('purchase_amount')
+        
+        # 1. Auto-Populate Goat Purchase disabled as requested (should not add purchase voucher/expense automatically)
+        pass
+
+        # 2. Auto-Populate Vaccination
+        vaccine_name = f.get('vaccination')
+        vaccine_period = f.get('vaccination_period') or p_date
+        if vaccine_name and vaccine_name.strip() and vaccine_name.lower() != 'none':
+            res_vac = db.execute('SELECT MAX(CAST(sr_no AS INTEGER)) FROM vaccine_records').fetchone()[0]
+            next_vac_sr = (res_vac or 0) + 1
+            db.execute('''
+                INSERT INTO vaccine_records (sr_no, tag_no, vaccine_date, vaccine_name, amount_spent, notes, next_due_date)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            ''', (next_vac_sr, tag_no, vaccine_period, vaccine_name, 0.0, 'Auto-entered from Goat Creation', f.get('vaccination_next_due') or None))
+            
+            db.execute('''
+                INSERT INTO goats_data (tag_number, date, category, type, amount, notes)
+                VALUES (?, ?, 'expense', 'Vaccine', ?, ?)
+            ''', (tag_no, vaccine_period, 0.0, f"Vaccination: {vaccine_name}"))
+
+        # 3. Auto-Populate Medicine
+        med_name = f.get('medicine')
+        med_period = f.get('medicine_period') or p_date
+        if med_name and med_name.strip() and med_name.lower() != 'none':
+            db.execute('''
+                INSERT INTO medicine_history (tag_no, doctor_name, consultation_date, medicine_name, dose, quantity, cost, notes)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (tag_no, 'Farm Doctor', med_period, med_name, '1 dose', 1.0, 0.0, 'Auto-entered from Goat Creation'))
+            
+            db.execute('''
+                INSERT INTO goats_data (tag_number, date, category, type, amount, notes)
+                VALUES (?, ?, 'expense', 'Medicine', ?, ?)
+            ''', (tag_no, med_period, 0.0, f"Medicine: {med_name}"))
+
+        # 4. Auto-Populate Feed Consumption & Inventory Adjustment
+        feed_name = f.get('feed')
+        feed_qty = f.get('feed_amount')
+        if feed_name and feed_name.strip() and feed_qty:
+            try:
+                feed_qty_val = float(feed_qty)
+                if feed_qty_val > 0:
+                    last_feed = db.execute('SELECT closing_stock, cost_per_unit FROM feed_inventory WHERE feed_name = ? ORDER BY purchase_date DESC, id DESC LIMIT 1', (feed_name,)).fetchone()
+                    opening = last_feed['closing_stock'] if last_feed else 0.0
+                    cost_per_unit = last_feed['cost_per_unit'] if last_feed else 0.0
+                    closing = max(0.0, opening - feed_qty_val)
+                    cost = feed_qty_val * cost_per_unit
+                    
+                    db.execute('''
+                        INSERT INTO feed_inventory (feed_name, opening_stock, purchased_qty, used_qty, wastage_qty, closing_stock, unit, cost_per_unit, total_cost, purchase_date, supplier)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    ''', (feed_name, opening, 0.0, feed_qty_val, 0.0, closing, 'KG', cost_per_unit, cost, p_date, 'Auto-allocated from Goat Creation'))
+                    
+                    db.execute('''
+                        INSERT INTO goats_data (tag_number, date, category, type, amount, notes)
+                        VALUES (?, ?, 'expense', 'Feed', ?, ?)
+                    ''', (tag_no, p_date, cost, f"Feed Consumption: {feed_name} ({feed_qty_val} KG)"))
+            except ValueError:
+                pass
+        
+        # 5. Connected Mortality Log Synchronization
+        status = f.get('status')
+        mortality_date = f.get('mortality_date')
+        if status == 'Expired' or mortality_date:
+            mort_exists = db.execute('SELECT 1 FROM mortality_records WHERE tag_id = ?', (tag_no,)).fetchone()
+            if not mort_exists:
+                res_mort = db.execute('SELECT MAX(CAST(sr_no AS INTEGER)) FROM mortality_records').fetchone()[0]
+                next_mort_sr = (res_mort or 0) + 1
+                db.execute('''
+                    INSERT INTO mortality_records (
+                        sr_no, tag_id, breed, breed_percent, gender, expired_date, 
+                        weight_kgs, insurance_inform_date, insurance_claim_date,
+                        current_value, claim_amount, cause_of_death
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ''', (
+                    str(next_mort_sr), tag_no, f.get('breed'), f.get('breed_percent'), f.get('gender'),
+                    mortality_date or datetime.now().strftime('%Y-%m-%d'),
+                    f.get('mortality_weight'), f.get('insurance_inform_date') or None, f.get('insurance_claim_date') or None,
+                    f.get('purchase_amount') or 0.0, f.get('insurance_claim_amount') or 0.0, f.get('mortality_reason') or 'Unspecified'
+                ))
+        
         db.commit()
-        flash('Master record added successfully!', 'success')
+        flash('Master record added successfully and connected entries generated in other menus!', 'success')
         return redirect(url_for('master'))
     # Get next serial number
     res = db.execute('SELECT MAX(CAST(si_no AS INTEGER)) FROM master_records').fetchone()[0]
@@ -709,54 +1073,421 @@ def master():
     db = get_db()
     tag_search = request.args.get('tag_no', '')
     if tag_search:
-        records = db.execute('SELECT * FROM master_records WHERE tag_no LIKE ? OR si_no LIKE ? ORDER BY id ASC', 
+        records_raw = db.execute('SELECT * FROM master_records WHERE tag_no LIKE ? OR si_no LIKE ? ORDER BY id ASC', 
              (f"%{tag_search}%", f"%{tag_search}%")).fetchall()
     else:
-        records = db.execute('SELECT * FROM master_records ORDER BY id ASC').fetchall()
+        records_raw = db.execute('SELECT * FROM master_records ORDER BY id ASC').fetchall()
+        
+    records = []
+    for r in records_raw:
+        r_dict = dict(r)
+        r_dict['age_str'] = calculate_age_str(r_dict.get('dob'))
+        records.append(r_dict)
     return render_template('master.html', records=records)
-
-@app.route('/sales_add', methods=['GET', 'POST'])
-def sales_add():
-    db = get_db()
-    if request.method == 'POST':
-        f = request.form
-        db = get_db()
-        db.execute('''
-            INSERT INTO sales_records (
-                sr_no, tag_id, breed, breed_percent, gender, weight, sold_price, 
-                date_of_sale, buyer_name, buyer_city, buyer_contact
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (
-            f.get('sr_no'), f.get('tag_id'), f.get('breed'), f.get('breed_percent'), f.get('gender'),
-            f.get('weight'), f.get('sold_price'), f.get('date_of_sale'), f.get('buyer_name'),
-            f.get('buyer_city'), f.get('buyer_contact')
-        ))
-        
-        # LOGIC FIX: Update status in master_records
-        db.execute("UPDATE master_records SET status = 'Sold', selling_date = ?, selling_price = ? WHERE tag_no = ?",
-                   (f.get('date_of_sale'), f.get('sold_price'), f.get('tag_id')))
-        
-        # Remove from eligible_to_sell list when sold
-        db.execute("DELETE FROM eligible_to_sell WHERE tag_id = ?", (f.get('tag_id'),))
-        
-        db.commit()
-        flash('Sales record added successfully!', 'success')
-        return redirect(url_for('sales'))
-    # Get next serial number
-    res = db.execute('SELECT MAX(CAST(sr_no AS INTEGER)) FROM sales_records').fetchone()[0]
-    next_sr = (res or 0) + 1
-    return render_template('sales_add.html', next_sr=next_sr)
 
 @app.route('/sales')
 def sales():
     db = get_db()
-    tag_search = request.args.get('tag_id', '')
-    if tag_search:
-        records = db.execute('SELECT * FROM sales_records WHERE tag_id LIKE ? OR buyer_name LIKE ? ORDER BY date_of_sale DESC', 
-             (f"%{tag_search}%", f"%{tag_search}%")).fetchall()
+    count_goat = db.execute("SELECT COUNT(*) FROM sales_records").fetchone()[0] or 0
+    sum_goat = db.execute("SELECT SUM(sold_price) FROM sales_records").fetchone()[0] or 0.0
+    
+    count_other = db.execute("SELECT COUNT(*) FROM other_sales_records").fetchone()[0] or 0
+    sum_other = db.execute("SELECT SUM(total_amount) FROM other_sales_records").fetchone()[0] or 0.0
+    
+    return render_template('sales_dashboard.html', 
+                           count_goat=count_goat, sum_goat=sum_goat,
+                           count_other=count_other, sum_other=sum_other)
+
+@app.route('/sales/<s_type>')
+def sales_register(s_type):
+    db = get_db()
+    records = []
+    
+    if s_type == 'goat':
+        raw_records = db.execute('SELECT * FROM sales_records ORDER BY date_of_sale DESC').fetchall()
+        for r in raw_records:
+            records.append({
+                'id': r['id'],
+                'sr_no': r['sr_no'],
+                'title': f"Goat Sale - Tag: {r['tag_id']}",
+                'subtitle': f"Breed: {r['breed']} ({r['breed_percent']}%) | Weight: {r['weight']} kg | Buyer: {r['buyer_name']}",
+                'date': r['date_of_sale'],
+                'amount': r['sold_price'],
+                'buyer_name': r['buyer_name'],
+                'buyer_city': r['buyer_city'],
+                'buyer_contact': r['buyer_contact'],
+                'notes': f"Sold {r['gender']} Goat with Tag ID {r['tag_id']}."
+            })
+    elif s_type == 'other':
+        raw_records = db.execute('SELECT * FROM other_sales_records ORDER BY date_of_sale DESC').fetchall()
+        for r in raw_records:
+            records.append({
+                'id': r['id'],
+                'sr_no': r['sr_no'],
+                'title': f"Other Sale: {r['item_name']}",
+                'subtitle': f"Quantity: {r['quantity']} {r['unit']} @ ₹{r['price_per_unit']}/unit | Buyer: {r['buyer_name']}",
+                'date': r['date_of_sale'],
+                'amount': r['total_amount'],
+                'buyer_name': r['buyer_name'],
+                'buyer_city': r['buyer_city'],
+                'buyer_contact': r['buyer_contact'],
+                'notes': r['notes']
+            })
+            
+    # Group month-wise
+    grouped = {}
+    for r in records:
+        try:
+            dt = datetime.strptime(r['date'], '%Y-%m-%d')
+            month_str = dt.strftime('%B %Y')
+        except Exception:
+            month_str = "Unknown Date"
+        if month_str not in grouped:
+            grouped[month_str] = []
+        grouped[month_str].append(r)
+        
+    return render_template('sales_register.html', s_type=s_type, grouped_records=grouped)
+
+@app.route('/sales/<s_type>/add', methods=['GET', 'POST'])
+def sales_add(s_type):
+    db = get_db()
+    today_str = datetime.now().strftime('%Y-%m-%d')
+    res = db.execute('SELECT MAX(CAST(sr_no AS INTEGER)) FROM sales_records').fetchone()[0]
+    next_sr = str((res or 0) + 1)
+    
+    if request.method == 'POST':
+        f = request.form
+        p_date = f.get('date_of_sale') or today_str
+        
+        # Get next serial number
+        if s_type == 'goat':
+            tag_id = f.get('tag_id')
+            goat = db.execute('SELECT 1 FROM master_records WHERE tag_no = ?', (tag_id,)).fetchone()
+            if not goat:
+                flash(f'No goat exists with this tag id "{tag_id}"', 'danger')
+                goats = db.execute("SELECT tag_no, breed, weight_kg FROM master_records WHERE status = 'Active' ORDER BY tag_no ASC").fetchall()
+                return render_template('sales_form.html', s_type=s_type, action='Create', today=today_str, next_sr=next_sr, record=f, goats=goats)
+                
+            db.execute('''
+                INSERT INTO sales_records (
+                    sr_no, tag_id, breed, breed_percent, gender, weight, sold_price, 
+                    date_of_sale, buyer_name, buyer_city, buyer_contact
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                next_sr, f.get('tag_id'), f.get('breed'), f.get('breed_percent'), f.get('gender'),
+                float(f.get('weight') or 0), float(f.get('sold_price') or 0), p_date,
+                f.get('buyer_name'), f.get('buyer_city'), f.get('buyer_contact')
+            ))
+            
+            # Update status in master_records
+            db.execute("UPDATE master_records SET status = 'Sold', selling_date = ?, selling_price = ? WHERE tag_no = ?",
+                       (p_date, float(f.get('sold_price') or 0), f.get('tag_id')))
+            
+            # Remove from eligible_to_sell list
+            db.execute("DELETE FROM eligible_to_sell WHERE tag_id = ?", (f.get('tag_id'),))
+            
+        elif s_type == 'other':
+            qty = float(f.get('quantity') or 0)
+            price_per = float(f.get('price_per_unit') or 0)
+            total = qty * price_per
+            
+            db.execute('''
+                INSERT INTO other_sales_records (
+                    sr_no, item_name, quantity, unit, price_per_unit, total_amount,
+                    date_of_sale, buyer_name, buyer_city, buyer_contact, notes
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                next_sr, f.get('item_name'), qty, f.get('unit'), price_per, total,
+                p_date, f.get('buyer_name'), f.get('buyer_city'), f.get('buyer_contact'), f.get('notes')
+            ))
+            
+        db.commit()
+        flash('Sales record added successfully!', 'success')
+        return redirect(url_for('sales_register', s_type=s_type))
+        
+    goats = []
+    if s_type == 'goat':
+        goats = db.execute("SELECT tag_no, breed, weight_kg FROM master_records WHERE status = 'Active' ORDER BY tag_no ASC").fetchall()
+    return render_template('sales_form.html', s_type=s_type, action='Create', today=today_str, next_sr=next_sr, goats=goats)
+
+@app.route('/sales/<s_type>/edit/<int:id>', methods=['GET', 'POST'])
+def sales_edit(s_type, id):
+    db = get_db()
+    today_str = datetime.now().strftime('%Y-%m-%d')
+    
+    if s_type == 'goat':
+        record = db.execute('SELECT * FROM sales_records WHERE id = ?', (id,)).fetchone()
     else:
-        records = db.execute('SELECT * FROM sales_records ORDER BY date_of_sale DESC').fetchall()
-    return render_template('sales.html', records=records)
+        record = db.execute('SELECT * FROM other_sales_records WHERE id = ?', (id,)).fetchone()
+        
+    if not record:
+        flash('Record not found.', 'danger')
+        return redirect(url_for('sales_register', s_type=s_type))
+        
+    if request.method == 'POST':
+        f = request.form
+        p_date = f.get('date_of_sale') or today_str
+        
+        if s_type == 'goat':
+            tag_id = f.get('tag_id')
+            goat = db.execute('SELECT 1 FROM master_records WHERE tag_no = ?', (tag_id,)).fetchone()
+            if not goat:
+                flash(f'No goat exists with this tag id "{tag_id}"', 'danger')
+                goats = db.execute("SELECT tag_no, breed, weight_kg FROM master_records WHERE status = 'Active' OR tag_no = ? ORDER BY tag_no ASC", (record['tag_id'],)).fetchall()
+                return render_template('sales_form.html', s_type=s_type, action='Edit', today=today_str, record=record, goats=goats)
+                
+            # Revert old goat status to Active first (in case tag_id changed)
+            old_tag = record['tag_id']
+            db.execute("UPDATE master_records SET status = 'Active', selling_date = NULL, selling_price = NULL WHERE tag_no = ?", (old_tag,))
+            
+            db.execute('''
+                UPDATE sales_records SET 
+                tag_id = ?, breed = ?, breed_percent = ?, gender = ?, weight = ?,
+                sold_price = ?, date_of_sale = ?, buyer_name = ?, buyer_city = ?, buyer_contact = ?
+                WHERE id = ?
+            ''', (
+                f.get('tag_id'), f.get('breed'), f.get('breed_percent'), f.get('gender'),
+                float(f.get('weight') or 0), float(f.get('sold_price') or 0), p_date,
+                f.get('buyer_name'), f.get('buyer_city'), f.get('buyer_contact'), id
+            ))
+            
+            # Set new goat status to Sold
+            db.execute("UPDATE master_records SET status = 'Sold', selling_date = ?, selling_price = ? WHERE tag_no = ?",
+                       (p_date, float(f.get('sold_price') or 0), f.get('tag_id')))
+                       
+        elif s_type == 'other':
+            qty = float(f.get('quantity') or 0)
+            price_per = float(f.get('price_per_unit') or 0)
+            total = qty * price_per
+            
+            db.execute('''
+                UPDATE other_sales_records SET 
+                item_name = ?, quantity = ?, unit = ?, price_per_unit = ?, total_amount = ?,
+                date_of_sale = ?, buyer_name = ?, buyer_city = ?, buyer_contact = ?, notes = ?
+                WHERE id = ?
+            ''', (
+                f.get('item_name'), qty, f.get('unit'), price_per, total,
+                p_date, f.get('buyer_name'), f.get('buyer_city'), f.get('buyer_contact'), f.get('notes'), id
+            ))
+            
+        db.commit()
+        flash('Sales record updated successfully!', 'success')
+        return redirect(url_for('sales_register', s_type=s_type))
+        
+    goats = []
+    if s_type == 'goat':
+        goats = db.execute("SELECT tag_no, breed, weight_kg FROM master_records WHERE status = 'Active' OR tag_no = ? ORDER BY tag_no ASC", (record['tag_id'],)).fetchall()
+    return render_template('sales_form.html', s_type=s_type, action='Edit', record=record, today=today_str, goats=goats)
+
+@app.route('/sales/<s_type>/delete/<int:id>', methods=['POST'])
+def sales_delete(s_type, id):
+    db = get_db()
+    if s_type == 'goat':
+        record = db.execute('SELECT tag_id FROM sales_records WHERE id = ?', (id,)).fetchone()
+        if record:
+            tag_id = record['tag_id']
+            db.execute('DELETE FROM sales_records WHERE id = ?', (id,))
+            db.execute("UPDATE master_records SET status = 'Active', selling_date = NULL, selling_price = NULL WHERE tag_no = ?", (tag_id,))
+            db.execute("INSERT OR IGNORE INTO eligible_to_sell (tag_id, tag_no, breed, gender, weight_kg) SELECT tag_no, tag_no, breed, gender, weight_kg FROM master_records WHERE tag_no = ?", (tag_id,))
+    elif s_type == 'other':
+        db.execute('DELETE FROM other_sales_records WHERE id = ?', (id,))
+        
+    db.commit()
+    flash('Sales record deleted successfully!', 'success')
+    return redirect(url_for('sales_register', s_type=s_type))
+
+@app.route('/sales/<s_type>/invoice/<int:id>')
+def sales_invoice(s_type, id):
+    db = get_db()
+    settings_raw = db.execute('SELECT * FROM farm_settings WHERE id = 1').fetchone()
+    if settings_raw:
+        farm_info = {
+            'farm_name': settings_raw['farm_name'] or 'Ranga Farms',
+            'farm_address': settings_raw['address'] or 'Aandigounder Street, Pachapalayam, Perur',
+            'farm_city': 'Coimbatore 641010',
+            'farm_phone': settings_raw['phone'] or '',
+            'bank_name': settings_raw['bank_name'] or 'State Bank of India',
+            'account_number': settings_raw['account_no'] or '39820129381',
+            'account_no': settings_raw['account_no'] or '39820129381',
+            'ifsc_code': settings_raw['ifsc_code'] or 'SBIN0001234',
+            'gst_no': settings_raw['gst_no'] or ''
+        }
+    else:
+        legacy_raw = db.execute('SELECT * FROM farm_info WHERE id = 1').fetchone()
+        if legacy_raw:
+            farm_info = {
+                'farm_name': legacy_raw['farm_name'],
+                'farm_address': legacy_raw['farm_address'],
+                'farm_city': legacy_raw['farm_city'],
+                'farm_phone': legacy_raw['farm_phone'],
+                'bank_name': legacy_raw['bank_name'],
+                'account_number': legacy_raw['account_number'],
+                'account_no': legacy_raw['account_number'],
+                'ifsc_code': legacy_raw['ifsc_code'],
+                'gst_no': ''
+            }
+        else:
+            farm_info = {
+                'farm_name': 'Ranga Farms',
+                'farm_address': 'Aandigounder Street, Pachapalayam, Perur',
+                'farm_city': 'Coimbatore 641010',
+                'farm_phone': '',
+                'bank_name': 'State Bank of India',
+                'account_number': '39820129381',
+                'account_no': '39820129381',
+                'ifsc_code': 'SBIN0001234',
+                'gst_no': ''
+            }
+        
+    if s_type == 'goat':
+        sale_raw = db.execute('SELECT * FROM sales_records WHERE id = ?', (id,)).fetchone()
+        if not sale_raw:
+            flash('Sales record not found.', 'danger')
+            return redirect(url_for('sales_register', s_type=s_type))
+        sale = {
+            'id': sale_raw['id'],
+            'date_of_sale': sale_raw['date_of_sale'],
+            'buyer_name': sale_raw['buyer_name'],
+            'buyer_city': sale_raw['buyer_city'],
+            'buyer_contact': sale_raw['buyer_contact'],
+            'total_amount': sale_raw['sold_price'],
+            'tag_id': sale_raw['tag_id'],
+            'breed': sale_raw['breed'],
+            'breed_percent': sale_raw['breed_percent'],
+            'gender': sale_raw['gender'],
+            'weight': sale_raw['weight']
+        }
+        particulars = [
+            {'label': 'Tag/ID Number', 'value': sale_raw['tag_id']},
+            {'label': 'Gender', 'value': sale_raw['gender']},
+            {'label': 'Weight (kg)', 'value': f"{sale_raw['weight']} kg"},
+            {'label': 'Breed', 'value': f"{sale_raw['breed']} ({sale_raw['breed_percent']}%)"}
+        ]
+    else:
+        sale_raw = db.execute('SELECT * FROM other_sales_records WHERE id = ?', (id,)).fetchone()
+        if not sale_raw:
+            flash('Sales record not found.', 'danger')
+            return redirect(url_for('sales_register', s_type=s_type))
+        sale = {
+            'id': sale_raw['id'],
+            'date_of_sale': sale_raw['date_of_sale'],
+            'buyer_name': sale_raw['buyer_name'],
+            'buyer_city': sale_raw['buyer_city'],
+            'buyer_contact': sale_raw['buyer_contact'],
+            'total_amount': sale_raw['total_amount'],
+            'item_name': sale_raw['item_name'],
+            'quantity': sale_raw['quantity'],
+            'unit': sale_raw['unit'],
+            'price_per_unit': sale_raw['price_per_unit'],
+            'notes': sale_raw['notes']
+        }
+        particulars = [
+            {'label': 'Item Sold', 'value': sale_raw['item_name']},
+            {'label': 'Quantity', 'value': f"{sale_raw['quantity']} {sale_raw['unit']}"},
+            {'label': 'Price per Unit', 'value': f"₹{sale_raw['price_per_unit']}"},
+            {'label': 'Additional Notes', 'value': sale_raw['notes'] or 'N/A'}
+        ]
+        
+    return render_template('sales_invoice.html', sale=sale, particulars=particulars, farm_info=farm_info, s_type=s_type, current_date=datetime.now())
+
+@app.route('/sales/<s_type>/invoice_txt/<int:id>')
+def sales_invoice_txt(s_type, id):
+    from io import BytesIO
+    db = get_db()
+    settings_raw = db.execute('SELECT * FROM farm_settings WHERE id = 1').fetchone()
+    if settings_raw:
+        farm_info = {
+            'farm_name': settings_raw['farm_name'] or 'Ranga Farms',
+            'farm_address': settings_raw['address'] or 'Aandigounder Street, Pachapalayam, Perur',
+            'farm_phone': settings_raw['phone'] or '',
+            'bank_name': settings_raw['bank_name'] or 'State Bank of India',
+            'account_no': settings_raw['account_no'] or '39820129381',
+            'ifsc_code': settings_raw['ifsc_code'] or 'SBIN0001234'
+        }
+    else:
+        legacy_raw = db.execute('SELECT * FROM farm_info WHERE id = 1').fetchone()
+        if legacy_raw:
+            farm_info = {
+                'farm_name': legacy_raw['farm_name'],
+                'farm_address': legacy_raw['farm_address'],
+                'farm_phone': legacy_raw['farm_phone'],
+                'bank_name': legacy_raw['bank_name'],
+                'account_no': legacy_raw['account_number'],
+                'ifsc_code': legacy_raw['ifsc_code']
+            }
+        else:
+            farm_info = {
+                'farm_name': 'Ranga Farms',
+                'farm_address': 'Aandigounder Street, Pachapalayam, Perur',
+                'farm_phone': '',
+                'bank_name': 'State Bank of India',
+                'account_no': '39820129381',
+                'ifsc_code': 'SBIN0001234'
+            }
+    
+    if s_type == 'goat':
+        sale = db.execute('SELECT * FROM sales_records WHERE id = ?', (id,)).fetchone()
+    else:
+        sale = db.execute('SELECT * FROM other_sales_records WHERE id = ?', (id,)).fetchone()
+        
+    if not sale:
+        flash('Sales record not found.', 'danger')
+        return redirect(url_for('sales_register', s_type=s_type))
+        
+    # Generate text bill
+    bill_text = ""
+    bill_text += "=" * 70 + "\n"
+    bill_text += f"{(farm_info['farm_name'] if farm_info and farm_info['farm_name'] else 'Ranga Farms'):^70}\n"
+    bill_text += "=" * 70 + "\n"
+    bill_text += f"{('SALES INVOICE (' + s_type.upper() + ')'):^70}\n"
+    bill_text += "=" * 70 + "\n\n"
+    
+    bill_text += f"Invoice #: INV-{s_type.upper()[:3]}-{sale['id']}\n"
+    bill_text += f"Date of Issue: {sale['date_of_sale']}\n\n"
+    
+    bill_text += "BILL TO:\n"
+    bill_text += f"Buyer Name: {sale['buyer_name']}\n"
+    bill_text += f"City: {sale['buyer_city']}\n"
+    bill_text += f"Contact: {sale['buyer_contact']}\n\n"
+    
+    bill_text += "-" * 70 + "\n"
+    if s_type == 'goat':
+        bill_text += f"{'Particulars':<45} | {'Details':<20}\n"
+        bill_text += "-" * 70 + "\n"
+        bill_text += f"{'Goat Tag ID':<45} | {sale['tag_id']:<20}\n"
+        bill_text += f"{'Breed':<45} | {sale['breed'] + ' (' + sale['breed_percent'] + '%)':<20}\n"
+        bill_text += f"{'Gender':<45} | {sale['gender']:<20}\n"
+        bill_text += f"{'Weight':<45} | {str(sale['weight']) + ' kg':<20}\n"
+        amount = sale['sold_price']
+    else:
+        bill_text += f"{'Particulars':<45} | {'Details':<20}\n"
+        bill_text += "-" * 70 + "\n"
+        bill_text += f"{'Item Name':<45} | {sale['item_name']:<20}\n"
+        bill_text += f"{'Quantity':<45} | {str(sale['quantity']) + ' ' + sale['unit']:<20}\n"
+        bill_text += f"{'Price per Unit':<45} | {'INR ' + str(sale['price_per_unit']):<20}\n"
+        amount = sale['total_amount']
+        
+    bill_text += "-" * 70 + "\n"
+    bill_text += f"{'TOTAL AMOUNT':<45} | INR {amount:.2f}\n"
+    bill_text += "=" * 70 + "\n\n"
+    bill_text += "Thank you for your business!\n"
+    
+    # Download file response
+    mem_file = BytesIO()
+    mem_file.write(bill_text.encode('utf-8'))
+    mem_file.seek(0)
+    
+    return send_file(
+        mem_file,
+        mimetype="text/plain",
+        as_attachment=True,
+        download_name=f"Invoice_{s_type}_{sale['id']}.txt"
+    )
+
+@app.route('/sales_add')
+def old_sales_add():
+    return redirect(url_for('sales_add', s_type='goat'))
+
 
 @app.route('/medicine_add', methods=['GET', 'POST'])
 def medicine_add():
@@ -796,7 +1527,7 @@ def medicine():
         q += ' AND strftime("%Y-%m", consultation_date) = ?'
         p.append(month_filter)
         
-    q += ' ORDER BY consultation_date DESC'
+    q += ' ORDER BY consultation_date ASC, id ASC'
     records = db.execute(q, p).fetchall()
     
     # Calculate totals
@@ -840,37 +1571,448 @@ def mortality():
     db = get_db()
     tag_search = request.args.get('tag_id', '')
     if tag_search:
-        records = db.execute('SELECT * FROM mortality_records WHERE tag_id LIKE ? ORDER BY expired_date DESC', 
+        records = db.execute('SELECT * FROM mortality_records WHERE tag_id LIKE ? ORDER BY CAST(sr_no AS INTEGER) ASC', 
              (f"%{tag_search}%",)).fetchall()
     else:
-        records = db.execute('SELECT * FROM mortality_records ORDER BY expired_date DESC').fetchall()
+        records = db.execute('SELECT * FROM mortality_records ORDER BY CAST(sr_no AS INTEGER) ASC').fetchall()
     return render_template('mortality.html', records=records)
+
+@app.route('/get_feed_stock/<feed_name>')
+def get_feed_stock(feed_name):
+    db = get_db()
+    last_record = db.execute('''
+        SELECT closing_stock, cost_per_unit, total_cost, opening_stock FROM feed_inventory 
+        WHERE feed_name = ? 
+        ORDER BY purchase_date DESC, id DESC LIMIT 1
+    ''', (feed_name,)).fetchone()
+    
+    stock = last_record['closing_stock'] if last_record else 0.0
+    rate = 0.0
+    if last_record:
+        if last_record['cost_per_unit'] and last_record['cost_per_unit'] > 0:
+            rate = last_record['cost_per_unit']
+        elif last_record['total_cost'] and last_record['opening_stock'] and last_record['opening_stock'] > 0:
+            rate = last_record['total_cost'] / last_record['opening_stock']
+            
+    return {'closing_stock': stock, 'rate_per_kg': rate}
+
+def get_goats_in_batch(batch_number):
+    db = get_db()
+    # Fetch active goats
+    goats_raw = db.execute('''
+        SELECT id, tag_no as identifier, breed, breed_percent, gender, color, weight_kg as weight, dob, purchase_date, status, 'Goat' as record_type
+        FROM master_records 
+        WHERE status = 'Active'
+    ''').fetchall()
+    
+    # Fetch kids
+    kids_raw = db.execute('''
+        SELECT id, kid_id as identifier, breed, breed_percent, gender, color, birth_weight as weight, birth_date as dob, birth_date as purchase_date, 'Active' as status, 'Kid' as record_type
+        FROM kid_records
+    ''').fetchall()
+    
+    all_animals = []
+    today = datetime.now().date()
+    
+    for row in goats_raw:
+        animal = dict(row)
+        dob_str = animal.get('dob')
+        days_old = 9999
+        if dob_str:
+            try:
+                dob_date = datetime.strptime(dob_str, '%Y-%m-%d').date()
+                days_old = (today - dob_date).days
+            except Exception:
+                pass
+        animal['days_old'] = days_old
+        all_animals.append(animal)
+        
+    for row in kids_raw:
+        animal = dict(row)
+        dob_str = animal.get('dob')
+        days_old = 9999
+        if dob_str:
+            try:
+                dob_date = datetime.strptime(dob_str, '%Y-%m-%d').date()
+                days_old = (today - dob_date).days
+            except Exception:
+                pass
+        animal['days_old'] = days_old
+        all_animals.append(animal)
+        
+    batch_animals = []
+    for animal in all_animals:
+        days = animal['days_old']
+        if batch_number == 1 and days <= 182:
+            batch_animals.append(animal)
+        elif batch_number == 2 and 182 < days <= 365:
+            batch_animals.append(animal)
+        elif batch_number == 3 and 365 < days <= 730:
+            batch_animals.append(animal)
+        elif batch_number == 4 and days > 730:
+            batch_animals.append(animal)
+            
+    return batch_animals
 
 @app.route('/feed')
 def feed():
     db = get_db()
-    records = db.execute('SELECT * FROM feed_inventory ORDER BY id DESC').fetchall()
-    summary = db.execute('SELECT SUM(opening_stock) as opening, SUM(purchased_qty) as total_purchased, SUM(used_qty) as total_used, SUM(total_cost) as total_cost, SUM(closing_stock) as closing FROM feed_inventory').fetchone()
-    return render_template('feed.html', records=records, summary=summary)
+    
+    # Fetch feed inventory
+    feed_records = db.execute("SELECT * FROM feed_inventory ORDER BY id ASC").fetchall()
+    feed_names = db.execute("SELECT DISTINCT feed_name FROM feed_inventory").fetchall()
+    feed_stocks = {}
+    for row in feed_names:
+        name = row['feed_name']
+        last = db.execute("SELECT closing_stock, unit FROM feed_inventory WHERE feed_name = ? ORDER BY id DESC LIMIT 1", (name,)).fetchone()
+        if last:
+            feed_stocks[name] = {
+                'closing_stock': last['closing_stock'],
+                'unit': last['unit'] or 'KG'
+            }
+            
+    # Fetch medicine inventory
+    medicine_records = db.execute("SELECT * FROM medicine_inventory ORDER BY id ASC").fetchall()
+    med_names = db.execute("SELECT DISTINCT medicine_name FROM medicine_inventory").fetchall()
+    med_stocks = {}
+    for row in med_names:
+        name = row['medicine_name']
+        last = db.execute("SELECT closing_stock, unit FROM medicine_inventory WHERE medicine_name = ? ORDER BY id DESC LIMIT 1", (name,)).fetchone()
+        if last:
+            med_stocks[name] = {
+                'closing_stock': last['closing_stock'],
+                'unit': last['unit'] or 'Doses'
+            }
+            
+    # Fetch vaccine inventory
+    vaccine_records = db.execute("SELECT * FROM vaccine_inventory ORDER BY id ASC").fetchall()
+    vac_names = db.execute("SELECT DISTINCT vaccine_name FROM vaccine_inventory").fetchall()
+    vac_stocks = {}
+    for row in vac_names:
+        name = row['vaccine_name']
+        last = db.execute("SELECT closing_stock, unit FROM vaccine_inventory WHERE vaccine_name = ? ORDER BY id DESC LIMIT 1", (name,)).fetchone()
+        if last:
+            vac_stocks[name] = {
+                'closing_stock': last['closing_stock'],
+                'unit': last['unit'] or 'Doses'
+            }
+            
+    # Calculate counts in the 4 batches
+    goats_raw = db.execute("SELECT dob FROM master_records WHERE status = 'Active'").fetchall()
+    kids_raw = db.execute("SELECT birth_date as dob FROM kid_records").fetchall()
+    
+    today = datetime.now().date()
+    batch_counts = {1: 0, 2: 0, 3: 0, 4: 0}
+    
+    for row in goats_raw:
+        dob_str = row['dob']
+        if dob_str:
+            try:
+                dob_date = datetime.strptime(dob_str, '%Y-%m-%d').date()
+                days = (today - dob_date).days
+                if days <= 182:
+                    batch_counts[1] += 1
+                elif days <= 365:
+                    batch_counts[2] += 1
+                elif days <= 730:
+                    batch_counts[3] += 1
+                else:
+                    batch_counts[4] += 1
+            except Exception:
+                pass
+                
+    for row in kids_raw:
+        dob_str = row['dob']
+        if dob_str:
+            try:
+                dob_date = datetime.strptime(dob_str, '%Y-%m-%d').date()
+                days = (today - dob_date).days
+                if days <= 182:
+                    batch_counts[1] += 1
+                elif days <= 365:
+                    batch_counts[2] += 1
+                elif days <= 730:
+                    batch_counts[3] += 1
+                else:
+                    batch_counts[4] += 1
+            except Exception:
+                pass
+                
+    return render_template('feed.html',
+                           feed_records=feed_records,
+                           feed_stocks=feed_stocks,
+                           medicine_records=medicine_records,
+                           med_stocks=med_stocks,
+                           vaccine_records=vaccine_records,
+                           vac_stocks=vac_stocks,
+                           batch_counts=batch_counts)
+
+@app.route('/stock_inventory')
+def stock_inventory():
+    db = get_db()
+    
+    # Fetch feed inventory
+    feed_records = db.execute("SELECT * FROM feed_inventory ORDER BY id ASC").fetchall()
+    feed_names = db.execute("SELECT DISTINCT feed_name FROM feed_inventory").fetchall()
+    feed_stocks = {}
+    for row in feed_names:
+        name = row['feed_name']
+        last = db.execute("SELECT closing_stock, unit FROM feed_inventory WHERE feed_name = ? ORDER BY id DESC LIMIT 1", (name,)).fetchone()
+        if last:
+            feed_stocks[name] = {
+                'closing_stock': last['closing_stock'],
+                'unit': last['unit'] or 'KG'
+            }
+            
+    # Fetch medicine inventory
+    medicine_records = db.execute("SELECT * FROM medicine_inventory ORDER BY id ASC").fetchall()
+    med_names = db.execute("SELECT DISTINCT medicine_name FROM medicine_inventory").fetchall()
+    med_stocks = {}
+    for row in med_names:
+        name = row['medicine_name']
+        last = db.execute("SELECT closing_stock, unit FROM medicine_inventory WHERE medicine_name = ? ORDER BY id DESC LIMIT 1", (name,)).fetchone()
+        if last:
+            med_stocks[name] = {
+                'closing_stock': last['closing_stock'],
+                'unit': last['unit'] or 'Doses'
+            }
+            
+    # Fetch vaccine inventory
+    vaccine_records = db.execute("SELECT * FROM vaccine_inventory ORDER BY id ASC").fetchall()
+    vac_names = db.execute("SELECT DISTINCT vaccine_name FROM vaccine_inventory").fetchall()
+    vac_stocks = {}
+    for row in vac_names:
+        name = row['vaccine_name']
+        last = db.execute("SELECT closing_stock, unit FROM vaccine_inventory WHERE vaccine_name = ? ORDER BY id DESC LIMIT 1", (name,)).fetchone()
+        if last:
+            vac_stocks[name] = {
+                'closing_stock': last['closing_stock'],
+                'unit': last['unit'] or 'Doses'
+            }
+
+    return render_template('stock_inventory.html',
+                           feed_records=feed_records,
+                           feed_stocks=feed_stocks,
+                           medicine_records=medicine_records,
+                           med_stocks=med_stocks,
+                           vaccine_records=vaccine_records,
+                           vac_stocks=vac_stocks)
+
+@app.route('/buy_stock', methods=['POST'])
+def buy_stock():
+    db = get_db()
+    f = request.form
+    item_type = f.get('item_type') # 'feed', 'medicine', 'vaccine'
+    item_name = f.get('item_name', '').strip()
+    qty = float(f.get('quantity') or 0)
+    cost = float(f.get('cost') or 0)
+    supplier = f.get('supplier', '').strip() or 'Market'
+    date_str = f.get('purchase_date') or datetime.now().strftime('%Y-%m-%d')
+    unit = f.get('unit') or ('KG' if item_type == 'feed' else 'Doses')
+    
+    if not item_name or qty <= 0 or cost <= 0:
+        flash('Invalid purchase details! Please fill all fields with correct numbers.', 'danger')
+        return redirect(url_for('feed'))
+        
+    if item_type == 'feed':
+        cursor = db.execute('''
+            INSERT INTO feed_purchases (feed_name, quantity, unit, cost, purchase_date, supplier)
+            VALUES (?, ?, ?, ?, ?, ?)
+        ''', (item_name, qty, unit, cost, date_str, supplier))
+        purchase_id = cursor.lastrowid
+        
+        last = db.execute("SELECT closing_stock FROM feed_inventory WHERE feed_name = ? ORDER BY id DESC LIMIT 1", (item_name,)).fetchone()
+        opening = last['closing_stock'] if last else 0.0
+        closing = opening + qty
+        cost_per_unit = cost / qty if qty > 0 else 0.0
+        
+        db.execute('''
+            INSERT INTO feed_inventory (feed_name, opening_stock, purchased_qty, used_qty, wastage_qty, closing_stock, unit, cost_per_unit, total_cost, purchase_date, supplier, purchase_id)
+            VALUES (?, ?, ?, 0.0, 0.0, ?, ?, ?, ?, ?, ?, ?)
+        ''', (item_name, opening, qty, closing, unit, cost_per_unit, cost, date_str, supplier, purchase_id))
+        
+    elif item_type == 'medicine':
+        cursor = db.execute('''
+            INSERT INTO medicine_purchases (medicine_name, dose_unit, quantity, cost, purchase_date, supplier)
+            VALUES (?, ?, ?, ?, ?, ?)
+        ''', (item_name, 'ml', qty, cost, date_str, supplier))
+        purchase_id = cursor.lastrowid
+        
+        last = db.execute("SELECT closing_stock FROM medicine_inventory WHERE medicine_name = ? ORDER BY id DESC LIMIT 1", (item_name,)).fetchone()
+        opening = last['closing_stock'] if last else 0.0
+        closing = opening + qty
+        cost_per_unit = cost / qty if qty > 0 else 0.0
+        
+        db.execute('''
+            INSERT INTO medicine_inventory (medicine_name, opening_stock, purchased_qty, used_qty, wastage_qty, closing_stock, unit, cost_per_unit, total_cost, purchase_date, supplier, purchase_id)
+            VALUES (?, ?, ?, 0.0, 0.0, ?, ?, ?, ?, ?, ?, ?)
+        ''', (item_name, opening, qty, closing, unit, cost_per_unit, cost, date_str, supplier, purchase_id))
+        
+    elif item_type == 'vaccine':
+        cursor = db.execute('''
+            INSERT INTO vaccine_purchases (vaccine_name, quantity, cost, purchase_date, supplier)
+            VALUES (?, ?, ?, ?, ?)
+        ''', (item_name, qty, cost, date_str, supplier))
+        purchase_id = cursor.lastrowid
+        
+        last = db.execute("SELECT closing_stock FROM vaccine_inventory WHERE vaccine_name = ? ORDER BY id DESC LIMIT 1", (item_name,)).fetchone()
+        opening = last['closing_stock'] if last else 0.0
+        closing = opening + qty
+        cost_per_unit = cost / qty if qty > 0 else 0.0
+        
+        db.execute('''
+            INSERT INTO vaccine_inventory (vaccine_name, opening_stock, purchased_qty, used_qty, wastage_qty, closing_stock, unit, cost_per_unit, total_cost, purchase_date, supplier, purchase_id)
+            VALUES (?, ?, ?, 0.0, 0.0, ?, ?, ?, ?, ?, ?, ?)
+        ''', (item_name, opening, qty, closing, unit, cost_per_unit, cost, date_str, supplier, purchase_id))
+        
+    # Logical expenses recording
+    desc = f"Purchased {qty} {unit} of {item_name} from {supplier}"
+    db.execute('''
+        INSERT INTO goats_data (tag_number, date, category, type, amount, notes)
+        VALUES ('All', ?, 'expense', ?, ?, ?)
+    ''', (date_str, item_type.capitalize(), cost, desc))
+    
+    db.execute('''
+        INSERT INTO expenses (category, amount, date, description, vendor_name, payment_mode, status)
+        VALUES (?, ?, ?, ?, ?, 'Cash', 'Paid')
+    ''', (item_type.capitalize() + ' Purchase', cost, date_str, desc, supplier))
+    
+    db.commit()
+    flash(f'{item_type.capitalize()} purchase of {qty} {unit} recorded and marked in Expenses successfully!', 'success')
+    return redirect(url_for('feed'))
+
+@app.route('/consume_feed', methods=['POST'])
+def consume_feed():
+    db = get_db()
+    f = request.form
+    feed_name = f.get('feed_name')
+    batch_num = int(f.get('batch_num') or 1)
+    qty = float(f.get('quantity') or 0)
+    wastage = float(f.get('wastage') or 0)
+    date_str = f.get('date') or datetime.now().strftime('%Y-%m-%d')
+    
+    if not feed_name or qty <= 0:
+        flash('Invalid feed allocation details!', 'danger')
+        return redirect(url_for('feed'))
+        
+    last = db.execute("SELECT closing_stock, cost_per_unit, unit FROM feed_inventory WHERE feed_name = ? ORDER BY id DESC LIMIT 1", (feed_name,)).fetchone()
+    opening = last['closing_stock'] if last else 0.0
+    cost_per_unit = last['cost_per_unit'] if last else 0.0
+    unit = last['unit'] or 'KG'
+    
+    if opening <= 0:
+        flash(f'No stock available for {feed_name}! Please buy feed first.', 'danger')
+        return redirect(url_for('feed'))
+        
+    closing = max(0.0, opening - qty - wastage)
+    
+    db.execute('''
+        INSERT INTO feed_inventory (feed_name, opening_stock, purchased_qty, used_qty, wastage_qty, closing_stock, unit, cost_per_unit, total_cost, purchase_date, supplier)
+        VALUES (?, ?, 0.0, ?, ?, ?, ?, ?, 0.0, ?, ?)
+    ''', (feed_name, opening, qty, wastage, closing, unit, cost_per_unit, date_str, f"Allocated to Batch {batch_num}"))
+    
+    db.commit()
+    flash(f'Gave {qty} {unit} feed to Batch {batch_num} successfully!', 'success')
+    return redirect(url_for('feed'))
+
+@app.route('/consume_medicine', methods=['POST'])
+def consume_medicine():
+    db = get_db()
+    f = request.form
+    med_name = f.get('medicine_name')
+    batch_num = int(f.get('batch_num') or 1)
+    qty = float(f.get('quantity') or 0)
+    date_str = f.get('date') or datetime.now().strftime('%Y-%m-%d')
+    notes = f.get('notes') or f"Allocated to Batch {batch_num}"
+    
+    if not med_name or qty <= 0:
+        flash('Invalid medicine allocation details!', 'danger')
+        return redirect(url_for('feed'))
+        
+    last = db.execute("SELECT closing_stock, cost_per_unit, unit FROM medicine_inventory WHERE medicine_name = ? ORDER BY id DESC LIMIT 1", (med_name,)).fetchone()
+    opening = last['closing_stock'] if last else 0.0
+    cost_per_unit = last['cost_per_unit'] if last else 0.0
+    unit = last['unit'] or 'Doses'
+    
+    if opening <= 0:
+        flash(f'No stock available for {med_name}! Please buy medicine first.', 'danger')
+        return redirect(url_for('feed'))
+        
+    closing = max(0.0, opening - qty)
+    
+    db.execute('''
+        INSERT INTO medicine_inventory (medicine_name, opening_stock, purchased_qty, used_qty, wastage_qty, closing_stock, unit, cost_per_unit, total_cost, purchase_date, supplier)
+        VALUES (?, ?, 0.0, ?, 0.0, ?, ?, ?, 0.0, ?, ?)
+    ''', (med_name, opening, qty, closing, unit, cost_per_unit, date_str, f"Allocated to Batch {batch_num}"))
+    
+    goats = get_goats_in_batch(batch_num)
+    for g in goats:
+        tag = g['identifier']
+        db.execute('''
+            INSERT INTO medicine_history (tag_no, doctor_name, consultation_date, medicine_name, dose, quantity, cost, notes)
+            VALUES (?, 'Farm Doctor', ?, ?, ?, ?, 0.0, ?)
+        ''', (tag, date_str, med_name, f"{qty / len(goats):.2f} {unit}" if goats else f"1 {unit}", f"{qty / len(goats):.2f}" if goats else "1", notes))
+        
+        db.execute('''
+            INSERT INTO goats_data (tag_number, date, category, type, amount, notes)
+            VALUES (?, ?, 'expense', 'Medicine', 0.0, ?)
+        ''', (tag, date_str, f"Batch {batch_num} Medication: {med_name}"))
+        
+    db.commit()
+    flash(f'Successfully allocated {qty} {unit} medicine to Batch {batch_num} and logged for {len(goats)} goats!', 'success')
+    return redirect(url_for('feed'))
+
+@app.route('/consume_vaccine', methods=['POST'])
+def consume_vaccine():
+    db = get_db()
+    f = request.form
+    vac_name = f.get('vaccine_name')
+    batch_num = int(f.get('batch_num') or 1)
+    qty = float(f.get('quantity') or 0)
+    date_str = f.get('date') or datetime.now().strftime('%Y-%m-%d')
+    next_due = f.get('next_due_date') or None
+    notes = f.get('notes') or f"Allocated to Batch {batch_num}"
+    
+    if not vac_name or qty <= 0:
+        flash('Invalid vaccine allocation details!', 'danger')
+        return redirect(url_for('feed'))
+        
+    last = db.execute("SELECT closing_stock, cost_per_unit, unit FROM vaccine_inventory WHERE vaccine_name = ? ORDER BY id DESC LIMIT 1", (vac_name,)).fetchone()
+    opening = last['closing_stock'] if last else 0.0
+    cost_per_unit = last['cost_per_unit'] if last else 0.0
+    unit = last['unit'] or 'Doses'
+    
+    if opening <= 0:
+        flash(f'No stock available for {vac_name}! Please buy vaccine first.', 'danger')
+        return redirect(url_for('feed'))
+        
+    closing = max(0.0, opening - qty)
+    
+    db.execute('''
+        INSERT INTO vaccine_inventory (vaccine_name, opening_stock, purchased_qty, used_qty, wastage_qty, closing_stock, unit, cost_per_unit, total_cost, purchase_date, supplier)
+        VALUES (?, ?, 0.0, ?, 0.0, ?, ?, ?, 0.0, ?, ?)
+    ''', (vac_name, opening, qty, closing, unit, cost_per_unit, date_str, f"Allocated to Batch {batch_num}"))
+    
+    goats = get_goats_in_batch(batch_num)
+    for g in goats:
+        tag = g['identifier']
+        db.execute('''
+            INSERT INTO vaccine_records (sr_no, tag_no, vaccine_date, vaccine_name, amount_spent, notes, next_due_date)
+            VALUES (?, ?, ?, ?, 0.0, ?, ?)
+        ''', (f"B{batch_num}", tag, date_str, vac_name, notes, next_due))
+        
+        db.execute('''
+            INSERT INTO goats_data (tag_number, date, category, type, amount, notes)
+            VALUES (?, ?, 'expense', 'Vaccine', 0.0, ?)
+        ''', (tag, date_str, f"Batch {batch_num} Vaccination: {vac_name}"))
+        
+    db.commit()
+    flash(f'Successfully allocated {qty} {unit} vaccine to Batch {batch_num} and logged for {len(goats)} goats!', 'success')
+    return redirect(url_for('feed'))
 
 @app.route('/feed_add', methods=['GET', 'POST'])
 def feed_add():
-    db = get_db()
-    if request.method == 'POST':
-        f = request.form
-        # Calculate closing stock: opening + purchased - used
-        opening = float(f.get('opening_stock') or 0)
-        purchased = float(f.get('purchase_qty') or 0)
-        used = float(f.get('used_qty') or 0)
-        closing = opening + purchased - used
-        
-        db.execute('''INSERT INTO feed_inventory (feed_name, opening_stock, purchased_qty, used_qty, closing_stock, unit, cost_per_unit, total_cost, purchase_date, supplier)
-                      VALUES (?,?,?,?,?,?,?,?,?,?)''',
-            (f.get('feed_name'), opening, purchased, used, closing, f.get('unit'), f.get('purchase_amount', 0), f.get('total_cost', 0), f.get('date'), f.get('supplier')))
-        db.commit()
-        flash('Feed record added!', 'success')
-        return redirect(url_for('feed'))
-    return render_template('feed_add.html')
+    return redirect(url_for('feed'))
 
 @app.route('/kid_add', methods=['GET', 'POST'])
 def kid_add():
@@ -878,6 +2020,35 @@ def kid_add():
     if request.method == 'POST':
         f = request.form
         db = get_db()
+        
+        # Validate parent IDs in master_records
+        mother_id = f.get('mother_id', '').strip()
+        father_id = f.get('father_id', '').strip()
+
+        if mother_id and father_id and mother_id == father_id:
+            flash("Validation failed: Mother and Father cannot have the same Tag ID!", 'danger')
+            return redirect(url_for('kid_add'))
+
+        # Check mother ID
+        if mother_id:
+            mother = db.execute('SELECT tag_no, gender FROM master_records WHERE tag_no = ?', (mother_id,)).fetchone()
+            if not mother:
+                flash(f"Validation failed: Mother Tag ID '{mother_id}' does not exist in Master Records!", 'danger')
+                return redirect(url_for('kid_add'))
+            elif mother['gender'] == 'Male':
+                flash(f"Validation failed: Mother Tag ID '{mother_id}' is a Male goat! A male goat cannot be registered as a Mother.", 'danger')
+                return redirect(url_for('kid_add'))
+
+        # Check father ID
+        if father_id:
+            father = db.execute('SELECT tag_no, gender FROM master_records WHERE tag_no = ?', (father_id,)).fetchone()
+            if not father:
+                flash(f"Validation failed: Father Tag ID '{father_id}' does not exist in Master Records!", 'danger')
+                return redirect(url_for('kid_add'))
+            elif father['gender'] == 'Female':
+                flash(f"Validation failed: Father Tag ID '{father_id}' is a Female goat! A female goat cannot be registered as a Father.", 'danger')
+                return redirect(url_for('kid_add'))
+                
         db.execute('''
             INSERT INTO kid_records (
                 s_no, kid_id, breed, breed_percent, gender, color, 
@@ -949,7 +2120,7 @@ def vaccine():
         q += ' AND strftime("%Y-%m", vaccine_date) = ?'
         p.append(month_filter)
         
-    q += ' ORDER BY vaccine_date DESC'
+    q += ' ORDER BY CAST(sr_no AS INTEGER) ASC, id ASC'
     records = db.execute(q, p).fetchall()
     
     total_cost = sum(r['amount_spent'] or 0 for r in records)
@@ -1036,75 +2207,117 @@ def master_edit(id):
     
     if request.method == 'POST':
         f = request.form
+        
+        # Calculate DOB from entered Age
+        try:
+            from datetime import timedelta
+            age_years = int(f.get('age_years') or 0)
+            age_months = int(f.get('age_months') or 0)
+            age_days = int(f.get('age_days') or 0)
+            total_days = age_years * 365 + age_months * 30 + age_days
+            dob_date = datetime.now().date() - timedelta(days=total_days)
+            dob_str = dob_date.strftime('%Y-%m-%d')
+        except Exception:
+            dob_str = None
+
         db.execute('''
             UPDATE master_records SET 
             si_no = ?, tag_no = ?, breed = ?, breed_percent = ?, status = ?, sold = ?, expired = ?, gender = ?,
             purchase_date = ?, color = ?, weight_kg = ?, purchase_amount = ?, insurance_date = ?,
-            vaccination = ?, vaccination_period = ?, medicine = ?, medicine_period = ?, feed = ?,
+            vaccination = ?, vaccination_period = ?, vaccination_next_due = ?, medicine = ?, medicine_period = ?, feed = ?,
             feed_amount = ?, mating_date = ?, mating_goat_no = ?, goat_week_period = ?,
             delivery_date = ?, new_goat_gender = ?, new_goat_color = ?, birth_weight = ?,
             selling_date = ?, selling_weight = ?, selling_price = ?, mortality_date = ?,
             mortality_weight = ?, mortality_reason = ?, insurance_claim_amount = ?,
-            insurance_inform_date = ?, insurance_claim_date = ?, kit_status = ? WHERE id = ?
+            insurance_inform_date = ?, insurance_claim_date = ?, kit_status = ?, dob = ? WHERE id = ?
         ''', (
             f.get('si_no'), f.get('tag_no'), f.get('breed'), f.get('breed_percent'), f.get('status'),
             f.get('sold'), f.get('expired'), f.get('gender'), f.get('purchase_date'), f.get('color'),
             f.get('weight_kg'), f.get('purchase_amount'), f.get('insurance_date'), f.get('vaccination'),
-            f.get('vaccination_period'), f.get('medicine'), f.get('medicine_period'), f.get('feed'),
+            f.get('vaccination_period'), f.get('vaccination_next_due') or None, f.get('medicine'), f.get('medicine_period'), f.get('feed'),
             f.get('feed_amount'), f.get('mating_date'), f.get('mating_goat_no'), f.get('goat_week_period'),
             f.get('delivery_date'), f.get('new_goat_gender'), f.get('new_goat_color'), f.get('birth_weight'),
-            f.get('selling_date'), f.get('selling_weight'), f.get('selling_price'), f.get('mortality_date'),
+            f.get('selling_date') or None, f.get('selling_weight'), f.get('selling_price'), f.get('mortality_date') or None,
             f.get('mortality_weight'), f.get('mortality_reason'), f.get('insurance_claim_amount'),
-            f.get('insurance_inform_date'), f.get('insurance_claim_date'), 1 if f.get('kit_status') else 0, id
+            f.get('insurance_inform_date') or None, f.get('insurance_claim_date') or None, 1 if f.get('kit_status') else 0, dob_str, id
         ))
+        
+        # Connected Mortality Log Synchronization
+        tag_no = f.get('tag_no')
+        status = f.get('status')
+        mortality_date = f.get('mortality_date')
+        if status == 'Expired' or mortality_date:
+            mort_exists = db.execute('SELECT 1 FROM mortality_records WHERE tag_id = ?', (tag_no,)).fetchone()
+            if not mort_exists:
+                res_mort = db.execute('SELECT MAX(CAST(sr_no AS INTEGER)) FROM mortality_records').fetchone()[0]
+                next_mort_sr = (res_mort or 0) + 1
+                db.execute('''
+                    INSERT INTO mortality_records (
+                        sr_no, tag_id, breed, breed_percent, gender, expired_date, 
+                        weight_kgs, insurance_inform_date, insurance_claim_date,
+                        current_value, claim_amount, cause_of_death
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ''', (
+                    str(next_mort_sr), tag_no, f.get('breed'), f.get('breed_percent'), f.get('gender'),
+                    mortality_date or datetime.now().strftime('%Y-%m-%d'),
+                    f.get('mortality_weight'), f.get('insurance_inform_date') or None, f.get('insurance_claim_date') or None,
+                    f.get('purchase_amount') or 0.0, f.get('insurance_claim_amount') or 0.0, f.get('mortality_reason') or 'Unspecified'
+                ))
+            else:
+                db.execute('''
+                    UPDATE mortality_records SET
+                    breed = ?, breed_percent = ?, gender = ?, expired_date = ?, 
+                    weight_kgs = ?, insurance_inform_date = ?, insurance_claim_date = ?,
+                    claim_amount = ?, cause_of_death = ?
+                    WHERE tag_id = ?
+                ''', (
+                    f.get('breed'), f.get('breed_percent'), f.get('gender'),
+                    mortality_date or datetime.now().strftime('%Y-%m-%d'),
+                    f.get('mortality_weight'), f.get('insurance_inform_date') or None, f.get('insurance_claim_date') or None,
+                    f.get('insurance_claim_amount') or 0.0, f.get('mortality_reason') or 'Unspecified',
+                    tag_no
+                ))
+        else:
+            db.execute('DELETE FROM mortality_records WHERE tag_id = ?', (tag_no,))
+        
         db.commit()
         flash('Master record updated successfully!', 'success')
         return redirect(url_for('master'))
     
-    return render_template('master_edit.html', record=record)
+    record_dict = dict(record)
+    age_dict = parse_dob_to_age_dict(record_dict.get('dob'))
+    record_dict['age_years'] = age_dict['years']
+    record_dict['age_months'] = age_dict['months']
+    record_dict['age_days'] = age_dict['days']
+    return render_template('master_edit.html', record=record_dict)
 
 @app.route('/master_delete/<int:id>', methods=['POST'])
 def master_delete(id):
     db = get_db()
-    db.execute('DELETE FROM master_records WHERE id = ?', (id,))
-    db.commit()
-    flash('Master record deleted successfully!', 'success')
+    record = db.execute('SELECT tag_no FROM master_records WHERE id = ?', (id,)).fetchone()
+    if record:
+        tag_no = record['tag_no']
+        db.execute('DELETE FROM master_records WHERE id = ?', (id,))
+        db.execute('DELETE FROM goats_data WHERE tag_number = ?', (tag_no,))
+        db.execute('DELETE FROM sales_records WHERE tag_id = ?', (tag_no,))
+        db.execute('DELETE FROM medicine_history WHERE tag_no = ?', (tag_no,))
+        db.execute('DELETE FROM vaccine_records WHERE tag_no = ?', (tag_no,))
+        db.execute('DELETE FROM mortality_records WHERE tag_id = ?', (tag_no,))
+        db.execute('DELETE FROM eligible_to_sell WHERE tag_id = ?', (tag_no,))
+        db.commit()
+        flash('Master record and all related history/financial logs deleted successfully!', 'success')
+    else:
+        flash('Record not found.', 'danger')
     return redirect(url_for('master'))
 
-# SALES RECORDS EDIT & DELETE
+# BACKWARD COMPATIBILITY SALES REDIRECTS
 @app.route('/sales_edit/<int:id>', methods=['GET', 'POST'])
-def sales_edit(id):
-    db = get_db()
-    record = db.execute('SELECT * FROM sales_records WHERE id = ?', (id,)).fetchone()
-    
-    if not record:
-        flash('Record not found.', 'danger')
-        return redirect(url_for('sales'))
-    
-    if request.method == 'POST':
-        f = request.form
-        db.execute('''
-            UPDATE sales_records SET 
-            sr_no = ?, tag_id = ?, breed = ?, breed_percent = ?, gender = ?, weight = ?,
-            sold_price = ?, date_of_sale = ?, buyer_name = ?, buyer_city = ?, buyer_contact = ? WHERE id = ?
-        ''', (
-            f.get('sr_no'), f.get('tag_id'), f.get('breed'), f.get('breed_percent'), f.get('gender'),
-            f.get('weight'), f.get('sold_price'), f.get('date_of_sale'), f.get('buyer_name'),
-            f.get('buyer_city'), f.get('buyer_contact'), id
-        ))
-        db.commit()
-        flash('Sales record updated successfully!', 'success')
-        return redirect(url_for('sales'))
-    
-    return render_template('sales_edit.html', record=record)
+def old_sales_edit(id):
+    return redirect(url_for('sales_edit', s_type='goat', id=id))
 
 @app.route('/sales_delete/<int:id>', methods=['POST'])
-def sales_delete(id):
-    db = get_db()
-    db.execute('DELETE FROM sales_records WHERE id = ?', (id,))
-    db.commit()
-    flash('Sales record deleted successfully!', 'success')
-    return redirect(url_for('sales'))
+def old_sales_delete(id):
+    return sales_delete('goat', id)
 
 # MEDICINE RECORDS EDIT & DELETE
 @app.route('/medicine_edit/<int:id>', methods=['GET', 'POST'])
@@ -1174,9 +2387,22 @@ def mortality_edit(id):
 @app.route('/mortality_delete/<int:id>', methods=['POST'])
 def mortality_delete(id):
     db = get_db()
-    db.execute('DELETE FROM mortality_records WHERE id = ?', (id,))
-    db.commit()
-    flash('Mortality record deleted successfully!', 'success')
+    record = db.execute('SELECT tag_id FROM mortality_records WHERE id = ?', (id,)).fetchone()
+    if record:
+        tag_id = record['tag_id']
+        db.execute('DELETE FROM mortality_records WHERE id = ?', (id,))
+        # Revert status in master_records
+        db.execute("UPDATE master_records SET status = 'Active', mortality_date = NULL, mortality_reason = NULL WHERE tag_no = ?", (tag_id,))
+        # Delete related transaction from goats_data
+        db.execute("DELETE FROM goats_data WHERE tag_number = ? AND type = 'Mortality Loss'", (tag_id,))
+        
+        # Restore into eligible_to_sell if it meets weight/age criteria or just re-insert
+        db.execute("INSERT OR IGNORE INTO eligible_to_sell (tag_id, tag_no, breed, gender, weight_kg) SELECT tag_no, tag_no, breed, gender, weight_kg FROM master_records WHERE tag_no = ?", (tag_id,))
+        
+        db.commit()
+        flash('Mortality record deleted, loss transaction reversed, and goat status reverted to Active!', 'success')
+    else:
+        flash('Record not found.', 'danger')
     return redirect(url_for('mortality'))
 
 # FEED RECORDS EDIT & DELETE
@@ -1191,22 +2417,47 @@ def feed_edit(id):
     
     if request.method == 'POST':
         f = request.form
-        # Recalculate
-        opening = float(f.get('opening_stock') or 0)
-        purchased = float(f.get('purchase_qty') or 0)
-        used = float(f.get('used_qty') or 0)
-        closing = opening + purchased - used
+        opening = float(f.get('opening_qty') or f.get('opening_stock') or 0)
+        consumption = float(f.get('consumption_qty') or f.get('used_qty') or 0)
+        wastage = float(f.get('wastage_qty') or 0)
+        closing = opening - consumption - wastage
         
+        purchase_amt = float(f.get('purchase_amount') or 0)
+        cost_per_unit = purchase_amt / opening if opening > 0 else 0.0
+        
+        # If this is linked to a purchase, update voucher, expense and goats_data
+        p_id = record['purchase_id']
+        if p_id:
+            old_purch = db.execute("SELECT * FROM feed_purchases WHERE id = ?", (p_id,)).fetchone()
+            if old_purch:
+                db.execute("DELETE FROM goats_data WHERE date = ? AND category = 'expense' AND type = 'Feed' AND amount = ?", (old_purch['purchase_date'], old_purch['cost']))
+                db.execute("DELETE FROM expenses WHERE date = ? AND category = 'Feed Purchase' AND amount = ? AND vendor_name = ?", (old_purch['purchase_date'], old_purch['cost'], old_purch['supplier']))
+                
+            db.execute('''
+                UPDATE feed_purchases SET feed_name = ?, quantity = ?, unit = ?, cost = ?, purchase_date = ?, supplier = ?
+                WHERE id = ?
+            ''', (f.get('feed_name'), opening, f.get('unit'), purchase_amt, f.get('date'), f.get('supplier'), p_id))
+            
+            desc = f"Purchased {opening} {f.get('unit')} of {f.get('feed_name')} from {f.get('supplier')}"
+            db.execute('''
+                INSERT INTO goats_data (tag_number, date, category, type, amount, notes)
+                VALUES ('All', ?, 'expense', 'Feed', ?, ?)
+            ''', (f.get('date'), purchase_amt, desc))
+            db.execute('''
+                INSERT INTO expenses (category, amount, date, description, vendor_name, payment_mode, status)
+                VALUES ('Feed Purchase', ?, ?, ?, ?, 'Cash', 'Paid')
+            ''', (purchase_amt, f.get('date'), desc, f.get('supplier')))
+
         db.execute('''
             UPDATE feed_inventory SET 
-            feed_name = ?, opening_stock = ?, purchased_qty = ?, used_qty = ?, closing_stock = ?,
+            feed_name = ?, opening_stock = ?, purchased_qty = ?, used_qty = ?, wastage_qty = ?, closing_stock = ?,
             unit = ?, cost_per_unit = ?, total_cost = ?, purchase_date = ?, supplier = ? WHERE id = ?
         ''', (
-            f.get('feed_name'), opening, purchased, used, closing, f.get('unit'), 
-            f.get('purchase_amount', 0), f.get('total_cost', 0), f.get('date'), f.get('supplier'), id
+            f.get('feed_name'), opening, (opening if p_id else 0.0), consumption, wastage, closing, f.get('unit'), 
+            cost_per_unit, purchase_amt, f.get('date'), f.get('supplier'), id
         ))
         db.commit()
-        flash('Feed record updated successfully!', 'success')
+        flash('Feed record and connected expense logs updated successfully!', 'success')
         return redirect(url_for('feed'))
     
     return render_template('feed_edit.html', record=record)
@@ -1214,9 +2465,164 @@ def feed_edit(id):
 @app.route('/feed_delete/<int:id>', methods=['POST'])
 def feed_delete(id):
     db = get_db()
+    record = db.execute("SELECT * FROM feed_inventory WHERE id = ?", (id,)).fetchone()
+    if record and record['purchase_id']:
+        p_id = record['purchase_id']
+        old_purch = db.execute("SELECT * FROM feed_purchases WHERE id = ?", (p_id,)).fetchone()
+        if old_purch:
+            db.execute("DELETE FROM goats_data WHERE date = ? AND category = 'expense' AND type = 'Feed' AND amount = ?", (old_purch['purchase_date'], old_purch['cost']))
+            db.execute("DELETE FROM expenses WHERE date = ? AND category = 'Feed Purchase' AND amount = ? AND vendor_name = ?", (old_purch['purchase_date'], old_purch['cost'], old_purch['supplier']))
+        db.execute('DELETE FROM feed_purchases WHERE id = ?', (p_id,))
+        
     db.execute('DELETE FROM feed_inventory WHERE id = ?', (id,))
     db.commit()
-    flash('Feed record deleted successfully!', 'success')
+    flash('Feed record and all connected expense/voucher logs deleted successfully!', 'success')
+    return redirect(url_for('feed'))
+
+@app.route('/medicine_inventory_edit/<int:id>', methods=['GET', 'POST'])
+def medicine_inventory_edit(id):
+    db = get_db()
+    record = db.execute('SELECT * FROM medicine_inventory WHERE id = ?', (id,)).fetchone()
+    
+    if not record:
+        flash('Record not found.', 'danger')
+        return redirect(url_for('feed'))
+    
+    if request.method == 'POST':
+        f = request.form
+        opening = float(f.get('opening_qty') or f.get('opening_stock') or 0)
+        consumption = float(f.get('used_qty') or f.get('consumption_qty') or 0)
+        wastage = float(f.get('wastage_qty') or 0)
+        closing = opening - consumption - wastage
+        
+        purchase_amt = float(f.get('purchase_amount') or 0)
+        cost_per_unit = purchase_amt / opening if opening > 0 else 0.0
+        
+        # If linked to a purchase, update voucher, expense and goats_data
+        p_id = record['purchase_id']
+        if p_id:
+            old_purch = db.execute("SELECT * FROM medicine_purchases WHERE id = ?", (p_id,)).fetchone()
+            if old_purch:
+                db.execute("DELETE FROM goats_data WHERE date = ? AND category = 'expense' AND type = 'Medicine' AND amount = ?", (old_purch['purchase_date'], old_purch['cost']))
+                db.execute("DELETE FROM expenses WHERE date = ? AND category = 'Medicine Purchase' AND amount = ? AND vendor_name = ?", (old_purch['purchase_date'], old_purch['cost'], old_purch['supplier']))
+                
+            db.execute('''
+                UPDATE medicine_purchases SET medicine_name = ?, dose_unit = ?, quantity = ?, cost = ?, purchase_date = ?, supplier = ?
+                WHERE id = ?
+            ''', (f.get('medicine_name'), f.get('unit'), opening, purchase_amt, f.get('date'), f.get('supplier'), p_id))
+            
+            desc = f"Purchased {opening} Doses of {f.get('medicine_name')} from {f.get('supplier')}"
+            db.execute('''
+                INSERT INTO goats_data (tag_number, date, category, type, amount, notes)
+                VALUES ('All', ?, 'expense', 'Medicine', ?, ?)
+            ''', (f.get('date'), purchase_amt, desc))
+            db.execute('''
+                INSERT INTO expenses (category, amount, date, description, vendor_name, payment_mode, status)
+                VALUES ('Medicine Purchase', ?, ?, ?, ?, 'Cash', 'Paid')
+            ''', (purchase_amt, f.get('date'), desc, f.get('supplier')))
+
+        db.execute('''
+            UPDATE medicine_inventory SET 
+            medicine_name = ?, opening_stock = ?, purchased_qty = ?, used_qty = ?, wastage_qty = ?, closing_stock = ?,
+            unit = ?, cost_per_unit = ?, total_cost = ?, purchase_date = ?, supplier = ? WHERE id = ?
+        ''', (
+            f.get('medicine_name'), opening, (opening if p_id else 0.0), consumption, wastage, closing, f.get('unit'), 
+            cost_per_unit, purchase_amt, f.get('date'), f.get('supplier'), id
+        ))
+        db.commit()
+        flash('Medicine record and connected expense logs updated successfully!', 'success')
+        return redirect(url_for('feed'))
+    
+    return render_template('medicine_inventory_edit.html', record=record)
+
+@app.route('/medicine_inventory_delete/<int:id>', methods=['POST'])
+def medicine_inventory_delete(id):
+    db = get_db()
+    record = db.execute("SELECT * FROM medicine_inventory WHERE id = ?", (id,)).fetchone()
+    if record and record['purchase_id']:
+        p_id = record['purchase_id']
+        old_purch = db.execute("SELECT * FROM medicine_purchases WHERE id = ?", (p_id,)).fetchone()
+        if old_purch:
+            db.execute("DELETE FROM goats_data WHERE date = ? AND category = 'expense' AND type = 'Medicine' AND amount = ?", (old_purch['purchase_date'], old_purch['cost']))
+            db.execute("DELETE FROM expenses WHERE date = ? AND category = 'Medicine Purchase' AND amount = ? AND vendor_name = ?", (old_purch['purchase_date'], old_purch['cost'], old_purch['supplier']))
+        db.execute('DELETE FROM medicine_purchases WHERE id = ?', (p_id,))
+        
+    db.execute('DELETE FROM medicine_inventory WHERE id = ?', (id,))
+    db.commit()
+    flash('Medicine inventory record and all connected expense/voucher logs deleted successfully!', 'success')
+    return redirect(url_for('feed'))
+
+@app.route('/vaccine_inventory_edit/<int:id>', methods=['GET', 'POST'])
+def vaccine_inventory_edit(id):
+    db = get_db()
+    record = db.execute('SELECT * FROM vaccine_inventory WHERE id = ?', (id,)).fetchone()
+    
+    if not record:
+        flash('Record not found.', 'danger')
+        return redirect(url_for('feed'))
+    
+    if request.method == 'POST':
+        f = request.form
+        opening = float(f.get('opening_qty') or f.get('opening_stock') or 0)
+        consumption = float(f.get('used_qty') or f.get('consumption_qty') or 0)
+        wastage = float(f.get('wastage_qty') or 0)
+        closing = opening - consumption - wastage
+        
+        purchase_amt = float(f.get('purchase_amount') or 0)
+        cost_per_unit = purchase_amt / opening if opening > 0 else 0.0
+        
+        # If linked to a purchase, update voucher, expense and goats_data
+        p_id = record['purchase_id']
+        if p_id:
+            old_purch = db.execute("SELECT * FROM vaccine_purchases WHERE id = ?", (p_id,)).fetchone()
+            if old_purch:
+                db.execute("DELETE FROM goats_data WHERE date = ? AND category = 'expense' AND type = 'Vaccine' AND amount = ?", (old_purch['purchase_date'], old_purch['cost']))
+                db.execute("DELETE FROM expenses WHERE date = ? AND category = 'Vaccine Purchase' AND amount = ? AND vendor_name = ?", (old_purch['purchase_date'], old_purch['cost'], old_purch['supplier']))
+                
+            db.execute('''
+                UPDATE vaccine_purchases SET vaccine_name = ?, quantity = ?, cost = ?, purchase_date = ?, supplier = ?
+                WHERE id = ?
+            ''', (f.get('vaccine_name'), opening, purchase_amt, f.get('date'), f.get('supplier'), p_id))
+            
+            desc = f"Purchased {opening} Doses of {f.get('vaccine_name')} from {f.get('supplier')}"
+            db.execute('''
+                INSERT INTO goats_data (tag_number, date, category, type, amount, notes)
+                VALUES ('All', ?, 'expense', 'Vaccine', ?, ?)
+            ''', (f.get('date'), purchase_amt, desc))
+            db.execute('''
+                INSERT INTO expenses (category, amount, date, description, vendor_name, payment_mode, status)
+                VALUES ('Vaccine Purchase', ?, ?, ?, ?, 'Cash', 'Paid')
+            ''', (purchase_amt, f.get('date'), desc, f.get('supplier')))
+
+        db.execute('''
+            UPDATE vaccine_inventory SET 
+            vaccine_name = ?, opening_stock = ?, purchased_qty = ?, used_qty = ?, wastage_qty = ?, closing_stock = ?,
+            unit = ?, cost_per_unit = ?, total_cost = ?, purchase_date = ?, supplier = ? WHERE id = ?
+        ''', (
+            f.get('vaccine_name'), opening, (opening if p_id else 0.0), consumption, wastage, closing, f.get('unit'), 
+            cost_per_unit, purchase_amt, f.get('date'), f.get('supplier'), id
+        ))
+        db.commit()
+        flash('Vaccine record and connected expense logs updated successfully!', 'success')
+        return redirect(url_for('feed'))
+    
+    return render_template('vaccine_inventory_edit.html', record=record)
+
+@app.route('/vaccine_inventory_delete/<int:id>', methods=['POST'])
+def vaccine_inventory_delete(id):
+    db = get_db()
+    record = db.execute("SELECT * FROM vaccine_inventory WHERE id = ?", (id,)).fetchone()
+    if record and record['purchase_id']:
+        p_id = record['purchase_id']
+        old_purch = db.execute("SELECT * FROM vaccine_purchases WHERE id = ?", (p_id,)).fetchone()
+        if old_purch:
+            db.execute("DELETE FROM goats_data WHERE date = ? AND category = 'expense' AND type = 'Vaccine' AND amount = ?", (old_purch['purchase_date'], old_purch['cost']))
+            db.execute("DELETE FROM expenses WHERE date = ? AND category = 'Vaccine Purchase' AND amount = ? AND vendor_name = ?", (old_purch['purchase_date'], old_purch['cost'], old_purch['supplier']))
+        db.execute('DELETE FROM vaccine_purchases WHERE id = ?', (p_id,))
+        
+    db.execute('DELETE FROM vaccine_inventory WHERE id = ?', (id,))
+    db.commit()
+    flash('Vaccine inventory record and all connected expense/voucher logs deleted successfully!', 'success')
     return redirect(url_for('feed'))
 
 # KID RECORDS EDIT & DELETE
@@ -1231,6 +2637,35 @@ def kid_edit(id):
     
     if request.method == 'POST':
         f = request.form
+        
+        # Validate parent IDs in master_records
+        mother_id = f.get('mother_id', '').strip()
+        father_id = f.get('father_id', '').strip()
+
+        if mother_id and father_id and mother_id == father_id:
+            flash("Validation failed: Mother and Father cannot have the same Tag ID!", 'danger')
+            return redirect(url_for('kid_edit', id=id))
+
+        # Check mother ID
+        if mother_id:
+            mother = db.execute('SELECT tag_no, gender FROM master_records WHERE tag_no = ?', (mother_id,)).fetchone()
+            if not mother:
+                flash(f"Validation failed: Mother Tag ID '{mother_id}' does not exist in Master Records!", 'danger')
+                return redirect(url_for('kid_edit', id=id))
+            elif mother['gender'] == 'Male':
+                flash(f"Validation failed: Mother Tag ID '{mother_id}' is a Male goat! A male goat cannot be registered as a Mother.", 'danger')
+                return redirect(url_for('kid_edit', id=id))
+
+        # Check father ID
+        if father_id:
+            father = db.execute('SELECT tag_no, gender FROM master_records WHERE tag_no = ?', (father_id,)).fetchone()
+            if not father:
+                flash(f"Validation failed: Father Tag ID '{father_id}' does not exist in Master Records!", 'danger')
+                return redirect(url_for('kid_edit', id=id))
+            elif father['gender'] == 'Female':
+                flash(f"Validation failed: Father Tag ID '{father_id}' is a Female goat! A female goat cannot be registered as a Father.", 'danger')
+                return redirect(url_for('kid_edit', id=id))
+
         db.execute('''
             UPDATE kid_records SET 
             s_no = ?, kid_id = ?, breed = ?, breed_percent = ?, gender = ?, color = ?,
@@ -1293,58 +2728,14 @@ def vaccine_delete(id):
     flash('Vaccine record deleted successfully!', 'success')
     return redirect(url_for('vaccine'))
 
-# PURCHASE RECORDS EDIT & DELETE
+# PURCHASE RECORDS EDIT & DELETE (Redirects for Backward Compatibility)
 @app.route('/purchase_edit/<int:id>', methods=['GET', 'POST'])
 def purchase_edit(id):
-    db = get_db()
-    record = db.execute('SELECT * FROM purchases WHERE id = ?', (id,)).fetchone()
-    
-    if not record:
-        flash('Record not found.', 'danger')
-        return redirect(url_for('purchases'))
-    
-    if request.method == 'POST':
-        f = request.form
-        # Get old tag_id before update
-        old_record = db.execute('SELECT tag_id FROM purchases WHERE id=?', (id,)).fetchone()
-        old_tag_id = old_record['tag_id'] if old_record else None
-        
-        db.execute('''
-            UPDATE purchases SET 
-            seller_name = ?, invoice_details = ?, purchase_date = ?, tag_id = ?, price = ? WHERE id = ?
-        ''', (
-            f.get('seller_name'), f.get('invoice_details'), f.get('purchase_date'),
-            f.get('tag_id'), f.get('price'), id
-        ))
-        
-        # Update corresponding master record if it exists
-        if old_tag_id:
-            db.execute('''UPDATE master_records 
-                         SET tag_no=?, purchase_date=?, purchase_amount=? 
-                         WHERE tag_no=?''', 
-                      (f.get('tag_id'), f.get('purchase_date'), f.get('price'), old_tag_id))
-        
-        db.commit()
-        flash('Purchase record and Master Record updated successfully!', 'success')
-        return redirect(url_for('purchases'))
-    
-    return render_template('purchase_edit.html', record=record)
+    return redirect(url_for('voucher_edit', v_type='goat', id=id))
 
 @app.route('/purchase_delete/<int:id>', methods=['POST'])
 def purchase_delete(id):
-    db = get_db()
-    # Get tag_id before deletion to clean up master_records
-    record = db.execute('SELECT tag_id FROM purchases WHERE id=?', (id,)).fetchone()
-    if record:
-        tag_id = record['tag_id']
-        db.execute('DELETE FROM purchases WHERE id = ?', (id,))
-        # Also remove from master_records to keep data clean
-        db.execute('DELETE FROM master_records WHERE tag_no = ?', (tag_id,))
-        db.commit()
-        flash('Purchase and corresponding Master Record deleted successfully!', 'success')
-    else:
-        flash('Record not found.', 'danger')
-    return redirect(url_for('purchases'))
+    return redirect(url_for('voucher_delete', v_type='goat', id=id))
 
 @app.route('/health')
 def health():
@@ -1357,12 +2748,19 @@ def health():
 def eligible_to_sell():
     db = get_db()
     # Get all goats marked as eligible to sell
-    eligible_goats = db.execute('''
-        SELECT ets.*, mr.breed, mr.gender, mr.weight_kg, mr.status
+    # Explicitly select ets.tag_id and use COALESCE to prevent empty joins or column shadowing from wiping out tag id and weight
+    eligible_goats_raw = db.execute('''
+        SELECT ets.tag_id, 
+               COALESCE(mr.breed, ets.breed) as breed, 
+               COALESCE(mr.gender, ets.gender) as gender, 
+               COALESCE(mr.weight_kg, ets.weight_kg) as weight_kg, 
+               COALESCE(mr.status, 'Active') as status,
+               ets.date_added
         FROM eligible_to_sell ets
         LEFT JOIN master_records mr ON ets.tag_id = mr.tag_no
         ORDER BY ets.date_added DESC
     ''').fetchall()
+    eligible_goats = [dict(row) for row in eligible_goats_raw]
     return render_template('eligible_to_sell.html', eligible_goats=eligible_goats)
 
 @app.route('/populate_eligible', methods=['POST'])
@@ -1452,186 +2850,604 @@ def search():
         
     flash(f"No records found for '{query}'", 'info')
     return redirect(url_for('dashboard'))
+@app.route('/vouchers')
+def vouchers():
+    db = get_db()
+    # Fetch counts and sums for the cards
+    count_goat = db.execute("SELECT COUNT(*) FROM purchases").fetchone()[0] or 0
+    sum_goat = db.execute("SELECT SUM(price) FROM purchases").fetchone()[0] or 0.0
+    
+    count_feed = db.execute("SELECT COUNT(*) FROM feed_purchases").fetchone()[0] or 0
+    sum_feed = db.execute("SELECT SUM(cost) FROM feed_purchases").fetchone()[0] or 0.0
+    
+    count_med = db.execute("SELECT COUNT(*) FROM medicine_purchases").fetchone()[0] or 0
+    sum_med = db.execute("SELECT SUM(cost) FROM medicine_purchases").fetchone()[0] or 0.0
+    count_vac = db.execute("SELECT COUNT(*) FROM vaccine_purchases").fetchone()[0] or 0
+    sum_vac = db.execute("SELECT SUM(cost) FROM vaccine_purchases").fetchone()[0] or 0.0
+    
+    count_health = count_med + count_vac
+    sum_health = sum_med + sum_vac
+    
+    count_other = db.execute("SELECT COUNT(*) FROM equipment").fetchone()[0] or 0
+    sum_other = db.execute("SELECT SUM(purchase_cost) FROM equipment").fetchone()[0] or 0.0
+    
+    return render_template('vouchers.html', 
+                           count_goat=count_goat, sum_goat=sum_goat,
+                           count_feed=count_feed, sum_feed=sum_feed,
+                           count_health=count_health, sum_health=sum_health,
+                           count_other=count_other, sum_other=sum_other)
+
+@app.route('/vouchers/<v_type>')
+def voucher_register(v_type):
+    if v_type not in ['goat', 'feed', 'health', 'other']:
+        flash('Invalid voucher type!', 'danger')
+        return redirect(url_for('vouchers'))
+        
+    db = get_db()
+    records = []
+    
+    if v_type == 'goat':
+        raw_records = db.execute('SELECT * FROM purchases ORDER BY purchase_date DESC').fetchall()
+        for r in raw_records:
+            records.append({
+                'id': r['id'],
+                'title': f"Goat Tag: {r['tag_id']}",
+                'subtitle': f"Seller: {r['seller_name']}",
+                'date': r['purchase_date'],
+                'amount': r['price'],
+                'notes': r['invoice_details'] or "No details"
+            })
+            
+    elif v_type == 'feed':
+        raw_records = db.execute('SELECT * FROM feed_purchases ORDER BY purchase_date DESC').fetchall()
+        for r in raw_records:
+            records.append({
+                'id': r['id'],
+                'title': f"Feed: {r['feed_name']}",
+                'subtitle': f"Qty: {r['quantity']} {r['unit']} | Supplier: {r['supplier']}",
+                'date': r['purchase_date'],
+                'amount': r['cost'],
+                'notes': f"Feed inventory stock replenishment"
+            })
+            
+    elif v_type == 'health':
+        med_records = db.execute('SELECT * FROM medicine_purchases').fetchall()
+        for r in med_records:
+            records.append({
+                'id': r['id'],
+                'sub_type': 'medicine',
+                'title': f"Medicine: {r['medicine_name']}",
+                'subtitle': f"Qty: {r['quantity']} {r['dose_unit']} | Supplier: {r['supplier']}",
+                'date': r['purchase_date'],
+                'amount': r['cost'],
+                'notes': "Medicine stock replenishment"
+            })
+        vac_records = db.execute('SELECT * FROM vaccine_purchases').fetchall()
+        for r in vac_records:
+            records.append({
+                'id': r['id'],
+                'sub_type': 'vaccine',
+                'title': f"Vaccine: {r['vaccine_name']}",
+                'subtitle': f"Qty: {r['quantity']} doses | Supplier: {r['supplier']}",
+                'date': r['purchase_date'],
+                'amount': r['cost'],
+                'notes': "Vaccine stock replenishment"
+            })
+        records.sort(key=lambda x: x['date'], reverse=True)
+        
+    elif v_type == 'other':
+        raw_records = db.execute('SELECT * FROM equipment ORDER BY purchase_date DESC').fetchall()
+        for r in raw_records:
+            records.append({
+                'id': r['id'],
+                'title': f"Asset: {r['name']}",
+                'subtitle': f"Type: {r['type']} | Supplier: {r['supplier']}",
+                'date': r['purchase_date'],
+                'amount': r['purchase_cost'] or 0.0,
+                'notes': r['notes'] or "No details"
+            })
+            
+    # Group month-wise
+    from collections import defaultdict
+    grouped_records = defaultdict(list)
+    for r in records:
+        try:
+            date_obj = datetime.strptime(r['date'], '%Y-%m-%d')
+            month_str = date_obj.strftime('%B %Y')
+        except:
+            month_str = "Other / Unknown Date"
+        grouped_records[month_str].append(r)
+        
+    return render_template('voucher_register.html', v_type=v_type, grouped_records=grouped_records)
+
+@app.route('/vouchers/<v_type>/add', methods=['GET', 'POST'])
+def voucher_add(v_type):
+    if v_type not in ['goat', 'feed', 'health', 'other']:
+        flash('Invalid voucher type!', 'danger')
+        return redirect(url_for('vouchers'))
+        
+    db = get_db()
+    today_str = datetime.now().strftime('%Y-%m-%d')
+    
+    if request.method == 'POST':
+        f = request.form
+        p_date = f.get('purchase_date') or today_str
+        
+        if v_type == 'goat':
+            tag_id = f.get('tag_id')
+            price = float(f.get('price') or 0)
+            
+            # 1. Save to purchases
+            db.execute('''
+                INSERT INTO purchases (seller_name, invoice_details, purchase_date, tag_id, price)
+                VALUES (?, ?, ?, ?, ?)
+            ''', (f.get('seller_name'), f.get('notes'), p_date, tag_id, price))
+            
+            # 2. Add to master_records
+            breed = f.get('breed', 'Unknown')
+            gender = f.get('gender', 'Unknown')
+            weight = float(f.get('weight') or 0)
+            db.execute('''
+                INSERT INTO master_records (tag_no, breed, gender, purchase_date, weight_kg, purchase_amount, status)
+                VALUES (?, ?, ?, ?, ?, ?, 'Active')
+            ''', (tag_id, breed, gender, p_date, weight, price))
+            db.commit()
+            flash('Goat Purchase Voucher created successfully!', 'success')
+            
+        elif v_type == 'feed':
+            feed_name = f.get('feed_name')
+            qty = float(f.get('quantity') or 0)
+            cost = float(f.get('cost') or 0)
+            unit = f.get('unit', 'KG')
+            supplier = f.get('supplier')
+            
+            cursor = db.execute('''
+                INSERT INTO feed_purchases (feed_name, quantity, unit, cost, purchase_date, supplier)
+                VALUES (?, ?, ?, ?, ?, ?)
+            ''', (feed_name, qty, unit, cost, p_date, supplier))
+            purchase_id = cursor.lastrowid
+            
+            # Fetch last closing stock
+            last = db.execute("SELECT closing_stock FROM feed_inventory WHERE feed_name = ? ORDER BY id DESC LIMIT 1", (feed_name,)).fetchone()
+            opening = last['closing_stock'] if last else 0.0
+            closing = opening + qty
+            cost_per_unit = cost / qty if qty > 0 else 0.0
+            
+            db.execute('''
+                INSERT INTO feed_inventory (feed_name, opening_stock, purchased_qty, used_qty, wastage_qty, closing_stock, unit, cost_per_unit, total_cost, purchase_date, supplier, purchase_id)
+                VALUES (?, ?, ?, 0.0, 0.0, ?, ?, ?, ?, ?, ?, ?)
+            ''', (feed_name, opening, qty, closing, unit, cost_per_unit, cost, p_date, supplier, purchase_id))
+            
+            # Expenses and goats_data logging
+            desc = f"Purchased {qty} {unit} of {feed_name} from {supplier}"
+            db.execute('''
+                INSERT INTO goats_data (tag_number, date, category, type, amount, notes)
+                VALUES ('All', ?, 'expense', 'Feed', ?, ?)
+            ''', (p_date, cost, desc))
+            db.execute('''
+                INSERT INTO expenses (category, amount, date, description, vendor_name, payment_mode, status)
+                VALUES ('Feed Purchase', ?, ?, ?, ?, 'Cash', 'Paid')
+            ''', (cost, p_date, desc, supplier))
+            
+            db.commit()
+            flash('Feed Purchase Voucher created successfully!', 'success')
+            
+        elif v_type == 'health':
+            sub_type = f.get('sub_type', 'medicine')
+            name = f.get('health_name')
+            qty = float(f.get('quantity') or 0)
+            cost = float(f.get('cost') or 0)
+            supplier = f.get('supplier')
+            
+            if sub_type == 'medicine':
+                dose_unit = f.get('dose_unit', 'ml')
+                cursor = db.execute('''
+                    INSERT INTO medicine_purchases (medicine_name, dose_unit, quantity, cost, purchase_date, supplier)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                ''', (name, dose_unit, qty, cost, p_date, supplier))
+                purchase_id = cursor.lastrowid
+                
+                # Fetch last closing stock
+                last = db.execute("SELECT closing_stock FROM medicine_inventory WHERE medicine_name = ? ORDER BY id DESC LIMIT 1", (name,)).fetchone()
+                opening = last['closing_stock'] if last else 0.0
+                closing = opening + qty
+                cost_per_unit = cost / qty if qty > 0 else 0.0
+                
+                db.execute('''
+                    INSERT INTO medicine_inventory (medicine_name, opening_stock, purchased_qty, used_qty, wastage_qty, closing_stock, unit, cost_per_unit, total_cost, purchase_date, supplier, purchase_id)
+                    VALUES (?, ?, ?, 0.0, 0.0, ?, ?, ?, ?, ?, ?, ?)
+                ''', (name, opening, qty, closing, 'Doses', cost_per_unit, cost, p_date, supplier, purchase_id))
+            else:
+                cursor = db.execute('''
+                    INSERT INTO vaccine_purchases (vaccine_name, quantity, cost, purchase_date, supplier)
+                    VALUES (?, ?, ?, ?, ?)
+                ''', (name, qty, cost, p_date, supplier))
+                purchase_id = cursor.lastrowid
+                
+                # Fetch last closing stock
+                last = db.execute("SELECT closing_stock FROM vaccine_inventory WHERE vaccine_name = ? ORDER BY id DESC LIMIT 1", (name,)).fetchone()
+                opening = last['closing_stock'] if last else 0.0
+                closing = opening + qty
+                cost_per_unit = cost / qty if qty > 0 else 0.0
+                
+                db.execute('''
+                    INSERT INTO vaccine_inventory (vaccine_name, opening_stock, purchased_qty, used_qty, wastage_qty, closing_stock, unit, cost_per_unit, total_cost, purchase_date, supplier, purchase_id)
+                    VALUES (?, ?, ?, 0.0, 0.0, ?, ?, ?, ?, ?, ?, ?)
+                ''', (name, opening, qty, closing, 'Doses', cost_per_unit, cost, p_date, supplier, purchase_id))
+            
+            # Expenses and goats_data logging
+            desc = f"Purchased {qty} Doses of {name} from {supplier}"
+            db.execute('''
+                INSERT INTO goats_data (tag_number, date, category, type, amount, notes)
+                VALUES ('All', ?, 'expense', ?, ?, ?)
+            ''', (p_date, sub_type.capitalize(), cost, desc))
+            db.execute('''
+                INSERT INTO expenses (category, amount, date, description, vendor_name, payment_mode, status)
+                VALUES (?, ?, ?, ?, ?, 'Cash', 'Paid')
+            ''', (sub_type.capitalize() + ' Purchase', cost, p_date, desc, supplier))
+            
+            db.commit()
+            flash('Health Supplies Voucher created successfully!', 'success')
+            
+        elif v_type == 'other':
+            name = f.get('name')
+            asset_type = f.get('type')
+            cost = float(f.get('cost') or 0)
+            supplier = f.get('supplier')
+            notes = f.get('notes')
+            status = f.get('status', 'Active')
+            
+            db.execute('''
+                INSERT INTO equipment (name, type, purchase_date, purchase_cost, supplier, status, notes)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            ''', (name, asset_type, p_date, cost, supplier, status, notes))
+            db.commit()
+            flash('Asset Purchase Voucher created successfully!', 'success')
+            
+        return redirect(url_for('voucher_register', v_type=v_type))
+        
+    return render_template('voucher_form.html', v_type=v_type, action='Add', record=None, today=today_str)
+
+@app.route('/vouchers/<v_type>/edit/<int:id>', methods=['GET', 'POST'])
+@app.route('/vouchers/<v_type>/edit/<sub_type>/<int:id>', methods=['GET', 'POST'])
+def voucher_edit(v_type, id, sub_type=None):
+    if v_type not in ['goat', 'feed', 'health', 'other']:
+        flash('Invalid voucher type!', 'danger')
+        return redirect(url_for('vouchers'))
+        
+    db = get_db()
+    record = None
+    
+    if v_type == 'goat':
+        record_raw = db.execute('SELECT * FROM purchases WHERE id = ?', (id,)).fetchone()
+        if record_raw:
+            master = db.execute('SELECT * FROM master_records WHERE tag_no = ?', (record_raw['tag_id'],)).fetchone()
+            record = {
+                'id': record_raw['id'],
+                'tag_id': record_raw['tag_id'],
+                'seller_name': record_raw['seller_name'],
+                'purchase_date': record_raw['purchase_date'],
+                'price': record_raw['price'],
+                'notes': record_raw['invoice_details'],
+                'breed': master['breed'] if master else 'Unknown',
+                'gender': master['gender'] if master else 'Unknown',
+                'weight': master['weight_kg'] if master else 0.0
+            }
+            
+    elif v_type == 'feed':
+        record = db.execute('SELECT * FROM feed_purchases WHERE id = ?', (id,)).fetchone()
+        
+    elif v_type == 'health':
+        if sub_type == 'medicine':
+            record_raw = db.execute('SELECT * FROM medicine_purchases WHERE id = ?', (id,)).fetchone()
+            if record_raw:
+                record = {
+                    'id': record_raw['id'],
+                    'sub_type': 'medicine',
+                    'health_name': record_raw['medicine_name'],
+                    'dose_unit': record_raw['dose_unit'],
+                    'quantity': record_raw['quantity'],
+                    'cost': record_raw['cost'],
+                    'purchase_date': record_raw['purchase_date'],
+                    'supplier': record_raw['supplier']
+                }
+        else:
+            record_raw = db.execute('SELECT * FROM vaccine_purchases WHERE id = ?', (id,)).fetchone()
+            if record_raw:
+                record = {
+                    'id': record_raw['id'],
+                    'sub_type': 'vaccine',
+                    'health_name': record_raw['vaccine_name'],
+                    'quantity': record_raw['quantity'],
+                    'cost': record_raw['cost'],
+                    'purchase_date': record_raw['purchase_date'],
+                    'supplier': record_raw['supplier']
+                }
+                
+    elif v_type == 'other':
+        record_raw = db.execute('SELECT * FROM equipment WHERE id = ?', (id,)).fetchone()
+        if record_raw:
+            record = {
+                'id': record_raw['id'],
+                'name': record_raw['name'],
+                'type': record_raw['type'],
+                'cost': record_raw['purchase_cost'],
+                'purchase_date': record_raw['purchase_date'],
+                'supplier': record_raw['supplier'],
+                'status': record_raw['status'],
+                'notes': record_raw['notes']
+            }
+            
+    if not record:
+        flash('Voucher record not found!', 'danger')
+        return redirect(url_for('voucher_register', v_type=v_type))
+        
+    if request.method == 'POST':
+        f = request.form
+        p_date = f.get('purchase_date') or record['purchase_date']
+        
+        if v_type == 'goat':
+            tag_id = f.get('tag_id')
+            price = float(f.get('price') or 0)
+            old_tag_id = record['tag_id']
+            
+            db.execute('''
+                UPDATE purchases SET seller_name = ?, invoice_details = ?, purchase_date = ?, tag_id = ?, price = ?
+                WHERE id = ?
+            ''', (f.get('seller_name'), f.get('notes'), p_date, tag_id, price, id))
+            
+            db.execute('''
+                UPDATE master_records SET tag_no = ?, breed = ?, gender = ?, purchase_date = ?, weight_kg = ?, purchase_amount = ?
+                WHERE tag_no = ?
+            ''', (tag_id, f.get('breed'), f.get('gender'), p_date, float(f.get('weight') or 0), price, old_tag_id))
+            db.commit()
+            flash('Goat Purchase Voucher updated successfully!', 'success')
+            
+        elif v_type == 'feed':
+            qty = float(f.get('quantity') or 0)
+            cost = float(f.get('cost') or 0)
+            
+            # Get old voucher details first
+            old = db.execute("SELECT * FROM feed_purchases WHERE id = ?", (id,)).fetchone()
+            if old:
+                # Delete old matching goats_data
+                db.execute("DELETE FROM goats_data WHERE date = ? AND category = 'expense' AND type = 'Feed' AND amount = ?", (old['purchase_date'], old['cost']))
+                # Delete old matching expenses
+                db.execute("DELETE FROM expenses WHERE date = ? AND category = 'Feed Purchase' AND amount = ? AND vendor_name = ?", (old['purchase_date'], old['cost'], old['supplier']))
+            
+            db.execute('''
+                UPDATE feed_purchases SET feed_name = ?, quantity = ?, unit = ?, cost = ?, purchase_date = ?, supplier = ?
+                WHERE id = ?
+            ''', (f.get('feed_name'), qty, f.get('unit'), cost, p_date, f.get('supplier'), id))
+            
+            # Recalculate feed inventory row
+            row = db.execute("SELECT opening_stock, used_qty, wastage_qty FROM feed_inventory WHERE purchase_id = ?", (id,)).fetchone()
+            if row:
+                opening = row['opening_stock'] or 0.0
+                used = row['used_qty'] or 0.0
+                wastage = row['wastage_qty'] or 0.0
+                closing = opening + qty - used - wastage
+                cost_per_unit = cost / qty if qty > 0 else 0.0
+                db.execute('''
+                    UPDATE feed_inventory 
+                    SET feed_name = ?, purchased_qty = ?, closing_stock = ?, cost_per_unit = ?, total_cost = ?, purchase_date = ?, supplier = ?
+                    WHERE purchase_id = ?
+                ''', (f.get('feed_name'), qty, closing, cost_per_unit, cost, p_date, f.get('supplier'), id))
+                
+            # Now insert the new goats_data and expenses rows!
+            desc = f"Purchased {qty} {f.get('unit')} of {f.get('feed_name')} from {f.get('supplier')}"
+            db.execute('''
+                INSERT INTO goats_data (tag_number, date, category, type, amount, notes)
+                VALUES ('All', ?, 'expense', 'Feed', ?, ?)
+            ''', (p_date, cost, desc))
+            db.execute('''
+                INSERT INTO expenses (category, amount, date, description, vendor_name, payment_mode, status)
+                VALUES ('Feed Purchase', ?, ?, ?, ?, 'Cash', 'Paid')
+            ''', (cost, p_date, desc, f.get('supplier')))
+            
+            db.commit()
+            flash('Feed Purchase Voucher updated successfully!', 'success')
+            
+        elif v_type == 'health':
+            name = f.get('health_name')
+            qty = float(f.get('quantity') or 0)
+            cost = float(f.get('cost') or 0)
+            supplier = f.get('supplier')
+            cost_per_unit = cost / qty if qty > 0 else 0.0
+            
+            # Get old voucher details first
+            if sub_type == 'medicine':
+                old = db.execute("SELECT * FROM medicine_purchases WHERE id = ?", (id,)).fetchone()
+            else:
+                old = db.execute("SELECT * FROM vaccine_purchases WHERE id = ?", (id,)).fetchone()
+                
+            if old:
+                # Delete old matching goats_data
+                db.execute("DELETE FROM goats_data WHERE date = ? AND category = 'expense' AND type = ? AND amount = ?", (old['purchase_date'], sub_type.capitalize(), old['cost']))
+                # Delete old matching expenses
+                db.execute("DELETE FROM expenses WHERE date = ? AND category = ? AND amount = ? AND vendor_name = ?", (old['purchase_date'], sub_type.capitalize() + ' Purchase', old['cost'], old['supplier']))
+            
+            if sub_type == 'medicine':
+                db.execute('''
+                    UPDATE medicine_purchases SET medicine_name = ?, dose_unit = ?, quantity = ?, cost = ?, purchase_date = ?, supplier = ?
+                    WHERE id = ?
+                ''', (name, f.get('dose_unit'), qty, cost, p_date, supplier, id))
+                
+                # Check if inventory row exists
+                inv_row = db.execute("SELECT id, opening_stock, used_qty, wastage_qty FROM medicine_inventory WHERE purchase_id = ?", (id,)).fetchone()
+                if inv_row:
+                    opening = inv_row['opening_stock'] or 0.0
+                    used = inv_row['used_qty'] or 0.0
+                    wastage = inv_row['wastage_qty'] or 0.0
+                    closing = opening + qty - used - wastage
+                    db.execute('''
+                        UPDATE medicine_inventory 
+                        SET medicine_name = ?, purchased_qty = ?, closing_stock = ?, cost_per_unit = ?, total_cost = ?, purchase_date = ?, supplier = ?
+                        WHERE purchase_id = ?
+                    ''', (name, qty, closing, cost_per_unit, cost, p_date, supplier, id))
+                else:
+                    # Insert new inventory row if it didn't exist
+                    last = db.execute("SELECT closing_stock FROM medicine_inventory WHERE medicine_name = ? ORDER BY id DESC LIMIT 1", (name,)).fetchone()
+                    opening = last['closing_stock'] if last else 0.0
+                    closing = opening + qty
+                    db.execute('''
+                        INSERT INTO medicine_inventory (medicine_name, opening_stock, purchased_qty, used_qty, wastage_qty, closing_stock, unit, cost_per_unit, total_cost, purchase_date, supplier, purchase_id)
+                        VALUES (?, ?, ?, 0.0, 0.0, ?, ?, ?, ?, ?, ?, ?)
+                    ''', (name, opening, qty, closing, 'Doses', cost_per_unit, cost, p_date, supplier, id))
+            else:
+                db.execute('''
+                    UPDATE vaccine_purchases SET vaccine_name = ?, quantity = ?, cost = ?, purchase_date = ?, supplier = ?
+                    WHERE id = ?
+                ''', (name, qty, cost, p_date, supplier, id))
+                
+                # Check if inventory row exists
+                inv_row = db.execute("SELECT id, opening_stock, used_qty, wastage_qty FROM vaccine_inventory WHERE purchase_id = ?", (id,)).fetchone()
+                if inv_row:
+                    opening = inv_row['opening_stock'] or 0.0
+                    used = inv_row['used_qty'] or 0.0
+                    wastage = inv_row['wastage_qty'] or 0.0
+                    closing = opening + qty - used - wastage
+                    db.execute('''
+                        UPDATE vaccine_inventory 
+                        SET vaccine_name = ?, purchased_qty = ?, closing_stock = ?, cost_per_unit = ?, total_cost = ?, purchase_date = ?, supplier = ?
+                        WHERE purchase_id = ?
+                    ''', (name, qty, closing, cost_per_unit, cost, p_date, supplier, id))
+                else:
+                    # Insert new inventory row if it didn't exist
+                    last = db.execute("SELECT closing_stock FROM vaccine_inventory WHERE vaccine_name = ? ORDER BY id DESC LIMIT 1", (name,)).fetchone()
+                    opening = last['closing_stock'] if last else 0.0
+                    closing = opening + qty
+                    db.execute('''
+                        INSERT INTO vaccine_inventory (vaccine_name, opening_stock, purchased_qty, used_qty, wastage_qty, closing_stock, unit, cost_per_unit, total_cost, purchase_date, supplier, purchase_id)
+                        VALUES (?, ?, ?, 0.0, 0.0, ?, ?, ?, ?, ?, ?, ?)
+                    ''', (name, opening, qty, closing, 'Doses', cost_per_unit, cost, p_date, supplier, id))
+            
+            # Now insert the new goats_data and expenses rows!
+            desc = f"Purchased {qty} Doses of {name} from {supplier}"
+            db.execute('''
+                INSERT INTO goats_data (tag_number, date, category, type, amount, notes)
+                VALUES ('All', ?, 'expense', ?, ?, ?)
+            ''', (p_date, sub_type.capitalize(), cost, desc))
+            db.execute('''
+                INSERT INTO expenses (category, amount, date, description, vendor_name, payment_mode, status)
+                VALUES (?, ?, ?, ?, ?, 'Cash', 'Paid')
+            ''', (sub_type.capitalize() + ' Purchase', cost, p_date, desc, supplier))
+            
+            db.commit()
+            flash('Health Supplies Voucher updated successfully!', 'success')
+            
+        elif v_type == 'other':
+            db.execute('''
+                UPDATE equipment SET name = ?, type = ?, purchase_date = ?, purchase_cost = ?, supplier = ?, status = ?, notes = ?
+                WHERE id = ?
+            ''', (f.get('name'), f.get('type'), p_date, float(f.get('cost') or 0), f.get('supplier'), f.get('status'), f.get('notes'), id))
+            db.commit()
+            flash('Asset Purchase Voucher updated successfully!', 'success')
+            
+        return redirect(url_for('voucher_register', v_type=v_type))
+        
+    return render_template('voucher_form.html', v_type=v_type, sub_type=sub_type, action='Edit', record=record, today=record.get('purchase_date', ''))
+
+@app.route('/vouchers/<v_type>/delete/<int:id>', methods=['POST'])
+@app.route('/vouchers/<v_type>/delete/<sub_type>/<int:id>', methods=['POST'])
+def voucher_delete(v_type, id, sub_type=None):
+    if v_type not in ['goat', 'feed', 'health', 'other']:
+        flash('Invalid voucher type!', 'danger')
+        return redirect(url_for('vouchers'))
+        
+    db = get_db()
+    
+    if v_type == 'goat':
+        record = db.execute('SELECT tag_id FROM purchases WHERE id = ?', (id,)).fetchone()
+        if record:
+            tag_id = record['tag_id']
+            db.execute('DELETE FROM purchases WHERE id = ?', (id,))
+            db.execute('DELETE FROM master_records WHERE tag_no = ?', (tag_id,))
+            db.execute('DELETE FROM goats_data WHERE tag_number = ?', (tag_id,))
+            db.execute('DELETE FROM eligible_to_sell WHERE tag_id = ?', (tag_id,))
+            db.commit()
+            flash('Goat Purchase Voucher and connected logs deleted successfully!', 'success')
+            
+    elif v_type == 'feed':
+        old = db.execute("SELECT * FROM feed_purchases WHERE id = ?", (id,)).fetchone()
+        if old:
+            db.execute("DELETE FROM goats_data WHERE date = ? AND category = 'expense' AND type = 'Feed' AND amount = ?", (old['purchase_date'], old['cost']))
+            db.execute("DELETE FROM expenses WHERE date = ? AND category = 'Feed Purchase' AND amount = ? AND vendor_name = ?", (old['purchase_date'], old['cost'], old['supplier']))
+        db.execute('DELETE FROM feed_purchases WHERE id = ?', (id,))
+        db.execute('DELETE FROM feed_inventory WHERE purchase_id = ?', (id,))
+        db.commit()
+        flash('Feed Purchase Voucher, linked inventory, and connected expense records deleted!', 'success')
+        
+    elif v_type == 'health':
+        if sub_type == 'medicine':
+            old = db.execute("SELECT * FROM medicine_purchases WHERE id = ?", (id,)).fetchone()
+            if old:
+                db.execute("DELETE FROM goats_data WHERE date = ? AND category = 'expense' AND type = 'Medicine' AND amount = ?", (old['purchase_date'], old['cost']))
+                db.execute("DELETE FROM expenses WHERE date = ? AND category = 'Medicine Purchase' AND amount = ? AND vendor_name = ?", (old['purchase_date'], old['cost'], old['supplier']))
+            db.execute('DELETE FROM medicine_purchases WHERE id = ?', (id,))
+            db.execute('DELETE FROM medicine_inventory WHERE purchase_id = ?', (id,))
+            flash('Medicine Voucher, linked inventory, and connected expense records deleted!', 'success')
+        else:
+            old = db.execute("SELECT * FROM vaccine_purchases WHERE id = ?", (id,)).fetchone()
+            if old:
+                db.execute("DELETE FROM goats_data WHERE date = ? AND category = 'expense' AND type = 'Vaccine' AND amount = ?", (old['purchase_date'], old['cost']))
+                db.execute("DELETE FROM expenses WHERE date = ? AND category = 'Vaccine Purchase' AND amount = ? AND vendor_name = ?", (old['purchase_date'], old['cost'], old['supplier']))
+            db.execute('DELETE FROM vaccine_purchases WHERE id = ?', (id,))
+            db.execute('DELETE FROM vaccine_inventory WHERE purchase_id = ?', (id,))
+            flash('Vaccine Voucher, linked inventory, and connected expense records deleted!', 'success')
+        db.commit()
+        
+    elif v_type == 'other':
+        db.execute('DELETE FROM equipment WHERE id = ?', (id,))
+        db.commit()
+        flash('Asset Purchase Voucher deleted successfully!', 'success')
+        
+    return redirect(url_for('voucher_register', v_type=v_type))
+
+# BACKWARD COMPATIBILITY REDIRECTS FOR OLD PURCHASES
 @app.route('/purchases')
 def purchases():
-    db = get_db()
-    # Fetch recent purchases across all 4 categories for the dashboard
-    recent_goats = db.execute('SELECT * FROM purchases ORDER BY purchase_date DESC LIMIT 5').fetchall()
-    recent_feed = db.execute('SELECT * FROM feed_purchases ORDER BY purchase_date DESC LIMIT 5').fetchall()
-    recent_meds = db.execute('SELECT * FROM medicine_purchases ORDER BY purchase_date DESC LIMIT 5').fetchall()
-    recent_vacs = db.execute('SELECT * FROM vaccine_purchases ORDER BY purchase_date DESC LIMIT 5').fetchall()
-    return render_template('purchases.html', goats=recent_goats, feed=recent_feed, meds=recent_meds, vacs=recent_vacs)
+    return redirect(url_for('vouchers'))
 
 @app.route('/purchase_goat', methods=['GET', 'POST'])
 def purchase_goat():
-    if request.method == 'POST':
-        f = request.form
-        db = get_db()
-        tag_id = f.get('tag_id')
-        
-        # 1. Add to purchases
-        db.execute('''
-            INSERT INTO purchases (
-                seller_name, invoice_details, purchase_date, tag_id, price
-            ) VALUES (?, ?, ?, ?, ?)
-        ''', (
-            f.get('seller_name'), f.get('invoice_details'), f.get('purchase_date'), 
-            tag_id, f.get('price')
-        ))
-        
-        # 2. Auto-add to master_records
-        breed = f.get('breed', 'Unknown')
-        gender = f.get('gender', 'Unknown')
-        weight = f.get('weight', 0)
-        
-        db.execute('''
-            INSERT INTO master_records (
-                tag_no, breed, gender, purchase_date, weight_kg, purchase_amount, status
-            ) VALUES (?, ?, ?, ?, ?, ?, 'Active')
-        ''', (tag_id, breed, gender, f.get('purchase_date'), weight, f.get('price')))
-        
-        db.commit()
-        flash('Goat purchased and added to Master Records successfully!', 'success')
-        return redirect(url_for('purchases'))
-    return render_template('purchase_goat.html')
+    return redirect(url_for('voucher_add', v_type='goat'))
 
 @app.route('/purchase_feed', methods=['GET', 'POST'])
 def purchase_feed():
-    if request.method == 'POST':
-        f = request.form
-        db = get_db()
-        qty = float(f.get('quantity') or 0)
-        cost = float(f.get('cost') or 0)
-        feed_name = f.get('feed_name')
-        
-        # 1. Log purchase
-        cursor = db.execute('''
-            INSERT INTO feed_purchases (
-                feed_name, quantity, unit, cost, purchase_date, supplier
-            ) VALUES (?, ?, ?, ?, ?, ?)
-        ''', (
-            feed_name, qty, f.get('unit'), cost, f.get('purchase_date'), f.get('supplier')
-        ))
-        purchase_id = cursor.lastrowid
-        
-        # 2. Update feed inventory
-        today = f.get('purchase_date')
-        
-        db.execute('''
-            INSERT INTO feed_inventory (feed_name, purchased_qty, closing_stock, total_cost, purchase_date, purchase_id)
-            VALUES (?, ?, ?, ?, ?, ?)
-        ''', (feed_name, qty, qty, cost, today, purchase_id))
-            
-        db.commit()
-        flash('Feed purchased and inventory updated!', 'success')
-        return redirect(url_for('purchases'))
-    return render_template('purchase_feed.html')
+    return redirect(url_for('voucher_add', v_type='feed'))
 
 @app.route('/purchase_medicine', methods=['GET', 'POST'])
 def purchase_medicine():
-    if request.method == 'POST':
-        f = request.form
-        db = get_db()
-        db.execute('''
-            INSERT INTO medicine_purchases (
-                medicine_name, dose_unit, quantity, cost, purchase_date, supplier
-            ) VALUES (?, ?, ?, ?, ?, ?)
-        ''', (
-            f.get('medicine_name'), f.get('dose_unit'), f.get('quantity'), 
-            f.get('cost'), f.get('purchase_date'), f.get('supplier')
-        ))
-        db.commit()
-        flash('Medicine purchased successfully!', 'success')
-        return redirect(url_for('purchases'))
-    return render_template('purchase_medicine.html')
+    return redirect(url_for('voucher_add', v_type='health'))
 
 @app.route('/purchase_vaccine', methods=['GET', 'POST'])
 def purchase_vaccine():
-    if request.method == 'POST':
-        f = request.form
-        db = get_db()
-        db.execute('''
-            INSERT INTO vaccine_purchases (
-                vaccine_name, quantity, cost, purchase_date, supplier
-            ) VALUES (?, ?, ?, ?, ?)
-        ''', (
-            f.get('vaccine_name'), f.get('quantity'), f.get('cost'), 
-            f.get('purchase_date'), f.get('supplier')
-        ))
-        db.commit()
-        flash('Vaccine purchased successfully!', 'success')
-        return redirect(url_for('purchases'))
-    return render_template('purchase_vaccine.html')
+    return redirect(url_for('voucher_add', v_type='health'))
 
 @app.route('/feed_purchase_edit/<int:id>', methods=['GET', 'POST'])
 def feed_purchase_edit(id):
-    db = get_db()
-    record = db.execute('SELECT * FROM feed_purchases WHERE id = ?', (id,)).fetchone()
-    if request.method == 'POST':
-        f = request.form
-        db.execute('''UPDATE feed_purchases SET feed_name=?, quantity=?, unit=?, cost=?, purchase_date=?, supplier=? WHERE id=?''',
-            (f.get('feed_name'), f.get('quantity'), f.get('unit'), f.get('cost'), f.get('purchase_date'), f.get('supplier'), id))
-        
-        # Update linked inventory
-        db.execute('''UPDATE feed_inventory SET feed_name=?, purchased_qty=?, closing_stock=?, total_cost=?, purchase_date=? WHERE purchase_id=?''',
-            (f.get('feed_name'), f.get('quantity'), f.get('quantity'), f.get('cost'), f.get('purchase_date'), id))
-        
-        db.commit()
-        flash('Feed purchase and Inventory updated successfully!', 'success')
-        return redirect(url_for('purchases'))
-    return render_template('generic_purchase_edit.html', record=record, p_type='feed')
+    return redirect(url_for('voucher_edit', v_type='feed', id=id))
 
 @app.route('/feed_purchase_delete/<int:id>', methods=['POST'])
 def feed_purchase_delete(id):
-    db = get_db()
-    db.execute('DELETE FROM feed_purchases WHERE id = ?', (id,))
-    # Also delete linked inventory
-    db.execute('DELETE FROM feed_inventory WHERE purchase_id = ?', (id,))
-    db.commit()
-    flash('Feed purchase and linked Inventory record deleted!', 'success')
-    return redirect(url_for('purchases'))
+    return redirect(url_for('voucher_delete', v_type='feed', id=id))
 
 @app.route('/med_purchase_edit/<int:id>', methods=['GET', 'POST'])
 def med_purchase_edit(id):
-    db = get_db()
-    record = db.execute('SELECT * FROM medicine_purchases WHERE id = ?', (id,)).fetchone()
-    if request.method == 'POST':
-        f = request.form
-        db.execute('''UPDATE medicine_purchases SET medicine_name=?, dose_unit=?, quantity=?, cost=?, purchase_date=?, supplier=? WHERE id=?''',
-            (f.get('medicine_name'), f.get('dose_unit'), f.get('quantity'), f.get('cost'), f.get('purchase_date'), f.get('supplier'), id))
-        db.commit()
-        flash('Medicine purchase updated successfully!', 'success')
-        return redirect(url_for('purchases'))
-    return render_template('generic_purchase_edit.html', record=record, p_type='med')
+    return redirect(url_for('voucher_edit', v_type='health', sub_type='medicine', id=id))
 
 @app.route('/med_purchase_delete/<int:id>', methods=['POST'])
 def med_purchase_delete(id):
-    db = get_db()
-    db.execute('DELETE FROM medicine_purchases WHERE id = ?', (id,))
-    db.commit()
-    flash('Medicine purchase deleted!', 'success')
-    return redirect(url_for('purchases'))
+    return redirect(url_for('voucher_delete', v_type='health', sub_type='medicine', id=id))
 
 @app.route('/vac_purchase_edit/<int:id>', methods=['GET', 'POST'])
 def vac_purchase_edit(id):
-    db = get_db()
-    record = db.execute('SELECT * FROM vaccine_purchases WHERE id = ?', (id,)).fetchone()
-    if request.method == 'POST':
-        f = request.form
-        db.execute('''UPDATE vaccine_purchases SET vaccine_name=?, quantity=?, cost=?, purchase_date=?, supplier=? WHERE id=?''',
-            (f.get('vaccine_name'), f.get('quantity'), f.get('cost'), f.get('purchase_date'), f.get('supplier'), id))
-        db.commit()
-        flash('Vaccine purchase updated successfully!', 'success')
-        return redirect(url_for('purchases'))
-    return render_template('generic_purchase_edit.html', record=record, p_type='vac')
+    return redirect(url_for('voucher_edit', v_type='health', sub_type='vaccine', id=id))
 
 @app.route('/vac_purchase_delete/<int:id>', methods=['POST'])
 def vac_purchase_delete(id):
-    db = get_db()
-    db.execute('DELETE FROM vaccine_purchases WHERE id = ?', (id,))
-    db.commit()
-    flash('Vaccine purchase deleted!', 'success')
-    return redirect(url_for('purchases'))
+    return redirect(url_for('voucher_delete', v_type='health', sub_type='vaccine', id=id))
 
 @app.route('/farm_settings', methods=['GET', 'POST'])
 def farm_settings():
@@ -1657,280 +3473,17 @@ def reports_list():
 @app.route('/invoice')
 @app.route('/invoice/<int:sales_id>')
 def generate_invoice(sales_id=None):
-    db = get_db()
     if sales_id is None:
-        sales = db.execute('SELECT * FROM sales_records ORDER BY date_of_sale DESC').fetchall()
-        return render_template('invoice_list.html', sales=sales)
-
-    sale = db.execute('SELECT * FROM sales_records WHERE id = ?', (sales_id,)).fetchone()
-    
-    if not sale:
-        flash('Sales record not found.', 'danger')
-        return redirect(url_for('generate_invoice'))
-    
-    farm_info = db.execute('SELECT * FROM farm_info WHERE id = 1').fetchone()
-    
-    # Ensure farm_info exists with default values
-    if not farm_info:
-        db.execute('''
-            INSERT INTO farm_info (id, farm_name, farm_address, farm_city, farm_phone, bank_name, account_number, ifsc_code)
-            VALUES (1, ?, ?, ?, ?, ?, ?, ?)
-        ''', ('Ranga Goat Farm', 'Aandigounder Street, Pachapalayam, Perur', 'Coimbatore 641010', '', '', '', ''))
-        db.commit()
-        farm_info = db.execute('SELECT * FROM farm_info WHERE id = 1').fetchone()
-    
-    # Get goat details from master records
-    goat = db.execute('SELECT * FROM master_records WHERE tag_no = ?', (sale['tag_id'],)).fetchone()
-    
-    return render_template('invoice.html', sale=sale, farm_info=farm_info, goat=goat, current_date=datetime.now())
+        return redirect(url_for('sales'))
+    return redirect(url_for('sales_invoice', s_type='goat', id=sales_id))
 
 @app.route('/invoice_txt/<int:sales_id>')
 def generate_invoice_txt(sales_id):
-    from io import BytesIO
-    
-    db = get_db()
-    sale = db.execute('SELECT * FROM sales_records WHERE id = ?', (sales_id,)).fetchone()
-    
-    if not sale:
-        flash('Sales record not found.', 'danger')
-        return redirect(url_for('sales'))
-    
-    farm_info = db.execute('SELECT * FROM farm_info WHERE id = 1').fetchone()
-    goat = db.execute('SELECT * FROM master_records WHERE tag_no = ?', (sale['tag_id'],)).fetchone()
-    
-    # Generate text bill
-    bill_text = ""
-    bill_text += "=" * 70 + "\n"
-    bill_text += f"{(farm_info['farm_name'] if farm_info and farm_info['farm_name'] else 'Goat Farm Pro'):^70}\n"
-    bill_text += "=" * 70 + "\n"
-    bill_text += f"{('SALES INVOICE'):^70}\n"
-    bill_text += "=" * 70 + "\n\n"
-    
-    # Farm Information
-    if farm_info:
-        bill_text += "FROM: FARM DETAILS\n"
-        bill_text += "-" * 70 + "\n"
-        bill_text += f"Farm Name     : {farm_info['farm_name'] or 'N/A'}\n"
-        bill_text += f"Address       : {farm_info['farm_address'] or 'N/A'}\n"
-        bill_text += f"City          : {farm_info['farm_city'] or 'N/A'}\n"
-        bill_text += f"Phone         : {farm_info['farm_phone'] or 'N/A'}\n"
-    else:
-        bill_text += "FROM: FARM DETAILS\n"
-        bill_text += "-" * 70 + "\n"
-        bill_text += "Farm details not configured\n"
-    
-    bill_text += "\n"
-    
-    # Buyer Information
-    bill_text += "TO: BUYER INFORMATION\n"
-    bill_text += "-" * 70 + "\n"
-    bill_text += f"Buyer Name    : {sale['buyer_name'] or 'N/A'}\n"
-    bill_text += f"City          : {sale['buyer_city'] or 'N/A'}\n"
-    bill_text += f"Contact       : {sale['buyer_contact'] or 'N/A'}\n"
-    bill_text += "\n"
-    
-    # Invoice Details
-    bill_text += "INVOICE DETAILS\n"
-    bill_text += "-" * 70 + "\n"
-    bill_text += f"Invoice Number: {sale['id']}\n"
-    bill_text += f"Invoice Date  : {sale['date_of_sale'] or 'N/A'}\n"
-    bill_text += f"Bill Date     : {datetime.now().strftime('%d-%m-%Y %H:%M:%S')}\n"
-    bill_text += "\n"
-    
-    # Particulars - Goat Details
-    bill_text += "GOAT PARTICULARS\n"
-    bill_text += "-" * 70 + "\n"
-    bill_text += f"{'Item':<20} {'Details':<50}\n"
-    bill_text += "-" * 70 + "\n"
-    bill_text += f"{'Tag/ID Number':<20} {sale['tag_id']:<50}\n"
-    bill_text += f"{'Gender':<20} {(sale['gender'] or (goat['gender'] if goat else 'N/A')):<50}\n"
-    bill_text += f"{'Weight (kg)':<20} {str(sale['weight'] or (goat['weight_kg'] if goat else 'N/A')):<50}\n"
-    bill_text += f"{'Breed':<20} {(sale['breed'] or (goat['breed'] if goat else 'N/A')):<50}\n"
-    bill_text += f"{'Breed Percent':<20} {(sale['breed_percent'] or (goat['breed_percent'] if goat else 'N/A')):<50}\n"
-    bill_text += "\n"
-    
-    # Price Details
-    bill_text += "PRICE DETAILS\n"
-    bill_text += "-" * 70 + "\n"
-    bill_text += f"{'Price per Unit':<40} ₹ {sale['sold_price']:>15.2f}\n"
-    bill_text += f"{'Total Amount':<40} ₹ {sale['sold_price']:>15.2f}\n"
-    bill_text += "-" * 70 + "\n"
-    bill_text += f"{'GRAND TOTAL':<40} ₹ {sale['sold_price']:>15.2f}\n"
-    bill_text += "-" * 70 + "\n"
-    bill_text += "\n"
-    
-    # Bank Details
-    if farm_info and farm_info['bank_name']:
-        bill_text += "BANK DETAILS\n"
-        bill_text += "-" * 70 + "\n"
-        bill_text += f"Bank Name     : {farm_info['bank_name'] or 'N/A'}\n"
-        bill_text += f"Account No    : {farm_info['account_number'] or 'N/A'}\n"
-        bill_text += f"IFSC Code     : {farm_info['ifsc_code'] or 'N/A'}\n"
-        bill_text += "\n"
-    
-    # Footer
-    bill_text += "=" * 70 + "\n"
-    bill_text += "Thank you for your business!\n"
-    bill_text += f"Generated on: {datetime.now().strftime('%d-%m-%Y %H:%M:%S')}\n"
-    bill_text += "=" * 70 + "\n"
-    
-    # Create BytesIO object and write bill text
-    bill_bytes = BytesIO(bill_text.encode('utf-8'))
-    bill_bytes.seek(0)
-    
-    try:
-        return send_file(
-            bill_bytes,
-            mimetype='text/plain',
-            as_attachment=True,
-            download_name=f'Invoice_{sale["id"]}_Bill.txt'
-        )
-    except TypeError:
-        # Fallback for older Flask versions
-        return send_file(
-            bill_bytes,
-            mimetype='text/plain',
-            as_attachment=True,
-            attachment_filename=f'Invoice_{sale["id"]}_Bill.txt'
-        )
+    return redirect(url_for('sales_invoice_txt', s_type='goat', id=sales_id))
 
 @app.route('/invoice_pdf/<int:sales_id>')
 def generate_invoice_pdf(sales_id):
-    from io import BytesIO
-    
-    try:
-        from reportlab.lib.pagesizes import A4
-        from reportlab.lib.units import mm
-        from reportlab.pdfgen import canvas
-    except ImportError:
-        flash('PDF generation requires reportlab. Install it with pip install reportlab.', 'warning')
-        return redirect(url_for('generate_invoice', sales_id=sales_id))
-
-    db = get_db()
-    sale = db.execute('SELECT * FROM sales_records WHERE id = ?', (sales_id,)).fetchone()
-    if not sale:
-        flash('Sales record not found.', 'danger')
-        return redirect(url_for('sales'))
-
-    farm_info = db.execute('SELECT * FROM farm_info WHERE id = 1').fetchone()
-    
-    # Ensure farm_info exists with default values
-    if not farm_info:
-        db.execute('''
-            INSERT INTO farm_info (id, farm_name, farm_address, farm_city, farm_phone, bank_name, account_number, ifsc_code)
-            VALUES (1, ?, ?, ?, ?, ?, ?, ?)
-        ''', ('Ranga Goat Farm', 'Aandigounder Street, Pachapalayam, Perur', 'Coimbatore 641010', '', '', '', ''))
-        db.commit()
-        farm_info = db.execute('SELECT * FROM farm_info WHERE id = 1').fetchone()
-    
-    goat = db.execute('SELECT * FROM master_records WHERE tag_no = ?', (sale['tag_id'],)).fetchone()
-
-    buffer = BytesIO()
-    width, height = A4
-    pdf = canvas.Canvas(buffer, pagesize=A4)
-    pdf.setTitle(f"Invoice_{sale['id']}")
-
-    margin = 25 * mm
-    line_height = 9 * mm
-    y = height - margin
-
-    farm_name = farm_info['farm_name'] if farm_info and farm_info['farm_name'] else 'Ranga Goat Farm'
-    pdf.setFont('Helvetica-Bold', 18)
-    pdf.drawString(margin, y, farm_name)
-    y -= line_height
-    pdf.setFont('Helvetica', 10)
-    if farm_info:
-        pdf.drawString(margin, y, f"{farm_info['farm_address'] or 'Address not configured'}")
-        y -= 5 * mm
-        pdf.drawString(margin, y, f"{farm_info['farm_city'] or ''} | Phone: {farm_info['farm_phone'] or 'N/A'}")
-    else:
-        pdf.drawString(margin, y, 'Farm details not configured')
-    y -= 12 * mm
-
-    pdf.setFont('Helvetica-Bold', 14)
-    pdf.drawString(margin, y, 'INVOICE')
-    pdf.setFont('Helvetica', 10)
-    pdf.drawString(width - margin - 100 * mm, y, f"Invoice #: {sale['id']}")
-    y -= line_height
-    pdf.drawString(width - margin - 100 * mm, y, f"Date: {sale['date_of_sale'] or 'N/A'}")
-    y -= 12 * mm
-
-    pdf.setFont('Helvetica-Bold', 12)
-    pdf.drawString(margin, y, 'Bill To:')
-    pdf.setFont('Helvetica', 10)
-    pdf.drawString(margin, y - 6 * mm, f"{sale['buyer_name'] or 'N/A'}")
-    pdf.drawString(margin, y - 12 * mm, f"{sale['buyer_city'] or 'N/A'}")
-    pdf.drawString(margin, y - 18 * mm, f"Contact: {sale['buyer_contact'] or 'N/A'}")
-
-    bank_y = y
-    if farm_info and farm_info['bank_name']:
-        pdf.setFont('Helvetica-Bold', 12)
-        pdf.drawString(width / 2 + 10 * mm, bank_y, 'Bank Details:')
-        pdf.setFont('Helvetica', 10)
-        pdf.drawString(width / 2 + 10 * mm, bank_y - 6 * mm, f"Bank: {farm_info['bank_name']}")
-        pdf.drawString(width / 2 + 10 * mm, bank_y - 12 * mm, f"A/C: {farm_info['account_number'] or 'N/A'}")
-        pdf.drawString(width / 2 + 10 * mm, bank_y - 18 * mm, f"IFSC: {farm_info['ifsc_code'] or 'N/A'}")
-
-    y -= 32 * mm
-    pdf.setFont('Helvetica-Bold', 12)
-    pdf.drawString(margin, y, 'Goat Particulars')
-    y -= 8 * mm
-    pdf.setFont('Helvetica', 10)
-    fields = [
-        ('Tag/ID Number', sale['tag_id']),
-        ('Gender', sale['gender'] or (goat['gender'] if goat else 'N/A')),
-        ('Weight (kg)', f"{sale['weight'] if sale['weight'] else (goat['weight_kg'] if goat else 'N/A')}"),
-        ('Breed', sale['breed'] or (goat['breed'] if goat else 'N/A')),
-        ('Breed Percent', sale['breed_percent'] or (goat['breed_percent'] if goat else 'N/A'))
-    ]
-    for label, value in fields:
-        pdf.drawString(margin, y, f"{label}: {value}")
-        y -= 7 * mm
-
-    y -= 6 * mm
-    pdf.setFont('Helvetica-Bold', 12)
-    pdf.drawString(margin, y, 'Price Summary')
-    y -= 8 * mm
-    pdf.setFont('Helvetica', 10)
-    pdf.drawString(margin, y, f"Price per Unit: ₹ {sale['sold_price']:.2f}")
-    y -= 7 * mm
-    pdf.drawString(margin, y, f"Total Amount: ₹ {sale['sold_price']:.2f}")
-    y -= 12 * mm
-    pdf.setFont('Helvetica-Bold', 11)
-    pdf.drawString(margin, y, f"Grand Total: ₹ {sale['sold_price']:.2f}")
-
-    y -= 18 * mm
-    pdf.setFont('Helvetica-Oblique', 9)
-    pdf.drawString(margin, y, f"Generated on: {datetime.now().strftime('%d-%m-%Y %H:%M:%S')}")
-    pdf.drawString(margin, y - 7 * mm, 'Thank you for your business!')
-
-    # Digital Signature Block
-    pdf.setFont('Helvetica-Bold', 10)
-    pdf.drawString(width - margin - 50 * mm, y, "Digital Signature")
-    pdf.setLineWidth(0.5)
-    pdf.line(width - margin - 60 * mm, y - 5 * mm, width - margin, y - 5 * mm)
-    pdf.setFont('Helvetica', 9)
-    pdf.drawString(width - margin - 55 * mm, y - 10 * mm, "(Authorized Signatory)")
-
-    pdf.showPage()
-    pdf.save()
-    buffer.seek(0)
-
-    try:
-        return send_file(
-            buffer,
-            mimetype='application/pdf',
-            as_attachment=True,
-            download_name=f'Invoice_{sale["id"]}.pdf'
-        )
-    except TypeError:
-        # Fallback for older Flask versions
-        return send_file(
-            buffer,
-            mimetype='application/pdf',
-            as_attachment=True,
-            attachment_filename=f'Invoice_{sale["id"]}.pdf'
-        )
+    return redirect(url_for('sales_invoice', s_type='goat', id=sales_id))
 
 @app.route('/clear_all_data', methods=['POST'])
 def clear_all_data():
@@ -1943,17 +3496,34 @@ def clear_all_data():
     
     db = get_db()
     try:
-        # Delete all records from all tables
         db.execute('DELETE FROM goats_data')
         db.execute('DELETE FROM master_records')
         db.execute('DELETE FROM sales_records')
         db.execute('DELETE FROM medicine_records')
+        db.execute('DELETE FROM medicine_history')
         db.execute('DELETE FROM mortality_records')
         db.execute('DELETE FROM feed_inventory')
         db.execute('DELETE FROM kid_records')
         db.execute('DELETE FROM purchases')
         db.execute('DELETE FROM vaccine_records')
         db.execute('DELETE FROM doctor_details')
+        db.execute('DELETE FROM expenses')
+        db.execute('DELETE FROM equipment')
+        db.execute('DELETE FROM equipment_services')
+        db.execute('DELETE FROM salary_payments')
+        db.execute('DELETE FROM attendance')
+        db.execute('DELETE FROM employee_wages')
+        db.execute('DELETE FROM tasks')
+        db.execute('DELETE FROM leaves')
+        db.execute('DELETE FROM finances')
+        db.execute('DELETE FROM medicine_purchases')
+        db.execute('DELETE FROM vaccine_purchases')
+        db.execute('DELETE FROM feed_purchases')
+        db.execute('DELETE FROM employees')
+        db.execute('DELETE FROM eligible_to_sell')
+        db.execute('DELETE FROM reports')
+        db.execute('DELETE FROM breeds')
+        db.execute('DELETE FROM suppliers')
         
         db.commit()
         flash('All data has been successfully cleared!', 'success')
@@ -1979,11 +3549,16 @@ def init_employee_tables():
                 conn.execute(f"ALTER TABLE {table} ADD COLUMN {col} {typ}")
             except sqlite3.OperationalError: pass
 
+        add_col("employees", "sr_no", "INTEGER")
         add_col("employees", "aadhar_no", "TEXT")
         add_col("employees", "pan_no", "TEXT")
         add_col("employees", "bank_name", "TEXT")
         add_col("employees", "account_no", "TEXT")
         add_col("employees", "ifsc_code", "TEXT")
+        
+        # Populate sr_no if empty/null
+        conn.execute('UPDATE employees SET sr_no = id WHERE sr_no IS NULL OR sr_no = 0')
+        add_col("expenses", "bill_file", "TEXT")
         conn.execute('''CREATE TABLE IF NOT EXISTS employee_wages (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             employee_id INTEGER UNIQUE, daily_wage REAL DEFAULT 0,
@@ -2049,44 +3624,63 @@ def init_employee_tables():
         conn.commit()
 
 
-init_employee_tables()
+with app.app_context():
+    init_employee_tables()
 
 @app.route('/employees')
 def employees():
     db = get_db()
-    records = db.execute('SELECT * FROM employees ORDER BY name ASC').fetchall()
+    records = db.execute('SELECT * FROM employees ORDER BY CAST(sr_no AS INTEGER) ASC').fetchall()
     return render_template('employees.html', records=records)
 
 @app.route('/employee_add', methods=['GET', 'POST'])
 def employee_add():
+    db = get_db()
     if request.method == 'POST':
         f = request.form
-        db = get_db()
-        db.execute('''INSERT INTO employees (name, role, phone, address, join_date, wage_type, wage_rate, status, notes, 
+        role = f.get('role', '').strip()
+        if not role:
+            flash('role is needed', 'danger')
+            res = db.execute("SELECT MAX(CAST(sr_no AS INTEGER)) FROM employees").fetchone()[0]
+            next_sr = (res or 0) + 1
+            return render_template('employee_add.html', next_sr=next_sr, form_data=f)
+            
+        db.execute('''INSERT INTO employees (sr_no, name, role, phone, address, join_date, wage_type, wage_rate, status, notes, 
                                              aadhar_no, pan_no, bank_name, account_no, ifsc_code) 
-                      VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)''',
-            (f.get('name'), f.get('role'), f.get('phone'), f.get('address'), f.get('joining_date'),
+                      VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)''',
+            (f.get('sr_no'), f.get('name'), role, f.get('phone'), f.get('address'), f.get('joining_date'),
              f.get('wage_type'), f.get('wage_rate', 0), 'Active', f.get('notes'),
              f.get('aadhar_no'), f.get('pan_no'), f.get('bank_name'), f.get('account_no'), f.get('ifsc_code')))
         db.commit()
         flash('Employee added!', 'success')
         return redirect(url_for('employees'))
-    return render_template('employee_add.html')
+        
+    res = db.execute("SELECT MAX(CAST(sr_no AS INTEGER)) FROM employees").fetchone()[0]
+    next_sr = (res or 0) + 1
+    return render_template('employee_add.html', next_sr=next_sr)
 
 @app.route('/employee_edit/<int:emp_id>', methods=['GET', 'POST'])
 def employee_edit(emp_id):
     db = get_db()
+    record = db.execute('SELECT * FROM employees WHERE id=?', (emp_id,)).fetchone()
+    if not record:
+        flash('Employee record not found or has been deleted.', 'danger')
+        return redirect(url_for('employees'))
     if request.method == 'POST':
         f = request.form
-        db.execute('''UPDATE employees SET name=?, role=?, phone=?, address=?, join_date=?, wage_type=?, wage_rate=?, status=?, notes=?,
+        role = f.get('role', '').strip()
+        if not role:
+            flash('role is needed', 'danger')
+            return render_template('employee_edit.html', record=record)
+            
+        db.execute('''UPDATE employees SET sr_no=?, name=?, role=?, phone=?, address=?, join_date=?, wage_type=?, wage_rate=?, status=?, notes=?,
                                            aadhar_no=?, pan_no=?, bank_name=?, account_no=?, ifsc_code=? WHERE id=?''',
-            (f.get('name'), f.get('role'), f.get('phone'), f.get('address'), f.get('joining_date'),
+            (f.get('sr_no'), f.get('name'), role, f.get('phone'), f.get('address'), f.get('joining_date'),
              f.get('wage_type'), f.get('wage_rate', 0), f.get('status'), f.get('notes'),
              f.get('aadhar_no'), f.get('pan_no'), f.get('bank_name'), f.get('account_no'), f.get('ifsc_code'), emp_id))
         db.commit()
         flash('Employee updated!', 'success')
         return redirect(url_for('employees'))
-    record = db.execute('SELECT * FROM employees WHERE id=?', (emp_id,)).fetchone()
     return render_template('employee_edit.html', record=record)
 
 @app.route('/employee_detail/<int:emp_id>')
@@ -2096,16 +3690,37 @@ def employee_detail(emp_id):
     if not emp:
         flash('Not found.', 'danger')
         return redirect(url_for('employees'))
+        
+    # Calculate attendance statistics
+    stats = db.execute('''
+        SELECT 
+            SUM(CASE WHEN status IN ('P', 'Present') THEN 1 ELSE 0 END) as present_cnt,
+            SUM(CASE WHEN status IN ('L', 'Leave', 'On Leave') THEN 1 ELSE 0 END) as leave_cnt
+        FROM attendance WHERE employee_id = ?
+    ''', (emp_id,)).fetchone()
+    
+    total_present = stats['present_cnt'] or 0
+    total_absent = 0
+    total_leaves = stats['leave_cnt'] or 0
+    
+    wages = db.execute('SELECT * FROM employee_wages WHERE employee_id=?', (emp_id,)).fetchone()
     attendance = db.execute('SELECT * FROM attendance WHERE employee_id=? ORDER BY date DESC LIMIT 30', (emp_id,)).fetchall()
     payments = db.execute('SELECT * FROM salary_payments WHERE employee_id=? ORDER BY paid_date DESC', (emp_id,)).fetchall()
-    return render_template('employee_detail.html', employee=emp, attendance=attendance, payments=payments)
+    
+    return render_template('employee_detail.html', employee=emp, attendance=attendance, payments=payments,
+                           total_present=total_present, total_absent=total_absent, total_leaves=total_leaves, wages=wages)
 
 @app.route('/employee_delete/<int:emp_id>', methods=['POST'])
 def employee_delete(emp_id):
     db = get_db()
     db.execute('DELETE FROM employees WHERE id=?', (emp_id,))
+    db.execute('DELETE FROM attendance WHERE employee_id=?', (emp_id,))
+    db.execute('DELETE FROM salary_payments WHERE employee_id=?', (emp_id,))
+    db.execute('DELETE FROM leaves WHERE employee_id=?', (emp_id,))
+    db.execute('DELETE FROM tasks WHERE employee_id=?', (emp_id,))
+    db.execute('DELETE FROM employee_wages WHERE employee_id=?', (emp_id,))
     db.commit()
-    flash('Employee deleted.', 'success')
+    flash('Employee and all related attendance, leaves, wages, and salary logs deleted successfully!', 'success')
     return redirect(url_for('employees'))
 
 
@@ -2113,60 +3728,75 @@ def employee_delete(emp_id):
 @app.route('/attendance')
 def attendance_view():
     db = get_db()
-    date_filter = request.args.get('date', '')
-    q = '''SELECT a.*, e.name, e.role FROM attendance a
-           JOIN employees e ON a.employee_id = e.id WHERE 1=1'''
-    p = []
-    if date_filter:
-        q += ' AND a.date = ?'
-        p.append(date_filter)
-    q += ' ORDER BY a.date DESC'
-    records = db.execute(q, p).fetchall()
-    emps = db.execute('SELECT * FROM employees WHERE status="Active" ORDER BY name').fetchall()
-    return render_template('attendance.html', records=records, employees=emps, date_filter=date_filter)
+    date_filter = request.args.get('date', datetime.now().strftime('%Y-%m-%d'))
+    
+    # Fetch all active employees
+    emps = db.execute('SELECT * FROM employees WHERE status="Active" ORDER BY CAST(sr_no AS INTEGER) ASC').fetchall()
+    
+    # Fetch existing attendance records for the selected date
+    existing = db.execute('SELECT * FROM attendance WHERE date = ?', (date_filter,)).fetchall()
+    existing_map = {r['employee_id']: r for r in existing}
+    
+    return render_template('attendance.html', employees=emps, existing_map=existing_map, date_filter=date_filter)
 
-@app.route('/attendance_add', methods=['POST'])
-def attendance_add():
+@app.route('/attendance_save', methods=['POST'])
+def attendance_save():
     db = get_db()
-    f = request.form
-    db.execute('INSERT INTO attendance (employee_id, date, status, notes) VALUES (?, ?, ?, ?)',
-        (f.get('employee_id'), f.get('date'), f.get('status'), f.get('notes')))
+    date_val = request.form.get('date')
+    if not date_val:
+        flash('Date is required!', 'danger')
+        return redirect(url_for('attendance_view'))
+        
+    emps = db.execute('SELECT id FROM employees WHERE status="Active"').fetchall()
+    for emp in emps:
+        emp_id = emp['id']
+        status = request.form.get(f'status_{emp_id}', 'Present')
+        notes = request.form.get(f'notes_{emp_id}', '').strip()
+        
+        # Check if record exists for this employee and date
+        existing = db.execute('SELECT id FROM attendance WHERE employee_id=? AND date=?', (emp_id, date_val)).fetchone()
+        if existing:
+            db.execute('UPDATE attendance SET status=?, notes=? WHERE id=?', (status, notes, existing['id']))
+        else:
+            db.execute('INSERT INTO attendance (employee_id, date, status, notes) VALUES (?, ?, ?, ?)',
+                       (emp_id, date_val, status, notes))
+                       
     db.commit()
-    flash('Attendance marked!', 'success')
-    return redirect(url_for('attendance_view'))
+    flash(f'Attendance sheet for {date_val} successfully saved!', 'success')
+    return redirect(url_for('attendance_view', date=date_val))
 
 @app.route('/attendance_summary')
 def attendance_summary():
     db = get_db()
     month = request.args.get('month', datetime.now().strftime('%m'))
     year = request.args.get('year', datetime.now().strftime('%Y'))
-    data = db.execute('''SELECT e.name, 
-        SUM(CASE WHEN a.status='Present' THEN 1 ELSE 0 END) as present,
-        SUM(CASE WHEN a.status='Absent' THEN 1 ELSE 0 END) as absent,
-        SUM(CASE WHEN a.status='Leave' THEN 1 ELSE 0 END) as leave,
-        SUM(CASE WHEN a.status='Half Day' THEN 1 ELSE 0 END) as half_day
+    data = db.execute('''SELECT e.id, e.name, e.sr_no, 
+        SUM(CASE WHEN a.status IN ('P', 'Present') THEN 1 ELSE 0 END) as present,
+        SUM(CASE WHEN a.status IN ('L', 'Leave', 'On Leave') THEN 1 ELSE 0 END) as leave
         FROM employees e
         LEFT JOIN attendance a ON e.id=a.employee_id AND strftime('%m', a.date)=? AND strftime('%Y', a.date)=?
-        GROUP BY e.id ORDER BY e.name''', (month, year)).fetchall()
-    return render_template('attendance_summary.html', data=data, month=month, year=year)
+        GROUP BY e.id ORDER BY CAST(e.sr_no AS INTEGER) ASC''', (month, year)).fetchall()
+    farm = db.execute('SELECT * FROM farm_info LIMIT 1').fetchone()
+    return render_template('attendance_summary.html', data=data, month=month, year=year, farm=farm)
 
 @app.route('/salary_calculate', methods=['GET', 'POST'])
 def salary_calculate():
     db = get_db()
+    
     month = request.args.get('month', datetime.now().strftime('%m'))
     year = request.args.get('year', datetime.now().strftime('%Y'))
+    today_date = datetime.now().strftime('%Y-%m-%d')
     
-    # Get attendance summary
-    data = db.execute('''SELECT e.id, e.name, e.role, e.wage_type, e.wage_rate,
-        SUM(CASE WHEN a.status='Present' THEN 1 ELSE 0 END) as present_days,
-        SUM(CASE WHEN a.status='Half Day' THEN 0.5 ELSE 0 END) as half_days
+    # Query attendance strictly for the selected month/year
+    data = db.execute('''SELECT e.id, e.name, e.role, e.wage_type, e.wage_rate, e.sr_no,
+        SUM(CASE WHEN a.status IN ('P', 'Present') THEN 1 ELSE 0 END) as present_days
         FROM employees e
         LEFT JOIN attendance a ON e.id=a.employee_id AND strftime('%m', a.date)=? AND strftime('%Y', a.date)=?
-        GROUP BY e.id ORDER BY e.name''', (month, year)).fetchall()
-    
+        GROUP BY e.id ORDER BY CAST(e.sr_no AS INTEGER) ASC''', (month, year)).fetchall()
+        
     salaries = []
     for emp in data:
-        present = (emp['present_days'] or 0) + (emp['half_days'] or 0)
+        present = emp['present_days'] or 0
         wage_type = emp['wage_type']
         wage_rate = emp['wage_rate'] or 0
         
@@ -2178,13 +3808,14 @@ def salary_calculate():
         elif wage_type == 'Daily':
             computed = wage_rate * present
             
-        # Check if already paid
+        # Get monthly paid amount
         paid = db.execute('''SELECT SUM(net_salary) FROM salary_payments 
                              WHERE employee_id=? AND month=? AND year=?''', 
-                          (emp['id'], int(month), int(year))).fetchone()[0] or 0
+                           (emp['id'], int(month), int(year))).fetchone()[0] or 0
         
         salaries.append({
             'id': emp['id'],
+            'sr_no': emp['sr_no'],
             'name': emp['name'],
             'role': emp['role'],
             'present': present,
@@ -2195,15 +3826,20 @@ def salary_calculate():
             'balance': max(0, computed - paid)
         })
         
-    return render_template('salary_calculate.html', salaries=salaries, month=month, year=year)
+    return render_template('salary_calculate.html', 
+                           salaries=salaries, 
+                           month=month, 
+                           year=year, 
+                           today_date=today_date)
 
 @app.route('/pay_salary', methods=['POST'])
 def pay_salary():
     db = get_db()
     emp_id = request.form.get('employee_id')
     amount = float(request.form.get('amount') or 0)
-    date = request.form.get('payment_date')
-    method = request.form.get('payment_mode')
+    date = request.form.get('payment_date') or datetime.now().strftime('%Y-%m-%d')
+    method = request.form.get('payment_mode') or 'Cash'
+    
     month = int(request.form.get('month', datetime.now().month))
     year = int(request.form.get('year', datetime.now().year))
     
@@ -2333,35 +3969,70 @@ def leave_status(leave_id, status):
     flash(f'Leave {status}.', 'success')
     return redirect(url_for('leaves'))
 
+
+
 # ── EXPENSES ──────────────────────────────────────────────────────────────────
 @app.route('/expenses')
 def expenses():
     db = get_db()
     category = request.args.get('category', '')
-    start_date = request.args.get('start_date', '')
-    end_date = request.args.get('end_date', '')
+    month = request.args.get('month', '')
+    year = request.args.get('year', '')
+    
     q = 'SELECT * FROM expenses WHERE 1=1'
     p = []
+    
     if category:
-        q += ' AND category=?'; p.append(category)
-    if start_date:
-        q += ' AND date>=?'; p.append(start_date)
-    if end_date:
-        q += ' AND date<=?'; p.append(end_date)
+        q += ' AND category LIKE ?'
+        p.append(f'%{category}%')
+        
+    if month and month != 'All':
+        q += " AND strftime('%m', date) = ?"
+        p.append(f"{int(month):02d}")
+        
+    if year and year != 'All':
+        q += " AND strftime('%Y', date) = ?"
+        p.append(str(year))
+        
     q += ' ORDER BY date DESC'
     records = db.execute(q, p).fetchall()
-    return render_template('expenses.html', records=records, category=category, start_date=start_date, end_date=end_date)
+    
+    return render_template('expenses.html', records=records, category=category, month=month, year=year)
 
 @app.route('/expense_add', methods=['GET', 'POST'])
 def expense_add():
     if request.method == 'POST':
         f = request.form
         db = get_db()
-        db.execute('INSERT INTO expenses (category, amount, date, description, vendor_name, payment_mode, receipt_no, notes) VALUES (?,?,?,?,?,?,?,?)',
-            (f.get('category'), f.get('amount'), f.get('expense_date'), f.get('description'),
-             f.get('vendor_name'), f.get('payment_method'), f.get('bill_reference'), f.get('notes')))
+        
+        # Handle file upload for the bill
+        bill_file_path = None
+        if 'attachment' in request.files:
+            file = request.files['attachment']
+            if file and file.filename != '':
+                import os
+                from werkzeug.utils import secure_filename
+                filename = secure_filename(file.filename)
+                timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+                filename = f"{timestamp}_{filename}"
+                upload_dir = os.path.join(app.root_path, 'static', 'uploads', 'bills')
+                os.makedirs(upload_dir, exist_ok=True)
+                file.save(os.path.join(upload_dir, filename))
+                bill_file_path = f"/static/uploads/bills/{filename}"
+        
+        db.execute('''
+            INSERT INTO expenses (category, amount, date, description, receipt_no, bill_file, status) 
+            VALUES (?, ?, ?, ?, ?, ?, 'Approved')
+        ''', (
+            f.get('category'), 
+            float(f.get('amount') or 0.0), 
+            f.get('expense_date'), 
+            f.get('description'), 
+            f.get('bill_reference'), 
+            bill_file_path
+        ))
         db.commit()
-        flash('Expense added!', 'success')
+        flash('Expense added successfully!', 'success')
         return redirect(url_for('expenses'))
     return render_template('expense_add.html')
 
@@ -2376,114 +4047,60 @@ def expense_approve(expense_id):
     return redirect(url_for('expenses'))
 
 # ── P&L FINANCE MODULE ────────────────────────────────────────────────────────
-@app.route('/pnl')
-def pnl():
+@app.route('/expense_delete/<int:expense_id>', methods=['POST'])
+def expense_delete(expense_id):
     db = get_db()
-    year = request.args.get('year', datetime.now().strftime('%Y'))
-    
-    # Months for Chart.js
-    months = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12']
-    month_names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-    
-    sales_data = []
-    expense_data = []
-    profit_data = []
-    cash_flow_data = []
-    cumulative_cash = 0
-    
-    total_sales_yr = 0
-    total_expenses_yr = 0
-    
-    # Advanced Breakdown Dictionaries
-    revenue_breakdown = {
-        'goat_sales': 0, 'milk_sales': 0, 'breeding': 0,
-        'manure': 0, 'online': 0, 'subsidies': 0
-    }
-    
-    expense_breakdown = {
-        'feed': 0, 'vet': 0, 'vaccine': 0, 'elec_water': 0,
-        'salaries': 0, 'transport': 0, 'maint': 0, 'rent': 0,
-        'insurance': 0, 'misc': 0
-    }
-    
-    for m in months:
-        ym = f"{year}-{m}"
-        
-        # --- REVENUE ---
-        goat_sales = db.execute('''SELECT SUM(sold_price) FROM sales_records WHERE strftime('%Y-%m', date_of_sale) = ?''', (ym,)).fetchone()[0] or 0
-        milk_sales = db.execute('''SELECT SUM(amount) FROM finances WHERE type='Income' AND category='Milk Sales' AND strftime('%Y-%m', date) = ?''', (ym,)).fetchone()[0] or 0
-        breeding = db.execute('''SELECT SUM(amount) FROM finances WHERE type='Income' AND category='Breeding Income' AND strftime('%Y-%m', date) = ?''', (ym,)).fetchone()[0] or 0
-        manure = db.execute('''SELECT SUM(amount) FROM finances WHERE type='Income' AND category='Organic Manure Sales' AND strftime('%Y-%m', date) = ?''', (ym,)).fetchone()[0] or 0
-        online = db.execute('''SELECT SUM(amount) FROM finances WHERE type='Income' AND category='Online Marketplace Income' AND strftime('%Y-%m', date) = ?''', (ym,)).fetchone()[0] or 0
-        subsidies = db.execute('''SELECT SUM(amount) FROM finances WHERE type='Income' AND category='Government Subsidies' AND strftime('%Y-%m', date) = ?''', (ym,)).fetchone()[0] or 0
-        
-        month_revenue = goat_sales + milk_sales + breeding + manure + online + subsidies
-        
-        revenue_breakdown['goat_sales'] += goat_sales
-        revenue_breakdown['milk_sales'] += milk_sales
-        revenue_breakdown['breeding'] += breeding
-        revenue_breakdown['manure'] += manure
-        revenue_breakdown['online'] += online
-        revenue_breakdown['subsidies'] += subsidies
-        
-        # --- EXPENSES ---
-        feed = db.execute('''SELECT SUM(total_cost) FROM feed_inventory WHERE strftime('%Y-%m', purchase_date) = ?''', (ym,)).fetchone()[0] or 0
-        vet = db.execute('''SELECT SUM(cost) FROM medicine_purchases WHERE strftime('%Y-%m', purchase_date) = ?''', (ym,)).fetchone()[0] or 0
-        vaccine = db.execute('''SELECT SUM(cost) FROM vaccine_purchases WHERE strftime('%Y-%m', purchase_date) = ?''', (ym,)).fetchone()[0] or 0
-        
-        elec_water = db.execute('''SELECT SUM(amount) FROM expenses WHERE status='Approved' AND category='Electricity and Water' AND strftime('%Y-%m', date) = ?''', (ym,)).fetchone()[0] or 0
-        transport = db.execute('''SELECT SUM(amount) FROM expenses WHERE status='Approved' AND category='Transport' AND strftime('%Y-%m', date) = ?''', (ym,)).fetchone()[0] or 0
-        rent = db.execute('''SELECT SUM(amount) FROM expenses WHERE status='Approved' AND category='Farm Rent' AND strftime('%Y-%m', date) = ?''', (ym,)).fetchone()[0] or 0
-        insurance = db.execute('''SELECT SUM(amount) FROM expenses WHERE status='Approved' AND category='Insurance' AND strftime('%Y-%m', date) = ?''', (ym,)).fetchone()[0] or 0
-        misc = db.execute('''SELECT SUM(amount) FROM expenses WHERE status='Approved' AND category NOT IN ('Electricity and Water', 'Transport', 'Farm Rent', 'Insurance') AND strftime('%Y-%m', date) = ?''', (ym,)).fetchone()[0] or 0
-        
-        salaries = db.execute('''SELECT SUM(net_salary) FROM salary_payments WHERE year = ? AND month = ?''', (year, int(m))).fetchone()[0] or 0
-        maint = db.execute('''SELECT SUM(service_cost) FROM equipment_services WHERE strftime('%Y-%m', service_date) = ?''', (ym,)).fetchone()[0] or 0
-        
-        month_expense = feed + vet + vaccine + elec_water + transport + rent + insurance + misc + salaries + maint
-        
-        expense_breakdown['feed'] += feed
-        expense_breakdown['vet'] += vet
-        expense_breakdown['vaccine'] += vaccine
-        expense_breakdown['elec_water'] += elec_water
-        expense_breakdown['salaries'] += salaries
-        expense_breakdown['transport'] += transport
-        expense_breakdown['maint'] += maint
-        expense_breakdown['rent'] += rent
-        expense_breakdown['insurance'] += insurance
-        expense_breakdown['misc'] += misc
-        
-        profit = month_revenue - month_expense
-        cumulative_cash += profit
-        
-        sales_data.append(month_revenue)
-        expense_data.append(month_expense)
-        profit_data.append(profit)
-        cash_flow_data.append(cumulative_cash)
-        
-        total_sales_yr += month_revenue
-        total_expenses_yr += month_expense
+    db.execute('DELETE FROM expenses WHERE id=?', (expense_id,))
+    db.commit()
+    flash('Expense record deleted successfully!', 'success')
+    return redirect(url_for('expenses'))
 
-    net_profit = total_sales_yr - total_expenses_yr
-    profit_margin = (net_profit / total_sales_yr * 100) if total_sales_yr > 0 else 0
-    roi = (net_profit / total_expenses_yr * 100) if total_expenses_yr > 0 else 0
-    burn_rate = total_expenses_yr / 12
-    ebitda = net_profit
+@app.route('/expense_edit/<int:expense_id>', methods=['GET', 'POST'])
+def expense_edit(expense_id):
+    db = get_db()
+    record = db.execute('SELECT * FROM expenses WHERE id = ?', (expense_id,)).fetchone()
     
-    active_goats = db.execute('''SELECT COUNT(*) FROM master_records WHERE status = 'Active' ''').fetchone()[0] or 1
-    rev_per_goat = total_sales_yr / active_goats
-    feed_per_goat = expense_breakdown['feed'] / active_goats
+    if not record:
+        flash('Expense record not found.', 'danger')
+        return redirect(url_for('expenses'))
+        
+    if request.method == 'POST':
+        f = request.form
+        
+        # Handle file upload for the bill
+        bill_file_path = record['bill_file']
+        if 'attachment' in request.files:
+            file = request.files['attachment']
+            if file and file.filename != '':
+                import os
+                from werkzeug.utils import secure_filename
+                filename = secure_filename(file.filename)
+                timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+                filename = f"{timestamp}_{filename}"
+                upload_dir = os.path.join(app.root_path, 'static', 'uploads', 'bills')
+                os.makedirs(upload_dir, exist_ok=True)
+                file.save(os.path.join(upload_dir, filename))
+                bill_file_path = f"/static/uploads/bills/{filename}"
+                
+        db.execute('''
+            UPDATE expenses 
+            SET category = ?, amount = ?, date = ?, description = ?, receipt_no = ?, bill_file = ?
+            WHERE id = ?
+        ''', (
+            f.get('category'), 
+            float(f.get('amount') or 0.0), 
+            f.get('expense_date'), 
+            f.get('description'), 
+            f.get('bill_reference'), 
+            bill_file_path,
+            expense_id
+        ))
+        db.commit()
+        flash('Expense updated successfully!', 'success')
+        return redirect(url_for('expenses'))
+        
+    return render_template('expense_edit.html', record=record)
 
-    return render_template('pnl.html', year=year, month_names=month_names,
-                           sales_data=sales_data, expense_data=expense_data, profit_data=profit_data,
-                           cash_flow_data=cash_flow_data,
-                           total_sales_yr=total_sales_yr, total_expenses_yr=total_expenses_yr,
-                           revenue_breakdown=revenue_breakdown, expense_breakdown=expense_breakdown,
-                           net_profit=net_profit, profit_margin=profit_margin, roi=roi,
-                           rev_per_goat=rev_per_goat, feed_per_goat=feed_per_goat,
-                           burn_rate=burn_rate, ebitda=ebitda)
-
-# ── EQUIPMENT ──────────────────────────────────────────────────────────────────
 @app.route('/equipment')
 def equipment():
     db = get_db()
@@ -2508,24 +4125,28 @@ def equipment_add():
     if request.method == 'POST':
         f = request.form
         db = get_db()
-        db.execute('INSERT INTO equipment (name, equipment_name, type, purchase_date, purchase_cost, supplier, status, notes, assigned_employee, service_due_date) VALUES (?,?,?,?,?,?,?,?,?,?)',
-            (f.get('equipment_name'), f.get('equipment_name'), f.get('type'), f.get('purchase_date'), f.get('purchase_cost'),
+        db.execute('INSERT INTO equipment (name, type, purchase_date, purchase_cost, supplier, status, notes, assigned_employee, service_due_date) VALUES (?,?,?,?,?,?,?,?,?)',
+            (f.get('equipment_name'), f.get('type'), f.get('purchase_date'), float(f.get('purchase_cost') or 0.0),
              f.get('supplier'), f.get('condition_status'), f.get('notes'), f.get('assigned_employee'), f.get('service_due_date')))
         db.commit()
-        flash('Equipment added!', 'success')
+        flash('Asset / Material added!', 'success')
         return redirect(url_for('equipment'))
     return render_template('equipment_add.html')
 
 @app.route('/equipment_edit/<int:id>', methods=['GET', 'POST'])
 def equipment_edit(id):
     db = get_db()
+    record = db.execute('SELECT * FROM equipment WHERE id=?', (id,)).fetchone()
+    if not record:
+        flash('Asset / Material record not found or has been deleted.', 'danger')
+        return redirect(url_for('equipment'))
     if request.method == 'POST':
         f = request.form
-        db.execute('UPDATE equipment SET name=?, equipment_name=?, type=?, purchase_date=?, purchase_cost=?, supplier=?, status=?, notes=?, assigned_employee=?, service_due_date=? WHERE id=?',
-            (f.get('equipment_name'), f.get('equipment_name'), f.get('type'), f.get('purchase_date'), f.get('purchase_cost'),
+        db.execute('UPDATE equipment SET name=?, type=?, purchase_date=?, purchase_cost=?, supplier=?, status=?, notes=?, assigned_employee=?, service_due_date=? WHERE id=?',
+            (f.get('equipment_name'), f.get('type'), f.get('purchase_date'), float(f.get('purchase_cost') or 0.0),
              f.get('supplier'), f.get('condition_status'), f.get('notes'), f.get('assigned_employee'), f.get('service_due_date'), id))
         db.commit()
-        flash('Equipment updated!', 'success')
+        flash('Asset / Material updated!', 'success')
         return redirect(url_for('equipment'))
     record = db.execute('SELECT * FROM equipment WHERE id=?', (id,)).fetchone()
     return render_template('equipment_edit.html', record=record)
@@ -2534,9 +4155,10 @@ def equipment_edit(id):
 def equipment_delete(id):
     db = get_db()
     db.execute('DELETE FROM equipment WHERE id = ?', (id,))
+    db.execute('DELETE FROM equipment_services WHERE equipment_id = ?', (id,))
     db.commit()
-    flash('Equipment record deleted!', 'success')
-    return redirect(url_for('equipment_purchases'))
+    flash('Asset / Material record and all its related maintenance records deleted successfully!', 'success')
+    return redirect(url_for('equipment'))
 
 @app.route('/equipment_detail/<int:id>')
 def equipment_detail(id):
@@ -2575,17 +4197,77 @@ def supplier_add():
 @app.route('/salary_report')
 def salary_report():
     db = get_db()
-    month = request.args.get('month', datetime.now().strftime('%Y-%m'))
-    data = db.execute('''SELECT e.employee_id, e.name, e.role,
-        w.daily_wage, w.monthly_salary, w.bonus, w.advance_salary,
-        w.pending_payment, w.overtime_rate,
-        SUM(CASE WHEN a.status='Present' THEN 1 ELSE 0 END) as present_days,
-        SUM(CASE WHEN a.status='Half Day' THEN 0.5 ELSE 0 END) as half_days
+    month_str = request.args.get('month', datetime.now().strftime('%Y-%m'))
+    try:
+        parts = month_str.split('-')
+        year = parts[0]
+        month = parts[1]
+    except Exception:
+        year = datetime.now().strftime('%Y')
+        month = datetime.now().strftime('%m')
+        month_str = f"{year}-{month}"
+
+    data = db.execute('''SELECT e.id, e.name, e.role, e.wage_type, e.wage_rate, e.sr_no,
+        SUM(CASE WHEN a.status IN ('P', 'Present') THEN 1 ELSE 0 END) as present_days
         FROM employees e
-        LEFT JOIN employee_wages w ON e.id=w.employee_id
-        LEFT JOIN attendance a ON e.id=a.employee_id AND strftime('%Y-%m', a.date)=?
-        GROUP BY e.id ORDER BY e.name''', (month,)).fetchall()
-    return render_template('salary_report.html', data=data, month=month)
+        LEFT JOIN attendance a ON e.id=a.employee_id AND strftime('%m', a.date)=? AND strftime('%Y', a.date)=?
+        GROUP BY e.id ORDER BY CAST(e.sr_no AS INTEGER) ASC''', (month, year)).fetchall()
+
+    employees = []
+    total_payable = 0.0
+    total_paid = 0.0
+    total_pending = 0.0
+
+    for emp in data:
+        present = emp['present_days'] or 0
+        wage_type = emp['wage_type']
+        wage_rate = emp['wage_rate'] or 0
+        
+        computed = 0.0
+        if wage_type == 'Monthly':
+            computed = (wage_rate / 30.0) * present
+        elif wage_type == 'Weekly':
+            computed = (wage_rate / 7.0) * present
+        elif wage_type == 'Daily':
+            computed = wage_rate * present
+            
+        paid = db.execute('''SELECT SUM(net_salary) FROM salary_payments 
+                             WHERE employee_id=? AND month=? AND year=?''', 
+                           (emp['id'], int(month), int(year))).fetchone()[0] or 0.0
+        
+        balance = max(0.0, computed - paid)
+        
+        status = 'Not Paid'
+        if paid >= computed and computed > 0:
+            status = 'Paid'
+        elif paid > 0:
+            status = 'Partially Paid'
+            
+        employees.append({
+            'sr_no': emp['sr_no'],
+            'name': emp['name'],
+            'role': emp['role'],
+            'daily_wage': wage_rate,
+            'days_worked': present,
+            'paying_amount': computed,
+            'paid_amount': paid,
+            'balance_due': balance,
+            'status': status
+
+        })
+        
+        total_payable += computed
+        total_paid += paid
+        total_pending += balance
+
+    farm = db.execute('SELECT * FROM farm_info LIMIT 1').fetchone()
+    return render_template('salary_report.html', 
+                           employees=employees, 
+                           total_payable=total_payable,
+                           total_paid=total_paid,
+                           total_pending=total_pending,
+                           month=month_str, 
+                           farm=farm)
 
 
 @app.route('/breeds', methods=['GET', 'POST'])
@@ -2658,58 +4340,33 @@ def equipment_purchases():
     records = db.execute("SELECT * FROM equipment ORDER BY purchase_date DESC").fetchall()
     return render_template('equipment_purchases.html', records=records)
 
-@app.route('/pnl_report')
-def pnl_report():
-    db = get_db()
-    year = request.args.get('year', datetime.now().strftime('%Y'))
-    months = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12']
-    month_names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-    
-    data = []
-    total_sales_yr = 0
-    total_expenses_yr = 0
-    
-    breakdown = {
-        'goat_purchases': 0, 'feed_purchases': 0, 'med_purchases': 0,
-        'vac_purchases': 0, 'salaries': 0, 'maint': 0, 'gen_exp': 0
-    }
-    
-    for i, m in enumerate(months):
-        ym = f"{year}-{m}"
-        sales = db.execute('''SELECT SUM(sold_price) FROM sales_records WHERE strftime('%Y-%m', date_of_sale) = ?''', (ym,)).fetchone()[0] or 0
-        gen_exp = db.execute('''SELECT SUM(amount) FROM expenses WHERE status='Approved' AND strftime('%Y-%m', date) = ?''', (ym,)).fetchone()[0] or 0
-        goat_purchases = db.execute('''SELECT SUM(purchase_amount) FROM master_records WHERE strftime('%Y-%m', purchase_date) = ?''', (ym,)).fetchone()[0] or 0
-        feed_purchases = db.execute('''SELECT SUM(total_cost) FROM feed_inventory WHERE strftime('%Y-%m', purchase_date) = ?''', (ym,)).fetchone()[0] or 0
-        med_purchases = db.execute('''SELECT SUM(cost) FROM medicine_purchases WHERE strftime('%Y-%m', purchase_date) = ?''', (ym,)).fetchone()[0] or 0
-        vac_purchases = db.execute('''SELECT SUM(cost) FROM vaccine_purchases WHERE strftime('%Y-%m', purchase_date) = ?''', (ym,)).fetchone()[0] or 0
-        maint = db.execute('''SELECT SUM(service_cost) FROM equipment_services WHERE strftime('%Y-%m', service_date) = ?''', (ym,)).fetchone()[0] or 0
-        salaries = db.execute('''SELECT SUM(net_salary) FROM salary_payments WHERE year = ? AND month = ?''', (year, int(m))).fetchone()[0] or 0
-        
-        total_exp = gen_exp + goat_purchases + feed_purchases + med_purchases + vac_purchases + maint + salaries
-        profit = sales - total_exp
-        
-        data.append({
-            'month_name': month_names[i],
-            'sales': sales,
-            'total_exp': total_exp,
-            'profit': profit
-        })
-        
-        total_sales_yr += sales
-        total_expenses_yr += total_exp
-        
-        breakdown['goat_purchases'] += goat_purchases
-        breakdown['feed_purchases'] += feed_purchases
-        breakdown['med_purchases'] += med_purchases
-        breakdown['vac_purchases'] += vac_purchases
-        breakdown['salaries'] += salaries
-        breakdown['maint'] += maint
-        breakdown['gen_exp'] += gen_exp
 
-    return render_template('pnl_report.html', 
-                           year=year, data=data, breakdown=breakdown,
-                           total_sales_yr=total_sales_yr, total_expenses_yr=total_expenses_yr)
+@app.context_processor
+def inject_eligible_goats_count():
+    try:
+        db = get_db()
+        count = db.execute("SELECT COUNT(*) FROM master_records WHERE weight_kg >= 25 AND status != 'Sold' AND status IS NOT NULL").fetchone()[0] or 0
+        return dict(eligible_sales_count=count)
+    except Exception:
+        return dict(eligible_sales_count=0)
+
+@app.route('/api/goat_lookup/<tag_id>')
+def api_goat_lookup(tag_id):
+    db = get_db()
+    goat = db.execute('SELECT breed, breed_percent, gender, weight_kg, status FROM master_records WHERE tag_no = ?', (tag_id,)).fetchone()
+    if not goat:
+        return jsonify({'found': False})
+    
+    return jsonify({
+        'found': True,
+        'breed': goat['breed'],
+        'breed_percent': goat['breed_percent'],
+        'gender': goat['gender'],
+        'weight_kg': goat['weight_kg'],
+        'status': goat['status'],
+        'already_sold': goat['status'] == 'Sold',
+        'already_expired': goat['status'] == 'Expired'
+    })
 
 if __name__ == '__main__':
     app.run(debug=True, port=5001)
-
