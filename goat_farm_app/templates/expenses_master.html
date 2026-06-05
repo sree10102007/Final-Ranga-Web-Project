@@ -1,0 +1,167 @@
+{% extends 'layout.html' %}
+{% block title %}Expenses Master - Ranga Farms{% endblock %}
+{% block page_title %}EXPENSES MASTER{% endblock %}
+{% block content %}
+<div class="page-header mb-4">
+    <div>
+        <h2 class="fw-800 text-dark mb-1" id="expenses-master-title">Expenses Master</h2>
+        <p class="text-muted mb-0">Tally-style master configuration for farm expense tracking — manage ledgers, categories, units, and vouchers.</p>
+    </div>
+</div>
+
+<!-- Summary Stats Row -->
+<div class="row g-3 mb-5">
+    <div class="col-md-4">
+        <div class="card border-0 rounded-4 shadow-sm h-100" style="background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%);">
+            <div class="card-body p-4 text-white d-flex align-items-center gap-3">
+                <div class="rounded-3 p-3" style="background: rgba(255,255,255,0.15);">
+                    <i class="bi bi-wallet2 fs-2"></i>
+                </div>
+                <div>
+                    <div class="small opacity-75 text-uppercase fw-bold" style="letter-spacing:.06em;">Total Farm Expenses</div>
+                    <div class="fw-800 fs-3 mt-1">₹{{ "%.2f"|format(expense_sum) }}</div>
+                    <div class="small opacity-60">{{ expense_count }} transactions</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 rounded-4 shadow-sm h-100" style="background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);">
+            <div class="card-body p-4 text-white d-flex align-items-center gap-3">
+                <div class="rounded-3 p-3" style="background: rgba(255,255,255,0.15);">
+                    <i class="bi bi-receipt-cutoff fs-2"></i>
+                </div>
+                <div>
+                    <div class="small opacity-75 text-uppercase fw-bold" style="letter-spacing:.06em;">Other Vouchers Total</div>
+                    <div class="fw-800 fs-3 mt-1">₹{{ "%.2f"|format(other_voucher_sum) }}</div>
+                    <div class="small opacity-60">{{ other_voucher_count }} vouchers</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 rounded-4 shadow-sm h-100" style="background: linear-gradient(135deg, #065f46 0%, #059669 100%);">
+            <div class="card-body p-4 text-white d-flex align-items-center gap-3">
+                <div class="rounded-3 p-3" style="background: rgba(255,255,255,0.15);">
+                    <i class="bi bi-collection fs-2"></i>
+                </div>
+                <div>
+                    <div class="small opacity-75 text-uppercase fw-bold" style="letter-spacing:.06em;">Master Data</div>
+                    <div class="fw-800 fs-3 mt-1">{{ ledger_count }} Ledgers</div>
+                    <div class="small opacity-60">{{ particular_count }} Particulars · {{ unit_count }} Units</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Master Menu Cards: 2x2 Tally-style layout -->
+<div class="row g-4 mb-5">
+
+    <!-- Ledger Accounts -->
+    <div class="col-md-6">
+        <a href="{{ url_for('expense_ledgers') }}" class="text-decoration-none card-action-hover">
+            <div class="card border-0 rounded-4 shadow-sm h-100 overflow-hidden position-relative">
+                <div style="height:5px; background: linear-gradient(90deg,#2563eb,#60a5fa);"></div>
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-start justify-content-between mb-3">
+                        <div class="rounded-3 p-3 d-inline-flex" style="background:#eff6ff;">
+                            <i class="bi bi-journal-bookmark-fill text-primary fs-2"></i>
+                        </div>
+                        <span class="badge bg-primary-subtle text-primary rounded-pill px-3 py-2 fw-bold">{{ ledger_count }} Ledgers</span>
+                    </div>
+                    <h5 class="fw-800 text-dark mb-1">Ledger Accounts</h5>
+                    <p class="text-muted small mb-3">Define Tally-style ledger groups like Direct Expenses, Indirect Expenses, Capital Account for P&L allocation.</p>
+                    <div class="d-flex align-items-center gap-2 text-primary small fw-bold">
+                        <i class="bi bi-arrow-right-circle-fill"></i> Manage Ledgers
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <!-- Expense Particulars (Categories) -->
+    <div class="col-md-6">
+        <a href="{{ url_for('expense_particulars') }}" class="text-decoration-none card-action-hover">
+            <div class="card border-0 rounded-4 shadow-sm h-100 overflow-hidden position-relative">
+                <div style="height:5px; background: linear-gradient(90deg,#d97706,#fbbf24);"></div>
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-start justify-content-between mb-3">
+                        <div class="rounded-3 p-3 d-inline-flex" style="background:#fffbeb;">
+                            <i class="bi bi-tags-fill text-warning fs-2"></i>
+                        </div>
+                        <span class="badge bg-warning-subtle text-warning rounded-pill px-3 py-2 fw-bold">{{ particular_count }} Particulars</span>
+                    </div>
+                    <h5 class="fw-800 text-dark mb-1">Expense Particulars</h5>
+                    <p class="text-muted small mb-3">Create expense categories (like Tally Particulars) — Consumables, Electricity, Repairs, etc. Used in Other Vouchers.</p>
+                    <div class="d-flex align-items-center gap-2 text-warning small fw-bold">
+                        <i class="bi bi-arrow-right-circle-fill"></i> Manage Particulars
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <!-- Units of Measure -->
+    <div class="col-md-6">
+        <a href="{{ url_for('expense_units_view') }}" class="text-decoration-none card-action-hover">
+            <div class="card border-0 rounded-4 shadow-sm h-100 overflow-hidden position-relative">
+                <div style="height:5px; background: linear-gradient(90deg,#0f766e,#2dd4bf);"></div>
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-start justify-content-between mb-3">
+                        <div class="rounded-3 p-3 d-inline-flex" style="background:#f0fdfa;">
+                            <i class="bi bi-rulers text-teal fs-2" style="color:#0d9488;"></i>
+                        </div>
+                        <span class="badge rounded-pill px-3 py-2 fw-bold" style="background:#f0fdfa;color:#0f766e;">{{ unit_count }} Units</span>
+                    </div>
+                    <h5 class="fw-800 text-dark mb-1">Units of Measure</h5>
+                    <p class="text-muted small mb-3">Configure measurement units — KG, Nos, Litres, Bags, Meters, etc. Used when recording quantities on vouchers.</p>
+                    <div class="d-flex align-items-center gap-2 small fw-bold" style="color:#0f766e;">
+                        <i class="bi bi-arrow-right-circle-fill"></i> Manage Units
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <!-- Farm Expenses Log -->
+    <div class="col-md-6">
+        <a href="{{ url_for('expenses') }}" class="text-decoration-none card-action-hover">
+            <div class="card border-0 rounded-4 shadow-sm h-100 overflow-hidden position-relative">
+                <div style="height:5px; background: linear-gradient(90deg,#15803d,#4ade80);"></div>
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-start justify-content-between mb-3">
+                        <div class="rounded-3 p-3 d-inline-flex" style="background:#f0fdf4;">
+                            <i class="bi bi-clipboard2-data-fill text-success fs-2"></i>
+                        </div>
+                        <span class="badge bg-success-subtle text-success rounded-pill px-3 py-2 fw-bold">{{ expense_count }} Records</span>
+                    </div>
+                    <h5 class="fw-800 text-dark mb-1">Farm Expenses Log</h5>
+                    <p class="text-muted small mb-3">View all farm operational expenses — automatically populated from vouchers (Feed, Health, Other) and direct entries.</p>
+                    <div class="d-flex align-items-center gap-2 text-success small fw-bold">
+                        <i class="bi bi-arrow-right-circle-fill"></i> View Expenses
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+
+<!-- Quick link to Other Vouchers -->
+<div class="card border-0 rounded-4 shadow-sm mb-4" style="background: linear-gradient(135deg,#2d1b69 0%,#7c3aed 100%);">
+    <div class="card-body p-4 d-flex align-items-center justify-content-between flex-wrap gap-3">
+        <div class="text-white">
+            <h5 class="fw-800 mb-1"><i class="bi bi-receipt-cutoff me-2"></i>Other Vouchers Register</h5>
+            <p class="mb-0 opacity-75 small">Create and manage Other Vouchers using your configured Particulars, Suppliers and Units.</p>
+        </div>
+        <a href="{{ url_for('voucher_register', v_type='other') }}" class="btn btn-light text-dark fw-bold rounded-pill px-4 shadow-sm">
+            <i class="bi bi-arrow-right-circle me-2"></i>Go to Other Vouchers
+        </a>
+    </div>
+</div>
+
+<style>
+.card-action-hover .card { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+.card-action-hover:hover .card { transform: translateY(-4px); box-shadow: 0 12px 28px rgba(0,0,0,0.12) !important; }
+</style>
+{% endblock %}

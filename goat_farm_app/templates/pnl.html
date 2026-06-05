@@ -1,0 +1,1274 @@
+{% extends 'layout.html' %}
+
+{% block title %}Profit & Loss Statement - Ranga Farms{% endblock %}
+{% block page_title %}Profit & Loss Statement{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --corp-blue: #000000;
+        --corp-blue-light: #000000;
+        --corp-green: #000000;
+        --corp-red: #000000;
+        --bg-glass: #ffffff;
+        --border-color: #000000;
+    }
+
+    .glass-card {
+        background: #ffffff;
+        border: 2px solid #000000;
+        border-radius: 12px;
+        box-shadow: none;
+    }
+
+    .corporate-container {
+        font-family: 'Inter', 'Outfit', sans-serif;
+        background-color: #ffffff;
+        border: 2px solid #000000;
+        border-radius: 12px;
+        box-shadow: none;
+        overflow: hidden;
+    }
+
+    .statement-header {
+        background-color: #000000;
+        color: #ffffff;
+        padding: 30px 40px;
+        border-bottom: 2px solid #000000;
+    }
+
+    .statement-title {
+        font-size: 1.6rem;
+        font-weight: 900;
+        letter-spacing: 1px;
+        color: #ffffff;
+    }
+
+    .statement-subtitle {
+        font-size: 0.9rem;
+        color: #a1a1aa;
+        font-weight: 500;
+    }
+
+    .table-financial {
+        width: 100%;
+        margin-bottom: 0;
+        border-collapse: collapse;
+    }
+
+    .table-financial th {
+        background-color: #ffffff;
+        color: #000000;
+        font-weight: 800;
+        font-size: 0.82rem;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        padding: 12px 30px;
+        border-bottom: 2px solid #000000;
+    }
+
+    .table-financial td {
+        padding: 12px 30px;
+        font-size: 0.92rem;
+        color: #000000;
+        border-bottom: 1px solid #cbd5e1;
+        vertical-align: middle;
+    }
+
+    .section-title-row {
+        background-color: #f1f5f9;
+        font-weight: 800;
+        color: #000000 !important;
+        font-size: 0.95rem !important;
+        letter-spacing: -0.2px;
+    }
+
+    .sub-section-row {
+        font-weight: 700;
+        color: #000000;
+        background-color: #ffffff;
+    }
+
+    .indent-1 {
+        padding-left: 30px !important;
+    }
+
+    .indent-2 {
+        padding-left: 50px !important;
+        font-style: normal;
+    }
+
+    .total-row {
+        font-weight: 800;
+        color: #000000;
+        background-color: #ffffff;
+        border-top: 1.5px solid #000000;
+        border-bottom: 2px solid #000000;
+    }
+
+    .total-row-grand {
+        font-weight: 800;
+        font-size: 1.05rem;
+        background-color: #ffffff;
+        border-top: 2px solid #000000;
+        border-bottom: 4px double #000000;
+    }
+
+    .financial-number {
+        font-family: 'JetBrains Mono', monospace;
+        font-weight: 700;
+        text-align: right;
+        color: #000000;
+    }
+
+    .number-negative {
+        color: #000000;
+    }
+
+    .drilldown-link {
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .drilldown-link:hover {
+        color: #000000 !important;
+        text-decoration: underline;
+        font-weight: bold;
+    }
+
+    #print-report-container {
+        display: none;
+    }
+
+    @media print {
+        #sidebar, #topbar, .d-print-none, form, .btn, .collapse, footer, #notification-toast-container, #traditional-container {
+            display: none !important;
+        }
+        
+        #print-report-container {
+            display: block !important;
+        }
+        
+        .report-table th, .report-table td {
+            padding: 8px 12px !important;
+            font-size: 0.85rem !important;
+            border: 1px solid #cbd5e1 !important;
+            color: #000000 !important;
+        }
+        
+        .report-section-header td {
+            background-color: #f1f5f9 !important;
+            font-weight: bold !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+        
+        .print-signatures {
+            margin-top: 80px !important;
+        }
+        
+        #main-content {
+            margin-left: 0 !important;
+            padding-top: 0 !important;
+            min-height: auto !important;
+            background: #ffffff !important;
+        }
+        
+        .page-body {
+            padding: 0 !important;
+            margin: 0 !important;
+            max-width: 100% !important;
+        }
+        
+        .container {
+            max-width: 100% !important;
+            width: 100% !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+
+        .corporate-container {
+            border: 2px solid #000000 !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+            margin: 0 !important;
+            width: 100% !important;
+            overflow: visible !important;
+        }
+        
+        .statement-header {
+            background-color: #15803d !important;
+            color: #ffffff !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+            padding: 20px !important;
+        }
+        
+        .statement-title {
+            color: #ffffff !important;
+        }
+        
+        .statement-subtitle {
+            color: #e2e8f0 !important;
+        }
+        
+        .table-financial th {
+            background-color: #f1f5f9 !important;
+            color: #000000 !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+            border-bottom: 2px solid #000000 !important;
+        }
+        
+        .section-title-row {
+            background-color: #f1f5f9 !important;
+            color: #000000 !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+        
+        .table-financial td {
+            border-bottom: 1px solid #cbd5e1 !important;
+        }
+
+        .total-row, .total-row-grand {
+            background-color: #ffffff !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+        
+        body {
+            background-color: #ffffff !important;
+            color: #000000 !important;
+        }
+        
+        tr {
+            page-break-inside: avoid;
+        }
+    }
+</style>
+
+<div class="container py-4">
+    <!-- Page Title Row -->
+    <div class="row mb-4 d-print-none">
+        <div class="col-12">
+            <h2 class="fw-800 text-dark mb-0"><i class="bi bi-graph-up-arrow text-success me-2"></i>Profit & Loss Statement</h2>
+        </div>
+    </div>
+
+    <!-- Filter Card Row -->
+    <div class="row mb-5 d-print-none">
+        <div class="col-12">
+            <form method="POST" action="{{ url_for('pnl') }}" class="glass-card p-3 shadow-sm" style="border: 2px solid #000000; border-radius: 12px; background: #ffffff;">
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                    <!-- Left Section: Month and Year Dropdowns -->
+                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                        <span class="small fw-bold text-dark text-uppercase">Month:</span>
+                        <select name="month" class="form-select form-select-sm rounded-pill text-dark border-dark" style="min-width: 125px; font-weight: 600; border: 1.5px solid #000;">
+                            <option value="All" {% if selected_month == 'All' %}selected{% endif %}>All Months</option>
+                            <option value="01" {% if selected_month == '01' %}selected{% endif %}>January</option>
+                            <option value="02" {% if selected_month == '02' %}selected{% endif %}>February</option>
+                            <option value="03" {% if selected_month == '03' %}selected{% endif %}>March</option>
+                            <option value="04" {% if selected_month == '04' %}selected{% endif %}>April</option>
+                            <option value="05" {% if selected_month == '05' %}selected{% endif %}>May</option>
+                            <option value="06" {% if selected_month == '06' %}selected{% endif %}>June</option>
+                            <option value="07" {% if selected_month == '07' %}selected{% endif %}>July</option>
+                            <option value="08" {% if selected_month == '08' %}selected{% endif %}>August</option>
+                            <option value="09" {% if selected_month == '09' %}selected{% endif %}>September</option>
+                            <option value="10" {% if selected_month == '10' %}selected{% endif %}>October</option>
+                            <option value="11" {% if selected_month == '11' %}selected{% endif %}>November</option>
+                            <option value="12" {% if selected_month == '12' %}selected{% endif %}>December</option>
+                        </select>
+                        
+                        <span class="small fw-bold text-dark text-uppercase ms-2">Year:</span>
+                        <select name="year" class="form-select form-select-sm rounded-pill text-dark border-dark" style="min-width: 95px; font-weight: 600; border: 1.5px solid #000;">
+                            {% for y in range(2024, 2061) %}
+                                <option value="{{ y }}" {% if selected_year == y|string %}selected{% endif %}>{{ y }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Right Section: Switch and Action Buttons (Flat structure) -->
+                    <div class="d-flex flex-wrap align-items-center gap-3">
+                        <!-- Include Stock Valuation Toggle -->
+                        <div class="form-check form-switch mb-0 d-flex align-items-center gap-2">
+                            <input class="form-check-input border-dark cursor-pointer" type="checkbox" name="include_stock" id="includeStock" {% if include_stock %}checked{% endif %} onchange="this.form.submit()" style="width: 2.2em; height: 1.1em; margin-top: 0; border: 1.5px solid #000;">
+                            <label class="form-check-label small fw-bold text-muted cursor-pointer mb-0" for="includeStock" style="user-select: none; white-space: nowrap; font-size: 0.8rem;">Include Stock Valuation</label>
+                        </div>
+
+                        <!-- Hide Browser Header/Footer Toggle -->
+                        <div class="form-check form-switch mb-0 d-flex align-items-center gap-2">
+                            <input class="form-check-input border-dark cursor-pointer" type="checkbox" id="toggleHeaders" onchange="toggleBrowserHeadersFooters(this.checked)" style="width: 2.2em; height: 1.1em; margin-top: 0; border: 1.5px solid #000;">
+                            <label class="form-check-label small fw-bold text-muted cursor-pointer mb-0" for="toggleHeaders" style="user-select: none; white-space: nowrap; font-size: 0.8rem;">Hide Browser Header/Footer</label>
+                        </div>
+
+                        <!-- Buttons -->
+                        <button class="btn btn-sm btn-outline-secondary rounded-pill px-3 fw-bold text-dark border-dark" type="button" data-bs-toggle="collapse" data-bs-target="#stockOverrides" title="Manual Stock Valuation" style="border-width: 1.5px;">
+                            <i class="bi bi-sliders me-1"></i> Stock Valuation
+                        </button>
+                        <button class="btn btn-sm btn-info rounded-pill px-3 fw-bold text-white shadow-sm border-dark" type="button" onclick="viewDrilldown('All')" title="View Detailed General Ledger" style="border-width: 1.5px;">
+                            <i class="bi bi-list-task me-1"></i> Detailed Ledger
+                        </button>
+                        <button class="btn btn-sm btn-success rounded-pill px-3 fw-bold shadow-sm border-dark" type="submit" style="border-width: 1.5px;">
+                            <i class="bi bi-funnel me-1"></i> Apply Filter
+                        </button>
+                        <button class="btn btn-sm btn-primary rounded-pill px-3 fw-bold shadow-sm border-dark" type="button" onclick="window.print()" style="border-width: 1.5px;">
+                            <i class="bi bi-printer me-1"></i> Print
+                        </button>
+                        <a href="{{ url_for('expenses_master') }}" class="btn btn-sm btn-outline-dark rounded-pill px-3 fw-bold border-dark" style="border-width: 1.5px;" title="Go to Expenses Master">
+                            <i class="bi bi-currency-rupee me-1"></i> Expenses Master
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Manual Stock Overrides Collapse -->
+    <div class="collapse mb-4" id="stockOverrides">
+        <div class="card border-0 shadow-sm rounded-4 bg-light">
+            <div class="card-body p-4">
+                <h6 class="fw-bold mb-3 text-dark"><i class="bi bi-sliders me-2 text-success"></i>Stock Valuation & Overrides</h6>
+                <form method="POST" action="{{ url_for('pnl') }}" class="row g-3">
+                    <input type="hidden" name="month" value="{{ selected_month }}">
+                    <input type="hidden" name="year" value="{{ selected_year }}">
+                    <input type="hidden" name="include_stock" value="1">
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold">Opening Stock Valuation (₹)</label>
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text">₹</span>
+                            <input type="number" step="0.01" name="opening_stock" class="form-control" placeholder="{{ '%.2f'|format(computed_opening) }}" value="{{ request.form.get('opening_stock', '') }}">
+                        </div>
+                        <div class="form-text small">Default: Closing stock of the previous period (<strong>₹{{ "%.2f"|format(computed_opening) }}</strong>).</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold">Closing Stock Valuation (₹)</label>
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text">₹</span>
+                            <input type="number" step="0.01" name="closing_stock" class="form-control" placeholder="{{ '%.2f'|format(computed_closing) }}" value="{{ request.form.get('closing_stock', '') }}">
+                        </div>
+                        <div class="form-text small">Default: Closing stock of the current period (<strong>₹{{ "%.2f"|format(computed_closing) }}</strong>).</div>
+                    </div>
+                    <div class="col-12 text-end mt-3">
+                        <button type="submit" class="btn btn-sm btn-success rounded-pill px-4 fw-bold">Save Overrides</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Traditional Ledger T-Account P&L -->
+    <div class="corporate-container" id="traditional-container">
+        {% set total_debits = opening_stock + total_purchases + total_direct_expenses %}
+        {% set total_credits = total_sales + total_direct_income + closing_stock %}
+        <!-- Brand Header -->
+        <div class="statement-header" style="background-color: #15803d; color: white; padding: 30px 40px; border-bottom: 3px solid #166534;">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <div class="statement-title" style="font-size: 1.6rem; font-weight: 800; letter-spacing: -0.5px;">RANGA FARMS</div>
+                    <div class="statement-subtitle text-uppercase mt-1" style="font-size: 0.75rem; letter-spacing: 1.5px; color: #a1a1aa;">Profit & Loss A/c</div>
+                </div>
+                <div class="col-md-6 text-md-end mt-2 mt-md-0">
+                    <span class="badge px-3 py-2 fw-bold rounded-pill font-monospace" style="font-size: 0.85rem; border: 1.5px solid #ffffff !important; color: #ffffff !important; background-color: transparent;">
+                        Period: {% if selected_month == 'All' %}Full Year{% else %}{{ from_date }} to {{ to_date }}{% endif %}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+
+        
+        <div class="row g-0 border-bottom">
+            <!-- Left Side (Debit - Opening Stock, Purchases, Direct Expenses, Gross Profit c/o) -->
+            <div class="col-md-6 border-end">
+                <table class="table table-financial mb-0">
+                    <thead>
+                        <tr class="section-title-row">
+                            <th style="width: 70%; padding: 12px 30px; font-size: 0.8rem; text-transform: uppercase; background-color: #f8fafc; color: #475569;">Particulars (Debit Side)</th>
+                            <th style="width: 30%; text-align: right; padding: 12px 30px; font-size: 0.8rem; text-transform: uppercase; background-color: #f8fafc; color: #475569;">Amount (₹)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Opening Stock -->
+                        {% if include_stock %}
+                        <tr class="drilldown-link" onclick="viewDrilldown('Opening Stock')">
+                            <td class="indent-1"><i class="bi bi-box-seam me-2 text-success"></i>Opening Stock</td>
+                            <td class="financial-number">₹{{ "%.2f"|format(opening_stock) }}</td>
+                        </tr>
+                        {% endif %}
+                        
+                        <!-- Purchase Accounts -->
+                        <tr class="sub-section-row">
+                            <td class="indent-1 fw-bold"><i class="bi bi-cart me-2 text-primary"></i>Purchase Accounts</td>
+                            <td class="financial-number fw-bold">₹{{ "%.2f"|format(total_purchases) }}</td>
+                        </tr>
+                        {% for sub_cat, amount in purchase_accounts.items() %}
+                            {% if amount > 0 %}
+                            <tr class="drilldown-link" onclick="viewDrilldown('{{ sub_cat }}')">
+                                <td class="indent-2 text-muted">{{ sub_cat }}</td>
+                                <td class="financial-number text-muted">₹{{ "%.2f"|format(amount) }}</td>
+                            </tr>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        <!-- Direct Expenses -->
+                        <tr class="sub-section-row">
+                            <td class="indent-1 fw-bold"><i class="bi bi-arrow-right-circle me-2 text-warning"></i>Direct Expenses</td>
+                            <td class="financial-number fw-bold">₹{{ "%.2f"|format(total_direct_expenses) }}</td>
+                        </tr>
+                        {% for sub_cat, amount in direct_expenses.items() %}
+                            {% if amount > 0 %}
+                            <tr class="drilldown-link" onclick="viewDrilldown('{{ sub_cat }}')">
+                                <td class="indent-2 text-muted">{{ sub_cat }}</td>
+                                <td class="financial-number text-muted">₹{{ "%.2f"|format(amount) }}</td>
+                            </tr>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        <!-- Gross Profit c/o -->
+                        {% if gross_profit >= 0 %}
+                        <tr class="fw-bold" style="background-color: #fafafa; border-top: 1px solid #000000; border-bottom: 1.5px solid #000000; color: #000000;">
+                            <td class="indent-1"><i class="bi bi-plus-circle me-2"></i>Gross Profit c/o (to P&L A/c)</td>
+                            <td class="financial-number">₹{{ "%.2f"|format(gross_profit) }}</td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Right Side (Credit - Sales, Direct Incomes, Closing Stock, Gross Loss c/o) -->
+            <div class="col-md-6">
+                <table class="table table-financial mb-0">
+                    <thead>
+                        <tr class="section-title-row">
+                            <th style="width: 70%; padding: 12px 30px; font-size: 0.8rem; text-transform: uppercase; background-color: #f8fafc; color: #475569;">Particulars (Credit Side)</th>
+                            <th style="width: 30%; text-align: right; padding: 12px 30px; font-size: 0.8rem; text-transform: uppercase; background-color: #f8fafc; color: #475569;">Amount (₹)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Sales Accounts -->
+                        <tr class="sub-section-row">
+                            <td class="indent-1 fw-bold"><i class="bi bi-graph-up me-2 text-success"></i>Sales Accounts</td>
+                            <td class="financial-number fw-bold">₹{{ "%.2f"|format(total_sales) }}</td>
+                        </tr>
+                        {% for sub_cat, amount in sales_accounts.items() %}
+                            {% if amount > 0 %}
+                            <tr class="drilldown-link" onclick="viewDrilldown('{{ sub_cat }}')">
+                                <td class="indent-2 text-muted">{{ sub_cat }}</td>
+                                <td class="financial-number text-muted">₹{{ "%.2f"|format(amount) }}</td>
+                            </tr>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        <!-- Direct Incomes -->
+                        <tr class="sub-section-row">
+                            <td class="indent-1 fw-bold"><i class="bi bi-wallet2 me-2"></i>Direct Incomes</td>
+                            <td class="financial-number fw-bold">₹{{ "%.2f"|format(total_direct_income) }}</td>
+                        </tr>
+                        {% for sub_cat, amount in direct_incomes.items() %}
+                            {% if amount > 0 %}
+                            <tr class="drilldown-link" onclick="viewDrilldown('{{ sub_cat }}')">
+                                <td class="indent-2 text-muted">{{ sub_cat }}</td>
+                                <td class="financial-number text-muted">₹{{ "%.2f"|format(amount) }}</td>
+                            </tr>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        <!-- Closing Stock -->
+                        {% if include_stock %}
+                        <tr class="drilldown-link" onclick="viewDrilldown('Closing Stock')">
+                            <td class="indent-1"><i class="bi bi-archive me-2 text-info"></i>Closing Stock</td>
+                            <td class="financial-number">₹{{ "%.2f"|format(closing_stock) }}</td>
+                        </tr>
+                        {% endif %}
+                        
+                        <!-- Gross Loss c/o -->
+                        {% if gross_profit < 0 %}
+                        <tr class="fw-bold" style="background-color: #fafafa; border-top: 1px solid #000000; border-bottom: 1.5px solid #000000; color: #000000;">
+                            <td class="indent-1"><i class="bi bi-dash-circle me-2"></i>Gross Loss c/o (to P&L A/c)</td>
+                            <td class="financial-number">₹{{ "%.2f"|format(gross_profit|abs) }}</td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Trading Totals Row -->
+        {% set trading_left_total = total_debits + (gross_profit if gross_profit >= 0 else 0) %}
+        {% set trading_right_total = total_credits + (gross_profit|abs if gross_profit < 0 else 0) %}
+        <div class="row g-0 border-bottom bg-white fw-bold" style="font-size: 0.92rem; border-top: 2px solid #000000; border-bottom: 2px solid #000000;">
+            <div class="col-md-6 border-end py-3 px-4 d-flex justify-content-between align-items-center" style="background-color: #ffffff; color: #000000;">
+                <span class="text-uppercase" style="letter-spacing: 0.5px;">Total</span>
+                <span class="font-monospace">₹{{ "%.2f"|format(trading_left_total) }}</span>
+            </div>
+            <div class="col-md-6 py-3 px-4 d-flex justify-content-between align-items-center" style="background-color: #ffffff; color: #000000;">
+                <span class="text-uppercase" style="letter-spacing: 0.5px;">Total</span>
+                <span class="font-monospace">₹{{ "%.2f"|format(trading_right_total) }}</span>
+            </div>
+        </div>
+
+
+        
+        <div class="row g-0 border-bottom">
+            <!-- Left Side (Debit - Gross Loss b/d, Indirect Expenses, Nett Profit) -->
+            <div class="col-md-6 border-end">
+                <table class="table table-financial mb-0">
+                    <tbody>
+                        <!-- Gross Loss b/d -->
+                        {% if gross_profit < 0 %}
+                        <tr class="fw-semibold" style="background-color: #ffffff; color: #000000;">
+                            <td class="indent-1"><i class="bi bi-dash-circle-fill me-2 text-dark"></i>Gross Loss b/d</td>
+                            <td class="financial-number">₹{{ "%.2f"|format(gross_profit|abs) }}</td>
+                        </tr>
+                        {% endif %}
+                        
+                        <!-- Indirect Expenses -->
+                        <tr class="sub-section-row">
+                            <td class="indent-1 fw-bold"><i class="bi bi-lightbulb me-2 text-secondary"></i>Indirect Expenses</td>
+                            <td class="financial-number fw-bold">₹{{ "%.2f"|format(total_indirect_expenses) }}</td>
+                        </tr>
+                        {% for sub_cat, amount in indirect_expenses.items() %}
+                            {% if amount > 0 %}
+                            <tr class="drilldown-link" onclick="viewDrilldown('{{ sub_cat }}')">
+                                <td class="indent-2 text-muted">{{ sub_cat }}</td>
+                                <td class="financial-number text-muted">₹{{ "%.2f"|format(amount) }}</td>
+                            </tr>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        <!-- Net Profit -->
+                        {% if is_profit %}
+                        <tr class="fw-bold" style="background-color: #ffffff; color: #16a34a; border-top: 2px solid #000000; border-bottom: 2px solid #000000;">
+                            <td class="indent-1"><i class="bi bi-check-circle me-2 text-success"></i>Net Profit</td>
+                            <td class="financial-number text-success" style="color: #16a34a !important;">₹{{ "%.2f"|format(net_profit) }}</td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Right Side (Credit - Gross Profit b/d, Indirect Incomes, Nett Loss) -->
+            <div class="col-md-6">
+                <table class="table table-financial mb-0">
+                    <tbody>
+                        <!-- Gross Profit b/d -->
+                        {% if gross_profit >= 0 %}
+                        <tr class="fw-semibold" style="background-color: #ffffff; color: #000000;">
+                            <td class="indent-1"><i class="bi bi-plus-circle-fill me-2 text-dark"></i>Gross Profit b/d</td>
+                            <td class="financial-number">₹{{ "%.2f"|format(gross_profit) }}</td>
+                        </tr>
+                        {% endif %}
+                        
+                        <!-- Indirect Incomes -->
+                        <tr class="sub-section-row">
+                            <td class="indent-1 fw-bold"><i class="bi bi-percent me-2 text-info"></i>Indirect Incomes</td>
+                            <td class="financial-number fw-bold">₹{{ "%.2f"|format(total_indirect_income) }}</td>
+                        </tr>
+                        {% for sub_cat, amount in indirect_incomes.items() %}
+                            {% if amount > 0 %}
+                            <tr class="drilldown-link" onclick="viewDrilldown('{{ sub_cat }}')">
+                                <td class="indent-2 text-muted">{{ sub_cat }}</td>
+                                <td class="financial-number text-muted">₹{{ "%.2f"|format(amount) }}</td>
+                            </tr>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        <!-- Net Loss -->
+                        {% if not is_profit %}
+                        <tr class="fw-bold" style="background-color: #ffffff; color: #dc2626; border-top: 2px solid #000000; border-bottom: 2px solid #000000;">
+                            <td class="indent-1"><i class="bi bi-x-circle me-2 text-danger"></i>Net Loss</td>
+                            <td class="financial-number text-danger" style="color: #dc2626 !important;">₹{{ "%.2f"|format(net_profit) }}</td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- P&L Totals Row -->
+        {% set pnl_grand_total = (gross_profit|abs if gross_profit < 0 else 0) + total_indirect_expenses + (net_profit if is_profit else 0) %}
+        <div class="row g-0 bg-white fw-bold" style="font-size: 0.95rem; border-top: 2px solid #000000; border-bottom: 4px double #000000;">
+            <div class="col-md-6 border-end py-3 px-4 d-flex justify-content-between align-items-center" style="background-color: #ffffff; color: #000000;">
+                <span class="text-uppercase" style="letter-spacing: 0.5px;">Total</span>
+                <span class="font-monospace">₹{{ "%.2f"|format(pnl_grand_total) }}</span>
+            </div>
+            <div class="col-md-6 py-3 px-4 d-flex justify-content-between align-items-center" style="background-color: #ffffff; color: #000000;">
+                <span class="text-uppercase" style="letter-spacing: 0.5px;">Total</span>
+                <span class="font-monospace">₹{{ "%.2f"|format(pnl_grand_total) }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── EXPENSES MASTER LEDGER BREAKDOWN PANEL ─────────────────────────── -->
+    {% if ledger_pnl_summary %}
+    <div class="d-print-none mt-5">
+        <div class="card border-0 rounded-4 shadow-sm overflow-hidden">
+            <div class="card-header border-0 p-4 d-flex align-items-center justify-content-between" style="background: linear-gradient(135deg,#2d1b69,#7c3aed);">
+                <div class="text-white">
+                    <h6 class="fw-800 mb-1"><i class="bi bi-currency-rupee me-2"></i>Expenses Master — Ledger Breakdown</h6>
+                    <p class="mb-0 small opacity-75">Other Voucher expenses grouped by Expense Particulars & Ledger Group for this period</p>
+                </div>
+                <a href="{{ url_for('expenses_master') }}" class="btn btn-light btn-sm rounded-pill px-3 fw-bold text-dark shadow-sm">
+                    <i class="bi bi-arrow-right-circle me-1"></i>Manage
+                </a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead style="background:#f8f7ff;">
+                            <tr>
+                                <th class="py-3 px-4 text-muted small fw-bold text-uppercase" style="letter-spacing:.05em;">#</th>
+                                <th class="py-3 px-3 text-muted small fw-bold text-uppercase" style="letter-spacing:.05em;">Particular (Expense Category)</th>
+                                <th class="py-3 px-3 text-muted small fw-bold text-uppercase" style="letter-spacing:.05em;">Ledger Group</th>
+                                <th class="py-3 px-3 text-muted small fw-bold text-uppercase text-end" style="letter-spacing:.05em;">Amount (₹)</th>
+                                <th class="py-3 px-3 text-muted small fw-bold text-uppercase text-center" style="letter-spacing:.05em;">P&L Impact</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% set ns = namespace(total=0) %}
+                            {% for label, info in ledger_pnl_summary.items() %}
+                            {% set ns.total = ns.total + info.amount %}
+                            <tr>
+                                <td class="py-3 px-4 text-muted font-monospace small">{{ loop.index }}</td>
+                                <td class="py-3 px-3">
+                                    <span class="fw-semibold text-dark">{{ label }}</span>
+                                </td>
+                                <td class="py-3 px-3">
+                                    {% set grp = info.group %}
+                                    <span class="badge rounded-pill px-3 py-2 small fw-bold
+                                        {% if grp == 'Direct Expenses' %}bg-warning-subtle text-warning
+                                        {% elif grp in ('Indirect Expenses','Administrative Expenses','Selling Expenses') %}bg-secondary-subtle text-secondary
+                                        {% elif grp == 'Capital Account' %}bg-primary-subtle text-primary
+                                        {% else %}bg-success-subtle text-success{% endif %}">
+                                        {{ grp }}
+                                    </span>
+                                </td>
+                                <td class="py-3 px-3 text-end font-monospace fw-semibold">₹{{ "%.2f"|format(info.amount) }}</td>
+                                <td class="py-3 px-3 text-center">
+                                    {% if grp == 'Capital Account' %}
+                                    <span class="badge bg-primary-subtle text-primary small">Balance Sheet</span>
+                                    {% elif grp in ('Indirect Expenses','Administrative Expenses','Selling Expenses') %}
+                                    <span class="badge bg-secondary-subtle text-secondary small">Indirect (Net Profit)</span>
+                                    {% else %}
+                                    <span class="badge bg-warning-subtle text-warning small">Direct (Gross Profit)</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot style="background:#f8f7ff; border-top: 2px solid #e5e7eb;">
+                            <tr class="fw-bold">
+                                <td colspan="3" class="py-3 px-4 text-dark">Total — Other Vouchers (Period)</td>
+                                <td class="py-3 px-3 text-end font-monospace" style="color:#7c3aed;">₹{{ "%.2f"|format(ns.total) }}</td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer bg-white border-top p-3 d-flex gap-3 flex-wrap">
+                <a href="{{ url_for('expense_ledgers') }}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                    <i class="bi bi-journal-bookmark me-1"></i>Ledger Accounts
+                </a>
+                <a href="{{ url_for('expense_particulars') }}" class="btn btn-sm btn-outline-warning rounded-pill px-3 text-dark">
+                    <i class="bi bi-tags me-1"></i>Expense Particulars
+                </a>
+                <a href="{{ url_for('voucher_register', v_type='other') }}" class="btn btn-sm btn-outline-dark rounded-pill px-3">
+                    <i class="bi bi-receipt-cutoff me-1"></i>Other Vouchers
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- PRINT ONLY VERTICAL FINANCIAL REPORT STATEMENT -->
+    <div class="print-only-report mt-4" id="print-report-container">
+        <div class="report-header text-center mb-5">
+            <h3 class="fw-bold text-uppercase" style="letter-spacing: 1px; color: #15803d; margin-bottom: 5px;">Ranga Farms</h3>
+            <h5 class="text-secondary text-uppercase mb-3" style="font-size: 0.85rem; letter-spacing: 2px;">Profit & Loss Statement</h5>
+            <div class="font-monospace small text-muted" style="border-top: 1px solid #ddd; border-bottom: 1px solid #ddd; display: inline-block; padding: 5px 20px;">
+                Period: {% if selected_month == 'All' %}Full Year {{ selected_year }}{% else %}{{ from_date }} to {{ to_date }}{% endif %}
+            </div>
+        </div>
+        
+        <table class="table table-bordered report-table">
+            <thead>
+                <tr style="background-color: #f1f5f9;">
+                    <th style="width: 50%; font-weight: 800; color: #000000;">Particulars</th>
+                    <th style="width: 25%; text-align: right; font-weight: 800; color: #000000;">Amount (₹)</th>
+                    <th style="width: 25%; text-align: right; font-weight: 800; color: #000000;">Total (₹)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- A. Revenue -->
+                <tr class="report-section-header">
+                    <td>A. REVENUE & DIRECT INCOMES</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <!-- Sales Accounts -->
+                <tr>
+                    <td class="ps-4">Sales Accounts</td>
+                    <td class="text-end font-monospace">₹{{ "%.2f"|format(total_sales) }}</td>
+                    <td></td>
+                </tr>
+                {% for sub_cat, amount in sales_accounts.items() %}
+                    {% if amount > 0 %}
+                    <tr class="text-muted small">
+                        <td class="ps-5"><em>{{ sub_cat }}</em></td>
+                        <td class="text-end font-monospace">₹{{ "%.2f"|format(amount) }}</td>
+                        <td></td>
+                    </tr>
+                    {% endif %}
+                {% endfor %}
+                <!-- Direct Incomes -->
+                {% if total_direct_income > 0 %}
+                <tr>
+                    <td class="ps-4">Direct Incomes</td>
+                    <td class="text-end font-monospace">₹{{ "%.2f"|format(total_direct_income) }}</td>
+                    <td></td>
+                </tr>
+                {% for sub_cat, amount in direct_incomes.items() %}
+                    {% if amount > 0 %}
+                    <tr class="text-muted small">
+                        <td class="ps-5"><em>{{ sub_cat }}</em></td>
+                        <td class="text-end font-monospace">₹{{ "%.2f"|format(amount) }}</td>
+                        <td></td>
+                    </tr>
+                    {% endif %}
+                {% endfor %}
+                {% endif %}
+                <tr class="fw-bold" style="background-color: #f8fafc;">
+                    <td class="ps-3">Total Revenue & Direct Income (A)</td>
+                    <td></td>
+                    <td class="text-end font-monospace">₹{{ "%.2f"|format(total_sales + total_direct_income) }}</td>
+                </tr>
+                
+                <!-- B. Cost of Sales -->
+                <tr class="report-section-header">
+                    <td>B. COST OF SALES & DIRECT COSTS</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                {% if include_stock %}
+                <tr>
+                    <td class="ps-4">Opening Stock</td>
+                    <td class="text-end font-monospace">₹{{ "%.2f"|format(opening_stock) }}</td>
+                    <td></td>
+                </tr>
+                {% endif %}
+                <tr>
+                    <td class="ps-4">Add: Purchases Accounts</td>
+                    <td class="text-end font-monospace">₹{{ "%.2f"|format(total_purchases) }}</td>
+                    <td></td>
+                </tr>
+                {% for sub_cat, amount in purchase_accounts.items() %}
+                    {% if amount > 0 %}
+                    <tr class="text-muted small">
+                        <td class="ps-5"><em>{{ sub_cat }}</em></td>
+                        <td class="text-end font-monospace">₹{{ "%.2f"|format(amount) }}</td>
+                        <td></td>
+                    </tr>
+                    {% endif %}
+                {% endfor %}
+                {% if total_direct_expenses > 0 %}
+                <tr>
+                    <td class="ps-4">Add: Direct Expenses</td>
+                    <td class="text-end font-monospace">₹{{ "%.2f"|format(total_direct_expenses) }}</td>
+                    <td></td>
+                </tr>
+                {% for sub_cat, amount in direct_expenses.items() %}
+                    {% if amount > 0 %}
+                    <tr class="text-muted small">
+                        <td class="ps-5"><em>{{ sub_cat }}</em></td>
+                        <td class="text-end font-monospace">₹{{ "%.2f"|format(amount) }}</td>
+                        <td></td>
+                    </tr>
+                    {% endif %}
+                {% endfor %}
+                {% endif %}
+                {% if include_stock %}
+                <tr>
+                    <td class="ps-4">Less: Closing Stock</td>
+                    <td class="text-end font-monospace">(₹{{ "%.2f"|format(closing_stock) }})</td>
+                    <td></td>
+                </tr>
+                {% endif %}
+                {% set cost_of_sales = opening_stock + total_purchases + total_direct_expenses - closing_stock %}
+                <tr class="fw-bold" style="background-color: #f8fafc;">
+                    <td class="ps-3">Total Cost of Sales & Direct Costs (B)</td>
+                    <td></td>
+                    <td class="text-end font-monospace">₹{{ "%.2f"|format(cost_of_sales) }}</td>
+                </tr>
+                
+                <!-- C. Gross Profit -->
+                <tr class="fw-bold" style="background-color: #e2e8f0; font-size: 0.95rem; border-top: 1.5px solid #000; border-bottom: 1.5px solid #000;">
+                    <td><strong>C. GROSS PROFIT (A - B)</strong></td>
+                    <td></td>
+                    <td class="text-end font-monospace">₹{{ "%.2f"|format(gross_profit) }}</td>
+                </tr>
+                
+                <!-- D. Indirect Expenses -->
+                {% if total_indirect_expenses > 0 %}
+                <tr class="report-section-header">
+                    <td>D. LESS: INDIRECT EXPENSES</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                {% for sub_cat, amount in indirect_expenses.items() %}
+                    {% if amount > 0 %}
+                    <tr>
+                        <td class="ps-4">{{ sub_cat }}</td>
+                        <td class="text-end font-monospace">₹{{ "%.2f"|format(amount) }}</td>
+                        <td></td>
+                    </tr>
+                    {% endif %}
+                {% endfor %}
+                <tr class="fw-bold" style="background-color: #f8fafc;">
+                    <td class="ps-3">Total Indirect Expenses (D)</td>
+                    <td></td>
+                    <td class="text-end font-monospace">(₹{{ "%.2f"|format(total_indirect_expenses) }})</td>
+                </tr>
+                {% endif %}
+                
+                <!-- E. Indirect Incomes -->
+                {% if total_indirect_income > 0 %}
+                <tr class="report-section-header">
+                    <td>E. ADD: INDIRECT INCOMES</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                {% for sub_cat, amount in indirect_incomes.items() %}
+                    {% if amount > 0 %}
+                    <tr>
+                        <td class="ps-4">{{ sub_cat }}</td>
+                        <td class="text-end font-monospace">₹{{ "%.2f"|format(amount) }}</td>
+                        <td></td>
+                    </tr>
+                    {% endif %}
+                {% endfor %}
+                <tr class="fw-bold" style="background-color: #f8fafc;">
+                    <td class="ps-3">Total Indirect Incomes (E)</td>
+                    <td></td>
+                    <td class="text-end font-monospace">₹{{ "%.2f"|format(total_indirect_income) }}</td>
+                </tr>
+                {% endif %}
+                
+                <!-- F. Net Profit / Loss -->
+                {% if is_profit %}
+                <tr class="fw-bold" style="background-color: #d1fae5 !important; color: #16a34a !important; border-top: 2px solid #000000; border-bottom: 4px double #000000; font-size: 1.05rem; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
+                    <td>F. NET PROFIT (C - D + E)</td>
+                    <td></td>
+                    <td class="text-end font-monospace" style="color: #16a34a !important;">₹{{ "%.2f"|format(net_profit) }}</td>
+                </tr>
+                {% else %}
+                <tr class="fw-bold" style="background-color: #fee2e2 !important; color: #dc2626 !important; border-top: 2px solid #000000; border-bottom: 4px double #000000; font-size: 1.05rem; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
+                    <td>F. NET LOSS (C - D + E)</td>
+                    <td></td>
+                    <td class="text-end font-monospace" style="color: #dc2626 !important;">(₹{{ "%.2f"|format(net_profit) }})</td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+        
+        <!-- Signature Section -->
+        <div class="row print-signatures" style="margin-top: 80px;">
+            <div class="col-6 text-center" style="width: 50%; float: left; display: inline-block;">
+                <div style="width: 200px; margin: 0 auto; border-top: 1px solid #000000; padding-top: 5px; font-weight: bold; font-size: 0.9rem;">Prepared By</div>
+            </div>
+            <div class="col-6 text-center" style="width: 50%; float: right; display: inline-block;">
+                <div style="width: 200px; margin: 0 auto; border-top: 1px solid #000000; padding-top: 5px; font-weight: bold; font-size: 0.9rem;">Authorized Signatory</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Glassmorphic Transaction Drilldown Modal -->
+<div class="modal fade" id="drilldownModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden" style="background: #ffffff; border: 2px solid #000000;">
+            <div class="modal-header bg-dark text-white border-0 py-3">
+                <h5 class="modal-title fw-bold" id="drilldownTitle"><i class="bi bi-zoom-in me-2"></i>Ledger Statement</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <!-- Action Controls at the top of the modal -->
+                <div id="modalActionControls" class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+                    <h6 class="text-muted mb-0 small"><i class="bi bi-info-circle me-1"></i> Showing all transactions for the selected period.</h6>
+                    <button class="btn btn-sm btn-primary rounded-pill px-3 fw-bold shadow-sm" type="button" onclick="printDetailedLedger()">
+                        <i class="bi bi-printer me-1"></i> Print Detailed Ledger
+                    </button>
+                </div>
+
+                <!-- Stacked / Grid View of Income and Expenses -->
+                <div id="drilldownAllContainer" class="row">
+                    <!-- Left Column: Income Details -->
+                    <div class="col-xl-6 col-12 mb-4">
+                        <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden" style="border: 2px solid #15803d !important;">
+                            <div class="card-header bg-success text-white border-0 py-3 d-flex justify-content-between align-items-center">
+                                <h6 class="fw-bold mb-0 text-white"><i class="bi bi-arrow-down-left-circle-fill me-2"></i>Income Details</h6>
+                                <div class="d-flex gap-2">
+                                    <span class="badge bg-white text-success fw-bold" id="incomeCount">0 transactions</span>
+                                    <span class="badge bg-white text-success fw-bold" id="incomeTotalBadge">₹0.00</span>
+                                </div>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="table-responsive" style="max-height: 450px; overflow-y: auto;">
+                                    <table class="table table-hover align-middle mb-0">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th style="width: 22%;">Date</th>
+                                                <th style="width: 53%;">Reference & Details</th>
+                                                <th style="width: 25%; text-align: right;">Amount</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="incomeContent">
+                                            <!-- Dynamically populated -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div id="incomeEmptyState" class="text-center py-5 text-muted small" style="display:none;">
+                                    <i class="bi bi-inbox fs-3 d-block mb-2 opacity-50"></i>
+                                    No income transactions found in this date range.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Expense Details -->
+                    <div class="col-xl-6 col-12 mb-4">
+                        <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden" style="border: 2px solid #b91c1c !important;">
+                            <div class="card-header bg-danger text-white border-0 py-3 d-flex justify-content-between align-items-center">
+                                <h6 class="fw-bold mb-0 text-white"><i class="bi bi-arrow-up-right-circle-fill me-2"></i>Expense Details</h6>
+                                <div class="d-flex gap-2">
+                                    <span class="badge bg-white text-danger fw-bold" id="expenseCount">0 transactions</span>
+                                    <span class="badge bg-white text-danger fw-bold" id="expenseTotalBadge">₹0.00</span>
+                                </div>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="table-responsive" style="max-height: 450px; overflow-y: auto;">
+                                    <table class="table table-hover align-middle mb-0">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th style="width: 22%;">Date</th>
+                                                <th style="width: 53%;">Reference & Details</th>
+                                                <th style="width: 25%; text-align: right;">Amount</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="expenseContent">
+                                            <!-- Dynamically populated -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div id="expenseEmptyState" class="text-center py-5 text-muted small" style="display:none;">
+                                    <i class="bi bi-inbox fs-3 d-block mb-2 opacity-50"></i>
+                                    No expense transactions found in this date range.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Single Table View for standard categories -->
+                <div id="drilldownSingleContainer" style="display: none;">
+                    <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+                        <table class="table table-hover align-middle mb-0" id="drilldownTable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Reference</th>
+                                    <th>Particulars / Details</th>
+                                    <th class="text-end">Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody id="drilldownContent">
+                                <!-- Populated dynamically via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="drilldownEmptyState" class="text-center py-5 text-muted" style="display:none;">
+                    <i class="bi bi-inbox fs-1 d-block mb-2 opacity-50"></i>
+                    No transactions recorded for this ledger in this date range.
+                </div>
+            </div>
+            <div class="modal-footer border-0 bg-light py-2">
+                <button type="button" class="btn btn-secondary btn-sm rounded-pill px-4" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let detailedLedgerData = null;
+
+document.addEventListener("DOMContentLoaded", function() {
+    // Pre-fetch all transaction details on load in background
+    fetchDetailedLedgerData();
+});
+
+function fetchDetailedLedgerData() {
+    const fromDate = "{{ from_date }}";
+    const toDate = "{{ to_date }}";
+    
+    fetch(`/api/pnl/drilldown?from_date=${fromDate}&to_date=${toDate}&category=All`)
+        .then(res => res.json())
+        .then(data => {
+            if (data.success && data.transactions) {
+                detailedLedgerData = data.transactions;
+                populateDetailedLedgerUI(data.transactions);
+            }
+        })
+        .catch(err => console.error("Error pre-fetching detailed ledger:", err));
+}
+
+function populateDetailedLedgerUI(transactions) {
+    const incomeTx = transactions.filter(t => t.type === 'income');
+    const expenseTx = transactions.filter(t => t.type === 'expense');
+    
+    let incomeTotal = 0;
+    incomeTx.forEach(t => incomeTotal += parseFloat(t.amount || 0));
+    
+    let expenseTotal = 0;
+    expenseTx.forEach(t => expenseTotal += parseFloat(t.amount || 0));
+    
+    // Update badges
+    document.getElementById('incomeCount').textContent = `${incomeTx.length} transaction${incomeTx.length !== 1 ? 's' : ''}`;
+    document.getElementById('incomeTotalBadge').textContent = `₹${incomeTotal.toFixed(2)}`;
+    
+    document.getElementById('expenseCount').textContent = `${expenseTx.length} transaction${expenseTx.length !== 1 ? 's' : ''}`;
+    document.getElementById('expenseTotalBadge').textContent = `₹${expenseTotal.toFixed(2)}`;
+    
+    // Populate Modal Income Content
+    let incomeHtml = '';
+    incomeTx.forEach(t => {
+        incomeHtml += `
+            <tr>
+                <td><span class="badge bg-light text-dark font-monospace border" style="font-size: 0.75rem;">${t.date}</span></td>
+                <td>
+                    <div class="fw-bold text-dark" style="font-size: 0.85rem;">
+                        <span class="badge bg-success-subtle text-success border me-2" style="font-size: 0.65rem;">${t.category || 'Income'}</span>${t.reference}
+                    </div>
+                    <div class="text-muted small" style="font-size: 0.75rem; margin-top: 2px;">${t.detail || ''}</div>
+                </td>
+                <td class="text-end font-monospace fw-bold text-success" style="font-size: 0.85rem;">₹${parseFloat(t.amount).toFixed(2)}</td>
+            </tr>
+        `;
+    });
+    
+    // Populate Modal Expense Content
+    let expenseHtml = '';
+    expenseTx.forEach(t => {
+        expenseHtml += `
+            <tr>
+                <td><span class="badge bg-light text-dark font-monospace border" style="font-size: 0.75rem;">${t.date}</span></td>
+                <td>
+                    <div class="fw-bold text-dark" style="font-size: 0.85rem;">
+                        <span class="badge bg-danger-subtle text-danger border me-2" style="font-size: 0.65rem;">${t.category || 'Expense'}</span>${t.reference}
+                    </div>
+                    <div class="text-muted small" style="font-size: 0.75rem; margin-top: 2px;">${t.detail || ''}</div>
+                </td>
+                <td class="text-end font-monospace fw-bold text-danger" style="font-size: 0.85rem;">₹${parseFloat(t.amount).toFixed(2)}</td>
+            </tr>
+        `;
+    });
+    
+    const incomeContent = document.getElementById('incomeContent');
+    const expenseContent = document.getElementById('expenseContent');
+    const incomeEmpty = document.getElementById('incomeEmptyState');
+    const expenseEmpty = document.getElementById('expenseEmptyState');
+    
+    if (incomeTx.length > 0) {
+        incomeContent.innerHTML = incomeHtml;
+        incomeEmpty.style.display = 'none';
+    } else {
+        incomeContent.innerHTML = '';
+        incomeEmpty.style.display = 'block';
+    }
+    
+    if (expenseTx.length > 0) {
+        expenseContent.innerHTML = expenseHtml;
+        expenseEmpty.style.display = 'none';
+    } else {
+        expenseContent.innerHTML = '';
+        expenseEmpty.style.display = 'block';
+    }
+}
+
+function viewDrilldown(categoryName) {
+    const title = document.getElementById('drilldownTitle');
+    const content = document.getElementById('drilldownContent');
+    const table = document.getElementById('drilldownTable');
+    const emptyState = document.getElementById('drilldownEmptyState');
+    
+    const drilldownAllContainer = document.getElementById('drilldownAllContainer');
+    const drilldownSingleContainer = document.getElementById('drilldownSingleContainer');
+    const modalActionControls = document.getElementById('modalActionControls');
+    
+    title.innerHTML = `<i class="bi bi-zoom-in me-2"></i>Ledger Statement: ${categoryName === 'All' ? 'All Transactions / Detailed Ledger' : categoryName}`;
+    
+    if (categoryName === 'All') {
+        drilldownAllContainer.style.display = 'flex';
+        drilldownSingleContainer.style.display = 'none';
+        modalActionControls.style.display = 'flex';
+        emptyState.style.display = 'none';
+        
+        const myModal = new bootstrap.Modal(document.getElementById('drilldownModal'));
+        myModal.show();
+        
+        if (!detailedLedgerData) {
+            fetchDetailedLedgerData();
+        }
+    } else {
+        content.innerHTML = `<tr><td colspan="4" class="text-center py-4"><span class="spinner-border spinner-border-sm me-2" role="status"></span>Loading transactions...</td></tr>`;
+        
+        drilldownAllContainer.style.display = 'none';
+        drilldownSingleContainer.style.display = 'block';
+        modalActionControls.style.display = 'none';
+        table.style.display = 'table';
+        emptyState.style.display = 'none';
+        
+        const myModal = new bootstrap.Modal(document.getElementById('drilldownModal'));
+        myModal.show();
+        
+        const fromDate = "{{ from_date }}";
+        const toDate = "{{ to_date }}";
+        
+        fetch(`/api/pnl/drilldown?from_date=${fromDate}&to_date=${toDate}&category=${encodeURIComponent(categoryName)}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.success && data.transactions && data.transactions.length > 0) {
+                    let html = '';
+                    data.transactions.forEach(t => {
+                        html += `
+                            <tr>
+                                <td><span class="badge bg-light text-dark font-monospace border" style="font-size: 0.75rem;">${t.date}</span></td>
+                                <td class="fw-bold text-dark" style="font-size: 0.85rem;">${t.reference}</td>
+                                <td class="text-muted small" style="font-size: 0.75rem;">${t.detail || ''}</td>
+                                <td class="text-end font-monospace fw-bold text-dark" style="font-size: 0.85rem;">₹${parseFloat(t.amount).toFixed(2)}</td>
+                            </tr>
+                        `;
+                    });
+                    content.innerHTML = html;
+                } else {
+                    table.style.display = 'none';
+                    emptyState.style.display = 'block';
+                }
+            })
+            .catch(err => {
+                content.innerHTML = `<tr><td colspan="4" class="text-center text-danger py-4"><i class="bi bi-exclamation-triangle-fill me-2"></i>Failed to retrieve details.</td></tr>`;
+            });
+    }
+}
+
+function printDetailedLedger() {
+    const fromDate = "{{ from_date }}";
+    const toDate = "{{ to_date }}";
+    const selectedMonth = "{{ selected_month }}";
+    const selectedYear = "{{ selected_year }}";
+    
+    const incomeHtml = document.getElementById('incomeContent').innerHTML;
+    const expenseHtml = document.getElementById('expenseContent').innerHTML;
+    const incomeCount = document.getElementById('incomeCount').textContent;
+    const expenseCount = document.getElementById('expenseCount').textContent;
+    const incomeTotalBadge = document.getElementById('incomeTotalBadge').textContent;
+    const expenseTotalBadge = document.getElementById('expenseTotalBadge').textContent;
+
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Detailed General Ledger - Ranga Farms</title>
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+            <style>
+                body { font-family: 'Inter', sans-serif; padding: 40px; background-color: #ffffff; color: #000000; }
+                .report-header { text-align: center; margin-bottom: 40px; border-bottom: 2px solid #000000; padding-bottom: 20px; }
+                .section-header { font-weight: bold; padding: 10px 15px; margin-top: 30px; margin-bottom: 15px; font-size: 1.1rem; border-bottom: 2px solid #000; }
+                .table th { background-color: #f8fafc !important; color: #000000 !important; font-weight: 800; border: 1px solid #cbd5e1 !important; }
+                .table td { border: 1px solid #cbd5e1 !important; font-size: 0.85rem !important; }
+                .font-monospace { font-family: 'JetBrains Mono', monospace; }
+                .no-print { display: none; }
+                @media print {
+                    body { padding: 0; }
+                    .no-print { display: none !important; }
+                }
+            </style>
+        </head>
+        <body>
+            <div class="no-print mb-4 text-end">
+                <button class="btn btn-primary rounded-pill px-4" onclick="window.print()"><i class="bi bi-printer me-2"></i>Print Ledger</button>
+                <button class="btn btn-secondary rounded-pill px-4" onclick="window.close()">Close</button>
+            </div>
+            
+            <div class="report-header">
+                <h2 class="fw-bold text-uppercase m-0" style="color: #15803d; letter-spacing: 1px;">RANGA FARMS</h2>
+                <h5 class="text-secondary text-uppercase mt-1 mb-3" style="font-size: 0.85rem; letter-spacing: 2px;">Detailed General Ledger Statement</h5>
+                <div class="font-monospace small text-muted" style="border-top: 1px solid #ddd; border-bottom: 1px solid #ddd; display: inline-block; padding: 5px 20px;">
+                    Period: ${selectedMonth === 'All' ? 'Full Year ' + selectedYear : fromDate + ' to ' + toDate}
+                </div>
+            </div>
+            
+            <div class="section-header text-success d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-arrow-down-left-circle-fill me-2"></i>INCOME TRANSACTIONS (${incomeCount})</span>
+                <span class="font-monospace">Total: ${incomeTotalBadge}</span>
+            </div>
+            <table class="table table-striped align-middle table-bordered">
+                <thead>
+                    <tr style="background-color: #f1f5f9;">
+                        <th style="width: 15%;">Date</th>
+                        <th style="width: 30%;">Reference</th>
+                        <th style="width: 40%;">Particulars / Details</th>
+                        <th style="width: 15%; text-align: right;">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${incomeHtml.trim() ? incomeHtml : '<tr><td colspan="4" class="text-center py-4 text-muted">No income transactions found in this date range.</td></tr>'}
+                </tbody>
+            </table>
+            
+            <div class="section-header text-danger d-flex justify-content-between align-items-center" style="page-break-before: always;">
+                <span><i class="bi bi-arrow-up-right-circle-fill me-2"></i>EXPENSE TRANSACTIONS (${expenseCount})</span>
+                <span class="font-monospace">Total: ${expenseTotalBadge}</span>
+            </div>
+            <table class="table table-striped align-middle table-bordered">
+                <thead>
+                    <tr style="background-color: #f1f5f9;">
+                        <th style="width: 15%;">Date</th>
+                        <th style="width: 30%;">Reference</th>
+                        <th style="width: 40%;">Particulars / Details</th>
+                        <th style="width: 15%; text-align: right;">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${expenseHtml.trim() ? expenseHtml : '<tr><td colspan="4" class="text-center py-4 text-muted">No expense transactions found in this date range.</td></tr>'}
+                </tbody>
+            </table>
+            
+            <div class="row mt-5 print-signatures">
+                <div class="col-6 text-center" style="width: 50%; float: left; display: inline-block;">
+                    <div style="width: 200px; margin: 0 auto; border-top: 1px solid #000000; padding-top: 5px; font-weight: bold; font-size: 0.9rem;">Prepared By</div>
+                </div>
+                <div class="col-6 text-center" style="width: 50%; float: right; display: inline-block;">
+                    <div style="width: 200px; margin: 0 auto; border-top: 1px solid #000000; padding-top: 5px; font-weight: bold; font-size: 0.9rem;">Authorized Signatory</div>
+                </div>
+            </div>
+            
+            <script>
+                window.onload = function() {
+                    setTimeout(function() {
+                        window.print();
+                    }, 500);
+                }
+            <\/script>
+        </body>
+        </html>
+    `);
+    printWindow.document.close();
+}
+
+</script>
+{% endblock %}

@@ -105,5 +105,29 @@
 
 <script>
 document.getElementById('todayDate').valueAsDate = new Date();
+
+function updateAgeFromBirthDate() {
+    var birthDateVal = document.getElementById('todayDate').value;
+    if (!birthDateVal) return;
+    
+    var birthDate = new Date(birthDateVal);
+    var today = new Date();
+    
+    var diffTime = today - birthDate;
+    var diffMonths = diffTime / (1000 * 60 * 60 * 24 * 30.44);
+    
+    if (birthDate > today) {
+        diffMonths = 0;
+    }
+    
+    var ageInput = document.querySelector('input[name="age_month"]');
+    if (ageInput) {
+        ageInput.value = Math.max(0, diffMonths).toFixed(1);
+    }
+}
+
+document.getElementById('todayDate').addEventListener('change', updateAgeFromBirthDate);
+// Trigger initially to set value
+updateAgeFromBirthDate();
 </script>
 {% endblock %}

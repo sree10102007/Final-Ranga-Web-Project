@@ -11,8 +11,8 @@
     }
     
     @page {
-        size: A4 portrait; /* Perfect for portrait view */
-        margin: 1.5cm 1cm 1.5cm 1cm;
+        size: A4 portrait;
+        margin: 1.2cm 1cm 1.2cm 1cm;
     }
     
     /* Ensure content area is full width on standard A4 paper */
@@ -22,7 +22,7 @@
         margin: 0 !important;
         padding: 0 !important;
         background: #fff !important;
-        color: #000 !important;
+        color: #111 !important;
         font-family: 'Outfit', 'Inter', sans-serif !important;
     }
     
@@ -38,79 +38,233 @@
         padding: 0 !important;
     }
     
+    /* Premium Printable Header Layout */
+    .print-header {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: flex-start !important;
+        border-bottom: 3px solid #198754 !important;
+        padding-bottom: 12px !important;
+        margin-bottom: 20px !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    
+    .print-header-left {
+        text-align: left !important;
+        max-width: 60% !important;
+    }
+    
+    .print-header-left h2 {
+        font-size: 20px !important;
+        font-weight: 800 !important;
+        color: #0f5132 !important;
+        margin: 0 0 4px 0 !important;
+        text-transform: uppercase !important;
+    }
+    
+    .print-header-left p {
+        font-size: 11px !important;
+        color: #555 !important;
+        margin: 0 !important;
+        line-height: 1.4 !important;
+    }
+    
+    .print-header-right {
+        text-align: right !important;
+        max-width: 40% !important;
+    }
+    
+    .print-header-right h3 {
+        font-size: 16px !important;
+        font-weight: 700 !important;
+        color: #111 !important;
+        margin: 0 0 6px 0 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.5px !important;
+    }
+    
+    .print-header-right p {
+        font-size: 11px !important;
+        color: #555 !important;
+        margin: 0 0 2px 0 !important;
+    }
+    
+    /* Print-specific metrics summary grid */
+    .print-metrics-row {
+        display: flex !important;
+        justify-content: space-between !important;
+        gap: 12px !important;
+        margin-bottom: 25px !important;
+    }
+    
+    .print-metric-card {
+        flex: 1 !important;
+        border: 1px solid #ddd !important;
+        border-radius: 6px !important;
+        padding: 10px 8px !important;
+        text-align: center !important;
+        background-color: #fcfdfe !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    
+    .print-metric-card.border-payable { border-left: 4px solid #0dcaf0 !important; }
+    .print-metric-card.border-paid { border-left: 4px solid #198754 !important; }
+    .print-metric-card.border-pending { border-left: 4px solid #dc3545 !important; }
+    .print-metric-card.border-employees { border-left: 4px solid #6c757d !important; }
+    
+    .print-metric-card h6 {
+        font-size: 9px !important;
+        text-transform: uppercase !important;
+        color: #555 !important;
+        margin: 0 0 4px 0 !important;
+        font-weight: bold !important;
+        letter-spacing: 0.3px !important;
+    }
+    
+    .print-metric-card h3 {
+        font-size: 14px !important;
+        font-weight: 800 !important;
+        color: #111 !important;
+        margin: 0 !important;
+    }
+    
     /* Print-specific table styles optimized for A4 paper */
     table {
         width: 100% !important;
         border-collapse: collapse !important;
-        margin-top: 20px !important;
-        font-size: 11px !important; /* Larger text for perfect readability on A4 */
-        table-layout: fixed !important; /* Strictly enforce column widths! */
+        margin-top: 15px !important;
+        font-size: 11px !important;
+        table-layout: fixed !important;
     }
     
     .table-responsive {
         overflow: visible !important;
-        overflow-x: visible !important;
     }
     
     th, td {
-        border: 1px solid #333 !important; /* Clear black borders for crisp printout */
-        padding: 8px 5px !important; /* Comfortable padding */
-        text-align: center !important; /* Perfectly centered text */
+        border: 1px solid #dee2e6 !important;
+        padding: 7px 4px !important;
+        text-align: center !important;
         vertical-align: middle !important;
-        white-space: nowrap !important; /* Prevent awkward wrapping inside cells */
     }
     
     th {
-        background-color: #f0f0f0 !important;
-        color: #000 !important;
+        background-color: #0f5132 !important;
+        color: #ffffff !important;
         font-weight: bold !important;
         text-transform: uppercase !important;
-        font-size: 10.5px !important;
-        letter-spacing: 0.3px !important;
+        font-size: 9px !important;
+        letter-spacing: 0.2px !important;
+        white-space: normal !important;
+        word-wrap: break-word !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
     }
     
-    /* Strict Column Width Allocations */
-    th:nth-child(1), td:nth-child(1) { width: 5% !important; }   /* Sr# */
-    th:nth-child(2), td:nth-child(2) { width: 25% !important; }  /* Name */
-    th:nth-child(3), td:nth-child(3) { width: 16% !important; }  /* Role */
-    th:nth-child(4), td:nth-child(4) { width: 11% !important; }  /* Daily Wage */
-    th:nth-child(5), td:nth-child(5) { width: 11% !important; }  /* Days Worked */
-    th:nth-child(6), td:nth-child(6) { width: 11% !important; }  /* Paying Amount */
-    th:nth-child(7), td:nth-child(7) { width: 11% !important; }  /* Paid Amount */
-    th:nth-child(8), td:nth-child(8) { width: 11% !important; }  /* Balance Due */
+    td {
+        white-space: nowrap !important;
+    }
     
-    /* Strip all backgrounds, shadows and border radii from badges for crisp printing */
+    tr:nth-child(even) {
+        background-color: #f8f9fa !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    
+    /* Strict Column Width Allocations (Optimized for space and wrapping) */
+    th:nth-child(1), td:nth-child(1) { width: 5% !important; }   /* Sr# */
+    th:nth-child(2), td:nth-child(2) { width: 20% !important; }  /* Name */
+    th:nth-child(3), td:nth-child(3) { width: 13% !important; }  /* Role */
+    th:nth-child(4), td:nth-child(4) { width: 12% !important; }  /* Daily Wage */
+    th:nth-child(5), td:nth-child(5) { width: 12% !important; }  /* Days Worked */
+    th:nth-child(6), td:nth-child(6) { width: 13% !important; }  /* Paying Amount */
+    th:nth-child(7), td:nth-child(7) { width: 13% !important; }  /* Paid Amount */
+    th:nth-child(8), td:nth-child(8) { width: 12% !important; }  /* Balance Due */
+    
     .badge {
         background: transparent !important;
         color: #000 !important;
         border: none !important;
         padding: 0 !important;
         margin: 0 !important;
-        font-size: 11.5px !important;
+        font-size: 11px !important;
         font-weight: bold !important;
         display: inline !important;
     }
     
     .text-success, .text-danger, .text-info, .text-dark, .fw-bold {
-        color: #000 !important;
         font-weight: bold !important;
     }
     
-    /* Adjust table row heights and borders */
+    .text-success { color: #198754 !important; }
+    .text-danger { color: #dc3545 !important; }
+    .text-info { color: #0dcaf0 !important; }
+    
     tr {
         page-break-inside: avoid !important;
-        height: auto !important;
+    }
+    
+    /* Print Signatures Block */
+    .print-signatures {
+        display: flex !important;
+        justify-content: space-between !important;
+        margin-top: 50px !important;
+        page-break-inside: avoid !important;
+    }
+    
+    .signature-box {
+        width: 180px !important;
+        text-align: center !important;
+    }
+    
+    .signature-line {
+        border-top: 1px solid #6c757d !important;
+        margin-top: 45px !important;
+        padding-top: 4px !important;
+        font-size: 11px !important;
+        color: #495057 !important;
+        font-weight: 600 !important;
     }
 }
 </style>
 
 <div class="container mt-4">
     <!-- Printable Header (Only visible when printing / PDF saving) -->
-    <div id="printable-header" class="d-none d-print-block text-center mb-4 pb-3 border-bottom border-dark">
-        <h2 class="fw-bold mb-1 text-uppercase text-dark">{{ farm.farm_name }}</h2>
-        <h6 class="mb-2 text-dark">{{ farm.address }}</h6>
-        <div class="mt-3 fs-5 text-dark fw-bold">MONTHLY SALARY REPORT</div>
-        <div class="text-secondary small">Month: <strong>{{ month }}</strong></div>
+    <div id="printable-header" class="d-none d-print-block">
+        <div class="print-header">
+            <div class="print-header-left">
+                <h2>{{ farm.farm_name }}</h2>
+                <p class="mb-1"><i class="fas fa-map-marker-alt me-1"></i> {{ farm.address }}</p>
+                {% if farm.phone %}<p class="mb-0"><i class="fas fa-phone me-1"></i> Phone: {{ farm.phone }}</p>{% endif %}
+            </div>
+            <div class="print-header-right">
+                <h3>Monthly Salary Report</h3>
+                <p>Period: <strong>{{ month }}</strong></p>
+                <p class="small text-muted">Generated: <span class="print-date-val"></span></p>
+            </div>
+        </div>
+        
+        <!-- Print Summary Metrics -->
+        <div class="print-metrics-row">
+            <div class="print-metric-card border-employees">
+                <h6>Total Employees</h6>
+                <h3>{{ employees|length }}</h3>
+            </div>
+            <div class="print-metric-card border-payable">
+                <h6>Total Payable</h6>
+                <h3>₹ {{ "{:,.2f}".format(total_payable) }}</h3>
+            </div>
+            <div class="print-metric-card border-paid">
+                <h6>Total Paid</h6>
+                <h3>₹ {{ "{:,.2f}".format(total_paid) }}</h3>
+            </div>
+            <div class="print-metric-card border-pending">
+                <h6>Total Pending</h6>
+                <h3>₹ {{ "{:,.2f}".format(total_pending) }}</h3>
+            </div>
+        </div>
     </div>
 
     <div class="row mb-4 align-items-center d-print-none">
@@ -118,7 +272,11 @@
             <h1 class="mb-0 fw-bold"><i class="fas fa-file-invoice-dollar text-success me-2"></i>Monthly Salary Report</h1>
             <p class="text-muted mb-0">Generated salary statements for month: <strong>{{ month }}</strong></p>
         </div>
-        <div class="col-md-5 text-md-end mt-3 mt-md-0">
+        <div class="col-md-5 d-flex align-items-center justify-content-md-end gap-3 mt-3 mt-md-0">
+            <div class="form-check form-switch mb-0">
+                <input class="form-check-input" type="checkbox" id="toggleHeaders" onchange="toggleBrowserHeadersFooters(this.checked)">
+                <label class="form-check-label small fw-semibold text-muted" for="toggleHeaders">Hide Browser Header/Footer</label>
+            </div>
             <div class="btn-group shadow-sm rounded-3 overflow-hidden">
                 <button onclick="window.print()" class="btn btn-primary fw-bold px-3 py-2">
                     <i class="fas fa-print me-2"></i>Print / PDF
@@ -221,10 +379,35 @@
                 </tbody>
             </table>
         </div>
+        
+        <!-- Printable Signature Section -->
+        <div class="d-none d-print-block print-signatures">
+            <div class="signature-box">
+                <div class="signature-line">Prepared By</div>
+            </div>
+            <div class="signature-box">
+                <div class="signature-line">Verified By</div>
+            </div>
+            <div class="signature-box">
+                <div class="signature-line">Authorized Signatory</div>
+            </div>
+        </div>
     </div>
 </div>
 
 <script>
+document.addEventListener("DOMContentLoaded", function() {
+    var today = new Date();
+    var dd = String(today.getDate()).padStart(2, '0');
+    var mm = String(today.getMonth() + 1).padStart(2, '0');
+    var yyyy = today.getFullYear();
+    var formattedDate = dd + '/' + mm + '/' + yyyy;
+    var printDates = document.querySelectorAll('.print-date-val');
+    printDates.forEach(function(el) {
+        el.textContent = formattedDate;
+    });
+});
+
 function downloadWord() {
     var headerElement = document.getElementById('printable-header');
     var tableElement = document.getElementById('printable-table');

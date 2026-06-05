@@ -36,9 +36,9 @@
                     <div class="d-flex align-items-center gap-2">
                         <label for="spacingSelect" class="small fw-semibold text-muted mb-0">Row Spacing:</label>
                         <select id="spacingSelect" class="form-select form-select-sm rounded-3" style="width: 150px;" onchange="adjustSpacing(this.value)">
-                            <option value="compact">Compact (Many Goats)</option>
+                            <option value="compact">Compact ({% if s_type == 'goat' %}Many Goats{% else %}Many Items{% endif %})</option>
                             <option value="normal" selected>Normal</option>
-                            <option value="spacious">Spacious (1 Goat)</option>
+                            <option value="spacious">Spacious ({% if s_type == 'goat' %}1 Goat{% else %}1 Item{% endif %})</option>
                         </select>
                     </div>
                     <div class="d-flex align-items-center gap-2">
@@ -52,6 +52,10 @@
                     <div class="form-check form-switch mb-0">
                         <input class="form-check-input" type="checkbox" id="toggleBank" checked onchange="toggleBankSection(this.checked)">
                         <label class="form-check-label small fw-semibold text-muted" for="toggleBank">Show Bank Details</label>
+                    </div>
+                    <div class="form-check form-switch mb-0">
+                        <input class="form-check-input" type="checkbox" id="toggleHeaders" onchange="toggleBrowserHeadersFooters(this.checked)">
+                        <label class="form-check-label small fw-semibold text-muted" for="toggleHeaders">Hide Browser Header/Footer</label>
                     </div>
                 </div>
             </div>
@@ -141,22 +145,26 @@
                     </thead>
                     <tbody>
                         {% if s_type == 'goat' %}
+                        {% for item in sales_list %}
                         <tr>
-                            <td class="py-3 px-3 text-center text-muted">1</td>
-                            <td class="py-3 px-3 fw-bold text-dark">Goat Sale (Tag: {{ sale.tag_id }})</td>
-                            <td class="py-3 px-3 text-center text-muted">{{ sale.breed }} ({{ sale.breed_percent }}%)</td>
-                            <td class="py-3 px-3 text-center text-muted">{% if sale.gender|lower == 'm' %}Male{% elif sale.gender|lower == 'f' %}Female{% else %}{{ sale.gender }}{% endif %}</td>
-                            <td class="py-3 px-3 text-center text-muted">{{ sale.weight }} kg</td>
-                            <td class="py-3 px-3 text-end fw-bold text-dark">₹{{ "%.2f"|format(sale.total_amount) }}</td>
+                            <td class="py-3 px-3 text-center text-muted">{{ loop.index }}</td>
+                            <td class="py-3 px-3 fw-bold text-dark">Goat Sale (Tag: {{ item.tag_id }})</td>
+                            <td class="py-3 px-3 text-center text-muted">{{ item.breed or 'N/A' }} ({% if item.breed_percent %}{{ item.breed_percent }}{% else %}100%{% endif %})</td>
+                            <td class="py-3 px-3 text-center text-muted">{% if item.gender|lower == 'm' or item.gender|lower == 'male' %}Male{% elif item.gender|lower == 'f' or item.gender|lower == 'female' %}Female{% else %}{{ item.gender or 'N/A' }}{% endif %}</td>
+                            <td class="py-3 px-3 text-center text-muted">{% if item.weight %}{{ item.weight }} kg{% else %}N/A{% endif %}</td>
+                            <td class="py-3 px-3 text-end fw-bold text-dark">₹{{ "%.2f"|format(item.sold_price) }}</td>
                         </tr>
+                        {% endfor %}
                         {% else %}
+                        {% for item in sales_list %}
                         <tr>
-                            <td class="py-3 px-3 text-center text-muted">1</td>
-                            <td class="py-3 px-3 fw-bold text-dark">{{ sale.item_name }}</td>
-                            <td class="py-3 px-3 text-center text-muted">{{ sale.quantity }} {{ sale.unit }}</td>
-                            <td class="py-3 px-3 text-end text-muted">₹{{ "%.2f"|format(sale.price_per_unit) }}</td>
-                            <td class="py-3 px-3 text-end fw-bold text-dark">₹{{ "%.2f"|format(sale.total_amount) }}</td>
+                            <td class="py-3 px-3 text-center text-muted">{{ loop.index }}</td>
+                            <td class="py-3 px-3 fw-bold text-dark">{{ item.item_name }}</td>
+                            <td class="py-3 px-3 text-center text-muted">{{ item.quantity }} {{ item.unit }}</td>
+                            <td class="py-3 px-3 text-end text-muted">₹{{ "%.2f"|format(item.price_per_unit) }}</td>
+                            <td class="py-3 px-3 text-end fw-bold text-dark">₹{{ "%.2f"|format(item.total_amount) }}</td>
                         </tr>
+                        {% endfor %}
                         {% endif %}
                     </tbody>
                 </table>

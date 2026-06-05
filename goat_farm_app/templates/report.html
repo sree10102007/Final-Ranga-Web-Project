@@ -1,10 +1,14 @@
 {% extends 'layout.html' %}
 {% block content %}
-<div class="row align-items-center mb-4">
+<div class="row align-items-center mb-4 d-print-none">
     <div class="col">
         <h2 class="fw-bold text-success mb-0"><i class="bi bi-graph-up-arrow"></i> Financial Reports</h2>
     </div>
-    <div class="col-auto">
+    <div class="col-auto d-flex align-items-center gap-3">
+        <div class="form-check form-switch mb-0">
+            <input class="form-check-input" type="checkbox" id="toggleHeaders" onchange="toggleBrowserHeadersFooters(this.checked)">
+            <label class="form-check-label small fw-semibold text-muted" for="toggleHeaders">Hide Browser Header/Footer</label>
+        </div>
         <button class="btn btn-outline-success shadow-sm" onclick="window.print()"><i class="bi bi-printer"></i> Print</button>
     </div>
 </div>

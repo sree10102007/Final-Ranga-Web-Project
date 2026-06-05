@@ -52,9 +52,9 @@
             <a href="{{ url_for('feed') }}" class="btn btn-success rounded-pill px-4 py-2 fw-semibold">
                 <i class="bi bi-people me-1"></i>Batch Allocation Center
             </a>
-            <button class="btn btn-outline-success rounded-pill px-4 py-2 fw-semibold" data-bs-toggle="modal" data-bs-target="#quickBuyModal">
+            <a href="{{ url_for('vouchers') }}" class="btn btn-outline-success rounded-pill px-4 py-2 fw-semibold">
                 <i class="bi bi-cart-plus me-1"></i>Buy New Item
-            </button>
+            </a>
         </div>
     </div>
 </div>
@@ -73,14 +73,22 @@
                 {% for feed_name, stock in feed_stocks.items() %}
                 <div class="stock-pill p-3 d-flex align-items-center justify-content-between">
                     <div>
-                        <span class="fw-bold text-dark d-block mb-1">{{ feed_name }}</span>
+                        <span class="fw-bold text-dark d-block mb-1">
+                            {{ feed_name }}
+                            {% if stock.alert_level > 0 %}
+                                <span class="badge bg-danger bg-opacity-10 text-danger ms-1 small fw-bold font-monospace" style="font-size: 0.7rem;"><i class="bi bi-bell-fill me-1"></i>Min: {{ "%.1f"|format(stock.alert_level) }}</span>
+                            {% endif %}
+                        </span>
                         <span class="fs-4 fw-bold text-success">{{ "%.2f"|format(stock.closing_stock) }} <small class="fs-6 text-muted">{{ stock.unit }}</small></span>
                     </div>
                     <div class="d-flex align-items-center gap-2">
                         {% if stock.closing_stock <= 0 %}
                             <span class="badge-no-stock">No Stock</span>
+                        {% elif stock.alert_level > 0 and stock.closing_stock <= stock.alert_level %}
+                            <span class="badge bg-warning text-dark px-2.5 py-1.5 rounded-pill small fw-bold" style="font-size: 0.75rem;"><i class="bi bi-exclamation-triangle-fill me-1"></i>Low</span>
                         {% endif %}
-                        <button class="btn btn-sm btn-success rounded-pill px-3" onclick="openBuyModal('feed', '{{ feed_name }}', '{{ stock.unit }}')">Buy</button>
+                        <button class="btn btn-sm btn-outline-secondary rounded-pill px-2.5" title="Set Reminder Threshold" onclick="openLimitModal('feed', '{{ feed_name }}', '{{ stock.alert_level }}', '{{ stock.unit }}')"><i class="bi bi-bell"></i></button>
+                        <a href="{{ url_for('voucher_add', v_type='feed', feed_name=feed_name, unit=stock.unit) }}" class="btn btn-sm btn-success rounded-pill px-3">Buy</a>
                     </div>
                 </div>
                 {% else %}
@@ -102,14 +110,22 @@
                 {% for med_name, stock in med_stocks.items() %}
                 <div class="stock-pill p-3 d-flex align-items-center justify-content-between">
                     <div>
-                        <span class="fw-bold text-dark d-block mb-1">{{ med_name }}</span>
+                        <span class="fw-bold text-dark d-block mb-1">
+                            {{ med_name }}
+                            {% if stock.alert_level > 0 %}
+                                <span class="badge bg-danger bg-opacity-10 text-danger ms-1 small fw-bold font-monospace" style="font-size: 0.7rem;"><i class="bi bi-bell-fill me-1"></i>Min: {{ "%.1f"|format(stock.alert_level) }}</span>
+                            {% endif %}
+                        </span>
                         <span class="fs-4 fw-bold text-primary">{{ "%.2f"|format(stock.closing_stock) }} <small class="fs-6 text-muted">{{ stock.unit }}</small></span>
                     </div>
                     <div class="d-flex align-items-center gap-2">
                         {% if stock.closing_stock <= 0 %}
                             <span class="badge-no-stock">No Stock</span>
+                        {% elif stock.alert_level > 0 and stock.closing_stock <= stock.alert_level %}
+                            <span class="badge bg-warning text-dark px-2.5 py-1.5 rounded-pill small fw-bold" style="font-size: 0.75rem;"><i class="bi bi-exclamation-triangle-fill me-1"></i>Low</span>
                         {% endif %}
-                        <button class="btn btn-sm btn-primary rounded-pill px-3" onclick="openBuyModal('medicine', '{{ med_name }}', '{{ stock.unit }}')">Buy</button>
+                        <button class="btn btn-sm btn-outline-secondary rounded-pill px-2.5" title="Set Reminder Threshold" onclick="openLimitModal('medicine', '{{ med_name }}', '{{ stock.alert_level }}', '{{ stock.unit }}')"><i class="bi bi-bell"></i></button>
+                        <a href="{{ url_for('voucher_add', v_type='health', sub_type='medicine', health_name=med_name, dose_unit=stock.unit) }}" class="btn btn-sm btn-primary rounded-pill px-3">Buy</a>
                     </div>
                 </div>
                 {% else %}
@@ -131,14 +147,22 @@
                 {% for vac_name, stock in vac_stocks.items() %}
                 <div class="stock-pill p-3 d-flex align-items-center justify-content-between">
                     <div>
-                        <span class="fw-bold text-dark d-block mb-1">{{ vac_name }}</span>
+                        <span class="fw-bold text-dark d-block mb-1">
+                            {{ vac_name }}
+                            {% if stock.alert_level > 0 %}
+                                <span class="badge bg-danger bg-opacity-10 text-danger ms-1 small fw-bold font-monospace" style="font-size: 0.7rem;"><i class="bi bi-bell-fill me-1"></i>Min: {{ "%.1f"|format(stock.alert_level) }}</span>
+                            {% endif %}
+                        </span>
                         <span class="fs-4 fw-bold text-info">{{ "%.2f"|format(stock.closing_stock) }} <small class="fs-6 text-muted">{{ stock.unit }}</small></span>
                     </div>
                     <div class="d-flex align-items-center gap-2">
                         {% if stock.closing_stock <= 0 %}
                             <span class="badge-no-stock">No Stock</span>
+                        {% elif stock.alert_level > 0 and stock.closing_stock <= stock.alert_level %}
+                            <span class="badge bg-warning text-dark px-2.5 py-1.5 rounded-pill small fw-bold" style="font-size: 0.75rem;"><i class="bi bi-exclamation-triangle-fill me-1"></i>Low</span>
                         {% endif %}
-                        <button class="btn btn-sm btn-info text-white rounded-pill px-3" onclick="openBuyModal('vaccine', '{{ vac_name }}', '{{ stock.unit }}')">Buy</button>
+                        <button class="btn btn-sm btn-outline-secondary rounded-pill px-2.5" title="Set Reminder Threshold" onclick="openLimitModal('vaccine', '{{ vac_name }}', '{{ stock.alert_level }}', '{{ stock.unit }}')"><i class="bi bi-bell"></i></button>
+                        <a href="{{ url_for('voucher_add', v_type='health', sub_type='vaccine', health_name=vac_name, unit=stock.unit) }}" class="btn btn-sm btn-info text-white rounded-pill px-3">Buy</a>
                     </div>
                 </div>
                 {% else %}
@@ -176,12 +200,19 @@
                     </div>
                     
                     <div class="mb-3">
-                        <label class="form-label small text-muted fw-bold">Quantity (KGs / Doses)</label>
+                        <label class="form-label small text-muted fw-bold">Quantity & Unit</label>
                         <div class="input-group">
                             <input type="number" step="0.01" name="quantity" class="form-control" placeholder="0.00" required>
-                            <span class="input-group-text bg-light border" id="buy_unit_label">KG</span>
+                            <select class="form-select bg-light border" id="buy_unit_select" style="max-width: 140px;" onchange="handleUnitChange()">
+                                <!-- Dynamic options loaded by populateUnits() -->
+                            </select>
                             <input type="hidden" name="unit" id="buy_unit_hidden" value="KG">
                         </div>
+                    </div>
+                    
+                    <div class="mb-3" id="custom_unit_div" style="display: none;">
+                        <label class="form-label small text-muted fw-bold">Specify Custom Unit</label>
+                        <input type="text" id="custom_unit_input" class="form-control" placeholder="e.g. Boxes, Bottles, ml" oninput="handleCustomUnitInput()">
                     </div>
                     
                     <div class="mb-3">
@@ -202,10 +233,47 @@
                         <input type="date" name="purchase_date" id="purchase_date" class="form-control" required>
                     </div>
 
+                    <div class="mb-3 border-top pt-2">
+                        <label class="form-label small text-muted fw-bold"><i class="bi bi-bell-fill text-warning me-1"></i>Reminder Threshold Limit (Optional)</label>
+                        <p class="text-muted small" style="font-size: 0.8rem;">Pop up an alert when stock reaches or falls below this level.</p>
+                        <input type="number" step="0.01" name="alert_limit" class="form-control" placeholder="Leave empty to keep current threshold">
+                    </div>
+
                 </div>
                 <div class="modal-footer border-0">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-success px-4">Buy & Log Expense</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 🔔 SET REMINDER LIMIT MODAL -->
+<div class="modal fade" id="limitModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <form action="{{ url_for('update_stock_limit') }}" method="POST">
+            <div class="modal-content border-0 shadow-lg rounded-4">
+                <div class="modal-header text-white">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-bell-fill me-2"></i>Set Reminder Threshold</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <input type="hidden" name="item_type" id="limit_item_type">
+                    <input type="hidden" name="item_name" id="limit_item_name">
+                    
+                    <div class="mb-3">
+                        <label class="form-label small text-muted fw-bold">Reminder Threshold Limit</label>
+                        <p class="text-muted small">You will receive a top-right popup notification once the stock falls below or reaches this limit.</p>
+                        <div class="input-group">
+                            <input type="number" step="0.01" name="limit" id="limit_val" class="form-control" placeholder="0.00" required>
+                            <span class="input-group-text bg-light border" id="limit_unit_label">KG</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-dark px-4">Save Threshold</button>
                 </div>
             </div>
         </form>
@@ -221,11 +289,106 @@
         return `${year}-${month}-${day}`;
     }
 
+    const UNIT_OPTIONS = {
+        feed: [
+            { value: 'KG', label: 'Kilograms (KG)' },
+            { value: 'g', label: 'Grams (g)' },
+            { value: 'Bags', label: 'Bags' },
+            { value: 'Liters', label: 'Liters (L)' }
+        ],
+        medicine: [
+            { value: 'Doses', label: 'Doses' },
+            { value: 'ml', label: 'Milliliters (ml)' },
+            { value: 'Liters', label: 'Liters (L)' },
+            { value: 'Tablets', label: 'Tablets' },
+            { value: 'Capsules', label: 'Capsules' },
+            { value: 'Vials', label: 'Vials' },
+            { value: 'Bottles', label: 'Bottles' },
+            { value: 'Packets', label: 'Packets' }
+        ],
+        vaccine: [
+            { value: 'Doses', label: 'Doses' },
+            { value: 'ml', label: 'Milliliters (ml)' },
+            { value: 'Vials', label: 'Vials' },
+            { value: 'Bottles', label: 'Bottles' }
+        ]
+    };
+
+    function populateUnits(type, selectedValue) {
+        const select = document.getElementById('buy_unit_select');
+        const customDiv = document.getElementById('custom_unit_div');
+        const customInput = document.getElementById('custom_unit_input');
+        const hiddenInput = document.getElementById('buy_unit_hidden');
+        
+        select.innerHTML = '';
+        
+        // Populate standard options
+        const options = UNIT_OPTIONS[type] || [];
+        options.forEach(opt => {
+            const el = document.createElement('option');
+            el.value = opt.value;
+            el.textContent = opt.label;
+            select.appendChild(el);
+        });
+        
+        // Add "Custom..." option
+        const customOpt = document.createElement('option');
+        customOpt.value = 'custom';
+        customOpt.textContent = 'Custom...';
+        select.appendChild(customOpt);
+        
+        // Decide what to select
+        if (selectedValue) {
+            const hasOption = options.some(opt => opt.value === selectedValue);
+            if (hasOption) {
+                select.value = selectedValue;
+                customDiv.style.display = 'none';
+                customInput.value = '';
+                hiddenInput.value = selectedValue;
+            } else {
+                select.value = 'custom';
+                customDiv.style.display = 'block';
+                customInput.value = selectedValue;
+                hiddenInput.value = selectedValue;
+            }
+        } else {
+            if (options.length > 0) {
+                select.value = options[0].value;
+                hiddenInput.value = options[0].value;
+            } else {
+                select.value = 'custom';
+                hiddenInput.value = '';
+            }
+            customDiv.style.display = 'none';
+            customInput.value = '';
+        }
+    }
+
+    function handleUnitChange() {
+        const select = document.getElementById('buy_unit_select');
+        const customDiv = document.getElementById('custom_unit_div');
+        const customInput = document.getElementById('custom_unit_input');
+        const hiddenInput = document.getElementById('buy_unit_hidden');
+        
+        if (select.value === 'custom') {
+            customDiv.style.display = 'block';
+            hiddenInput.value = customInput.value || '';
+        } else {
+            customDiv.style.display = 'none';
+            hiddenInput.value = select.value;
+        }
+    }
+
+    function handleCustomUnitInput() {
+        const customInput = document.getElementById('custom_unit_input');
+        const hiddenInput = document.getElementById('buy_unit_hidden');
+        hiddenInput.value = customInput.value;
+    }
+
     function openBuyModal(type, name, unit) {
         document.getElementById('buy_item_type').value = type;
         document.getElementById('buy_item_name').value = name;
-        document.getElementById('buy_unit_label').textContent = unit;
-        document.getElementById('buy_unit_hidden').value = unit;
+        populateUnits(type, unit);
         
         const header = document.querySelector('#quickBuyModal .modal-header');
         header.className = "modal-header text-white";
@@ -244,21 +407,34 @@
         myModal.show();
     }
 
+    function openLimitModal(itemType, itemName, currentLimit, unit) {
+        document.getElementById('limit_item_type').value = itemType;
+        document.getElementById('limit_item_name').value = itemName;
+        document.getElementById('limit_val').value = parseFloat(currentLimit) || 0.00;
+        document.getElementById('limit_unit_label').textContent = unit;
+        
+        const header = document.querySelector('#limitModal .modal-header');
+        header.className = "modal-header text-white";
+        if(itemType === 'feed') {
+            header.classList.add('bg-success');
+        } else if(itemType === 'medicine') {
+            header.classList.add('bg-primary');
+        } else {
+            header.classList.add('bg-info');
+        }
+        
+        const myModal = new bootstrap.Modal(document.getElementById('limitModal'));
+        myModal.show();
+    }
+
     function updateBuyUnit() {
         const type = document.getElementById('buy_item_type').value;
-        const label = document.getElementById('buy_unit_label');
-        const hidden = document.getElementById('buy_unit_hidden');
-        if(type === 'feed') {
-            label.textContent = "KG";
-            hidden.value = "KG";
-        } else {
-            label.textContent = "Doses";
-            hidden.value = "Doses";
-        }
+        populateUnits(type);
     }
 
     document.addEventListener("DOMContentLoaded", function() {
         document.getElementById('purchase_date').value = getTodayString();
+        populateUnits('feed'); // Initialize default units for Feed on page load
     });
 </script>
 {% endblock %}

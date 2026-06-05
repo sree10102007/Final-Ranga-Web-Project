@@ -28,6 +28,49 @@
       --sidebar-hover: #f1f5f9;
       --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
+
+    /* Custom Toast Notifications Styling */
+    .farm-toast {
+        background: rgba(255, 255, 255, 0.9) !important;
+        backdrop-filter: blur(12px) saturate(180%);
+        -webkit-backdrop-filter: blur(12px) saturate(180%);
+        border: 1px solid rgba(255, 255, 255, 0.5) !important;
+        border-radius: 16px !important;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08) !important;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        margin-bottom: 12px;
+        overflow: hidden;
+        width: 350px !important;
+    }
+    .farm-toast.weight-alert {
+        border-left: 5px solid #2e7d32 !important;
+    }
+    .farm-toast.stock-alert {
+        border-left: 5px solid #ff9800 !important;
+    }
+    .farm-toast.batch-alert {
+        border-left: 5px solid #2196f3 !important;
+    }
+    .farm-toast .toast-header {
+        background: transparent !important;
+        border-bottom: none !important;
+        color: #1e293b !important;
+        font-weight: 700 !important;
+        padding: 14px 16px 4px !important;
+    }
+    .farm-toast .toast-body {
+        padding: 8px 16px 16px !important;
+        color: #475569 !important;
+        font-size: 0.92rem !important;
+        line-height: 1.4 !important;
+    }
+    .farm-toast .btn-close {
+        filter: grayscale(1) opacity(0.6);
+        transition: all 0.2s;
+    }
+    .farm-toast .btn-close:hover {
+        filter: grayscale(0) opacity(1);
+    }
   </style>
 </head>
 <body>
@@ -98,10 +141,25 @@
       <a href="{{ url_for('feed') }}" class="sidebar-link {% if request.endpoint in ['feed','feed_add','feed_edit'] %}active{% endif %}"><span class="link-icon"><i class="bi bi-people-fill"></i></span> Batch Allocation Center</a>
       <a href="{{ url_for('stock_inventory') }}" class="sidebar-link {% if request.endpoint in ['stock_inventory'] %}active{% endif %}"><span class="link-icon"><i class="bi bi-box-seam"></i></span> Stock Inventory & Purchases</a>
       <a href="{{ url_for('expenses') }}" class="sidebar-link {% if request.endpoint in ['expenses','expense_add'] %}active{% endif %}"><span class="link-icon"><i class="bi bi-wallet2"></i></span> Expenses</a>
-      <a href="{{ url_for('equipment') }}" class="sidebar-link {% if request.endpoint in ['equipment','equipment_add','equipment_edit','equipment_detail'] %}active{% endif %}"><span class="link-icon"><i class="bi bi-tools"></i></span> Fixed Assets</a>
+      <a href="{{ url_for('equipment') }}" class="sidebar-link {% if request.endpoint in ['equipment','equipment_add','equipment_edit','equipment_detail'] %}active{% endif %}"><span class="link-icon"><i class="bi bi-tools"></i></span> Godown</a>
+    </div>
+
+    <!-- EXPENSES MASTER MENU -->
+    {% set exp_master_ep = ['expenses_master','expense_ledgers','expense_ledger_edit','expense_particulars','expense_particular_edit','expense_units_view'] %}
+    <button class="nav-group-header {% if request.endpoint in exp_master_ep %}open{% endif %}" onclick="toggleGroup(this)">
+      <span class="group-icon"><i class="bi bi-currency-rupee"></i></span> Expenses Master
+      <span class="chevron"><i class="bi bi-chevron-right"></i></span>
+    </button>
+    <div class="nav-group-items {% if request.endpoint in exp_master_ep %}show{% endif %}">
+      <a href="{{ url_for('expenses_master') }}" class="sidebar-link {% if request.endpoint == 'expenses_master' %}active{% endif %}"><span class="link-icon"><i class="bi bi-grid-1x2"></i></span> Master Dashboard</a>
+      <a href="{{ url_for('expense_ledgers') }}" class="sidebar-link {% if request.endpoint in ['expense_ledgers','expense_ledger_edit'] %}active{% endif %}"><span class="link-icon"><i class="bi bi-journal-bookmark-fill"></i></span> Ledger Accounts</a>
+      <a href="{{ url_for('expense_particulars') }}" class="sidebar-link {% if request.endpoint in ['expense_particulars','expense_particular_edit'] %}active{% endif %}"><span class="link-icon"><i class="bi bi-tags-fill"></i></span> Expense Particulars</a>
+      <a href="{{ url_for('expense_units_view') }}" class="sidebar-link {% if request.endpoint == 'expense_units_view' %}active{% endif %}"><span class="link-icon"><i class="bi bi-rulers"></i></span> Units of Measure</a>
+      <a href="{{ url_for('voucher_register', v_type='other') }}" class="sidebar-link {% if request.endpoint in ['voucher_register','voucher_add','voucher_edit'] and request.view_args.get('v_type') == 'other' %}active{% endif %}"><span class="link-icon"><i class="bi bi-receipt-cutoff"></i></span> Other Vouchers</a>
     </div>
 
     <!-- HR MANAGEMENT MENU -->
+
     {% set hr_ep = ['employees','employee_add','employee_edit','employee_detail','attendance_view','attendance_summary','salary_calculate'] %}
     <button class="nav-group-header {% if request.endpoint in hr_ep %}open{% endif %}" onclick="toggleGroup(this)">
       <span class="group-icon"><i class="bi bi-people"></i></span> HR Management
@@ -114,7 +172,7 @@
     </div>
 
     <!-- REPORTS MENU -->
-    {% set rep_ep = ['salary_report','attendance_summary'] %}
+    {% set rep_ep = ['salary_report','attendance_summary','pnl'] %}
     <button class="nav-group-header {% if request.endpoint in rep_ep %}open{% endif %}" onclick="toggleGroup(this)">
       <span class="group-icon"><i class="bi bi-bar-chart-line"></i></span> Reports
       <span class="chevron"><i class="bi bi-chevron-right"></i></span>
@@ -122,6 +180,7 @@
     <div class="nav-group-items {% if request.endpoint in rep_ep %}show{% endif %}">
       <a href="{{ url_for('salary_report') }}" class="sidebar-link {% if request.endpoint == 'salary_report' %}active{% endif %}"><span class="link-icon"><i class="bi bi-file-earmark-bar-graph"></i></span> Salary Report</a>
       <a href="{{ url_for('attendance_summary') }}" class="sidebar-link {% if request.endpoint == 'attendance_summary' %}active{% endif %}"><span class="link-icon"><i class="bi bi-calendar3"></i></span> Attendance Summary</a>
+      <a href="{{ url_for('pnl') }}" class="sidebar-link {% if request.endpoint == 'pnl' %}active{% endif %}"><span class="link-icon"><i class="bi bi-cash-coin"></i></span> Profit & Loss (P&L)</a>
     </div>
 
     <!-- SETTINGS & ACCOUNT -->
@@ -182,6 +241,23 @@
       bsAlert.close();
     });
   }, 5000);
+
+  // Global helper for toggling print headers/footers
+  function toggleBrowserHeadersFooters(hide) {
+    let style = document.getElementById('hide-headers-footers-style');
+    if (hide) {
+      if (!style) {
+        style = document.createElement('style');
+        style.id = 'hide-headers-footers-style';
+        style.innerHTML = `@media print { @page { margin-top: 0mm !important; margin-bottom: 0mm !important; } body { padding-top: 15mm !important; padding-bottom: 15mm !important; } }`;
+        document.head.appendChild(style);
+      }
+    } else {
+      if (style) {
+        style.remove();
+      }
+    }
+  }
 
   // ── AUTO DATE: Set today's date on all empty date inputs ────────────────────
   (function() {
@@ -250,19 +326,197 @@
 {% endif %}
 
 
-{% if eligible_sales_count and eligible_sales_count > 0 and session.get('show_eligible_toast') == 'shown' %}
-<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1080;">
-  <div id="eligibleSalesToast" class="toast show align-items-center text-bg-warning border-0 shadow-lg" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="false">
-    <div class="d-flex p-2">
-      <div class="toast-body small fw-bold text-dark">
-        🐐 {{ eligible_sales_count }} goats ready for sale (weight ≥ 25 kg)!
-        <a href="{{ url_for('eligible_to_sell') }}" class="text-dark text-decoration-underline ms-1">View List</a>
+
+<!-- ═══════════ NOTIFICATION TOASTS CONTAINER ═══════════ -->
+<div id="notification-toast-container" class="position-fixed top-0 end-0 p-3 d-print-none" style="z-index: 2050; margin-top: 75px; max-width: 400px; width: 100%;"></div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  {% if session.user_id %}
+  // Query notifications from API
+  fetch('/api/notifications')
+    .then(response => response.json())
+    .then(data => {
+      const container = document.getElementById('notification-toast-container');
+      if (!container) return;
+
+      // 1. Render Target Weight Met Alerts (>= 25 kg)
+      if (data.weight_alerts && data.weight_alerts.length > 0) {
+        data.weight_alerts.forEach(goat => {
+          const toastEl = document.createElement('div');
+          toastEl.className = 'toast show farm-toast weight-alert';
+          toastEl.setAttribute('role', 'alert');
+          toastEl.setAttribute('aria-live', 'assertive');
+          toastEl.setAttribute('aria-atomic', 'true');
+          toastEl.setAttribute('data-bs-autohide', 'false');
+
+          toastEl.innerHTML = `
+            <div class="toast-header d-flex align-items-center justify-content-between">
+              <strong class="me-auto text-success d-flex align-items-center gap-2"><i class="bi bi-award-fill fs-5"></i>Goat Reached 25 kg!</strong>
+              <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body">
+              <div class="mb-2">Goat <strong>${goat.tag_no}</strong> (${goat.color}) weighs <strong>${goat.weight_kg} kg</strong>. It is eligible to sell!</div>
+              <div class="d-flex gap-2 mt-3">
+                ${goat.already_eligible ? 
+                  `<span class="badge bg-success-subtle text-success py-2 px-3 rounded-pill w-100 text-center fs-7"><i class="bi bi-check-circle-fill me-1"></i>Already Listed for Sale</span>` :
+                  `<button class="btn btn-sm btn-success rounded-pill px-3 py-1.5 w-100 fw-bold shadow-sm" onclick="markEligible('${goat.tag_no}', this)">
+                     <i class="bi bi-cart-plus me-1"></i>Add to Sell List
+                   </button>`
+                }
+              </div>
+            </div>
+          `;
+          container.appendChild(toastEl);
+        });
+      }
+
+      // 2. Render Low Stock Alerts
+      if (data.low_stock_alerts && data.low_stock_alerts.length > 0) {
+        data.low_stock_alerts.forEach(stock => {
+          const toastEl = document.createElement('div');
+          toastEl.className = 'toast show farm-toast stock-alert';
+          toastEl.setAttribute('role', 'alert');
+          toastEl.setAttribute('aria-live', 'polite');
+          toastEl.setAttribute('aria-atomic', 'true');
+          toastEl.setAttribute('data-bs-autohide', 'false');
+
+          toastEl.innerHTML = `
+            <div class="toast-header d-flex align-items-center justify-content-between">
+              <strong class="me-auto text-warning d-flex align-items-center gap-2"><i class="bi bi-exclamation-triangle-fill fs-5"></i>Low Stock Alert</strong>
+              <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body">
+              <div>Stock for ${stock.item_type} <strong>${stock.item_name}</strong> is running low!</div>
+              <div class="mt-2 text-dark fw-bold">Remaining: <span class="text-danger">${stock.closing_stock.toFixed(2)} ${stock.unit}</span> <span class="text-muted font-normal">(Limit: ${stock.alert_level.toFixed(2)} ${stock.unit})</span></div>
+            </div>
+          `;
+          container.appendChild(toastEl);
+        });
+      }
+
+      // 3. Render Batch Treatment Reminders
+      if (data.batch_alerts && data.batch_alerts.length > 0) {
+        data.batch_alerts.forEach(rem => {
+          const toastEl = document.createElement('div');
+          toastEl.className = 'toast show farm-toast batch-alert';
+          toastEl.setAttribute('role', 'alert');
+          toastEl.setAttribute('aria-live', 'assertive');
+          toastEl.setAttribute('aria-atomic', 'true');
+          toastEl.setAttribute('data-bs-autohide', 'false');
+
+          toastEl.innerHTML = `
+            <div class="toast-header d-flex align-items-center justify-content-between">
+              <strong class="me-auto text-primary d-flex align-items-center gap-2"><i class="bi bi-calendar-event-fill fs-5"></i>Batch Reminder</strong>
+              <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body">
+              <div class="mb-2"><strong>${rem.reminder_type}</strong> (<strong>${rem.item_name}</strong>) is scheduled for <strong>${rem.batch_name}</strong> today!</div>
+              <div class="mt-3">
+                <button class="btn btn-sm btn-primary rounded-pill px-3 py-1.5 w-100 fw-bold shadow-sm" onclick="completeReminder(${rem.id}, this)">
+                  <i class="bi bi-check2-circle me-1"></i>Mark Done
+                </button>
+              </div>
+            </div>
+          `;
+          container.appendChild(toastEl);
+        });
+      }
+    })
+    .catch(err => console.error('Error fetching notifications:', err));
+  {% endif %}
+});
+
+function markEligible(tagNo, btn) {
+  btn.disabled = true;
+  btn.innerHTML = `<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>Adding...`;
+  
+  fetch(`/api/add_to_eligible/${tagNo}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      btn.parentElement.innerHTML = `<span class="badge bg-success-subtle text-success py-2 px-3 rounded-pill w-100 text-center fs-7"><i class="bi bi-check-circle-fill me-1"></i>Already Listed for Sale</span>`;
+      showFeedbackToast('success', `Goat ${tagNo} successfully marked as eligible to sell!`);
+    } else {
+      btn.disabled = false;
+      btn.innerHTML = `<i class="bi bi-cart-plus me-1"></i>Add to Sell List`;
+      showFeedbackToast('danger', `Error: ${data.error || 'Failed to add'}`);
+    }
+  })
+  .catch(err => {
+    btn.disabled = false;
+    btn.innerHTML = `<i class="bi bi-cart-plus me-1"></i>Add to Sell List`;
+    showFeedbackToast('danger', 'Network error. Please try again.');
+  });
+}
+
+function completeReminder(id, btn) {
+  btn.disabled = true;
+  btn.innerHTML = `<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>Completing...`;
+  
+  fetch(`/api/complete_batch_reminder/${id}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      const toast = btn.closest('.farm-toast');
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateX(100px)';
+      setTimeout(() => {
+        toast.remove();
+        // Also refresh window if on goat_batches page to reflect the completion in the UI
+        if(window.location.pathname.includes('goat_batches')) {
+            window.location.reload();
+        }
+      }, 400);
+      showFeedbackToast('success', 'Batch reminder marked as completed successfully!');
+    } else {
+      btn.disabled = false;
+      btn.innerHTML = `<i class="bi bi-check2-circle me-1"></i>Mark Done`;
+      showFeedbackToast('danger', 'Failed to update reminder.');
+    }
+  })
+  .catch(err => {
+    btn.disabled = false;
+    btn.innerHTML = `<i class="bi bi-check2-circle me-1"></i>Mark Done`;
+    showFeedbackToast('danger', 'Network error. Please try again.');
+  });
+}
+
+function showFeedbackToast(type, message) {
+  const container = document.getElementById('notification-toast-container');
+  if (!container) return;
+  
+  const toastEl = document.createElement('div');
+  toastEl.className = `toast align-items-center text-bg-${type} border-0 farm-toast mb-2 show`;
+  toastEl.setAttribute('role', 'alert');
+  toastEl.setAttribute('aria-live', 'assertive');
+  toastEl.setAttribute('aria-atomic', 'true');
+  
+  toastEl.innerHTML = `
+    <div class="d-flex">
+      <div class="toast-body fw-bold text-white">
+        <i class="bi ${type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-octagon-fill'} me-2"></i>${message}
       </div>
-      <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close" onclick="document.getElementById('eligibleSalesToast').classList.remove('show')"></button>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
     </div>
-  </div>
-</div>
-{% endif %}
+  `;
+  container.appendChild(toastEl);
+  setTimeout(() => {
+    toastEl.style.opacity = '0';
+    setTimeout(() => { toastEl.remove(); }, 400);
+  }, 4000);
+}
+</script>
 
 </body>
 </html>

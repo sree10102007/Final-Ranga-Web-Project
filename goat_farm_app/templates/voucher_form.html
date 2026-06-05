@@ -32,7 +32,8 @@
             
             <div class="card-body p-5">
                 <form method="POST" action="">
-                    <!-- ── Present Date (Automatically Set if Add) ── -->
+                    <!-- ── Present Date & P&L Ledger Category (not shown for Other Vouchers — those have their own fields) ── -->
+                    {% if v_type != 'other' %}
                     <div class="row mb-4">
                         <div class="col-md-6">
                             <label class="form-label text-muted small fw-bold">DATE OF PURCHASE</label>
@@ -43,9 +44,17 @@
                             </div>
                             <small class="text-muted">Present date auto-populated for convenience</small>
                         </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small fw-bold">P&L LEDGER ACCOUNT <span class="text-danger">*</span></label>
+                            <input type="text" name="pnl_category" class="form-control" required placeholder="e.g. Purchase, Direct Expenses"
+                                   value="{% if record %}{{ record.pnl_category }}{% else %}Purchase{% endif %}">
+                            <small class="text-muted">Enter corresponding Profit & Loss ledger name</small>
+                        </div>
                     </div>
-                    
+
                     <hr class="border-light my-4">
+                    {% endif %}
+
                     
                     <!-- ── GOAT VOUCHER FIELDS ── -->
                     {% if v_type == 'goat' %}
@@ -189,47 +198,152 @@
                             document.addEventListener("DOMContentLoaded", toggleHealthFields);
                         </script>
                     
-                    <!-- ── OTHER PURCHASES (Assets / Equipment) FIELDS ── -->
+                    <!-- ── OTHER VOUCHERS (Tally-style Expense) FIELDS ── -->
                     {% elif v_type == 'other' %}
-                        <div class="row g-3 mb-4">
+                        <!-- Row 1: Date + Supplier Name -->
+                        <div class="row g-3 mb-3">
                             <div class="col-md-6">
-                                <label class="form-label text-muted small fw-bold">ASSET/EQUIPMENT NAME</label>
-                                <input type="text" name="name" class="form-control" required placeholder="e.g. Automatic Milking Machine, Electric Fence"
-                                       value="{% if record %}{{ record.name }}{% endif %}">
+                                <label class="form-label text-muted small fw-bold">DATE <span class="text-danger">*</span></label>
+                                <input type="date" name="voucher_date" class="form-control" required
+                                       value="{% if record and record.voucher_date %}{{ record.voucher_date }}{% else %}{{ today }}{% endif %}">
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label text-muted small fw-bold">ASSET CATEGORY</label>
-                                <select name="type" class="form-select">
-                                    <option value="Other Things" {% if not record or record.type == 'Other Things' %}selected{% endif %}>Other Things</option>
-                                    <option value="Equipment" {% if record and record.type == 'Equipment' %}selected{% endif %}>Equipment</option>
+                                <label class="form-label text-muted small fw-bold">SUPPLIER NAME</label>
+                                <input type="text" name="supplier_name" class="form-control"
+                                       placeholder="e.g. Agri Mart, Local Vendor"
+                                       value="{% if record %}{{ record.supplier_name or '' }}{% endif %}">
+                            </div>
+                        </div>
+
+                        <!-- Row 2: Particulars (Category) -->
+                        <div class="mb-3">
+                            <label class="form-label text-muted small fw-bold">PARTICULARS (EXPENSE CATEGORY) <span class="text-danger">*</span></label>
+                            {% if particulars %}
+                            <select name="particular_id" class="form-select" required id="particular_select" onchange="updateParticularName(this)">
+                                <option value="">— Select Particular —</option>
+                                {% for p in particulars %}
+                                <option value="{{ p.id }}" {% if record and record.particular_id == p.id %}selected{% endif %}>
+                                    {{ p.name }}{% if p.ledger_name %} ({{ p.ledger_name }}){% endif %}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <input type="hidden" name="particular_name" id="particular_name_hidden"
+                                   value="{% if record %}{{ record.particular_name or '' }}{% endif %}">
+                            <div class="form-text">
+                                <a href="{{ url_for('expense_particulars') }}" target="_blank" class="text-decoration-none small">
+                                    <i class="bi bi-plus-circle me-1"></i>Create new particular
+                                </a>
+                            </div>
+                            {% else %}
+                            <div class="alert alert-warning small rounded-3 mb-2 border-0 py-2">
+                                <i class="bi bi-exclamation-triangle me-2"></i>No particulars defined.
+                                <a href="{{ url_for('expense_particulars') }}" class="fw-bold">Create particulars first</a>
+                            </div>
+                            <input type="text" name="particular_name" class="form-control" required
+                                   placeholder="Enter expense type e.g. Consumables, Repairs"
+                                   value="{% if record %}{{ record.particular_name or '' }}{% endif %}">
+                            <input type="hidden" name="particular_id" value="">
+                            {% endif %}
+                        </div>
+
+                        <!-- Row 3: Bill Date + Bill No -->
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label text-muted small fw-bold">BILL DATE</label>
+                                <input type="date" name="bill_date" class="form-control no-auto-date"
+                                       value="{% if record and record.bill_date %}{{ record.bill_date }}{% endif %}">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label text-muted small fw-bold">BILL NO</label>
+                                <input type="text" name="bill_no" class="form-control"
+                                       placeholder="e.g. INV-2024-001"
+                                       value="{% if record %}{{ record.bill_no or '' }}{% endif %}">
+                            </div>
+                        </div>
+
+                        <!-- Row 4: Quantity + Unit -->
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label text-muted small fw-bold">QUANTITY <span class="text-muted fw-normal">(Optional)</span></label>
+                                <input type="number" step="0.001" name="quantity" class="form-control"
+                                       placeholder="e.g. 5.5"
+                                       value="{% if record and record.quantity %}{{ record.quantity }}{% endif %}">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label text-muted small fw-bold">UNIT OF MEASURE</label>
+                                {% if expense_units %}
+                                <select name="unit_id" class="form-select" id="unit_select" onchange="updateUnitName(this)">
+                                    <option value="">— Select Unit —</option>
+                                    {% for u in expense_units %}
+                                    <option value="{{ u.id }}" {% if record and record.unit_id == u.id %}selected{% endif %}>
+                                        {{ u.unit_name }} ({{ u.unit_symbol or u.unit_name }})
+                                    </option>
+                                    {% endfor %}
                                 </select>
+                                <input type="hidden" name="unit_name" id="unit_name_hidden"
+                                       value="{% if record %}{{ record.unit_name or '' }}{% endif %}">
+                                <div class="form-text">
+                                    <a href="{{ url_for('expense_units_view') }}" target="_blank" class="text-decoration-none small">
+                                        <i class="bi bi-plus-circle me-1"></i>Add new unit
+                                    </a>
+                                </div>
+                                {% else %}
+                                <input type="text" name="unit_name" class="form-control"
+                                       placeholder="e.g. KG, Nos, Litres"
+                                       value="{% if record %}{{ record.unit_name or '' }}{% endif %}">
+                                <input type="hidden" name="unit_id" value="">
+                                {% endif %}
                             </div>
+                        </div>
+
+                        <!-- Row 5: Amount + P&L Category -->
+                        <div class="row g-3 mb-3">
                             <div class="col-md-6">
-                                <label class="form-label text-muted small fw-bold">TOTAL VOUCHER COST (₹)</label>
+                                <label class="form-label text-muted small fw-bold">TOTAL AMOUNT (₹) <span class="text-danger">*</span></label>
                                 <div class="input-group">
-                                    <span class="input-group-text bg-light">₹</span>
-                                    <input type="number" step="0.01" name="cost" class="form-control" required placeholder="0.00"
-                                           value="{% if record %}{{ record.cost }}{% endif %}">
+                                    <span class="input-group-text bg-light fw-bold">₹</span>
+                                    <input type="number" step="0.01" name="amount" class="form-control" required placeholder="0.00"
+                                           value="{% if record %}{{ record.amount or '' }}{% endif %}">
                                 </div>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label text-muted small fw-bold">SUPPLIER</label>
-                                <input type="text" name="supplier" class="form-control" placeholder="e.g. Agri-Tech Instruments"
-                                       value="{% if record %}{{ record.supplier }}{% endif %}">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label text-muted small fw-bold">INITIAL STATUS</label>
-                                <select name="status" class="form-select">
-                                    <option value="Good" {% if not record or record.status == 'Good' %}selected{% endif %}>Good</option>
-                                    <option value="Needs Repair" {% if record and record.status == 'Needs Repair' %}selected{% endif %}>Needs Repair</option>
+                                <label class="form-label text-muted small fw-bold">P&L CATEGORY</label>
+                                <select name="pnl_category" class="form-select">
+                                    <option value="Direct Expenses" {% if not record or record.pnl_category == 'Direct Expenses' %}selected{% endif %}>Direct Expenses</option>
+                                    <option value="Indirect Expenses" {% if record and record.pnl_category == 'Indirect Expenses' %}selected{% endif %}>Indirect Expenses</option>
+                                    <option value="Capital Account" {% if record and record.pnl_category == 'Capital Account' %}selected{% endif %}>Capital Account</option>
+                                    <option value="Administrative Expenses" {% if record and record.pnl_category == 'Administrative Expenses' %}selected{% endif %}>Administrative Expenses</option>
                                 </select>
                             </div>
-                            <div class="col-12">
-                                <label class="form-label text-muted small fw-bold">VOUCHER & LEDGER DESCRIPTION</label>
-                                <textarea name="notes" class="form-control" rows="3" placeholder="Enter purchase reasons, serial numbers, warranty, or other specifications...">{% if record %}{{ record.notes }}{% endif %}</textarea>
-                            </div>
                         </div>
+
+                        <!-- Row 6: Notes -->
+                        <div class="mb-3">
+                            <label class="form-label text-muted small fw-bold">NOTES / DESCRIPTION</label>
+                            <textarea name="notes" class="form-control" rows="2"
+                                      placeholder="Details about this expense...">{% if record %}{{ record.notes or '' }}{% endif %}</textarea>
+                        </div>
+
+                        <script>
+                        function updateParticularName(sel) {
+                            const opt = sel.options[sel.selectedIndex];
+                            const hidden = document.getElementById('particular_name_hidden');
+                            if (hidden) hidden.value = opt ? opt.text.split(' (')[0] : '';
+                        }
+                        function updateUnitName(sel) {
+                            const opt = sel.options[sel.selectedIndex];
+                            const hidden = document.getElementById('unit_name_hidden');
+                            if (hidden) hidden.value = opt ? opt.text.split(' (')[0] : '';
+                        }
+                        document.addEventListener('DOMContentLoaded', function() {
+                            const pSel = document.getElementById('particular_select');
+                            if (pSel) updateParticularName(pSel);
+                            const uSel = document.getElementById('unit_select');
+                            if (uSel) updateUnitName(uSel);
+                        });
+                        </script>
                     {% endif %}
+
                     
                     <!-- Submit Buttons -->
                     <div class="d-flex justify-content-end gap-3 mt-5">

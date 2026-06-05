@@ -14,7 +14,7 @@
     <div class="card-body p-4">
         <h5 class="fw-bold mb-3 text-dark"><i class="bi bi-funnel text-success me-2"></i>Select Salary Period</h5>
         <form method="GET" action="{{ url_for('salary_calculate') }}" class="row g-3 align-items-end">
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <label class="form-label small fw-bold text-muted">Month</label>
                 <select name="month" class="form-select border-0 bg-light py-2">
                     {% for m in range(1, 13) %}
@@ -22,11 +22,27 @@
                     {% endfor %}
                 </select>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <label class="form-label small fw-bold text-muted">Year</label>
                 <input type="number" name="year" class="form-control border-0 bg-light py-2" value="{{ year }}">
             </div>
-            <div class="col-md-4">
+            <div class="col-md-2">
+                <label class="form-label small fw-bold text-muted">Start Day</label>
+                <select name="start_day" class="form-select border-0 bg-light py-2">
+                    {% for d in range(1, 32) %}
+                    <option value="{{ d }}" {% if start_day|int == d %}selected{% endif %}>{{ d }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small fw-bold text-muted">End Day</label>
+                <select name="end_day" class="form-select border-0 bg-light py-2">
+                    {% for d in range(1, 32) %}
+                    <option value="{{ d }}" {% if end_day|int == d or (not end_day and d == 30) %}selected{% endif %}>{{ d }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
                 <div class="d-flex gap-2">
                     <a href="{{ url_for('salary_calculate') }}" class="btn btn-light w-50 py-2 fw-600">Reset</a>
                     <button type="submit" class="btn btn-success w-50 py-2 fw-bold">Calculate</button>
@@ -58,7 +74,13 @@
                     <td class="fw-bold">{{ s.sr_no or s.id }}</td>
                     <td><span class="badge bg-success-subtle text-success border">{{ s.name }}</span></td>
                     <td class="text-muted">{{ s.role }}</td>
-                    <td>{{ s.present }} days</td>
+                    <td>
+                        <input type="number" class="form-control form-control-sm fw-bold border-success text-center px-1 d-inline-block" 
+                               value="{{ s.present }}" min="0" max="{{ total_days }}" style="width: 70px;"
+                               data-wage-type="{{ s.wage_type }}" data-wage-rate="{{ s.wage_rate }}" data-paid="{{ s.paid }}"
+                               oninput="updateRowSalary(this)">
+                        <span class="small text-muted ms-1">/ {{ total_days }} days</span>
+                    </td>
                     <td>
                         <div class="small fw-bold">{{ s.wage_type or 'Not Set' }}</div>
                         <div class="small text-muted">₹{{ s.wage_rate }}</div>
@@ -99,4 +121,37 @@
         </table>
     </div>
 </div>
+
+<script>
+function updateRowSalary(input) {
+    const wageType = input.getAttribute('data-wage-type');
+    const wageRate = parseFloat(input.getAttribute('data-wage-rate')) || 0;
+    const paid = parseFloat(input.getAttribute('data-paid')) || 0;
+    const totalDays = parseFloat("{{ total_days }}") || 30;
+    const present = parseFloat(input.value) || 0;
+    
+    let computed = 0.0;
+    if (wageType === 'Monthly') {
+        computed = (wageRate / totalDays) * present;
+    } else if (wageType === 'Weekly') {
+        computed = (wageRate / 7.0) * present;
+    } else if (wageType === 'Daily') {
+        computed = wageRate * present;
+    }
+    
+    const row = input.closest('tr');
+    const computedTd = row.querySelector('.text-info');
+    const balanceTd = row.querySelector('.text-danger');
+    const amountInput = row.querySelector('input[name="amount"]');
+    
+    computedTd.textContent = '₹' + computed.toFixed(2);
+    const balance = Math.max(0.0, computed - paid);
+    balanceTd.textContent = '₹' + balance.toFixed(2);
+    
+    if (amountInput) {
+        amountInput.value = balance.toFixed(2);
+        amountInput.max = balance.toFixed(2);
+    }
+}
+</script>
 {% endblock %}

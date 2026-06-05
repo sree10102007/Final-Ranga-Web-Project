@@ -19,36 +19,120 @@
             <div class="card border-0 shadow-sm rounded-4">
                 <div class="card-body p-4 p-md-5">
                     <form method="post" enctype="multipart/form-data">
-                        <!-- Category & Amount row -->
-                        <div class="row mb-3">
-                            <div class="col-md-6 mb-3 mb-md-0">
-                                <label class="form-label small fw-bold text-dark">Category <span class="text-danger">*</span></label>
-                                <input type="text" name="category" class="form-control rounded-3" placeholder="Enter category" value="{{ record['category'] }}" required>
+                        <!-- Row 1: Date + Supplier Name -->
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label text-muted small fw-bold">DATE <span class="text-danger">*</span></label>
+                                <input type="date" name="voucher_date" class="form-control" required
+                                       value="{{ record['date'] }}">
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label small fw-bold text-dark">Money Spent (Amount) <span class="text-danger">*</span></label>
+                                <label class="form-label text-muted small fw-bold">SUPPLIER NAME</label>
+                                <input type="text" name="supplier_name" class="form-control"
+                                       placeholder="e.g. Agri Mart, Local Vendor"
+                                       value="{{ record['vendor_name'] or '' }}">
+                            </div>
+                        </div>
+
+                        <!-- Row 2: Particulars (Expense Category) -->
+                        <div class="mb-3">
+                            <label class="form-label text-muted small fw-bold">PARTICULARS (EXPENSE CATEGORY) <span class="text-danger">*</span></label>
+                            {% if particulars %}
+                            <select name="particular_id" class="form-select" required id="particular_select" onchange="updateParticularName(this)">
+                                <option value="">— Select Particular —</option>
+                                {% for p in particulars %}
+                                <option value="{{ p.id }}" {% if record['particular_id'] == p.id or (not record['particular_id'] and record['category'] == p.name) %}selected{% endif %}>
+                                    {{ p.name }}{% if p.ledger_name %} ({{ p.ledger_name }}){% endif %}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <input type="hidden" name="particular_name" id="particular_name_hidden" value="{{ record['category'] or '' }}">
+                            <div class="form-text">
+                                <a href="{{ url_for('expense_particulars') }}" target="_blank" class="text-decoration-none small">
+                                    <i class="bi bi-plus-circle me-1"></i>Create new particular
+                                </a>
+                            </div>
+                            {% else %}
+                            <input type="text" name="particular_name" class="form-control" required
+                                   placeholder="Enter expense type e.g. Consumables, Repairs"
+                                   value="{{ record['category'] or '' }}">
+                            <input type="hidden" name="particular_id" value="{{ record['particular_id'] or '' }}">
+                            {% endif %}
+                        </div>
+
+                        <!-- Row 3: Bill Date + Bill No -->
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label text-muted small fw-bold">BILL DATE</label>
+                                <input type="date" name="bill_date" class="form-control no-auto-date"
+                                       value="{{ record['bill_date'] or '' }}">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label text-muted small fw-bold">BILL NO</label>
+                                <input type="text" name="bill_no" class="form-control"
+                                       placeholder="e.g. INV-2024-001"
+                                       value="{{ record['receipt_no'] or '' }}">
+                            </div>
+                        </div>
+
+                        <!-- Row 4: Quantity + Unit -->
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label text-muted small fw-bold">QUANTITY <span class="text-muted fw-normal">(Optional)</span></label>
+                                <input type="number" step="0.001" name="quantity" class="form-control"
+                                       placeholder="e.g. 5.5"
+                                       value="{{ record['quantity'] or '' }}">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label text-muted small fw-bold">UNIT OF MEASURE</label>
+                                {% if expense_units %}
+                                <select name="unit_id" class="form-select" id="unit_select" onchange="updateUnitName(this)">
+                                    <option value="">— Select Unit —</option>
+                                    {% for u in expense_units %}
+                                    <option value="{{ u.id }}" {% if record['unit_id'] == u.id or (not record['unit_id'] and record['unit_name'] == u.unit_name) %}selected{% endif %}>
+                                        {{ u.unit_name }} ({{ u.unit_symbol or u.unit_name }})
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                                <input type="hidden" name="unit_name" id="unit_name_hidden" value="{{ record['unit_name'] or '' }}">
+                                <div class="form-text">
+                                    <a href="{{ url_for('expense_units_view') }}" target="_blank" class="text-decoration-none small">
+                                        <i class="bi bi-plus-circle me-1"></i>Add new unit
+                                    </a>
+                                </div>
+                                {% else %}
+                                <input type="text" name="unit_name" class="form-control"
+                                       placeholder="e.g. KG, Nos, Litres"
+                                       value="{{ record['unit_name'] or '' }}">
+                                <input type="hidden" name="unit_id" value="{{ record['unit_id'] or '' }}">
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Row 5: Amount + P&L Category -->
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label text-muted small fw-bold">TOTAL AMOUNT (₹) <span class="text-danger">*</span></label>
                                 <div class="input-group">
-                                    <span class="input-group-text bg-light">₹</span>
-                                    <input type="number" step="0.01" name="amount" class="form-control rounded-end-3" placeholder="0.00" value="{{ record['amount'] }}" required>
+                                    <span class="input-group-text bg-light fw-bold">₹</span>
+                                    <input type="number" step="0.01" name="amount" class="form-control" required placeholder="0.00"
+                                           value="{{ record['amount'] }}">
                                 </div>
                             </div>
-                        </div>
-
-                        <!-- Date & Bill No row -->
-                        <div class="row mb-3">
-                            <div class="col-md-6 mb-3 mb-md-0">
-                                <label class="form-label small fw-bold text-dark">Expense Date <span class="text-danger">*</span></label>
-                                <input type="date" name="expense_date" class="form-control rounded-3" value="{{ record['date'] }}" required>
-                            </div>
                             <div class="col-md-6">
-                                <label class="form-label small fw-bold text-dark">Bill No / Reference</label>
-                                <input type="text" name="bill_reference" class="form-control rounded-3" placeholder="Enter Bill / Receipt Number" value="{{ record['receipt_no'] or '' }}">
+                                <label class="form-label text-muted small fw-bold">P&L CATEGORY</label>
+                                <select name="pnl_category" class="form-select">
+                                    <option value="Direct Expenses" {% if record['pnl_category'] == 'Direct Expenses' %}selected{% endif %}>Direct Expenses</option>
+                                    <option value="Indirect Expenses" {% if record['pnl_category'] == 'Indirect Expenses' %}selected{% endif %}>Indirect Expenses</option>
+                                    <option value="Capital Account" {% if record['pnl_category'] == 'Capital Account' %}selected{% endif %}>Capital Account</option>
+                                    <option value="Administrative Expenses" {% if record['pnl_category'] == 'Administrative Expenses' %}selected{% endif %}>Administrative Expenses</option>
+                                </select>
                             </div>
                         </div>
 
-                        <!-- Choose File of Bill row -->
-                        <div class="mb-4">
-                            <label class="form-label small fw-bold text-dark">Attachment (Choose file of the bill)</label>
+                        <!-- Row 6: Attachment -->
+                        <div class="mb-3">
+                            <label class="form-label text-muted small fw-bold">ATTACHMENT (BILL / RECEIPT FILE)</label>
                             {% if record['bill_file'] %}
                             <div class="d-flex align-items-center gap-2 mb-2 p-2 bg-light rounded-3">
                                 <i class="bi bi-file-earmark-pdf text-success"></i>
@@ -56,14 +140,15 @@
                                 <a href="{{ record['bill_file'] }}" target="_blank" class="badge bg-success-subtle text-success text-decoration-none">View Current File</a>
                             </div>
                             {% endif %}
-                            <input type="file" name="attachment" class="form-control rounded-3">
+                            <input type="file" name="attachment" class="form-control">
                             <div class="form-text small text-muted">Upload a new file to replace the current attachment (PDF, JPEG, PNG formats).</div>
                         </div>
 
-                        <!-- Description row -->
+                        <!-- Row 7: Notes -->
                         <div class="mb-4">
-                            <label class="form-label small fw-bold text-dark">Money Spent Details (Description) <span class="text-muted">(Optional)</span></label>
-                            <textarea name="description" class="form-control rounded-3" rows="3" placeholder="Describe what the money was spent for...">{{ record['description'] or '' }}</textarea>
+                            <label class="form-label text-muted small fw-bold">NOTES / DESCRIPTION</label>
+                            <textarea name="notes" class="form-control" rows="3"
+                                      placeholder="Details about this expense...">{{ record['notes'] or record['description'] or '' }}</textarea>
                         </div>
 
                         <div class="d-grid mt-4">
@@ -77,4 +162,27 @@
         </div>
     </div>
 </div>
+
+<script>
+function updateParticularName(sel) {
+    const opt = sel.options[sel.selectedIndex];
+    const hidden = document.getElementById('particular_name_hidden');
+    if (opt && sel.value !== "") {
+        const text = opt.text.split('(')[0].trim();
+        hidden.value = text;
+    } else {
+        hidden.value = "";
+    }
+}
+function updateUnitName(sel) {
+    const opt = sel.options[sel.selectedIndex];
+    const hidden = document.getElementById('unit_name_hidden');
+    if (opt && sel.value !== "") {
+        const text = opt.text.split('(')[0].trim();
+        hidden.value = text;
+    } else {
+        hidden.value = "";
+    }
+}
+</script>
 {% endblock %}
