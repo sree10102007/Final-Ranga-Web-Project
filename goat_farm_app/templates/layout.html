@@ -128,7 +128,7 @@
     </button>
     <div class="nav-group-items {% if request.endpoint in sales_ep %}show{% endif %}">
       <a href="{{ url_for('sales') }}" class="sidebar-link {% if request.endpoint in ['sales','sales_register','sales_add','sales_edit'] %}active{% endif %}"><span class="link-icon"><i class="bi bi-receipt"></i></span> Sales Records</a>
-      <a href="{{ url_for('vouchers') }}" class="sidebar-link {% if request.endpoint in ['vouchers','voucher_register','voucher_add','voucher_edit'] %}active{% endif %}"><span class="link-icon"><i class="bi bi-cart3"></i></span> Vouchers Dashboard</a>
+      <a href="{{ url_for('vouchers') }}" class="sidebar-link {% if request.endpoint in ['vouchers','voucher_register','voucher_add','voucher_edit'] and request.view_args.get('v_type') != 'other' %}active{% endif %}"><span class="link-icon"><i class="bi bi-cart3"></i></span> Vouchers</a>
     </div>
 
     <!-- FARM OPERATIONS MENU -->
@@ -145,17 +145,15 @@
     </div>
 
     <!-- EXPENSES MASTER MENU -->
-    {% set exp_master_ep = ['expenses_master','expense_ledgers','expense_ledger_edit','expense_particulars','expense_particular_edit','expense_units_view'] %}
+    {% set exp_master_ep = ['expenses_master','expense_ledgers','expense_ledger_edit','expense_particulars','expense_particular_edit','expense_units_view','ledger_groups','ledger_group_edit'] %}
     <button class="nav-group-header {% if request.endpoint in exp_master_ep %}open{% endif %}" onclick="toggleGroup(this)">
       <span class="group-icon"><i class="bi bi-currency-rupee"></i></span> Expenses Master
       <span class="chevron"><i class="bi bi-chevron-right"></i></span>
     </button>
     <div class="nav-group-items {% if request.endpoint in exp_master_ep %}show{% endif %}">
       <a href="{{ url_for('expenses_master') }}" class="sidebar-link {% if request.endpoint == 'expenses_master' %}active{% endif %}"><span class="link-icon"><i class="bi bi-grid-1x2"></i></span> Master Dashboard</a>
-      <a href="{{ url_for('expense_ledgers') }}" class="sidebar-link {% if request.endpoint in ['expense_ledgers','expense_ledger_edit'] %}active{% endif %}"><span class="link-icon"><i class="bi bi-journal-bookmark-fill"></i></span> Ledger Accounts</a>
-      <a href="{{ url_for('expense_particulars') }}" class="sidebar-link {% if request.endpoint in ['expense_particulars','expense_particular_edit'] %}active{% endif %}"><span class="link-icon"><i class="bi bi-tags-fill"></i></span> Expense Particulars</a>
+      <a href="{{ url_for('expense_ledgers') }}" class="sidebar-link {% if request.endpoint in ['expense_ledgers','expense_ledger_edit','ledger_groups','ledger_group_edit','expense_particulars','expense_particular_edit'] %}active{% endif %}"><span class="link-icon"><i class="bi bi-journal-bookmark-fill"></i></span> Ledger Accounts</a>
       <a href="{{ url_for('expense_units_view') }}" class="sidebar-link {% if request.endpoint == 'expense_units_view' %}active{% endif %}"><span class="link-icon"><i class="bi bi-rulers"></i></span> Units of Measure</a>
-      <a href="{{ url_for('voucher_register', v_type='other') }}" class="sidebar-link {% if request.endpoint in ['voucher_register','voucher_add','voucher_edit'] and request.view_args.get('v_type') == 'other' %}active{% endif %}"><span class="link-icon"><i class="bi bi-receipt-cutoff"></i></span> Other Vouchers</a>
     </div>
 
     <!-- HR MANAGEMENT MENU -->

@@ -201,6 +201,15 @@ def migrate():
     for col in ['report_type', 'generated_date', 'from_date', 'to_date', 'file_path', 'notes']:
         add_column('reports', col, 'TEXT')
 
+    # --- 11. VOUCHERS PARTICULARS & LEDGERS ---
+    print("Checking voucher tables for particulars and ledger columns...")
+    for table_name in ['purchases', 'feed_purchases', 'medicine_purchases', 'vaccine_purchases']:
+        add_column(table_name, 'particular_id', 'INTEGER')
+        add_column(table_name, 'particular_name', 'TEXT')
+        add_column(table_name, 'pnl_category', 'TEXT')
+        add_column(table_name, 'bill_date', 'DATE')
+        add_column(table_name, 'bill_no', 'TEXT')
+
     print("Database migration successfully completed.")
     conn.close()
 

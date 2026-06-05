@@ -336,10 +336,40 @@ def init_db():
         add_column("equipment", "pnl_category", "TEXT DEFAULT 'Purchase'")
         add_column("sales_records", "pnl_category", "TEXT DEFAULT 'Sales'")
         add_column("other_sales_records", "pnl_category", "TEXT DEFAULT 'Sales'")
+
+        # Form details alignment for all vouchers
+        add_column("purchases", "bill_date", "DATE")
+        add_column("purchases", "bill_no", "TEXT")
+        
+        add_column("feed_purchases", "bill_date", "DATE")
+        add_column("feed_purchases", "bill_no", "TEXT")
+        add_column("feed_purchases", "notes", "TEXT")
+        
+        add_column("medicine_purchases", "bill_date", "DATE")
+        add_column("medicine_purchases", "bill_no", "TEXT")
+        add_column("medicine_purchases", "notes", "TEXT")
+        
+        add_column("vaccine_purchases", "bill_date", "DATE")
+        add_column("vaccine_purchases", "bill_no", "TEXT")
+        add_column("vaccine_purchases", "notes", "TEXT")
+        
+        # Voucher Particulars alignment
+        add_column("purchases", "particular_id", "INTEGER")
+        add_column("purchases", "particular_name", "TEXT")
+        
+        add_column("feed_purchases", "particular_id", "INTEGER")
+        add_column("feed_purchases", "particular_name", "TEXT")
+        
+        add_column("medicine_purchases", "particular_id", "INTEGER")
+        add_column("medicine_purchases", "particular_name", "TEXT")
+        
+        add_column("vaccine_purchases", "particular_id", "INTEGER")
+        add_column("vaccine_purchases", "particular_name", "TEXT")
         
         # Expenses columns alignment with Other Vouchers
         add_column("expenses", "particular_id", "INTEGER")
         add_column("expenses", "bill_date", "DATE")
+        add_column("expenses", "bill_no", "TEXT")
         add_column("expenses", "quantity", "REAL")
         add_column("expenses", "unit_id", "INTEGER")
         add_column("expenses", "unit_name", "TEXT")
@@ -520,6 +550,29 @@ def init_db():
         ''')
 
         # ── EXPENSES MASTER TABLES ──────────────────────────────────────────────
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS ledger_groups (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                group_name TEXT UNIQUE NOT NULL,
+                description TEXT
+            )
+        ''')
+        # Seed default ledger groups if empty
+        group_count = conn.execute('SELECT COUNT(*) FROM ledger_groups').fetchone()[0]
+        if group_count == 0:
+            default_groups = [
+                ('Direct Expenses', 'Direct expenses on farm operations'),
+                ('Indirect Expenses', 'Indirect expenses/overheads'),
+                ('Capital Account', 'Capital assets and investments'),
+                ('Administrative Expenses', 'Admin and office expenses'),
+                ('Selling Expenses', 'Marketing and selling costs')
+            ]
+            for gname, gdesc in default_groups:
+                try:
+                    conn.execute('INSERT INTO ledger_groups (group_name, description) VALUES (?, ?)', (gname, gdesc))
+                except Exception:
+                    pass
+
         conn.execute('''
             CREATE TABLE IF NOT EXISTS expense_ledgers (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -1431,6 +1484,7 @@ def sales_register(s_type):
 @app.route('/sales/<s_type>/add', methods=['GET', 'POST'])
 def sales_add(s_type):
     db = get_db()
+    ledger_groups = db.execute('SELECT * FROM ledger_groups ORDER BY group_name').fetchall()
     today_str = datetime.now().strftime('%Y-%m-%d')
     res = db.execute('SELECT MAX(CAST(sr_no AS INTEGER)) FROM sales_records').fetchone()[0]
     res_other = db.execute('SELECT MAX(CAST(sr_no AS INTEGER)) FROM other_sales_records').fetchone()[0]
@@ -1460,7 +1514,7 @@ def sales_add(s_type):
                 if not goat:
                     flash(f'No goat exists with tag id "{tag_id}"', 'danger')
                     goats = db.execute("SELECT tag_no, breed, weight_kg FROM master_records WHERE status = 'Active' ORDER BY tag_no ASC").fetchall()
-                    return render_template('sales_form.html', s_type=s_type, action='Create', today=today_str, next_sr=next_sr, record=f, goats=goats)
+                    return render_template('sales_form.html', s_type=s_type, action='Create', today=today_str, next_sr=next_sr, record=f, goats=goats, ledger_groups=ledger_groups)
                 
                 # Retrieve the weight entered in the form or default to the database weight
                 form_weight_str = weights[i].strip() if i < len(weights) else ""
@@ -1472,10 +1526,7 @@ def sales_add(s_type):
                 else:
                     sold_weight = goat['weight_kg'] if goat['weight_kg'] is not None else 0.0
 
-                if sold_weight < 25:
-                    flash(f'Goat "{tag_id}" weighs only {sold_weight} kg. A goat must weigh 25 kg or above to be sold.', 'danger')
-                    goats = db.execute("SELECT tag_no, breed, weight_kg FROM master_records WHERE status = 'Active' ORDER BY tag_no ASC").fetchall()
-                    return render_template('sales_form.html', s_type=s_type, action='Create', today=today_str, next_sr=next_sr, record=f, goats=goats)
+
             
             inserted_count = 0
             for i in range(len(tag_ids)):
@@ -1551,11 +1602,12 @@ def sales_add(s_type):
     goats = []
     if s_type == 'goat':
         goats = db.execute("SELECT tag_no, breed, weight_kg FROM master_records WHERE status = 'Active' ORDER BY tag_no ASC").fetchall()
-    return render_template('sales_form.html', s_type=s_type, action='Create', today=today_str, next_sr=next_sr, goats=goats)
+    return render_template('sales_form.html', s_type=s_type, action='Create', today=today_str, next_sr=next_sr, goats=goats, ledger_groups=ledger_groups)
 
 @app.route('/sales/<s_type>/edit/<int:id>', methods=['GET', 'POST'])
 def sales_edit(s_type, id):
     db = get_db()
+    ledger_groups = db.execute('SELECT * FROM ledger_groups ORDER BY group_name').fetchall()
     today_str = datetime.now().strftime('%Y-%m-%d')
     
     if s_type == 'goat':
@@ -1601,7 +1653,7 @@ def sales_edit(s_type, id):
                 if not goat:
                     flash(f'No goat exists with tag id "{tag_id}"', 'danger')
                     goats = db.execute("SELECT tag_no, breed, weight_kg FROM master_records WHERE status = 'Active' OR tag_no IN (SELECT tag_id FROM sales_records WHERE sr_no = ?) ORDER BY tag_no ASC", (sr_no,)).fetchall()
-                    return render_template('sales_form.html', s_type=s_type, action='Edit', today=today_str, record=record, records_list=records_list, goats=goats)
+                    return render_template('sales_form.html', s_type=s_type, action='Edit', today=today_str, record=record, records_list=records_list, goats=goats, ledger_groups=ledger_groups)
                 
                 # Retrieve the weight entered in the form or default to the database weight
                 form_weight_str = weights[i].strip() if i < len(weights) else ""
@@ -1613,10 +1665,7 @@ def sales_edit(s_type, id):
                 else:
                     sold_weight = goat['weight_kg'] if goat['weight_kg'] is not None else 0.0
 
-                if sold_weight < 25:
-                    flash(f'Goat "{tag_id}" weighs only {sold_weight} kg. A goat must weigh 25 kg or above to be sold.', 'danger')
-                    goats = db.execute("SELECT tag_no, breed, weight_kg FROM master_records WHERE status = 'Active' OR tag_no IN (SELECT tag_id FROM sales_records WHERE sr_no = ?) ORDER BY tag_no ASC", (sr_no,)).fetchall()
-                    return render_template('sales_form.html', s_type=s_type, action='Edit', today=today_str, record=record, records_list=records_list, goats=goats)
+
             
             # Revert old goats to Active status first
             old_goats = db.execute('SELECT tag_id FROM sales_records WHERE sr_no = ?', (sr_no,)).fetchall()
@@ -1708,7 +1757,7 @@ def sales_edit(s_type, id):
     goats = []
     if s_type == 'goat':
         goats = db.execute("SELECT tag_no, breed, weight_kg FROM master_records WHERE status = 'Active' OR tag_no IN (SELECT tag_id FROM sales_records WHERE sr_no = ?) ORDER BY tag_no ASC", (sr_no,)).fetchall()
-    return render_template('sales_form.html', s_type=s_type, action='Edit', record=record, records_list=records_list, today=today_str, goats=goats)
+    return render_template('sales_form.html', s_type=s_type, action='Edit', record=record, records_list=records_list, today=today_str, goats=goats, ledger_groups=ledger_groups)
 
 @app.route('/sales/<s_type>/delete/<int:id>', methods=['POST'])
 def sales_delete(s_type, id):
@@ -3445,17 +3494,25 @@ def voucher_add(v_type):
     if request.method == 'POST':
         f = request.form
         p_date = f.get('purchase_date') or today_str
-        pnl_cat = f.get('pnl_category', 'Purchase')
+        pnl_cat = f.get('pnl_category', 'Direct Expenses' if v_type == 'other' else 'Purchase')
         
+        # Parse particulars for all voucher types
+        particular_id = f.get('particular_id') or None
+        particular_id = int(particular_id) if particular_id else None
+        particular_name = f.get('particular_name', '').strip()
+        if particular_id and not particular_name:
+            p = db.execute('SELECT name FROM expense_particulars WHERE id=?', (particular_id,)).fetchone()
+            particular_name = p['name'] if p else ''
+
         if v_type == 'goat':
             tag_id = f.get('tag_id')
             price = float(f.get('price') or 0)
             
             # 1. Save to purchases
             db.execute('''
-                INSERT INTO purchases (seller_name, invoice_details, purchase_date, tag_id, price, pnl_category)
-                VALUES (?, ?, ?, ?, ?, ?)
-            ''', (f.get('seller_name'), f.get('notes'), p_date, tag_id, price, pnl_cat))
+                INSERT INTO purchases (seller_name, invoice_details, purchase_date, tag_id, price, pnl_category, bill_date, bill_no, particular_id, particular_name)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (f.get('seller_name'), f.get('notes'), p_date, tag_id, price, pnl_cat, f.get('bill_date') or None, f.get('bill_no', '').strip(), particular_id, particular_name))
             
             # 2. Add to master_records
             breed = f.get('breed', 'Unknown')
@@ -3477,24 +3534,27 @@ def voucher_add(v_type):
             
             # 4. Add to expenses so it appears in Expenses Management page
             db.execute('''
-                INSERT INTO expenses (category, amount, date, description, vendor_name, payment_mode, status)
-                VALUES (?, ?, ?, ?, ?, 'Cash', 'Paid')
-            ''', (pnl_cat or 'Livestock Purchase', price, p_date, goat_desc, f.get('seller_name')))
+                INSERT INTO expenses (category, amount, date, description, vendor_name, payment_mode, status, bill_date, bill_no, particular_id, pnl_category)
+                VALUES (?, ?, ?, ?, ?, 'Cash', 'Paid', ?, ?, ?, ?)
+            ''', (particular_name or pnl_cat or 'Livestock Purchase', price, p_date, goat_desc, f.get('seller_name'), f.get('bill_date') or None, f.get('bill_no', '').strip(), particular_id, pnl_cat))
             
             db.commit()
             flash('Goat Purchase Voucher created successfully!', 'success')
             
         elif v_type == 'feed':
-            feed_name = f.get('feed_name')
+            feed_name = f.get('feed_name') or particular_name
             qty = float(f.get('quantity') or 0)
             cost = float(f.get('cost') or 0)
             unit = f.get('unit', 'KG')
             supplier = f.get('supplier')
+            bill_date = f.get('bill_date') or None
+            bill_no = f.get('bill_no', '').strip()
+            notes = f.get('notes', '').strip()
             
             cursor = db.execute('''
-                INSERT INTO feed_purchases (feed_name, quantity, unit, cost, purchase_date, supplier, pnl_category)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
-            ''', (feed_name, qty, unit, cost, p_date, supplier, pnl_cat))
+                INSERT INTO feed_purchases (feed_name, quantity, unit, cost, purchase_date, supplier, pnl_category, bill_date, bill_no, notes, particular_id, particular_name)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (feed_name, qty, unit, cost, p_date, supplier, pnl_cat, bill_date, bill_no, notes, particular_id, particular_name))
             purchase_id = cursor.lastrowid
             
             # Fetch last closing stock
@@ -3509,32 +3569,35 @@ def voucher_add(v_type):
             ''', (feed_name, opening, qty, closing, unit, cost_per_unit, cost, p_date, supplier, purchase_id))
             
             # Expenses and goats_data logging
-            desc = f"Purchased {qty} {unit} of {feed_name} from {supplier}"
+            desc = f"Purchased {qty} {unit} of {feed_name} from {supplier}. Notes: {notes}".strip('. ')
             db.execute('''
                 INSERT INTO goats_data (tag_number, date, category, type, amount, notes)
                 VALUES ('All', ?, 'expense', 'Feed', ?, ?)
             ''', (p_date, cost, desc))
             db.execute('''
-                INSERT INTO expenses (category, amount, date, description, vendor_name, payment_mode, status)
-                VALUES (?, ?, ?, ?, ?, 'Cash', 'Paid')
-            ''', (pnl_cat, cost, p_date, desc, supplier))
+                INSERT INTO expenses (category, amount, date, description, vendor_name, payment_mode, status, bill_date, bill_no, particular_id, pnl_category)
+                VALUES (?, ?, ?, ?, ?, 'Cash', 'Paid', ?, ?, ?, ?)
+            ''', (particular_name or pnl_cat, cost, p_date, desc, supplier, bill_date, bill_no, particular_id, pnl_cat))
             
             db.commit()
             flash('Feed Purchase Voucher created successfully!', 'success')
             
         elif v_type == 'health':
             sub_type = f.get('sub_type', 'medicine')
-            name = f.get('health_name')
+            name = f.get('health_name') or particular_name
             qty = float(f.get('quantity') or 0)
             cost = float(f.get('cost') or 0)
             supplier = f.get('supplier')
+            bill_date = f.get('bill_date') or None
+            bill_no = f.get('bill_no', '').strip()
+            notes = f.get('notes', '').strip()
             
             if sub_type == 'medicine':
                 dose_unit = f.get('dose_unit', 'ml')
                 cursor = db.execute('''
-                    INSERT INTO medicine_purchases (medicine_name, dose_unit, quantity, cost, purchase_date, supplier, pnl_category)
-                    VALUES (?, ?, ?, ?, ?, ?, ?)
-                ''', (name, dose_unit, qty, cost, p_date, supplier, pnl_cat))
+                    INSERT INTO medicine_purchases (medicine_name, dose_unit, quantity, cost, purchase_date, supplier, pnl_category, bill_date, bill_no, notes, particular_id, particular_name)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ''', (name, dose_unit, qty, cost, p_date, supplier, pnl_cat, bill_date, bill_no, notes, particular_id, particular_name))
                 purchase_id = cursor.lastrowid
                 
                 # Fetch last closing stock
@@ -3549,9 +3612,9 @@ def voucher_add(v_type):
                 ''', (name, opening, qty, closing, 'Doses', cost_per_unit, cost, p_date, supplier, purchase_id))
             else:
                 cursor = db.execute('''
-                    INSERT INTO vaccine_purchases (vaccine_name, quantity, cost, purchase_date, supplier, pnl_category)
-                    VALUES (?, ?, ?, ?, ?, ?)
-                ''', (name, qty, cost, p_date, supplier, pnl_cat))
+                    INSERT INTO vaccine_purchases (vaccine_name, quantity, cost, purchase_date, supplier, pnl_category, bill_date, bill_no, notes, particular_id, particular_name)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ''', (name, qty, cost, p_date, supplier, pnl_cat, bill_date, bill_no, notes, particular_id, particular_name))
                 purchase_id = cursor.lastrowid
                 
                 # Fetch last closing stock
@@ -3566,15 +3629,15 @@ def voucher_add(v_type):
                 ''', (name, opening, qty, closing, 'Doses', cost_per_unit, cost, p_date, supplier, purchase_id))
             
             # Expenses and goats_data logging
-            desc = f"Purchased {qty} Doses of {name} from {supplier}"
+            desc = f"Purchased {qty} Doses of {name} from {supplier}. Notes: {notes}".strip('. ')
             db.execute('''
                 INSERT INTO goats_data (tag_number, date, category, type, amount, notes)
                 VALUES ('All', ?, 'expense', ?, ?, ?)
             ''', (p_date, sub_type.capitalize(), cost, desc))
             db.execute('''
-                INSERT INTO expenses (category, amount, date, description, vendor_name, payment_mode, status)
-                VALUES (?, ?, ?, ?, ?, 'Cash', 'Paid')
-            ''', (pnl_cat, cost, p_date, desc, supplier))
+                INSERT INTO expenses (category, amount, date, description, vendor_name, payment_mode, status, bill_date, bill_no, particular_id, pnl_category)
+                VALUES (?, ?, ?, ?, ?, 'Cash', 'Paid', ?, ?, ?, ?)
+            ''', (particular_name or pnl_cat, cost, p_date, desc, supplier, bill_date, bill_no, particular_id, pnl_cat))
             
             db.commit()
             flash('Health Supplies Voucher created successfully!', 'success')
@@ -3639,10 +3702,11 @@ def voucher_add(v_type):
             'pnl_category': 'Purchase'
         }
 
-    # Load particulars and units for the 'other' form
     particulars = db.execute('SELECT * FROM expense_particulars ORDER BY name').fetchall()
     expense_units = db.execute('SELECT * FROM expense_units ORDER BY unit_name').fetchall()
-    return render_template('voucher_form.html', v_type=v_type, action='Add', record=record, today=today_str, particulars=particulars, expense_units=expense_units)
+    ledgers = db.execute('SELECT * FROM expense_ledgers ORDER BY ledger_name').fetchall()
+    ledger_groups = db.execute('SELECT * FROM ledger_groups ORDER BY group_name').fetchall()
+    return render_template('voucher_form.html', v_type=v_type, action='Add', record=record, today=today_str, particulars=particulars, expense_units=expense_units, ledgers=ledgers, ledger_groups=ledger_groups)
 
 @app.route('/vouchers/<v_type>/edit/<int:id>', methods=['GET', 'POST'])
 @app.route('/vouchers/<v_type>/edit/<sub_type>/<int:id>', methods=['GET', 'POST'])
@@ -3668,7 +3732,11 @@ def voucher_edit(v_type, id, sub_type=None):
                 'breed': master['breed'] if master else 'Unknown',
                 'gender': master['gender'] if master else 'Unknown',
                 'weight': master['weight_kg'] if master else 0.0,
-                'pnl_category': record_raw['pnl_category'] or 'Purchase'
+                'pnl_category': record_raw['pnl_category'] or 'Purchase',
+                'bill_date': record_raw['bill_date'] if 'bill_date' in record_raw.keys() else '',
+                'bill_no': record_raw['bill_no'] if 'bill_no' in record_raw.keys() else '',
+                'particular_id': record_raw['particular_id'] if 'particular_id' in record_raw.keys() else None,
+                'particular_name': record_raw['particular_name'] if 'particular_name' in record_raw.keys() else ''
             }
             
     elif v_type == 'feed':
@@ -3690,7 +3758,12 @@ def voucher_edit(v_type, id, sub_type=None):
                     'cost': record_raw['cost'],
                     'purchase_date': record_raw['purchase_date'],
                     'supplier': record_raw['supplier'],
-                    'pnl_category': record_raw['pnl_category'] or 'Purchase'
+                    'pnl_category': record_raw['pnl_category'] or 'Purchase',
+                    'bill_date': record_raw['bill_date'] if 'bill_date' in record_raw.keys() else '',
+                    'bill_no': record_raw['bill_no'] if 'bill_no' in record_raw.keys() else '',
+                    'notes': record_raw['notes'] if 'notes' in record_raw.keys() else '',
+                    'particular_id': record_raw['particular_id'] if 'particular_id' in record_raw.keys() else None,
+                    'particular_name': record_raw['particular_name'] if 'particular_name' in record_raw.keys() else ''
                 }
         else:
             record_raw = db.execute('SELECT * FROM vaccine_purchases WHERE id = ?', (id,)).fetchone()
@@ -3703,7 +3776,12 @@ def voucher_edit(v_type, id, sub_type=None):
                     'cost': record_raw['cost'],
                     'purchase_date': record_raw['purchase_date'],
                     'supplier': record_raw['supplier'],
-                    'pnl_category': record_raw['pnl_category'] or 'Purchase'
+                    'pnl_category': record_raw['pnl_category'] or 'Purchase',
+                    'bill_date': record_raw['bill_date'] if 'bill_date' in record_raw.keys() else '',
+                    'bill_no': record_raw['bill_no'] if 'bill_no' in record_raw.keys() else '',
+                    'notes': record_raw['notes'] if 'notes' in record_raw.keys() else '',
+                    'particular_id': record_raw['particular_id'] if 'particular_id' in record_raw.keys() else None,
+                    'particular_name': record_raw['particular_name'] if 'particular_name' in record_raw.keys() else ''
                 }
                 
     elif v_type == 'other':
@@ -3738,15 +3816,23 @@ def voucher_edit(v_type, id, sub_type=None):
             p_date = f.get('purchase_date') or record.get('purchase_date', today_str)
         pnl_cat = f.get('pnl_category', 'Direct Expenses' if v_type == 'other' else 'Purchase')
         
+        # Parse particulars for all voucher types
+        particular_id = f.get('particular_id') or None
+        particular_id = int(particular_id) if particular_id else None
+        particular_name = f.get('particular_name', '').strip()
+        if particular_id and not particular_name:
+            p = db.execute('SELECT name FROM expense_particulars WHERE id=?', (particular_id,)).fetchone()
+            particular_name = p['name'] if p else ''
+
         if v_type == 'goat':
             tag_id = f.get('tag_id')
             price = float(f.get('price') or 0)
             old_tag_id = record['tag_id']
             
             db.execute('''
-                UPDATE purchases SET seller_name = ?, invoice_details = ?, purchase_date = ?, tag_id = ?, price = ?, pnl_category = ?
+                UPDATE purchases SET seller_name = ?, invoice_details = ?, purchase_date = ?, tag_id = ?, price = ?, pnl_category = ?, bill_date = ?, bill_no = ?, particular_id = ?, particular_name = ?
                 WHERE id = ?
-            ''', (f.get('seller_name'), f.get('notes'), p_date, tag_id, price, pnl_cat, id))
+            ''', (f.get('seller_name'), f.get('notes'), p_date, tag_id, price, pnl_cat, f.get('bill_date') or None, f.get('bill_no', '').strip(), particular_id, particular_name, id))
             
             db.execute('''
                 UPDATE master_records SET tag_no = ?, breed = ?, gender = ?, purchase_date = ?, weight_kg = ?, purchase_amount = ?
@@ -3774,9 +3860,9 @@ def voucher_edit(v_type, id, sub_type=None):
                 db.execute("DELETE FROM expenses WHERE date = ? AND vendor_name = ? AND amount = ? AND category NOT LIKE '%Labor%' AND category NOT LIKE '%Labour%'",
                            (record.get('purchase_date'), record.get('seller_name'), record.get('price')))
             db.execute('''
-                INSERT INTO expenses (category, amount, date, description, vendor_name, payment_mode, status)
-                VALUES (?, ?, ?, ?, ?, 'Cash', 'Paid')
-            ''', (pnl_cat or 'Livestock Purchase', price, p_date, goat_desc_edit, f.get('seller_name')))
+                INSERT INTO expenses (category, amount, date, description, vendor_name, payment_mode, status, bill_date, bill_no, particular_id, pnl_category)
+                VALUES (?, ?, ?, ?, ?, 'Cash', 'Paid', ?, ?, ?, ?)
+            ''', (particular_name or pnl_cat or 'Livestock Purchase', price, p_date, goat_desc_edit, f.get('seller_name'), f.get('bill_date') or None, f.get('bill_no', '').strip(), particular_id, pnl_cat))
             
             db.commit()
             flash('Goat Purchase Voucher updated successfully!', 'success')
@@ -3784,6 +3870,7 @@ def voucher_edit(v_type, id, sub_type=None):
         elif v_type == 'feed':
             qty = float(f.get('quantity') or 0)
             cost = float(f.get('cost') or 0)
+            feed_name = f.get('feed_name') or particular_name
             
             # Get old voucher details first
             old = db.execute("SELECT * FROM feed_purchases WHERE id = ?", (id,)).fetchone()
@@ -3794,9 +3881,9 @@ def voucher_edit(v_type, id, sub_type=None):
                 db.execute("DELETE FROM expenses WHERE date = ? AND category = ? AND amount = ? AND vendor_name = ?", (old['purchase_date'], old['pnl_category'] or 'Feed Purchase', old['cost'], old['supplier']))
             
             db.execute('''
-                UPDATE feed_purchases SET feed_name = ?, quantity = ?, unit = ?, cost = ?, purchase_date = ?, supplier = ?, pnl_category = ?
+                UPDATE feed_purchases SET feed_name = ?, quantity = ?, unit = ?, cost = ?, purchase_date = ?, supplier = ?, pnl_category = ?, bill_date = ?, bill_no = ?, notes = ?, particular_id = ?, particular_name = ?
                 WHERE id = ?
-            ''', (f.get('feed_name'), qty, f.get('unit'), cost, p_date, f.get('supplier'), pnl_cat, id))
+            ''', (feed_name, qty, f.get('unit'), cost, p_date, f.get('supplier'), pnl_cat, f.get('bill_date') or None, f.get('bill_no', '').strip(), f.get('notes', '').strip(), particular_id, particular_name, id))
             
             # Recalculate feed inventory row
             row = db.execute("SELECT opening_stock, used_qty, wastage_qty FROM feed_inventory WHERE purchase_id = ?", (id,)).fetchone()
@@ -3810,24 +3897,24 @@ def voucher_edit(v_type, id, sub_type=None):
                     UPDATE feed_inventory 
                     SET feed_name = ?, purchased_qty = ?, closing_stock = ?, cost_per_unit = ?, total_cost = ?, purchase_date = ?, supplier = ?
                     WHERE purchase_id = ?
-                ''', (f.get('feed_name'), qty, closing, cost_per_unit, cost, p_date, f.get('supplier'), id))
+                ''', (feed_name, qty, closing, cost_per_unit, cost, p_date, f.get('supplier'), id))
                 
             # Now insert the new goats_data and expenses rows!
-            desc = f"Purchased {qty} {f.get('unit')} of {f.get('feed_name')} from {f.get('supplier')}"
+            desc = f"Purchased {qty} {f.get('unit')} of {feed_name} from {f.get('supplier')}"
             db.execute('''
                 INSERT INTO goats_data (tag_number, date, category, type, amount, notes)
                 VALUES ('All', ?, 'expense', 'Feed', ?, ?)
             ''', (p_date, cost, desc))
             db.execute('''
-                INSERT INTO expenses (category, amount, date, description, vendor_name, payment_mode, status)
-                VALUES (?, ?, ?, ?, ?, 'Cash', 'Paid')
-            ''', (pnl_cat, cost, p_date, desc, f.get('supplier')))
+                INSERT INTO expenses (category, amount, date, description, vendor_name, payment_mode, status, bill_date, bill_no, particular_id, pnl_category)
+                VALUES (?, ?, ?, ?, ?, 'Cash', 'Paid', ?, ?, ?, ?)
+            ''', (particular_name or pnl_cat, cost, p_date, desc, f.get('supplier'), f.get('bill_date') or None, f.get('bill_no', '').strip(), particular_id, pnl_cat))
             
             db.commit()
             flash('Feed Purchase Voucher updated successfully!', 'success')
             
         elif v_type == 'health':
-            name = f.get('health_name')
+            name = f.get('health_name') or particular_name
             qty = float(f.get('quantity') or 0)
             cost = float(f.get('cost') or 0)
             supplier = f.get('supplier')
@@ -3847,9 +3934,9 @@ def voucher_edit(v_type, id, sub_type=None):
             
             if sub_type == 'medicine':
                 db.execute('''
-                    UPDATE medicine_purchases SET medicine_name = ?, dose_unit = ?, quantity = ?, cost = ?, purchase_date = ?, supplier = ?, pnl_category = ?
+                    UPDATE medicine_purchases SET medicine_name = ?, dose_unit = ?, quantity = ?, cost = ?, purchase_date = ?, supplier = ?, pnl_category = ?, bill_date = ?, bill_no = ?, notes = ?, particular_id = ?, particular_name = ?
                     WHERE id = ?
-                ''', (name, f.get('dose_unit'), qty, cost, p_date, supplier, pnl_cat, id))
+                ''', (name, f.get('dose_unit'), qty, cost, p_date, supplier, pnl_cat, f.get('bill_date') or None, f.get('bill_no', '').strip(), f.get('notes', '').strip(), particular_id, particular_name, id))
                 
                 # Check if inventory row exists
                 inv_row = db.execute("SELECT id, opening_stock, used_qty, wastage_qty FROM medicine_inventory WHERE purchase_id = ?", (id,)).fetchone()
@@ -3874,9 +3961,9 @@ def voucher_edit(v_type, id, sub_type=None):
                     ''', (name, opening, qty, closing, 'Doses', cost_per_unit, cost, p_date, supplier, id))
             else:
                 db.execute('''
-                    UPDATE vaccine_purchases SET vaccine_name = ?, quantity = ?, cost = ?, purchase_date = ?, supplier = ?, pnl_category = ?
+                    UPDATE vaccine_purchases SET vaccine_name = ?, quantity = ?, cost = ?, purchase_date = ?, supplier = ?, pnl_category = ?, bill_date = ?, bill_no = ?, notes = ?, particular_id = ?, particular_name = ?
                     WHERE id = ?
-                ''', (name, qty, cost, p_date, supplier, pnl_cat, id))
+                ''', (name, qty, cost, p_date, supplier, pnl_cat, f.get('bill_date') or None, f.get('bill_no', '').strip(), f.get('notes', '').strip(), particular_id, particular_name, id))
                 
                 # Check if inventory row exists
                 inv_row = db.execute("SELECT id, opening_stock, used_qty, wastage_qty FROM vaccine_inventory WHERE purchase_id = ?", (id,)).fetchone()
@@ -3907,9 +3994,9 @@ def voucher_edit(v_type, id, sub_type=None):
                 VALUES ('All', ?, 'expense', ?, ?, ?)
             ''', (p_date, sub_type.capitalize(), cost, desc))
             db.execute('''
-                INSERT INTO expenses (category, amount, date, description, vendor_name, payment_mode, status)
-                VALUES (?, ?, ?, ?, ?, 'Cash', 'Paid')
-            ''', (pnl_cat, cost, p_date, desc, supplier))
+                INSERT INTO expenses (category, amount, date, description, vendor_name, payment_mode, status, bill_date, bill_no, particular_id, pnl_category)
+                VALUES (?, ?, ?, ?, ?, 'Cash', 'Paid', ?, ?, ?, ?)
+            ''', (particular_name or pnl_cat, cost, p_date, desc, supplier, f.get('bill_date') or None, f.get('bill_no', '').strip(), particular_id, pnl_cat))
             
             db.commit()
             flash('Health Supplies Voucher updated successfully!', 'success')
@@ -3962,12 +4049,13 @@ def voucher_edit(v_type, id, sub_type=None):
 
         return redirect(url_for('voucher_register', v_type=v_type))
 
-    # Load particulars and units for the 'other' form
     particulars = db.execute('SELECT * FROM expense_particulars ORDER BY name').fetchall()
     expense_units = db.execute('SELECT * FROM expense_units ORDER BY unit_name').fetchall()
+    ledgers = db.execute('SELECT * FROM expense_ledgers ORDER BY ledger_name').fetchall()
+    ledger_groups = db.execute('SELECT * FROM ledger_groups ORDER BY group_name').fetchall()
     today_str = datetime.now().strftime('%Y-%m-%d')
     edit_date = record.get('voucher_date') if v_type == 'other' else record.get('purchase_date', '')
-    return render_template('voucher_form.html', v_type=v_type, sub_type=sub_type, action='Edit', record=record, today=edit_date, particulars=particulars, expense_units=expense_units)
+    return render_template('voucher_form.html', v_type=v_type, sub_type=sub_type, action='Edit', record=record, today=edit_date, particulars=particulars, expense_units=expense_units, ledgers=ledgers, ledger_groups=ledger_groups)
 
 @app.route('/vouchers/<v_type>/delete/<int:id>', methods=['POST'])
 @app.route('/vouchers/<v_type>/delete/<sub_type>/<int:id>', methods=['POST'])
@@ -4756,7 +4844,9 @@ def expense_add():
 
     particulars = db.execute('SELECT * FROM expense_particulars ORDER BY name').fetchall()
     expense_units = db.execute('SELECT * FROM expense_units ORDER BY unit_name').fetchall()
-    return render_template('expense_add.html', particulars=particulars, expense_units=expense_units, today=today_str)
+    ledgers = db.execute('SELECT * FROM expense_ledgers ORDER BY ledger_name').fetchall()
+    ledger_groups = db.execute('SELECT * FROM ledger_groups ORDER BY group_name').fetchall()
+    return render_template('expense_add.html', particulars=particulars, expense_units=expense_units, ledgers=ledgers, ledger_groups=ledger_groups, today=today_str)
 
 @app.route('/expense_approve/<int:expense_id>', methods=['POST'])
 def expense_approve(expense_id):
@@ -4857,13 +4947,16 @@ def expense_edit(expense_id):
         
     particulars = db.execute('SELECT * FROM expense_particulars ORDER BY name').fetchall()
     expense_units = db.execute('SELECT * FROM expense_units ORDER BY unit_name').fetchall()
-    return render_template('expense_edit.html', record=record, particulars=particulars, expense_units=expense_units)
+    ledgers = db.execute('SELECT * FROM expense_ledgers ORDER BY ledger_name').fetchall()
+    ledger_groups = db.execute('SELECT * FROM ledger_groups ORDER BY group_name').fetchall()
+    return render_template('expense_edit.html', record=record, particulars=particulars, expense_units=expense_units, ledgers=ledgers, ledger_groups=ledger_groups)
 
 # ── EXPENSES MASTER MODULE ────────────────────────────────────────────────────
 @app.route('/expenses_master')
 def expenses_master():
     db = get_db()
     ledger_count = db.execute('SELECT COUNT(*) FROM expense_ledgers').fetchone()[0] or 0
+    group_count = db.execute('SELECT COUNT(*) FROM ledger_groups').fetchone()[0] or 0
     particular_count = db.execute('SELECT COUNT(*) FROM expense_particulars').fetchone()[0] or 0
     unit_count = db.execute('SELECT COUNT(*) FROM expense_units').fetchone()[0] or 0
     other_voucher_count = db.execute('SELECT COUNT(*) FROM other_vouchers').fetchone()[0] or 0
@@ -4871,7 +4964,7 @@ def expenses_master():
     expense_count = db.execute("SELECT COUNT(*) FROM expenses").fetchone()[0] or 0
     expense_sum = db.execute("SELECT SUM(amount) FROM expenses WHERE status='Approved' OR status='Paid'").fetchone()[0] or 0.0
     return render_template('expenses_master.html',
-        ledger_count=ledger_count, particular_count=particular_count,
+        ledger_count=ledger_count, group_count=group_count, particular_count=particular_count,
         unit_count=unit_count, other_voucher_count=other_voucher_count,
         other_voucher_sum=other_voucher_sum, expense_count=expense_count,
         expense_sum=expense_sum)
@@ -4894,9 +4987,18 @@ def expense_ledgers():
                     flash('Ledger name already exists!', 'danger')
             else:
                 flash('Ledger name is required.', 'danger')
-        return redirect(url_for('expense_ledgers'))
+        return redirect(url_for('expense_ledgers', tab='ledgers'))
     ledgers = db.execute('SELECT * FROM expense_ledgers ORDER BY ledger_group, ledger_name').fetchall()
-    return render_template('expense_ledgers.html', ledgers=ledgers)
+    groups = db.execute('SELECT * FROM ledger_groups ORDER BY group_name').fetchall()
+    group_names = {g['group_name'] for g in groups}
+    unassigned_ledgers = [l for l in ledgers if l['ledger_group'] not in group_names or not l['ledger_group']]
+    particulars = db.execute('''
+        SELECT ep.*, el.ledger_name, el.ledger_group
+        FROM expense_particulars ep
+        LEFT JOIN expense_ledgers el ON ep.ledger_id = el.id
+        ORDER BY ep.name
+    ''').fetchall()
+    return render_template('expense_ledgers.html', ledgers=ledgers, groups=groups, unassigned_ledgers=unassigned_ledgers, particulars=particulars)
 
 @app.route('/expense_ledger_edit/<int:lid>', methods=['GET', 'POST'])
 def expense_ledger_edit(lid):
@@ -4904,7 +5006,7 @@ def expense_ledger_edit(lid):
     ledger = db.execute('SELECT * FROM expense_ledgers WHERE id=?', (lid,)).fetchone()
     if not ledger:
         flash('Ledger not found.', 'danger')
-        return redirect(url_for('expense_ledgers'))
+        return redirect(url_for('expense_ledgers', tab='ledgers'))
     if request.method == 'POST':
         lname = request.form.get('ledger_name', '').strip()
         lgrp = request.form.get('ledger_group', 'Direct Expenses').strip()
@@ -4916,8 +5018,8 @@ def expense_ledger_edit(lid):
                 flash('Ledger updated!', 'success')
             except Exception:
                 flash('Ledger name already exists!', 'danger')
-        return redirect(url_for('expense_ledgers'))
-    ledger_groups = ['Direct Expenses', 'Indirect Expenses', 'Capital Account', 'Administrative Expenses', 'Selling Expenses']
+        return redirect(url_for('expense_ledgers', tab='ledgers'))
+    ledger_groups = [g['group_name'] for g in db.execute('SELECT group_name FROM ledger_groups ORDER BY group_name').fetchall()]
     return render_template('expense_ledger_edit.html', ledger=ledger, ledger_groups=ledger_groups)
 
 @app.route('/expense_ledger_delete/<int:lid>', methods=['POST'])
@@ -4926,7 +5028,79 @@ def expense_ledger_delete(lid):
     db.execute('DELETE FROM expense_ledgers WHERE id=?', (lid,))
     db.commit()
     flash('Ledger deleted.', 'success')
-    return redirect(url_for('expense_ledgers'))
+    return redirect(url_for('expense_ledgers', tab='ledgers'))
+
+@app.route('/ledger_groups', methods=['GET', 'POST'])
+def ledger_groups():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    db = get_db()
+    if request.method == 'POST':
+        action = request.form.get('action', 'add')
+        if action == 'add':
+            gname = request.form.get('group_name', '').strip()
+            gdesc = request.form.get('description', '').strip()
+            if gname:
+                try:
+                    db.execute('INSERT INTO ledger_groups (group_name, description) VALUES (?, ?)', (gname, gdesc))
+                    db.commit()
+                    flash(f'Ledger Group "{gname}" created successfully!', 'success')
+                except Exception:
+                    flash('Ledger Group name already exists!', 'danger')
+            else:
+                flash('Ledger Group name is required.', 'danger')
+        return redirect(url_for('expense_ledgers', tab='groups'))
+    return redirect(url_for('expense_ledgers', tab='groups'))
+
+@app.route('/ledger_group_edit/<int:gid>', methods=['GET', 'POST'])
+def ledger_group_edit(gid):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    db = get_db()
+    group = db.execute('SELECT * FROM ledger_groups WHERE id=?', (gid,)).fetchone()
+    if not group:
+        flash('Ledger Group not found.', 'danger')
+        return redirect(url_for('expense_ledgers', tab='groups'))
+        
+    default_groups = ['Direct Expenses', 'Indirect Expenses', 'Capital Account', 'Administrative Expenses', 'Selling Expenses']
+    is_default = group['group_name'] in default_groups
+
+    if request.method == 'POST':
+        gname = request.form.get('group_name', '').strip()
+        gdesc = request.form.get('description', '').strip()
+        if gname:
+            if is_default and gname != group['group_name']:
+                flash('Cannot rename default ledger groups.', 'danger')
+                return redirect(url_for('expense_ledgers', tab='groups'))
+            try:
+                old_name = group['group_name']
+                db.execute('UPDATE ledger_groups SET group_name=?, description=? WHERE id=?', (gname, gdesc, gid))
+                # Propagate name change to expense_ledgers
+                db.execute('UPDATE expense_ledgers SET ledger_group=? WHERE ledger_group=?', (gname, old_name))
+                db.commit()
+                flash('Ledger Group updated successfully!', 'success')
+            except Exception:
+                flash('Ledger Group name already exists!', 'danger')
+        return redirect(url_for('expense_ledgers', tab='groups'))
+        
+    return render_template('ledger_group_edit.html', group=group, is_default=is_default)
+
+@app.route('/ledger_group_delete/<int:gid>', methods=['POST'])
+def ledger_group_delete(gid):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    db = get_db()
+    group = db.execute('SELECT * FROM ledger_groups WHERE id=?', (gid,)).fetchone()
+    if not group:
+        flash('Ledger Group not found.', 'danger')
+        return redirect(url_for('expense_ledgers', tab='groups'))
+        
+    # Set any linked ledgers' group to NULL (they will become Unassigned)
+    db.execute('UPDATE expense_ledgers SET ledger_group = NULL WHERE ledger_group = ?', (group['group_name'],))
+    db.execute('DELETE FROM ledger_groups WHERE id=?', (gid,))
+    db.commit()
+    flash('Ledger Group deleted successfully. Any linked ledgers are now unassigned.', 'success')
+    return redirect(url_for('expense_ledgers', tab='groups'))
 
 @app.route('/expense_particulars', methods=['GET', 'POST'])
 def expense_particulars():
@@ -4946,15 +5120,8 @@ def expense_particulars():
                     flash('Particular name already exists!', 'danger')
             else:
                 flash('Particular name is required.', 'danger')
-        return redirect(url_for('expense_particulars'))
-    particulars = db.execute('''
-        SELECT ep.*, el.ledger_name, el.ledger_group
-        FROM expense_particulars ep
-        LEFT JOIN expense_ledgers el ON ep.ledger_id = el.id
-        ORDER BY ep.name
-    ''').fetchall()
-    ledgers = db.execute('SELECT * FROM expense_ledgers ORDER BY ledger_group, ledger_name').fetchall()
-    return render_template('expense_particulars.html', particulars=particulars, ledgers=ledgers)
+        return redirect(url_for('expense_ledgers', tab='particulars'))
+    return redirect(url_for('expense_ledgers', tab='particulars'))
 
 @app.route('/expense_particular_edit/<int:pid>', methods=['GET', 'POST'])
 def expense_particular_edit(pid):
@@ -4962,7 +5129,7 @@ def expense_particular_edit(pid):
     particular = db.execute('SELECT * FROM expense_particulars WHERE id=?', (pid,)).fetchone()
     if not particular:
         flash('Particular not found.', 'danger')
-        return redirect(url_for('expense_particulars'))
+        return redirect(url_for('expense_ledgers', tab='particulars'))
     if request.method == 'POST':
         pname = request.form.get('name', '').strip()
         ledger_id = request.form.get('ledger_id') or None
@@ -4974,7 +5141,7 @@ def expense_particular_edit(pid):
                 flash('Particular updated!', 'success')
             except Exception:
                 flash('Particular name already exists!', 'danger')
-        return redirect(url_for('expense_particulars'))
+        return redirect(url_for('expense_ledgers', tab='particulars'))
     ledgers = db.execute('SELECT * FROM expense_ledgers ORDER BY ledger_group, ledger_name').fetchall()
     return render_template('expense_particular_edit.html', particular=particular, ledgers=ledgers)
 
@@ -4984,7 +5151,7 @@ def expense_particular_delete(pid):
     db.execute('DELETE FROM expense_particulars WHERE id=?', (pid,))
     db.commit()
     flash('Particular deleted.', 'success')
-    return redirect(url_for('expense_particulars'))
+    return redirect(url_for('expense_ledgers', tab='particulars'))
 
 @app.route('/expense_units', methods=['GET', 'POST'])
 def expense_units_view():
@@ -5337,12 +5504,7 @@ def pnl():
         purchases_list.append({'type': 'Equipment', 'detail': f"Asset: {r['detail']}", 'date': r['date'], 'amount': r['amount'] or 0.0, 'pnl_category': r['pnl_category'] or 'Purchase'})
         
     # Aggregate purchases by pnl_category
-    purchase_accounts = {
-        'Purchase': 0.0,
-        'Purchase@12%': 0.0,
-        'Purchase@18%': 0.0,
-        'Purchase@5%': 0.0
-    }
+    purchase_accounts = {}
     
     total_purchases_sum = 0.0
     for p in purchases_list:
@@ -5357,11 +5519,6 @@ def pnl():
                 direct_expenses[cat] = 0.0
             direct_expenses[cat] += p['amount']
             total_direct_expenses += p['amount']
-        else:
-            if cat not in purchase_accounts:
-                purchase_accounts[cat] = 0.0
-            purchase_accounts[cat] += p['amount']
-            total_purchases_sum += p['amount']
         
     # --- EXPENSES LEDGERS (DIRECT vs INDIRECT) ---
     # Categorize using stored pnl_category on each expense row (respects Expense Master ledger groups)
@@ -5631,7 +5788,7 @@ def api_pnl_drilldown():
             transactions.append({'date': r['date'], 'reference': r['reference'], 'detail': f"Sold to {r['buyer_name']} - {r['notes'] or ''}", 'amount': r['amount'], 'category': r_cat, 'type': 'income'})
 
         # 9. Expenses
-        rows = db.execute("SELECT date, category AS reference, description AS detail, amount FROM expenses WHERE status = 'Approved' AND date BETWEEN ? AND ? ORDER BY date DESC", (from_date, to_date)).fetchall()
+        rows = db.execute("SELECT date, category AS reference, description AS detail, amount FROM expenses WHERE status IN ('Approved', 'Paid') AND date BETWEEN ? AND ? ORDER BY date DESC", (from_date, to_date)).fetchall()
         for r in rows:
             if r['reference'] and ('labor' in r['reference'].lower() or 'labour' in r['reference'].lower()):
                 continue
@@ -5790,7 +5947,7 @@ def api_pnl_drilldown():
                 transactions.append({'date': r['date'], 'reference': r['reference'], 'detail': f"{r['buyer_name']} - {r['notes'] or ''}", 'amount': r['amount']})
 
         # Expenses
-        rows = db.execute("SELECT date, category AS reference, description AS detail, amount FROM expenses WHERE status = 'Approved' AND category = ? AND date BETWEEN ? AND ? ORDER BY date DESC", (category, from_date, to_date)).fetchall()
+        rows = db.execute("SELECT date, category AS reference, description AS detail, amount FROM expenses WHERE status IN ('Approved', 'Paid') AND category = ? AND date BETWEEN ? AND ? ORDER BY date DESC", (category, from_date, to_date)).fetchall()
         for r in rows:
             transactions.append({'date': r['date'], 'reference': r['reference'], 'detail': r['detail'] or 'General Expense', 'amount': r['amount']})
             

@@ -140,6 +140,28 @@
         display: none;
     }
 
+    .collapsible-header {
+        cursor: pointer;
+        user-select: none;
+        transition: background-color 0.15s ease;
+    }
+    
+    .collapsible-header:hover {
+        background-color: #f1f5f9 !important;
+    }
+    
+    .toggle-chevron {
+        display: inline-block;
+        transition: transform 0.2s ease;
+        font-size: 0.75rem;
+        width: 1.2rem;
+        text-align: center;
+    }
+    
+    .collapsible-header.expanded .toggle-chevron {
+        transform: rotate(90deg);
+    }
+
     @media print {
         #sidebar, #topbar, .d-print-none, form, .btn, .collapse, footer, #notification-toast-container, #traditional-container {
             display: none !important;
@@ -309,6 +331,9 @@
                         <button class="btn btn-sm btn-info rounded-pill px-3 fw-bold text-white shadow-sm border-dark" type="button" onclick="viewDrilldown('All')" title="View Detailed General Ledger" style="border-width: 1.5px;">
                             <i class="bi bi-list-task me-1"></i> Detailed Ledger
                         </button>
+                        <button class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold text-dark border-dark" type="button" id="btnToggleExpandAll" title="Expand or Collapse All Groups" style="border-width: 1.5px;">
+                            <i class="bi bi-arrows-expand me-1"></i> Expand All
+                        </button>
                         <button class="btn btn-sm btn-success rounded-pill px-3 fw-bold shadow-sm border-dark" type="submit" style="border-width: 1.5px;">
                             <i class="bi bi-funnel me-1"></i> Apply Filter
                         </button>
@@ -391,34 +416,24 @@
                     <tbody>
                         <!-- Opening Stock -->
                         {% if include_stock %}
-                        <tr class="drilldown-link" onclick="viewDrilldown('Opening Stock')">
-                            <td class="indent-1"><i class="bi bi-box-seam me-2 text-success"></i>Opening Stock</td>
+                        <tr class="collapsible-header" data-target="opening-stock">
+                            <td class="indent-1"><i class="bi bi-chevron-right me-1 text-muted toggle-chevron"></i><i class="bi bi-box-seam me-2 text-success"></i>Opening Stock</td>
                             <td class="financial-number">₹{{ "%.2f"|format(opening_stock) }}</td>
+                        </tr>
+                        <tr class="opening-stock-child drilldown-link" style="display: none;" onclick="viewDrilldown('Opening Stock')">
+                            <td class="indent-2 text-muted">Stock</td>
+                            <td class="financial-number text-muted">₹{{ "%.2f"|format(opening_stock) }}</td>
                         </tr>
                         {% endif %}
                         
-                        <!-- Purchase Accounts -->
-                        <tr class="sub-section-row">
-                            <td class="indent-1 fw-bold"><i class="bi bi-cart me-2 text-primary"></i>Purchase Accounts</td>
-                            <td class="financial-number fw-bold">₹{{ "%.2f"|format(total_purchases) }}</td>
-                        </tr>
-                        {% for sub_cat, amount in purchase_accounts.items() %}
-                            {% if amount > 0 %}
-                            <tr class="drilldown-link" onclick="viewDrilldown('{{ sub_cat }}')">
-                                <td class="indent-2 text-muted">{{ sub_cat }}</td>
-                                <td class="financial-number text-muted">₹{{ "%.2f"|format(amount) }}</td>
-                            </tr>
-                            {% endif %}
-                        {% endfor %}
-                        
                         <!-- Direct Expenses -->
-                        <tr class="sub-section-row">
-                            <td class="indent-1 fw-bold"><i class="bi bi-arrow-right-circle me-2 text-warning"></i>Direct Expenses</td>
+                        <tr class="sub-section-row collapsible-header" data-target="direct-expenses">
+                            <td class="indent-1 fw-bold"><i class="bi bi-chevron-right me-1 text-muted toggle-chevron"></i><i class="bi bi-arrow-right-circle me-2 text-warning"></i>Direct Expenses</td>
                             <td class="financial-number fw-bold">₹{{ "%.2f"|format(total_direct_expenses) }}</td>
                         </tr>
                         {% for sub_cat, amount in direct_expenses.items() %}
                             {% if amount > 0 %}
-                            <tr class="drilldown-link" onclick="viewDrilldown('{{ sub_cat }}')">
+                            <tr class="direct-expenses-child drilldown-link" style="display: none;" onclick="viewDrilldown('{{ sub_cat }}')">
                                 <td class="indent-2 text-muted">{{ sub_cat }}</td>
                                 <td class="financial-number text-muted">₹{{ "%.2f"|format(amount) }}</td>
                             </tr>
@@ -447,13 +462,13 @@
                     </thead>
                     <tbody>
                         <!-- Sales Accounts -->
-                        <tr class="sub-section-row">
-                            <td class="indent-1 fw-bold"><i class="bi bi-graph-up me-2 text-success"></i>Sales Accounts</td>
+                        <tr class="sub-section-row collapsible-header" data-target="sales-accounts">
+                            <td class="indent-1 fw-bold"><i class="bi bi-chevron-right me-1 text-muted toggle-chevron"></i><i class="bi bi-graph-up me-2 text-success"></i>Sales Accounts</td>
                             <td class="financial-number fw-bold">₹{{ "%.2f"|format(total_sales) }}</td>
                         </tr>
                         {% for sub_cat, amount in sales_accounts.items() %}
                             {% if amount > 0 %}
-                            <tr class="drilldown-link" onclick="viewDrilldown('{{ sub_cat }}')">
+                            <tr class="sales-accounts-child drilldown-link" style="display: none;" onclick="viewDrilldown('{{ sub_cat }}')">
                                 <td class="indent-2 text-muted">{{ sub_cat }}</td>
                                 <td class="financial-number text-muted">₹{{ "%.2f"|format(amount) }}</td>
                             </tr>
@@ -461,13 +476,13 @@
                         {% endfor %}
                         
                         <!-- Direct Incomes -->
-                        <tr class="sub-section-row">
-                            <td class="indent-1 fw-bold"><i class="bi bi-wallet2 me-2"></i>Direct Incomes</td>
+                        <tr class="sub-section-row collapsible-header" data-target="direct-incomes">
+                            <td class="indent-1 fw-bold"><i class="bi bi-chevron-right me-1 text-muted toggle-chevron"></i><i class="bi bi-wallet2 me-2"></i>Direct Incomes</td>
                             <td class="financial-number fw-bold">₹{{ "%.2f"|format(total_direct_income) }}</td>
                         </tr>
                         {% for sub_cat, amount in direct_incomes.items() %}
                             {% if amount > 0 %}
-                            <tr class="drilldown-link" onclick="viewDrilldown('{{ sub_cat }}')">
+                            <tr class="direct-incomes-child drilldown-link" style="display: none;" onclick="viewDrilldown('{{ sub_cat }}')">
                                 <td class="indent-2 text-muted">{{ sub_cat }}</td>
                                 <td class="financial-number text-muted">₹{{ "%.2f"|format(amount) }}</td>
                             </tr>
@@ -476,9 +491,13 @@
                         
                         <!-- Closing Stock -->
                         {% if include_stock %}
-                        <tr class="drilldown-link" onclick="viewDrilldown('Closing Stock')">
-                            <td class="indent-1"><i class="bi bi-archive me-2 text-info"></i>Closing Stock</td>
+                        <tr class="collapsible-header" data-target="closing-stock">
+                            <td class="indent-1"><i class="bi bi-chevron-right me-1 text-muted toggle-chevron"></i><i class="bi bi-archive me-2 text-info"></i>Closing Stock</td>
                             <td class="financial-number">₹{{ "%.2f"|format(closing_stock) }}</td>
+                        </tr>
+                        <tr class="closing-stock-child drilldown-link" style="display: none;" onclick="viewDrilldown('Closing Stock')">
+                            <td class="indent-2 text-muted">Stock</td>
+                            <td class="financial-number text-muted">₹{{ "%.2f"|format(closing_stock) }}</td>
                         </tr>
                         {% endif %}
                         
@@ -524,13 +543,13 @@
                         {% endif %}
                         
                         <!-- Indirect Expenses -->
-                        <tr class="sub-section-row">
-                            <td class="indent-1 fw-bold"><i class="bi bi-lightbulb me-2 text-secondary"></i>Indirect Expenses</td>
+                        <tr class="sub-section-row collapsible-header" data-target="indirect-expenses">
+                            <td class="indent-1 fw-bold"><i class="bi bi-chevron-right me-1 text-muted toggle-chevron"></i><i class="bi bi-lightbulb me-2 text-secondary"></i>Indirect Expenses</td>
                             <td class="financial-number fw-bold">₹{{ "%.2f"|format(total_indirect_expenses) }}</td>
                         </tr>
                         {% for sub_cat, amount in indirect_expenses.items() %}
                             {% if amount > 0 %}
-                            <tr class="drilldown-link" onclick="viewDrilldown('{{ sub_cat }}')">
+                            <tr class="indirect-expenses-child drilldown-link" style="display: none;" onclick="viewDrilldown('{{ sub_cat }}')">
                                 <td class="indent-2 text-muted">{{ sub_cat }}</td>
                                 <td class="financial-number text-muted">₹{{ "%.2f"|format(amount) }}</td>
                             </tr>
@@ -561,13 +580,13 @@
                         {% endif %}
                         
                         <!-- Indirect Incomes -->
-                        <tr class="sub-section-row">
-                            <td class="indent-1 fw-bold"><i class="bi bi-percent me-2 text-info"></i>Indirect Incomes</td>
+                        <tr class="sub-section-row collapsible-header" data-target="indirect-incomes">
+                            <td class="indent-1 fw-bold"><i class="bi bi-chevron-right me-1 text-muted toggle-chevron"></i><i class="bi bi-percent me-2 text-info"></i>Indirect Incomes</td>
                             <td class="financial-number fw-bold">₹{{ "%.2f"|format(total_indirect_income) }}</td>
                         </tr>
                         {% for sub_cat, amount in indirect_incomes.items() %}
                             {% if amount > 0 %}
-                            <tr class="drilldown-link" onclick="viewDrilldown('{{ sub_cat }}')">
+                            <tr class="indirect-incomes-child drilldown-link" style="display: none;" onclick="viewDrilldown('{{ sub_cat }}')">
                                 <td class="indent-2 text-muted">{{ sub_cat }}</td>
                                 <td class="financial-number text-muted">₹{{ "%.2f"|format(amount) }}</td>
                             </tr>
@@ -671,7 +690,7 @@
                 <a href="{{ url_for('expense_ledgers') }}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
                     <i class="bi bi-journal-bookmark me-1"></i>Ledger Accounts
                 </a>
-                <a href="{{ url_for('expense_particulars') }}" class="btn btn-sm btn-outline-warning rounded-pill px-3 text-dark">
+                <a href="{{ url_for('expense_ledgers', tab='particulars') }}" class="btn btn-sm btn-outline-warning rounded-pill px-3 text-dark">
                     <i class="bi bi-tags me-1"></i>Expense Particulars
                 </a>
                 <a href="{{ url_for('voucher_register', v_type='other') }}" class="btn btn-sm btn-outline-dark rounded-pill px-3">
@@ -758,20 +777,7 @@
                     <td></td>
                 </tr>
                 {% endif %}
-                <tr>
-                    <td class="ps-4">Add: Purchases Accounts</td>
-                    <td class="text-end font-monospace">₹{{ "%.2f"|format(total_purchases) }}</td>
-                    <td></td>
-                </tr>
-                {% for sub_cat, amount in purchase_accounts.items() %}
-                    {% if amount > 0 %}
-                    <tr class="text-muted small">
-                        <td class="ps-5"><em>{{ sub_cat }}</em></td>
-                        <td class="text-end font-monospace">₹{{ "%.2f"|format(amount) }}</td>
-                        <td></td>
-                    </tr>
-                    {% endif %}
-                {% endfor %}
+
                 {% if total_direct_expenses > 0 %}
                 <tr>
                     <td class="ps-4">Add: Direct Expenses</td>
@@ -1007,6 +1013,59 @@ let detailedLedgerData = null;
 document.addEventListener("DOMContentLoaded", function() {
     // Pre-fetch all transaction details on load in background
     fetchDetailedLedgerData();
+
+    // Toggle collapsible categories
+    document.querySelectorAll('.collapsible-header').forEach(header => {
+        header.addEventListener('click', function(e) {
+            // Prevent execution if user clicked a hyperlink or interactive child
+            if (e.target.tagName === 'A' || e.target.closest('a')) return;
+            
+            const targetGroup = this.getAttribute('data-target');
+            const childRows = document.querySelectorAll(`.${targetGroup}-child`);
+            const isCurrentlyExpanded = this.classList.contains('expanded');
+            
+            if (isCurrentlyExpanded) {
+                this.classList.remove('expanded');
+                childRows.forEach(row => {
+                    row.style.display = 'none';
+                });
+            } else {
+                this.classList.add('expanded');
+                childRows.forEach(row => {
+                    row.style.display = 'table-row';
+                });
+            }
+        });
+    });
+
+    // Expand All / Collapse All behavior
+    const btnToggleExpandAll = document.getElementById('btnToggleExpandAll');
+    let allExpandedState = false;
+    
+    if (btnToggleExpandAll) {
+        btnToggleExpandAll.addEventListener('click', function() {
+            allExpandedState = !allExpandedState;
+            document.querySelectorAll('.collapsible-header').forEach(header => {
+                const targetGroup = header.getAttribute('data-target');
+                const childRows = document.querySelectorAll(`.${targetGroup}-child`);
+                if (allExpandedState) {
+                    header.classList.add('expanded');
+                    childRows.forEach(row => row.style.display = 'table-row');
+                } else {
+                    header.classList.remove('expanded');
+                    childRows.forEach(row => row.style.display = 'none');
+                }
+            });
+            
+            if (allExpandedState) {
+                btnToggleExpandAll.innerHTML = '<i class="bi bi-arrows-collapse me-1"></i> Collapse All';
+                btnToggleExpandAll.classList.replace('btn-outline-primary', 'btn-primary');
+            } else {
+                btnToggleExpandAll.innerHTML = '<i class="bi bi-arrows-expand me-1"></i> Expand All';
+                btnToggleExpandAll.classList.replace('btn-primary', 'btn-outline-primary');
+            }
+        });
+    }
 });
 
 function fetchDetailedLedgerData() {

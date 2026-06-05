@@ -36,7 +36,7 @@
 
                         <!-- Row 2: Particulars (Expense Category) -->
                         <div class="mb-3">
-                            <label class="form-label text-muted small fw-bold">PARTICULARS (EXPENSE CATEGORY) <span class="text-danger">*</span></label>
+                            <label class="form-label text-muted small fw-bold">PARTICULARS <span class="text-danger">*</span></label>
                             {% if particulars %}
                             <select name="particular_id" class="form-select" required id="particular_select" onchange="updateParticularName(this)">
                                 <option value="">— Select Particular —</option>
@@ -109,7 +109,7 @@
                             </div>
                         </div>
 
-                        <!-- Row 5: Amount + P&L Category -->
+                        <!-- Row 5: Amount + Ledger Group -->
                         <div class="row g-3 mb-3">
                             <div class="col-md-6">
                                 <label class="form-label text-muted small fw-bold">TOTAL AMOUNT (₹) <span class="text-danger">*</span></label>
@@ -120,12 +120,11 @@
                                 </div>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label text-muted small fw-bold">P&L CATEGORY</label>
+                                <label class="form-label text-muted small fw-bold">LEDGER GROUP</label>
                                 <select name="pnl_category" class="form-select">
-                                    <option value="Direct Expenses" {% if record['pnl_category'] == 'Direct Expenses' %}selected{% endif %}>Direct Expenses</option>
-                                    <option value="Indirect Expenses" {% if record['pnl_category'] == 'Indirect Expenses' %}selected{% endif %}>Indirect Expenses</option>
-                                    <option value="Capital Account" {% if record['pnl_category'] == 'Capital Account' %}selected{% endif %}>Capital Account</option>
-                                    <option value="Administrative Expenses" {% if record['pnl_category'] == 'Administrative Expenses' %}selected{% endif %}>Administrative Expenses</option>
+                                    {% for g in ledger_groups %}
+                                    <option value="{{ g.group_name }}" {% if record['pnl_category'] == g.group_name %}selected{% endif %}>{{ g.group_name }}</option>
+                                    {% endfor %}
                                 </select>
                             </div>
                         </div>

@@ -35,9 +35,12 @@
                                    value="{% if record %}{{ record.date_of_sale }}{% else %}{{ today }}{% endif %}">
                         </div>
                         <div class="col-md-5">
-                            <label class="form-label text-muted small fw-bold">P&L LEDGER ACCOUNT *</label>
-                            <input type="text" name="pnl_category" class="form-control border-success" required placeholder="e.g. Sales, Other Income"
-                                   value="{% if record %}{{ record.pnl_category }}{% else %}Sales{% endif %}">
+                            <label class="form-label text-muted small fw-bold">LEDGER GROUP <span class="text-danger">*</span></label>
+                            <select name="pnl_category" class="form-select border-success" required>
+                                {% for g in ledger_groups %}
+                                <option value="{{ g.group_name }}" {% if record and record.pnl_category == g.group_name %}selected{% elif not record and g.group_name == 'Sales' %}selected{% endif %}>{{ g.group_name }}</option>
+                                {% endfor %}
+                            </select>
                         </div>
                     </div>
 
@@ -426,7 +429,6 @@ function validateGoatRowWeight(row) {
     const tagInput = row.querySelector('.tag-id-input');
     const feedback = row.querySelector('.tag-feedback');
     const badge = row.querySelector('.tag-status-badge');
-    const weightField = row.querySelector('.field-weight');
     
     if (!tagInput || tagInput.value.trim() === '') return;
     
@@ -435,18 +437,9 @@ function validateGoatRowWeight(row) {
         return;
     }
 
-    const enteredWeight = parseFloat(weightField.value);
-    
-    if (isNaN(enteredWeight) || enteredWeight < 25) {
-        const wtStr = isNaN(enteredWeight) ? 'not set' : enteredWeight + ' kg';
-        feedback.innerHTML = '<span class="text-danger"><i class="bi bi-exclamation-triangle-fill"></i> Warning: Goat weighs ' + wtStr + '. Must weigh 25 kg or above to be sold.</span>';
-        badge.innerHTML = '<span class="badge bg-warning text-dark ms-1">Weight < 25 kg</span>';
-        tagInput.dataset.valid = 'false';
-    } else {
-        feedback.innerHTML = '<span class="text-success"><i class="bi bi-check-circle-fill"></i> Goat found & weight is valid.</span>';
-        badge.innerHTML = '<span class="badge bg-success ms-1">Active</span>';
-        tagInput.dataset.valid = 'true';
-    }
+    feedback.innerHTML = '<span class="text-success"><i class="bi bi-check-circle-fill"></i> Goat found & active.</span>';
+    badge.innerHTML = '<span class="badge bg-success ms-1">Active</span>';
+    tagInput.dataset.valid = 'true';
     validateFormSubmitState();
 }
 

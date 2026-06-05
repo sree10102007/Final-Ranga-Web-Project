@@ -92,72 +92,75 @@
             <span class="badge bg-secondary-subtle text-secondary fs-6 ms-3 rounded-pill">{{ records|length }} Records</span>
         </h4>
         
-        <div class="row g-4">
+        <div class="row g-3">
             {% for r in records %}
             <!-- Card Item carrying sales date for dynamic script parsing -->
-            <div class="col-md-6 col-lg-4 sales-card-item" data-sales-date="{{ r.date }}">
-                <!-- Premium Printed Sales Slip Design -->
-                <div class="card sales-slip border-0 shadow-sm rounded-4 overflow-hidden position-relative">
+            <div class="col-12 sales-card-item" data-sales-date="{{ r.date }}">
+                <!-- Premium Printed Sales Slip Design (Condensed Row) -->
+                <div class="card sales-slip border-0 shadow-sm rounded-4 overflow-hidden">
                     <div class="sales-top-bar" style="
-                        height: 6px; 
+                        height: 4px; 
                         {% if s_type == 'goat' %}background: #10b981;
                         {% else %}background: #3b82f6;{% endif %}
                     "></div>
                     
-                    <div class="card-body p-4">
-                        <!-- Header -->
-                        <div class="d-flex justify-content-between align-items-start mb-3">
-                            <div>
-                                <span class="badge text-uppercase font-monospace mb-1 bg-light text-dark border">
-                                    INV-{% if s_type == 'goat' %}GT{% else %}OT{% endif %}-{{ r.id }}
-                                </span>
-                                <h5 class="fw-bold text-dark mb-0 mt-1">{{ r.title }}</h5>
+                    <div class="card-body p-3">
+                        <div class="row align-items-center">
+                            <!-- Left Area: Invoice # -->
+                            <div class="col-auto">
+                                <div class="d-flex flex-column align-items-center justify-content-center rounded-3 p-2 text-center" style="
+                                    width: 90px;
+                                    height: 60px;
+                                    background: #f8fafc;
+                                    border: 1px solid #e2e8f0;
+                                ">
+                                    <span class="text-uppercase font-monospace fw-bold text-muted" style="font-size: 0.7rem;">INV-{% if s_type == 'goat' %}GT{% else %}OT{% endif %}</span>
+                                    <span class="fw-800 text-dark" style="font-size: 1.1rem; line-height: 1.1;">#{{ r.id }}</span>
+                                </div>
                             </div>
-                            <a href="{{ url_for('sales_invoice', s_type=s_type, id=r.id) }}" class="btn btn-sm btn-success rounded-pill px-2 py-1 shadow-sm" title="Generate Invoice Bill">
-                                <i class="bi bi-receipt-cutoff me-1"></i>Bill
-                            </a>
-                        </div>
-                        
-                        <!-- Body Details -->
-                        <p class="text-muted small mb-3">{{ r.subtitle }}</p>
-                        
-                        <!-- Dotted Divider Line -->
-                        <div class="receipt-divider my-3"></div>
-                        
-                        <!-- Amount & Date -->
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <div>
-                                <div class="text-muted small">Date of Sale</div>
-                                <div class="fw-semibold text-dark small"><i class="bi bi-clock me-1"></i>{{ r.date }}</div>
+                            
+                            <!-- Middle Area: Title & Subtitle & Notes -->
+                            <div class="col text-truncate">
+                                <div class="d-flex align-items-center gap-2 flex-wrap">
+                                    <h5 class="fw-bold text-dark mb-0 text-truncate" style="max-width: 350px;">{{ r.title }}</h5>
+                                    <span class="badge bg-secondary-subtle text-secondary rounded-pill px-2.5 py-1 small fw-bold font-monospace" style="font-size: 0.75rem;">
+                                        <i class="bi bi-calendar-event me-1"></i>{{ r.date }}
+                                    </span>
+                                </div>
+                                <p class="text-muted small mb-0 mt-1 text-truncate" style="font-size: 0.85rem; max-width: 500px;">{{ r.subtitle }}</p>
+                                <div class="text-muted small mt-1 font-monospace text-truncate" style="font-size: 0.75rem; border-left: 3px solid {% if r.notes %}#e2e8f0{% else %}transparent{% endif %}; padding-left: 8px; min-height: 18px; max-width: 500px;">
+                                    {% if r.notes %}
+                                    <i class="bi bi-chat-right-text me-1 text-muted"></i>{{ r.notes }}
+                                    {% else %}
+                                    &nbsp;
+                                    {% endif %}
+                                </div>
                             </div>
-                            <div class="text-end">
-                                <div class="text-muted small">Total Revenue</div>
-                                <div class="fw-800 fs-4 text-success">₹{{ "%.2f"|format(r.amount) }}</div>
+                            
+                            <!-- Right Area: Amount -->
+                            <div class="col-auto px-4 text-end" style="min-width: 140px;">
+                                <div class="text-muted small" style="font-size: 0.7rem; font-weight: 700; letter-spacing: 0.05em;">TOTAL REVENUE</div>
+                                <div class="fw-800 fs-5 text-success">₹{{ "%.2f"|format(r.amount) }}</div>
                             </div>
-                        </div>
-                        
-                        <div class="bg-light rounded-3 p-3 mb-4 small text-muted font-monospace" style="min-height: 50px;">
-                            <i class="bi bi-chat-right-text me-2"></i>{{ r.notes or 'No remarks provided.' }}
-                        </div>
-                        
-                        <!-- Actions -->
-                        <div class="d-flex justify-content-between align-items-center pt-2 border-top border-light">
-                            <span class="small text-muted italic">Verified Income</span>
-                            <div class="d-flex gap-2">
-                                <!-- Alter / Update -->
-                                <a href="{{ url_for('sales_edit', s_type=s_type, id=r.id) }}" 
-                                   class="btn btn-sm btn-outline-warning border rounded-pill px-3" title="Alter Record">
-                                    <i class="bi bi-pencil-square me-1"></i>Alter
-                                </a>
-                                
-                                <!-- Delete -->
-                                <form action="{{ url_for('sales_delete', s_type=s_type, id=r.id) }}" 
-                                      method="POST" class="m-0 d-inline" 
-                                      onsubmit="return confirm('WARNING: Are you sure you want to permanently delete this sales record? This will revert any linked ledger updates and goat statuses.');">
-                                    <button type="submit" class="btn btn-sm btn-outline-danger border rounded-pill px-3" title="Delete Record">
-                                        <i class="bi bi-trash-fill me-1"></i>Delete
-                                    </button>
-                                </form>
+                            
+                            <!-- Right Area: Actions -->
+                            <div class="col-auto">
+                                <div class="d-flex gap-2">
+                                    <a href="{{ url_for('sales_invoice', s_type=s_type, id=r.id) }}" class="btn btn-sm btn-success rounded-pill px-3 py-1.5 shadow-sm d-flex align-items-center gap-1" title="Generate Invoice Bill">
+                                        <i class="bi bi-receipt-cutoff"></i> Bill
+                                    </a>
+                                    <a href="{{ url_for('sales_edit', s_type=s_type, id=r.id) }}" 
+                                       class="btn btn-sm btn-outline-warning border rounded-pill px-3 py-1.5 d-flex align-items-center gap-1" title="Alter Record">
+                                        <i class="bi bi-pencil-square"></i> Alter
+                                    </a>
+                                    <form action="{{ url_for('sales_delete', s_type=s_type, id=r.id) }}" 
+                                          method="POST" class="m-0 d-inline" 
+                                          onsubmit="return confirm('WARNING: Are you sure you want to permanently delete this sales record? This will revert any linked ledger updates and goat statuses.');">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger border rounded-pill px-3 py-1.5 d-flex align-items-center gap-1" title="Delete Record">
+                                            <i class="bi bi-trash-fill"></i> Delete
+                                        </button>
+                                    </form>
+                                </div>
                             </div>
                         </div>
                     </div>

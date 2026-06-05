@@ -35,7 +35,7 @@
 
                         <!-- Row 2: Particulars (Expense Category) -->
                         <div class="mb-3">
-                            <label class="form-label text-muted small fw-bold">PARTICULARS (EXPENSE CATEGORY) <span class="text-danger">*</span></label>
+                            <label class="form-label text-muted small fw-bold">PARTICULARS <span class="text-danger">*</span></label>
                             {% if particulars %}
                             <select name="particular_id" class="form-select" required id="particular_select" onchange="updateParticularName(this)">
                                 <option value="">— Select Particular —</option>
@@ -107,7 +107,7 @@
                             </div>
                         </div>
 
-                        <!-- Row 5: Amount + P&L Category -->
+                        <!-- Row 5: Amount + Ledger Group -->
                         <div class="row g-3 mb-3">
                             <div class="col-md-6">
                                 <label class="form-label text-muted small fw-bold">TOTAL AMOUNT (₹) <span class="text-danger">*</span></label>
@@ -117,12 +117,11 @@
                                 </div>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label text-muted small fw-bold">P&L CATEGORY</label>
+                                <label class="form-label text-muted small fw-bold">LEDGER GROUP</label>
                                 <select name="pnl_category" class="form-select">
-                                    <option value="Direct Expenses" selected>Direct Expenses</option>
-                                    <option value="Indirect Expenses">Indirect Expenses</option>
-                                    <option value="Capital Account">Capital Account</option>
-                                    <option value="Administrative Expenses">Administrative Expenses</option>
+                                    {% for g in ledger_groups %}
+                                    <option value="{{ g.group_name }}">{{ g.group_name }}</option>
+                                    {% endfor %}
                                 </select>
                             </div>
                         </div>

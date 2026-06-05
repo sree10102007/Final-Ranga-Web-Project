@@ -1,6 +1,6 @@
 {% extends 'layout.html' %}
-{% block title %}Ledger Accounts - Expenses Master{% endblock %}
-{% block page_title %}LEDGER ACCOUNTS{% endblock %}
+{% block title %}Ledger Accounts Setup - Expenses Master{% endblock %}
+{% block page_title %}LEDGER CONFIGURATION{% endblock %}
 {% block content %}
 <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
     <div class="d-flex align-items-center gap-3">
@@ -8,94 +8,296 @@
             <i class="bi bi-arrow-left fs-5"></i>
         </a>
         <div>
-            <h2 class="fw-bold text-primary mb-0">Ledger Accounts</h2>
-            <p class="text-muted small mb-0">Define Tally-style ledger groups for P&L allocation</p>
+            <h2 class="fw-bold text-primary mb-0">Ledger Configuration</h2>
+            <p class="text-muted small mb-0">Manage Ledger Accounts, Ledger Groups, and Expense Particulars in one place</p>
         </div>
     </div>
 </div>
 
-<div class="row g-4">
-    <!-- Add Ledger Form -->
-    <div class="col-lg-4">
-        <div class="card border-0 shadow-sm rounded-4 h-100">
-            <div class="card-header bg-primary text-white rounded-top-4 p-4 border-0">
-                <h6 class="fw-bold mb-0"><i class="bi bi-plus-circle me-2"></i>Create New Ledger</h6>
-            </div>
-            <div class="card-body p-4">
-                <form method="post">
-                    <input type="hidden" name="action" value="add">
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold text-dark">Ledger Name <span class="text-danger">*</span></label>
-                        <input type="text" name="ledger_name" class="form-control rounded-3" required placeholder="e.g. Electricity Charges">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold text-dark">Ledger Group <span class="text-danger">*</span></label>
-                        <select name="ledger_group" class="form-select rounded-3">
-                            <option value="Direct Expenses">Direct Expenses</option>
-                            <option value="Indirect Expenses">Indirect Expenses</option>
-                            <option value="Capital Account">Capital Account</option>
-                            <option value="Administrative Expenses">Administrative Expenses</option>
-                            <option value="Selling Expenses">Selling Expenses</option>
-                        </select>
-                    </div>
-                    <div class="mb-4">
-                        <label class="form-label small fw-bold text-dark">Description</label>
-                        <textarea name="description" class="form-control rounded-3" rows="2" placeholder="Brief description..."></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-primary w-100 rounded-pill fw-bold shadow-sm">
-                        <i class="bi bi-plus-circle me-2"></i>Add Ledger
-                    </button>
-                </form>
-            </div>
-        </div>
-    </div>
+<!-- Tabs Navigation -->
+{% set active_tab = request.args.get('tab', 'groups') %}
+<ul class="nav nav-pills nav-fill bg-white p-2 rounded-4 shadow-sm mb-4 border border-light" id="ledgerTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+        <a href="?tab=groups" class="nav-link rounded-3 fw-bold py-2.5 {% if active_tab == 'groups' %}active bg-primary text-white{% else %}text-muted{% endif %}" role="tab">
+            <i class="bi bi-collection-fill me-2"></i>Ledger Groups
+        </a>
+    </li>
+    <li class="nav-item" role="presentation">
+        <a href="?tab=ledgers" class="nav-link rounded-3 fw-bold py-2.5 {% if active_tab == 'ledgers' %}active bg-primary text-white{% else %}text-muted{% endif %}" role="tab">
+            <i class="bi bi-journal-bookmark-fill me-2"></i>Ledger Accounts
+        </a>
+    </li>
+    <li class="nav-item" role="presentation">
+        <a href="?tab=particulars" class="nav-link rounded-3 fw-bold py-2.5 {% if active_tab == 'particulars' %}active bg-primary text-white{% else %}text-muted{% endif %}" role="tab">
+            <i class="bi bi-tags-fill me-2"></i>Expense Particulars
+        </a>
+    </li>
+</ul>
 
-    <!-- Ledger List -->
-    <div class="col-lg-8">
-        <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-            <div class="card-header bg-white border-bottom p-4">
-                <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-journal-bookmark me-2 text-primary"></i>All Ledger Accounts ({{ ledgers|length }})</h6>
+<div class="tab-content" id="ledgerTabsContent">
+    <!-- ── TAB 1: LEDGER ACCOUNTS ── -->
+    {% if active_tab == 'ledgers' %}
+    <div class="row g-4">
+        <!-- Form to Add Ledger -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-primary text-white rounded-top-4 p-4 border-0">
+                    <h6 class="fw-bold mb-0"><i class="bi bi-plus-circle me-2"></i>Create New Ledger</h6>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post" action="{{ url_for('expense_ledgers') }}">
+                        <input type="hidden" name="action" value="add">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-dark">Ledger Name <span class="text-danger">*</span></label>
+                            <input type="text" name="ledger_name" class="form-control rounded-3" required placeholder="e.g. Electricity Charges">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-dark">Ledger Group <span class="text-danger">*</span></label>
+                            <select name="ledger_group" class="form-select rounded-3">
+                                {% for g in groups %}
+                                <option value="{{ g.group_name }}">{{ g.group_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label small fw-bold text-dark">Description</label>
+                            <textarea name="description" class="form-control rounded-3" rows="2" placeholder="Brief description..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 rounded-pill fw-bold shadow-sm">
+                            <i class="bi bi-plus-circle me-2"></i>Add Ledger
+                        </button>
+                    </form>
+                </div>
             </div>
-            {% set groups = ['Direct Expenses','Indirect Expenses','Capital Account','Administrative Expenses','Selling Expenses'] %}
-            {% for grp in groups %}
-                {% set grp_ledgers = ledgers | selectattr('ledger_group', 'equalto', grp) | list %}
-                {% if grp_ledgers %}
-                <div class="px-4 pt-3 pb-1">
-                    <span class="badge rounded-pill px-3 py-2 fw-bold small
-                        {% if grp == 'Direct Expenses' %}bg-success-subtle text-success
-                        {% elif grp == 'Indirect Expenses' %}bg-warning-subtle text-warning
-                        {% elif grp == 'Capital Account' %}bg-primary-subtle text-primary
-                        {% else %}bg-secondary-subtle text-secondary{% endif %}">
-                        {{ grp }}
-                    </span>
+        </div>
+        
+        <!-- List of Ledgers -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="card-header bg-white border-bottom p-4">
+                    <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-journal-bookmark me-2 text-primary"></i>All Ledger Accounts ({{ ledgers|length }})</h6>
                 </div>
-                {% for l in grp_ledgers %}
-                <div class="d-flex align-items-center justify-content-between px-4 py-3 border-bottom">
-                    <div>
-                        <div class="fw-semibold text-dark">{{ l.ledger_name }}</div>
-                        {% if l.description %}<div class="text-muted small">{{ l.description }}</div>{% endif %}
+                {% for g in groups %}
+                    {% set grp = g.group_name %}
+                    {% set grp_ledgers = ledgers | selectattr('ledger_group', 'equalto', grp) | list %}
+                    {% if grp_ledgers %}
+                    <div class="px-4 pt-3 pb-1">
+                        <span class="badge rounded-pill px-3 py-2 fw-bold small
+                            {% if grp == 'Direct Expenses' %}bg-success-subtle text-success
+                            {% elif grp == 'Indirect Expenses' %}bg-warning-subtle text-warning
+                            {% elif grp == 'Capital Account' %}bg-primary-subtle text-primary
+                            {% else %}bg-secondary-subtle text-secondary{% endif %}">
+                            {{ grp }}
+                        </span>
                     </div>
-                    <div class="d-flex gap-2">
-                        <a href="{{ url_for('expense_ledger_edit', lid=l.id) }}" class="btn btn-outline-warning btn-sm rounded-pill px-3">
-                            <i class="bi bi-pencil me-1"></i>Edit
-                        </a>
-                        <form action="{{ url_for('expense_ledger_delete', lid=l.id) }}" method="post" class="d-inline" onsubmit="return confirm('Delete this ledger?');">
-                            <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3">
-                                <i class="bi bi-trash me-1"></i>Delete
-                            </button>
-                        </form>
+                    {% for l in grp_ledgers %}
+                    <div class="d-flex align-items-center justify-content-between px-4 py-3 border-bottom">
+                        <div>
+                            <div class="fw-semibold text-dark">{{ l.ledger_name }}</div>
+                            {% if l.description %}<div class="text-muted small">{{ l.description }}</div>{% endif %}
+                        </div>
+                        <div class="d-flex gap-2">
+                            <a href="{{ url_for('expense_ledger_edit', lid=l.id) }}" class="btn btn-outline-warning btn-sm rounded-pill px-3">
+                                <i class="bi bi-pencil me-1"></i>Edit
+                            </a>
+                            <form action="{{ url_for('expense_ledger_delete', lid=l.id) }}" method="post" class="d-inline" onsubmit="return confirm('Delete this ledger?');">
+                                <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3">
+                                    <i class="bi bi-trash me-1"></i>Delete
+                                </button>
+                            </form>
+                        </div>
                     </div>
-                </div>
+                    {% endfor %}
+                    {% endif %}
                 {% endfor %}
+                
+                {% if unassigned_ledgers %}
+                    <div class="px-4 pt-3 pb-1">
+                        <span class="badge rounded-pill px-3 py-2 fw-bold small bg-danger-subtle text-danger">
+                            Unassigned / Suspense
+                        </span>
+                    </div>
+                    {% for l in unassigned_ledgers %}
+                    <div class="d-flex align-items-center justify-content-between px-4 py-3 border-bottom">
+                        <div>
+                            <div class="fw-semibold text-dark">{{ l.ledger_name }}</div>
+                            {% if l.description %}<div class="text-muted small">{{ l.description }}</div>{% endif %}
+                            <div class="text-danger small mt-1"><i class="bi bi-exclamation-triangle me-1"></i>Current Group: "{{ l.ledger_group or 'None' }}" (Deleted)</div>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <a href="{{ url_for('expense_ledger_edit', lid=l.id) }}" class="btn btn-outline-warning btn-sm rounded-pill px-3">
+                                <i class="bi bi-pencil me-1"></i>Edit
+                            </a>
+                            <form action="{{ url_for('expense_ledger_delete', lid=l.id) }}" method="post" class="d-inline" onsubmit="return confirm('Delete this ledger?');">
+                                <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3">
+                                    <i class="bi bi-trash me-1"></i>Delete
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endfor %}
                 {% endif %}
-            {% endfor %}
-            {% if not ledgers %}
-            <div class="text-center py-5 text-muted">
-                <i class="bi bi-journal-x fs-1 d-block mb-3 opacity-25"></i>
-                No ledgers yet. Create your first ledger on the left.
+                {% if not ledgers and not unassigned_ledgers %}
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-journal-x fs-1 d-block mb-3 opacity-25"></i>
+                    No ledgers yet. Create your first ledger on the left.
+                </div>
+                {% endif %}
             </div>
-            {% endif %}
         </div>
     </div>
+    {% endif %}
+
+    <!-- ── TAB 2: LEDGER GROUPS ── -->
+    {% if active_tab == 'groups' %}
+    <div class="row g-4">
+        <!-- Form to Add Group -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-primary text-white rounded-top-4 p-4 border-0">
+                    <h6 class="fw-bold mb-0"><i class="bi bi-plus-circle me-2"></i>Create New Group</h6>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post" action="{{ url_for('ledger_groups') }}">
+                        <input type="hidden" name="action" value="add">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-dark">Group Name <span class="text-danger">*</span></label>
+                            <input type="text" name="group_name" class="form-control rounded-3" required placeholder="e.g. Operating Expenses">
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label small fw-bold text-dark">Description</label>
+                            <textarea name="description" class="form-control rounded-3" rows="3" placeholder="Brief description..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 rounded-pill fw-bold shadow-sm">
+                            <i class="bi bi-plus-circle me-2"></i>Add Group
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- List of Groups -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="card-header bg-white border-bottom p-4">
+                    <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-collection me-2 text-primary"></i>All Ledger Groups ({{ groups|length }})</h6>
+                </div>
+                <div class="list-group list-group-flush">
+                    {% set default_groups = ['Direct Expenses', 'Indirect Expenses', 'Capital Account', 'Administrative Expenses', 'Selling Expenses'] %}
+                    {% for g in groups %}
+                    <div class="list-group-item px-4 py-3 border-bottom d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="d-flex align-items-center gap-2 flex-wrap">
+                                <span class="fw-semibold text-dark">{{ g.group_name }}</span>
+                                {% if g.group_name in default_groups %}
+                                <span class="badge bg-secondary-subtle text-secondary rounded-pill px-2.5 py-1 small fw-bold">System Default</span>
+                                {% endif %}
+                                <span class="badge bg-primary-subtle text-primary rounded-pill px-2 py-0.5 small fw-bold font-monospace">{{ g.ledger_count }} ledgers</span>
+                            </div>
+                            {% if g.description %}
+                            <div class="text-muted small mt-1">{{ g.description }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="d-flex gap-2">
+                            <a href="{{ url_for('ledger_group_edit', gid=g.id) }}" class="btn btn-outline-warning btn-sm rounded-pill px-3">
+                                <i class="bi bi-pencil me-1"></i>Edit
+                            </a>
+                            <form action="{{ url_for('ledger_group_delete', gid=g.id) }}" method="post" class="d-inline" onsubmit="return confirm('WARNING: Are you sure you want to permanently delete this Ledger Group? This action cannot be undone. Any linked ledgers will become unassigned.');">
+                                <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3">
+                                    <i class="bi bi-trash me-1"></i>Delete
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- ── TAB 3: EXPENSE PARTICULARS ── -->
+    {% if active_tab == 'particulars' %}
+    <div class="row g-4">
+        <!-- Form to Add Particular -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-primary text-white rounded-top-4 p-4 border-0">
+                    <h6 class="fw-bold mb-0"><i class="bi bi-plus-circle me-2"></i>Create New Particular</h6>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post" action="{{ url_for('expense_particulars') }}">
+                        <input type="hidden" name="action" value="add">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-dark">Particular Name <span class="text-danger">*</span></label>
+                            <input type="text" name="name" class="form-control rounded-3" required placeholder="e.g. Office Stationery">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-dark">Linked Ledger</label>
+                            <select name="ledger_id" class="form-select rounded-3">
+                                <option value="">— No Ledger —</option>
+                                {% for l in ledgers %}
+                                <option value="{{ l.id }}">{{ l.ledger_name }} ({{ l.ledger_group }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label small fw-bold text-dark">Description</label>
+                            <textarea name="description" class="form-control rounded-3" rows="3" placeholder="Brief description..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 rounded-pill fw-bold shadow-sm">
+                            <i class="bi bi-plus-circle me-2"></i>Add Particular
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- List of Particulars -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="card-header bg-white border-bottom p-4">
+                    <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-tags me-2 text-primary"></i>All Expense Particulars ({{ particulars|length }})</h6>
+                </div>
+                <div class="list-group list-group-flush">
+                    {% for p in particulars %}
+                    <div class="list-group-item px-4 py-3 border-bottom d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="fw-semibold text-dark">{{ p.name }}</div>
+                            <div class="d-flex align-items-center gap-2 mt-1 flex-wrap">
+                                {% if p.ledger_name %}
+                                <span class="badge rounded-pill px-2.5 py-1 small fw-bold bg-success-subtle text-success">
+                                    Linked: {{ p.ledger_name }}
+                                </span>
+                                <span class="badge rounded-pill px-2 py-0.5 small fw-bold font-monospace text-muted">
+                                    {{ p.ledger_group }}
+                                </span>
+                                {% else %}
+                                <span class="badge rounded-pill px-2.5 py-1 small fw-bold bg-danger-subtle text-danger">
+                                    Unlinked (No Ledger)
+                                </span>
+                                {% endif %}
+                            </div>
+                            {% if p.description %}
+                            <div class="text-muted small mt-1">{{ p.description }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="d-flex gap-2">
+                            <a href="{{ url_for('expense_particular_edit', pid=p.id) }}" class="btn btn-outline-warning btn-sm rounded-pill px-3">
+                                <i class="bi bi-pencil me-1"></i>Edit
+                            </a>
+                            <form action="{{ url_for('expense_particular_delete', pid=p.id) }}" method="post" class="d-inline" onsubmit="return confirm('Delete this particular?');">
+                                <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3">
+                                    <i class="bi bi-trash me-1"></i>Delete
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
 </div>
 {% endblock %}
