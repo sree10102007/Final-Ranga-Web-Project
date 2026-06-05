@@ -853,8 +853,22 @@ def goat_detail(tag_number):
     '''
     history = db.execute(history_query, (tag_number, tag_number, tag_number, tag_number, tag_number, tag_number)).fetchall()
     
-    income = sum(r['amount'] for r in history if r['category'] == 'income')
-    expense = sum(r['amount'] for r in history if r['category'] == 'expense')
+    income = 0.0
+    for r in history:
+        if r['category'] == 'income':
+            try:
+                income += float(r['amount'] or 0.0)
+            except (ValueError, TypeError):
+                pass
+
+    expense = 0.0
+    for r in history:
+        if r['category'] == 'expense':
+            try:
+                expense += float(r['amount'] or 0.0)
+            except (ValueError, TypeError):
+                pass
+                
     profit = income - expense
     
     return render_template('goat_detail.html', tag_number=tag_number, goat=goat, income=income, expense=expense, profit=profit, history=history)
