@@ -1,0 +1,67 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="row mb-4">
+    <div class="col-8">
+        <h2 class="fw-bold text-success"><i class="bi bi-emoji-smile"></i> Kits (Young Goats) Register</h2>
+        <p class="text-muted mb-0">List of young goats marked with active kit status from the master register.</p>
+    </div>
+    <div class="col-4 text-end">
+        <a href="{{ url_for('master_add') }}" class="btn btn-success shadow-sm">
+            <i class="bi bi-plus-circle"></i> Add Master Record
+        </a>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm rounded-4">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" style="min-width: 1800px;">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">SI No</th>
+                        <th>Tag No</th>
+                        <th>Status</th>
+                        <th>Breed Data</th>
+                        <th>Gender & Color</th>
+                        <th>Weight</th>
+                        <th>Purchase Info</th>
+                        <th>Medical Cycles</th>
+                        <th>Breeding & Offspring</th>
+                        <th>Sales Info</th>
+                        <th>Mortality Info</th>
+                        <th class="pe-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in records %}
+                    <tr>
+                        <td class="ps-4">{{ loop.index }}</td>
+                        <td class="fw-bold"><span class="badge bg-success">{{ r.tag_no }}</span></td>
+                        <td>
+                            <span class="badge {% if r.status == 'Active' %}bg-primary{% elif r.status == 'Sold' %}bg-warning{% else %}bg-danger{% endif %}">
+                                {{ r.status }}
+                            </span>
+                        </td>
+                        <td><small>{{ r.breed }}<br>{{ r.breed_percent }}%</small></td>
+                        <td class="small">{% if r.gender|lower == 'm' %}Male{% elif r.gender|lower == 'f' %}Female{% else %}{{ r.gender }}{% endif %}<br><span class="text-muted">{{ r.color }}</span></td>
+                        <td>{{ r.weight_kg }} kg</td>
+                        <td><small>{{ r.purchase_date }}<br>₹{{ r.purchase_amount }}</small></td>
+                        <td><small>Vac: {{ r.vaccination }} ({{ r.vaccination_period }})<br>Med: {{ r.medicine }} ({{ r.medicine_period }})</small></td>
+                        <td><small>Mated: {{ r.mating_date }} / {{ r.mating_goat_no }}<br>Delivery: {{ r.delivery_date }}</small></td>
+                        <td><small>{{ r.selling_date }}<br>₹{{ r.selling_price }}<br>{{ r.selling_weight }}kg</small></td>
+                        <td><small>{{ r.mortality_date }}<br>{{ r.mortality_weight }}kg<br><i class="text-danger">{{ r.mortality_reason }}</i></small></td>
+                        <td class="pe-4">
+                            <a href="{{ url_for('master_edit', id=r['id']) }}" class="btn btn-sm btn-warning me-2"><i class="bi bi-pencil"></i></a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="12" class="text-center py-4 text-muted">No kits (young goats) found in the master register.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

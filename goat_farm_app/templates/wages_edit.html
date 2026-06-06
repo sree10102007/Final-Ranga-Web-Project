@@ -1,0 +1,135 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0"><i class="fas fa-money-bill"></i> Edit Wages - {{ employee.name }}</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('wages_edit', emp_id=employee.id) }}" novalidate>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label" for="daily_wage">Daily Wage (₹)</label>
+                                <input type="number" class="form-control" id="daily_wage" name="daily_wage" step="0.01" value="{{ wages.daily_wage or '0' }}" placeholder="Enter daily wage">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label" for="weekly_salary">Weekly Salary (₹)</label>
+                                <input type="number" class="form-control" id="weekly_salary" name="weekly_salary" step="0.01" value="{{ wages.weekly_salary or '0' }}" placeholder="Enter weekly salary">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label" for="monthly_salary">Monthly Salary (₹)</label>
+                                <input type="number" class="form-control" id="monthly_salary" name="monthly_salary" step="0.01" value="{{ wages.monthly_salary or '0' }}" placeholder="Enter monthly salary">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label" for="overtime_rate">Overtime Rate (₹/hour)</label>
+                                <input type="number" class="form-control" id="overtime_rate" name="overtime_rate" step="0.01" value="{{ wages.overtime_rate or '0' }}" placeholder="Enter overtime rate">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label" for="bonus">Bonus (₹)</label>
+                                <input type="number" class="form-control" id="bonus" name="bonus" step="0.01" value="{{ wages.bonus or '0' }}" placeholder="Enter bonus amount">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label" for="advance_salary">Advance Salary (₹)</label>
+                                <input type="number" class="form-control" id="advance_salary" name="advance_salary" step="0.01" value="{{ wages.advance_salary or '0' }}" placeholder="Enter advance salary">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label" for="pending_payment">Pending Payment (₹)</label>
+                                <input type="number" class="form-control" id="pending_payment" name="pending_payment" step="0.01" value="{{ wages.pending_payment or '0' }}" placeholder="Enter pending payment">
+                            </div>
+                        </div>
+
+                        <!-- Summary Card -->
+                        <div class="card bg-light mb-3">
+                            <div class="card-body">
+                                <h6 class="card-title">Wage Summary</h6>
+                                <table class="table table-sm table-borderless">
+                                    <tr>
+                                        <td><strong>Monthly Salary:</strong></td>
+                                        <td class="text-end">₹ <span id="summary_monthly">{{ wages.monthly_salary or '0' }}</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Bonus:</strong></td>
+                                        <td class="text-end">₹ <span id="summary_bonus">{{ wages.bonus or '0' }}</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Advance Salary:</strong></td>
+                                        <td class="text-end">₹ <span id="summary_advance">{{ wages.advance_salary or '0' }}</span></td>
+                                    </tr>
+                                    <tr class="border-top">
+                                        <td><strong>Pending Payment:</strong></td>
+                                        <td class="text-end text-danger"><strong>₹ <span id="summary_pending">{{ wages.pending_payment or '0' }}</span></strong></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-between">
+                            <a href="{{ url_for('wages_list') }}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Back
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Save Wages
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Employee Info -->
+            <div class="card mt-3">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">Employee Information</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-borderless table-sm">
+                        <tr>
+                            <td><strong>Employee ID:</strong></td>
+                            <td>{{ employee.employee_id }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Name:</strong></td>
+                            <td>{{ employee.name }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Role:</strong></td>
+                            <td>{{ employee.role }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Joining Date:</strong></td>
+                            <td>{{ employee.joining_date }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Update summary on input change
+document.getElementById('monthly_salary').addEventListener('change', function() {
+    document.getElementById('summary_monthly').textContent = this.value;
+});
+document.getElementById('bonus').addEventListener('change', function() {
+    document.getElementById('summary_bonus').textContent = this.value;
+});
+document.getElementById('advance_salary').addEventListener('change', function() {
+    document.getElementById('summary_advance').textContent = this.value;
+});
+document.getElementById('pending_payment').addEventListener('change', function() {
+    document.getElementById('summary_pending').textContent = this.value;
+});
+</script>
+{% endblock %}
