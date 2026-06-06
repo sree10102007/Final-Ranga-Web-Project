@@ -676,7 +676,7 @@ with app.app_context():
 
 @app.before_request
 def require_login():
-    allowed_routes = ['login', 'static', 'register', 'verify_otp', 'goats', 'goat_detail']
+    allowed_routes = ['login', 'static', 'register', 'goats', 'goat_detail']
     if request.endpoint not in allowed_routes and 'user_id' not in session:
         return redirect(url_for('login'))
 
@@ -725,55 +725,26 @@ def register():
         password = request.form['password']
         
         db = get_db()
+        
+        # Enforce account limit of 6
+        user_count = db.execute('SELECT COUNT(*) FROM users').fetchone()[0] or 0
+        if user_count >= 6:
+            flash('Registration limit reached. A maximum of 6 accounts is allowed.', 'danger')
+            return redirect(url_for('register'))
+            
         existing = db.execute('SELECT id FROM users WHERE username = ?', (username,)).fetchone()
         if existing:
             flash('Username already exists.', 'danger')
             return redirect(url_for('register'))
             
-        # Generate 6-digit OTP
-        otp = str(random.randint(100000, 999999))
-        print(f"\n" + "="*50)
-        print(f" MOCK OTP NOTIFICATION")
-        print(f" Registration OTP for '{username}' is: {otp}")
-        print("="*50 + "\n")
+        password_hash = generate_password_hash(password)
+        db.execute('INSERT INTO users (username, password) VALUES (?, ?)', (username, password_hash))
+        db.commit()
         
-        session['reg_username'] = username
-        session['reg_password'] = generate_password_hash(password)
-        session['reg_otp'] = otp
-        
-        flash('We have generated an OTP for you. Since this is a demo, please check the console for the code.', 'info')
-        return redirect(url_for('verify_otp'))
+        flash('Registration successful! You can now log in.', 'success')
+        return redirect(url_for('login'))
         
     return render_template('register.html')
-
-@app.route('/verify_otp', methods=['GET', 'POST'])
-def verify_otp():
-    if 'reg_otp' not in session:
-        flash('Session expired. Please register again.', 'warning')
-        return redirect(url_for('register'))
-        
-    if request.method == 'POST':
-        user_otp = request.form['otp'].strip()
-        if user_otp == session['reg_otp']:
-            # OTP matches, create user
-            username = session['reg_username']
-            password_hash = session['reg_password']
-            
-            db = get_db()
-            db.execute('INSERT INTO users (username, password) VALUES (?, ?)', (username, password_hash))
-            db.commit()
-            
-            # Clear registration session data
-            session.pop('reg_username', None)
-            session.pop('reg_password', None)
-            session.pop('reg_otp', None)
-            
-            flash('Registration successful! You can now log in.', 'success')
-            return redirect(url_for('login'))
-        else:
-            flash('Invalid OTP. Please try again.', 'danger')
-            
-    return render_template('verify_otp.html')
 
 @app.route('/')
 @app.route('/dashboard')
