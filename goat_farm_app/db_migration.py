@@ -1,40 +1,103 @@
-import sqlite3
 import os
+import psycopg2
+import psycopg2.extras
+
+# Resolve root path
+base_dir = os.path.dirname(os.path.abspath(__file__))
+
+# Load environment variables from .env file if dotenv is installed
+try:
+    from dotenv import load_dotenv
+    load_dotenv(os.path.join(base_dir, '.env'))
+except ImportError:
+    pass
+
+def get_db_connection():
+    db_url = os.environ.get('DATABASE_URL')
+    if db_url:
+        return psycopg2.connect(db_url)
+    
+    db_name = os.environ.get('DB_NAME', 'goat_farm')
+    try:
+        return psycopg2.connect(
+            host=os.environ.get('DB_HOST', 'localhost'),
+            port=os.environ.get('DB_PORT', '5432'),
+            database=db_name,
+            user=os.environ.get('DB_USER', 'postgres'),
+            password=os.environ.get('DB_PASSWORD', 'postgres'),
+            sslmode=os.environ.get('DB_SSLMODE', 'prefer')
+        )
+    except psycopg2.OperationalError as e:
+        if "does not exist" in str(e):
+            try:
+                # Connect to default 'postgres' database to create the target database
+                conn = psycopg2.connect(
+                    host=os.environ.get('DB_HOST', 'localhost'),
+                    port=os.environ.get('DB_PORT', '5432'),
+                    database='postgres',
+                    user=os.environ.get('DB_USER', 'postgres'),
+                    password=os.environ.get('DB_PASSWORD', 'postgres'),
+                    sslmode=os.environ.get('DB_SSLMODE', 'prefer')
+                )
+                conn.autocommit = True
+                with conn.cursor() as cursor:
+                    cursor.execute(f'CREATE DATABASE "{db_name}"')
+                conn.close()
+                # Retry connecting to the newly created database
+                return psycopg2.connect(
+                    host=os.environ.get('DB_HOST', 'localhost'),
+                    port=os.environ.get('DB_PORT', '5432'),
+                    database=db_name,
+                    user=os.environ.get('DB_USER', 'postgres'),
+                    password=os.environ.get('DB_PASSWORD', 'postgres'),
+                    sslmode=os.environ.get('DB_SSLMODE', 'prefer')
+                )
+            except Exception:
+                raise e
+        else:
+            raise e
+
+# Mock sqlite3 exception namespace for compatibility if we catch errors
+class SqliteExceptionCompat:
+    OperationalError = psycopg2.OperationalError
+    IntegrityError = psycopg2.IntegrityError
+    Error = psycopg2.Error
+
+sqlite3 = SqliteExceptionCompat
 
 def migrate():
-    # Detect the correct DB file path
-    db_path = 'database.db'
-    if not os.path.exists(db_path):
-        # Check if it's in the same dir as the app
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-        db_path = os.path.join(current_dir, 'database.db')
-        if not os.path.exists(db_path):
-             print(f"Database {db_path} not found. A new one will be created.")
-    
-    conn = sqlite3.connect(db_path)
+    print("Connecting to PostgreSQL database...")
+    conn = get_db_connection()
+    # Set autocommit to True so each schema creation runs in its own transaction block.
+    # This prevents the whole transaction from aborting if a statement fails.
+    conn.autocommit = True
     cursor = conn.cursor()
 
     def get_columns(table_name):
         try:
-            cursor.execute(f"PRAGMA table_info({table_name})")
-            return [row[1] for row in cursor.fetchall()]
-        except:
+            # Query information_schema for column names
+            cursor.execute(
+                "SELECT column_name FROM information_schema.columns WHERE table_name = %s",
+                (table_name.lower(),)
+            )
+            return [row[0] for row in cursor.fetchall()]
+        except Exception as e:
+            print(f"Error getting columns for {table_name}: {e}")
             return []
 
     def add_column(table_name, column_name, column_type):
         cols = get_columns(table_name)
-        if column_name not in cols:
+        if column_name.lower() not in [c.lower() for c in cols]:
             print(f"Adding column {column_name} to {table_name}...")
             try:
-                cursor.execute(f"ALTER TABLE {table_name} ADD COLUMN {column_name} {column_type}")
-                conn.commit()
-            except sqlite3.OperationalError as e:
+                cursor.execute(f"ALTER TABLE {table_name} ADD COLUMN IF NOT EXISTS {column_name} {column_type}")
+            except Exception as e:
                 print(f"Error adding column {column_name}: {e}")
 
     # --- 1. EQUIPMENT ---
     print("Checking equipment table...")
     cursor.execute('''CREATE TABLE IF NOT EXISTS equipment (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id SERIAL PRIMARY KEY,
         name TEXT,
         type TEXT,
         purchase_date DATE,
@@ -45,14 +108,13 @@ def migrate():
         assigned_employee TEXT,
         service_due_date DATE
     )''')
-    conn.commit()
     for col in ['name', 'type', 'purchase_date', 'purchase_cost', 'supplier', 'status', 'notes', 'assigned_employee', 'service_due_date']:
         add_column('equipment', col, 'TEXT' if col not in ['purchase_cost', 'purchase_date', 'service_due_date'] else 'REAL' if col == 'purchase_cost' else 'DATE')
 
     # --- 2. EQUIPMENT SERVICES (es) ---
     print("Checking equipment_services table...")
     cursor.execute('''CREATE TABLE IF NOT EXISTS equipment_services (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id SERIAL PRIMARY KEY,
         equipment_id INTEGER,
         vendor_name TEXT,
         service_date DATE,
@@ -61,14 +123,13 @@ def migrate():
         status TEXT,
         notes TEXT
     )''')
-    conn.commit()
     for col in ['vendor_name', 'service_date', 'service_cost', 'description', 'status', 'notes']:
         add_column('equipment_services', col, 'TEXT' if col != 'service_cost' else 'REAL')
 
     # --- 3. EXPENSES ---
     print("Checking expenses table...")
     cursor.execute('''CREATE TABLE IF NOT EXISTS expenses (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id SERIAL PRIMARY KEY,
         category TEXT,
         amount REAL,
         date DATE,
@@ -76,16 +137,17 @@ def migrate():
         vendor_name TEXT,
         payment_mode TEXT,
         receipt_no TEXT,
-        notes TEXT
+        notes TEXT,
+        status TEXT,
+        pnl_category TEXT
     )''')
-    conn.commit()
-    for col in ['category', 'amount', 'date', 'description', 'vendor_name', 'payment_mode', 'receipt_no', 'notes']:
+    for col in ['category', 'amount', 'date', 'description', 'vendor_name', 'payment_mode', 'receipt_no', 'notes', 'status', 'pnl_category']:
         add_column('expenses', col, 'TEXT' if col != 'amount' else 'REAL')
 
     # --- 4. FEED INVENTORY ---
     print("Checking feed_inventory table...")
     cursor.execute('''CREATE TABLE IF NOT EXISTS feed_inventory (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id SERIAL PRIMARY KEY,
         feed_name TEXT,
         opening_stock REAL,
         purchased_qty REAL,
@@ -98,14 +160,13 @@ def migrate():
         supplier TEXT,
         alert_level REAL
     )''')
-    conn.commit()
     for col in ['feed_name', 'opening_stock', 'purchased_qty', 'used_qty', 'closing_stock', 'unit', 'cost_per_unit', 'total_cost', 'purchase_date', 'supplier', 'alert_level']:
         add_column('feed_inventory', col, 'TEXT' if col in ['feed_name', 'unit', 'purchase_date', 'supplier'] else 'REAL')
 
     # --- 5. FINANCES ---
     print("Checking finances table...")
     cursor.execute('''CREATE TABLE IF NOT EXISTS finances (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id SERIAL PRIMARY KEY,
         type TEXT,
         category TEXT,
         amount REAL,
@@ -114,14 +175,13 @@ def migrate():
         reference_id TEXT,
         notes TEXT
     )''')
-    conn.commit()
     for col in ['type', 'category', 'amount', 'date', 'description', 'reference_id', 'notes']:
         add_column('finances', col, 'TEXT' if col != 'amount' else 'REAL')
 
     # --- 6. EMPLOYEES ---
     print("Checking employees table...")
     cursor.execute('''CREATE TABLE IF NOT EXISTS employees (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id SERIAL PRIMARY KEY,
         name TEXT,
         role TEXT,
         phone TEXT,
@@ -132,27 +192,25 @@ def migrate():
         status TEXT,
         notes TEXT
     )''')
-    conn.commit()
     for col in ['name', 'role', 'phone', 'address', 'join_date', 'wage_type', 'wage_rate', 'status', 'notes']:
         add_column('employees', col, 'TEXT' if col != 'wage_rate' else 'REAL')
 
     # --- 7. ATTENDANCE ---
     print("Checking attendance table...")
     cursor.execute('''CREATE TABLE IF NOT EXISTS attendance (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id SERIAL PRIMARY KEY,
         employee_id INTEGER,
         date DATE,
         status TEXT,
         notes TEXT
     )''')
-    conn.commit()
     for col in ['employee_id', 'date', 'status', 'notes']:
         add_column('attendance', col, 'INTEGER' if col == 'employee_id' else 'TEXT')
 
     # --- 8. SALARY PAYMENTS ---
     print("Checking salary_payments table...")
     cursor.execute('''CREATE TABLE IF NOT EXISTS salary_payments (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id SERIAL PRIMARY KEY,
         employee_id INTEGER,
         month INTEGER,
         year INTEGER,
@@ -164,14 +222,13 @@ def migrate():
         paid_date DATE,
         payment_mode TEXT
     )''')
-    conn.commit()
     for col in ['employee_id', 'month', 'year', 'total_days', 'present_days', 'gross_salary', 'deductions', 'net_salary', 'paid_date', 'payment_mode']:
         add_column('salary_payments', col, 'REAL' if 'salary' in col or 'deductions' in col else 'INTEGER' if 'days' in col or col in ['employee_id', 'month', 'year'] else 'TEXT')
 
     # --- 9. FARM SETTINGS ---
     print("Checking farm_settings table...")
     cursor.execute('''CREATE TABLE IF NOT EXISTS farm_settings (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id SERIAL PRIMARY KEY,
         farm_name TEXT,
         address TEXT,
         phone TEXT,
@@ -182,14 +239,13 @@ def migrate():
         gst_no TEXT,
         logo_path TEXT
     )''')
-    conn.commit()
     for col in ['farm_name', 'address', 'phone', 'email', 'bank_name', 'account_no', 'ifsc_code', 'gst_no', 'logo_path']:
         add_column('farm_settings', col, 'TEXT')
 
     # --- 10. REPORTS ---
     print("Checking reports table...")
     cursor.execute('''CREATE TABLE IF NOT EXISTS reports (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id SERIAL PRIMARY KEY,
         report_type TEXT,
         generated_date DATE,
         from_date DATE,
@@ -197,7 +253,6 @@ def migrate():
         file_path TEXT,
         notes TEXT
     )''')
-    conn.commit()
     for col in ['report_type', 'generated_date', 'from_date', 'to_date', 'file_path', 'notes']:
         add_column('reports', col, 'TEXT')
 
@@ -214,4 +269,15 @@ def migrate():
     conn.close()
 
 if __name__ == '__main__':
-    migrate()
+    try:
+        migrate()
+    except psycopg2.OperationalError as e:
+        import sys
+        print("\n" + "="*80)
+        print("  MIGRATION DATABASE CONNECTION ERROR")
+        print("="*80)
+        print(f"Could not connect to PostgreSQL database: {e}")
+        print("\nPlease verify your connection parameters in the '.env' file located in the 'goat_farm_app' directory.")
+        print("Specifically, make sure 'DB_PASSWORD' matches your PostgreSQL user's password.")
+        print("="*80 + "\n")
+        sys.exit(1)

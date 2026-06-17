@@ -1,9 +1,11 @@
 import os
-import sqlite3
 import random
 from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file, jsonify, g
 from werkzeug.security import generate_password_hash, check_password_hash
+import psycopg2
+import psycopg2.extras
+import sys
 
 # Resolve root path to handle Windows folder redirection (e.g. OneDrive)
 base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -13,19 +15,216 @@ if not os.path.exists(os.path.join(base_dir, 'templates')):
     if os.path.exists(os.path.join(alt_dir, 'templates')):
         base_dir = alt_dir
 
+# Load environment variables from .env file if dotenv is installed
+try:
+    from dotenv import load_dotenv
+    load_dotenv(os.path.join(base_dir, '.env'))
+except ImportError:
+    pass
+
+
+# Map SQLite exceptions to psycopg2 exceptions for backward compatibility in catch blocks
+class DummySqlite3:
+    OperationalError = (psycopg2.OperationalError, psycopg2.ProgrammingError)
+    IntegrityError = psycopg2.IntegrityError
+    Error = psycopg2.Error
+    Row = object
+
+sqlite3 = DummySqlite3
+sys.modules['sqlite3'] = DummySqlite3
+
+# Postgres Connection Wrapper classes
+class PostgresCursorWrapper:
+    def __init__(self, cursor, conn_wrapper):
+        self.cursor = cursor
+        self.conn_wrapper = conn_wrapper
+        self.lastrowid = None
+
+    def execute(self, sql, params=None):
+        import re
+        # Translate placeholder from SQLite (?) to Postgres (%s)
+        translated_sql = sql.replace('?', '%s')
+        
+        # Translate SQLite-specific IFNULL to PostgreSQL-compatible COALESCE
+        translated_sql = re.sub(r'\bIFNULL\b', 'COALESCE', translated_sql, flags=re.IGNORECASE)
+        
+        # Translate SQLite case-insensitive LIKE to PostgreSQL ILIKE
+        translated_sql = re.sub(r'\bLIKE\b', 'ILIKE', translated_sql, flags=re.IGNORECASE)
+        
+        # Translate AUTOINCREMENT to SERIAL
+        translated_sql = re.sub(r'\bINTEGER\s+PRIMARY\s+KEY\s+AUTOINCREMENT\b', 'SERIAL PRIMARY KEY', translated_sql, flags=re.IGNORECASE)
+        
+        # Check if query is an INSERT
+        is_insert = translated_sql.strip().upper().startswith('INSERT')
+        has_returning = 'RETURNING' in translated_sql.upper()
+        
+        if is_insert and not has_returning:
+            stripped = translated_sql.strip()
+            if stripped.endswith(';'):
+                translated_sql = stripped[:-1] + ' RETURNING id;'
+            else:
+                translated_sql = stripped + ' RETURNING id'
+        
+        if params is not None:
+            if not isinstance(params, (tuple, list)):
+                params = (params,)
+            # Convert empty strings to None to prevent PostgreSQL database type errors
+            new_params = []
+            for p in params:
+                if p == '':
+                    new_params.append(None)
+                else:
+                    new_params.append(p)
+            params = tuple(new_params)
+                
+        # Check if inside transaction block to use savepoints
+        in_transaction = (self.conn_wrapper.conn.get_transaction_status() == psycopg2.extensions.TRANSACTION_STATUS_INTRANS)
+        
+        savepoint_name = None
+        if in_transaction:
+            savepoint_name = f"sp_{random.randint(1000000, 9999999)}"
+            # Execute savepoint on a separate temporary cursor so we don't clear the active query's results
+            with self.conn_wrapper.conn.cursor() as sp_cur:
+                sp_cur.execute(f"SAVEPOINT {savepoint_name}")
+            
+        try:
+            self.cursor.execute(translated_sql, params)
+            if is_insert and not has_returning:
+                row = self.cursor.fetchone()
+                if row:
+                    self.lastrowid = row[0]
+            if savepoint_name:
+                with self.conn_wrapper.conn.cursor() as sp_cur:
+                    sp_cur.execute(f"RELEASE SAVEPOINT {savepoint_name}")
+        except Exception as e:
+            if savepoint_name:
+                try:
+                    with self.conn_wrapper.conn.cursor() as sp_cur:
+                        sp_cur.execute(f"ROLLBACK TO SAVEPOINT {savepoint_name}")
+                except Exception:
+                    pass
+            raise e
+            
+        return self
+
+    def fetchone(self):
+        try:
+            return self.cursor.fetchone()
+        except psycopg2.ProgrammingError:
+            # Handle cases where no results are returned (e.g. INSERT/UPDATE/DELETE queries)
+            return None
+
+    def fetchall(self):
+        try:
+            return self.cursor.fetchall()
+        except psycopg2.ProgrammingError:
+            return []
+
+    def fetchmany(self, size=None):
+        try:
+            if size is None:
+                return self.cursor.fetchmany()
+            return self.cursor.fetchmany(size)
+        except psycopg2.ProgrammingError:
+            return []
+
+    @property
+    def description(self):
+        return self.cursor.description
+
+    @property
+    def rowcount(self):
+        return self.cursor.rowcount
+
+    def __iter__(self):
+        try:
+            return iter(self.cursor)
+        except psycopg2.ProgrammingError:
+            return iter([])
+
+class PostgresConnectionWrapper:
+    def __init__(self, conn):
+        self.conn = conn
+
+    def cursor(self):
+        cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        return PostgresCursorWrapper(cur, self)
+
+    def execute(self, sql, params=None):
+        cur = self.cursor()
+        cur.execute(sql, params)
+        return cur
+
+    def commit(self):
+        self.conn.commit()
+
+    def rollback(self):
+        self.conn.rollback()
+
+    def close(self):
+        self.conn.close()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if exc_type is not None:
+            self.rollback()
+        else:
+            self.commit()
+
+def get_db_connection():
+    db_url = os.environ.get('DATABASE_URL')
+    if db_url:
+        return psycopg2.connect(db_url)
+    
+    db_name = os.environ.get('DB_NAME', 'goat_farm')
+    try:
+        return psycopg2.connect(
+            host=os.environ.get('DB_HOST', 'localhost'),
+            port=os.environ.get('DB_PORT', '5432'),
+            database=db_name,
+            user=os.environ.get('DB_USER', 'postgres'),
+            password=os.environ.get('DB_PASSWORD', 'postgres'),
+            sslmode=os.environ.get('DB_SSLMODE', 'prefer')
+        )
+    except psycopg2.OperationalError as e:
+        if "does not exist" in str(e):
+            try:
+                # Connect to default 'postgres' database to create the target database
+                conn = psycopg2.connect(
+                    host=os.environ.get('DB_HOST', 'localhost'),
+                    port=os.environ.get('DB_PORT', '5432'),
+                    database='postgres',
+                    user=os.environ.get('DB_USER', 'postgres'),
+                    password=os.environ.get('DB_PASSWORD', 'postgres'),
+                    sslmode=os.environ.get('DB_SSLMODE', 'prefer')
+                )
+                conn.autocommit = True
+                with conn.cursor() as cursor:
+                    cursor.execute(f'CREATE DATABASE "{db_name}"')
+                conn.close()
+                # Retry connecting to the newly created database
+                return psycopg2.connect(
+                    host=os.environ.get('DB_HOST', 'localhost'),
+                    port=os.environ.get('DB_PORT', '5432'),
+                    database=db_name,
+                    user=os.environ.get('DB_USER', 'postgres'),
+                    password=os.environ.get('DB_PASSWORD', 'postgres'),
+                    sslmode=os.environ.get('DB_SSLMODE', 'prefer')
+                )
+            except Exception:
+                raise e
+        else:
+            raise e
+
 app = Flask(__name__, root_path=base_dir)
 app.secret_key = 'dev_secret_key_for_goat_farm'
-DB_FILE = os.path.join(app.root_path, 'database.db')
 
 def get_db():
     db = getattr(g, '_database', None)
     if db is None:
-        db = g._database = sqlite3.connect(DB_FILE, timeout=30.0)
-        db.row_factory = sqlite3.Row
-        try:
-            db.execute("PRAGMA journal_mode=WAL;")
-        except Exception:
-            pass
+        db = g._database = PostgresConnectionWrapper(get_db_connection())
     return db
 
 @app.teardown_appcontext
@@ -33,6 +232,7 @@ def close_connection(exception):
     db = getattr(g, '_database', None)
     if db is not None:
         db.close()
+
 
 def calculate_age_str(dob_str):
     if not dob_str:
@@ -126,16 +326,18 @@ def calculate_kid_age_months(birth_date_str):
 
 def init_db():
     with get_db() as conn:
+        old_autocommit = conn.conn.autocommit
+        conn.conn.autocommit = True
         conn.execute('''
             CREATE TABLE IF NOT EXISTS users (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id SERIAL PRIMARY KEY,
                 username TEXT UNIQUE NOT NULL,
                 password TEXT NOT NULL
             )
         ''')
         conn.execute('''
             CREATE TABLE IF NOT EXISTS goats_data (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id SERIAL PRIMARY KEY,
                 tag_number TEXT NOT NULL,
                 date DATE NOT NULL,
                 category TEXT NOT NULL,
@@ -146,8 +348,8 @@ def init_db():
         ''')
         conn.execute('''
             CREATE TABLE IF NOT EXISTS master_records (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                si_no TEXT, tag_no TEXT NOT NULL, breed TEXT, breed_percent TEXT,
+                id SERIAL PRIMARY KEY,
+                si_no TEXT, tag_no TEXT UNIQUE NOT NULL, breed TEXT, breed_percent TEXT,
                 status TEXT, sold TEXT, expired TEXT, gender TEXT, purchase_date DATE,
                 color TEXT, weight_kg REAL, purchase_amount REAL, insurance_date DATE,
                 vaccination TEXT, vaccination_period TEXT, vaccination_next_due DATE, medicine TEXT, medicine_period TEXT,
@@ -160,12 +362,12 @@ def init_db():
             )
         ''')
         try:
-            conn.execute('ALTER TABLE master_records ADD COLUMN vaccination_next_due DATE')
+            conn.execute('ALTER TABLE master_records ADD COLUMN IF NOT EXISTS vaccination_next_due DATE')
         except Exception:
             pass
         conn.execute('''
             CREATE TABLE IF NOT EXISTS sales_records (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id SERIAL PRIMARY KEY,
                 sr_no TEXT,
                 tag_id TEXT NOT NULL,
                 breed TEXT,
@@ -181,7 +383,7 @@ def init_db():
         ''')
         conn.execute('''
             CREATE TABLE IF NOT EXISTS other_sales_records (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id SERIAL PRIMARY KEY,
                 sr_no TEXT,
                 item_name TEXT NOT NULL,
                 quantity REAL,
@@ -197,7 +399,7 @@ def init_db():
         ''')
         conn.execute('''
             CREATE TABLE IF NOT EXISTS medicine_records (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id SERIAL PRIMARY KEY,
                 sr_no TEXT,
                 tag_no TEXT NOT NULL,
                 breed TEXT,
@@ -213,7 +415,7 @@ def init_db():
         ''')
         conn.execute('''
             CREATE TABLE IF NOT EXISTS mortality_records (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id SERIAL PRIMARY KEY,
                 sr_no TEXT,
                 tag_id TEXT NOT NULL,
                 breed TEXT,
@@ -232,7 +434,7 @@ def init_db():
         ''')
         conn.execute('''
             CREATE TABLE IF NOT EXISTS feed_inventory (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id SERIAL PRIMARY KEY,
                 feed_name TEXT NOT NULL,
                 opening_stock REAL DEFAULT 0,
                 purchased_qty REAL DEFAULT 0,
@@ -248,7 +450,7 @@ def init_db():
         ''')
         conn.execute('''
             CREATE TABLE IF NOT EXISTS medicine_inventory (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id SERIAL PRIMARY KEY,
                 medicine_name TEXT NOT NULL,
                 opening_stock REAL DEFAULT 0,
                 purchased_qty REAL DEFAULT 0,
@@ -265,7 +467,7 @@ def init_db():
         ''')
         conn.execute('''
             CREATE TABLE IF NOT EXISTS vaccine_inventory (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id SERIAL PRIMARY KEY,
                 vaccine_name TEXT NOT NULL,
                 opening_stock REAL DEFAULT 0,
                 purchased_qty REAL DEFAULT 0,
@@ -281,12 +483,12 @@ def init_db():
             )
         ''')
         try:
-            conn.execute('ALTER TABLE feed_inventory ADD COLUMN wastage_qty REAL DEFAULT 0')
+            conn.execute('ALTER TABLE feed_inventory ADD COLUMN IF NOT EXISTS wastage_qty REAL DEFAULT 0')
         except sqlite3.OperationalError:
             pass
         conn.execute('''
             CREATE TABLE IF NOT EXISTS kid_records (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id SERIAL PRIMARY KEY,
                 s_no TEXT,
                 kid_id TEXT NOT NULL,
                 breed TEXT,
@@ -303,7 +505,7 @@ def init_db():
         ''')
         def add_column(table, column, definition):
             try:
-                conn.execute(f"ALTER TABLE {table} ADD COLUMN {column} {definition}")
+                conn.execute(f"ALTER TABLE {table} ADD COLUMN IF NOT EXISTS {column} {definition}")
             except sqlite3.OperationalError:
                 pass
                 
@@ -315,12 +517,12 @@ def init_db():
         add_column("kid_records", "insurance_amount", "REAL")
 
         try:
-            conn.execute("ALTER TABLE master_records ADD COLUMN kit_status TEXT DEFAULT 'No'")
+            conn.execute("ALTER TABLE master_records ADD COLUMN IF NOT EXISTS kit_status TEXT DEFAULT 'No'")
         except sqlite3.OperationalError:
             pass
 
         try:
-            conn.execute("ALTER TABLE master_records ADD COLUMN dob DATE")
+            conn.execute("ALTER TABLE master_records ADD COLUMN IF NOT EXISTS dob DATE")
         except sqlite3.OperationalError:
             pass
 
@@ -336,6 +538,7 @@ def init_db():
         add_column("equipment", "pnl_category", "TEXT DEFAULT 'Purchase'")
         add_column("sales_records", "pnl_category", "TEXT DEFAULT 'Sales'")
         add_column("other_sales_records", "pnl_category", "TEXT DEFAULT 'Sales'")
+        add_column("expenses", "pnl_category", "TEXT DEFAULT 'Direct Expenses'")
 
         # Form details alignment for all vouchers
         add_column("purchases", "bill_date", "DATE")
@@ -377,7 +580,7 @@ def init_db():
         # Ensure equipment table has all required fields
         conn.execute('''
             CREATE TABLE IF NOT EXISTS equipment (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id SERIAL PRIMARY KEY,
                 name TEXT,
                 type TEXT,
                 purchase_date DATE,
@@ -394,7 +597,7 @@ def init_db():
 
         conn.execute('''
             CREATE TABLE IF NOT EXISTS medicine_history (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id SERIAL PRIMARY KEY,
                 tag_no TEXT NOT NULL,
                 doctor_name TEXT,
                 consultation_date DATE NOT NULL,
@@ -407,14 +610,14 @@ def init_db():
         ''')
         conn.execute('''
             CREATE TABLE IF NOT EXISTS breeds (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id SERIAL PRIMARY KEY,
                 breed_name TEXT UNIQUE NOT NULL,
                 description TEXT
             )
         ''')
         conn.execute('''
             CREATE TABLE IF NOT EXISTS suppliers (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id SERIAL PRIMARY KEY,
                 supplier_name TEXT UNIQUE NOT NULL,
                 contact_person TEXT,
                 phone TEXT,
@@ -424,7 +627,7 @@ def init_db():
         ''')
         conn.execute('''
             CREATE TABLE IF NOT EXISTS feed_purchases (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id SERIAL PRIMARY KEY,
                 feed_name TEXT NOT NULL,
                 quantity REAL NOT NULL,
                 unit TEXT,
@@ -435,7 +638,7 @@ def init_db():
         ''')
         conn.execute('''
             CREATE TABLE IF NOT EXISTS medicine_purchases (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id SERIAL PRIMARY KEY,
                 medicine_name TEXT NOT NULL,
                 dose_unit TEXT,
                 quantity REAL NOT NULL,
@@ -446,7 +649,7 @@ def init_db():
         ''')
         conn.execute('''
             CREATE TABLE IF NOT EXISTS vaccine_purchases (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id SERIAL PRIMARY KEY,
                 vaccine_name TEXT NOT NULL,
                 quantity REAL NOT NULL,
                 cost REAL NOT NULL,
@@ -456,7 +659,7 @@ def init_db():
         ''')
         conn.execute('''
             CREATE TABLE IF NOT EXISTS purchases (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id SERIAL PRIMARY KEY,
                 seller_name TEXT NOT NULL,
                 invoice_details TEXT,
                 purchase_date DATE NOT NULL,
@@ -466,7 +669,7 @@ def init_db():
         ''')
         conn.execute('''
             CREATE TABLE IF NOT EXISTS farm_info (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id SERIAL PRIMARY KEY,
                 farm_name TEXT,
                 farm_address TEXT,
                 farm_city TEXT,
@@ -478,7 +681,7 @@ def init_db():
         ''')
         conn.execute('''
             CREATE TABLE IF NOT EXISTS vaccine_records (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id SERIAL PRIMARY KEY,
                 sr_no TEXT,
                 tag_no TEXT NOT NULL,
                 vaccine_date DATE NOT NULL,
@@ -492,12 +695,12 @@ def init_db():
             )
         ''')
         try:
-            conn.execute("ALTER TABLE vaccine_records ADD COLUMN next_due_date DATE")
+            conn.execute("ALTER TABLE vaccine_records ADD COLUMN IF NOT EXISTS next_due_date DATE")
         except sqlite3.OperationalError:
             pass
         conn.execute('''
             CREATE TABLE IF NOT EXISTS doctor_details (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id SERIAL PRIMARY KEY,
                 doctor_name TEXT NOT NULL,
                 specialization TEXT,
                 contact_number TEXT,
@@ -512,7 +715,7 @@ def init_db():
         ''')
         conn.execute('''
             CREATE TABLE IF NOT EXISTS eligible_to_sell (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id SERIAL PRIMARY KEY,
                 tag_id TEXT UNIQUE NOT NULL,
                 tag_no TEXT NOT NULL,
                 breed TEXT,
@@ -524,7 +727,7 @@ def init_db():
         ''')
         conn.execute('''
             CREATE TABLE IF NOT EXISTS user_login_tracking (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id SERIAL PRIMARY KEY,
                 user_id INTEGER NOT NULL,
                 last_login_date DATE DEFAULT NULL,
                 has_seen_weight_notification INTEGER DEFAULT 0,
@@ -533,14 +736,14 @@ def init_db():
         ''')
         # Add alert_level column to feed_inventory if it doesn't exist
         try:
-            conn.execute('ALTER TABLE feed_inventory ADD COLUMN alert_level REAL DEFAULT 0')
+            conn.execute('ALTER TABLE feed_inventory ADD COLUMN IF NOT EXISTS alert_level REAL DEFAULT 0')
         except sqlite3.OperationalError:
             pass
 
         # Create batch_reminders table
         conn.execute('''
             CREATE TABLE IF NOT EXISTS batch_reminders (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id SERIAL PRIMARY KEY,
                 batch_name TEXT NOT NULL,
                 reminder_type TEXT NOT NULL,
                 item_name TEXT NOT NULL,
@@ -552,7 +755,7 @@ def init_db():
         # ── EXPENSES MASTER TABLES ──────────────────────────────────────────────
         conn.execute('''
             CREATE TABLE IF NOT EXISTS ledger_groups (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id SERIAL PRIMARY KEY,
                 group_name TEXT UNIQUE NOT NULL,
                 description TEXT
             )
@@ -575,7 +778,7 @@ def init_db():
 
         conn.execute('''
             CREATE TABLE IF NOT EXISTS expense_ledgers (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id SERIAL PRIMARY KEY,
                 ledger_name TEXT UNIQUE NOT NULL,
                 ledger_group TEXT DEFAULT 'Direct Expenses',
                 description TEXT
@@ -583,7 +786,7 @@ def init_db():
         ''')
         conn.execute('''
             CREATE TABLE IF NOT EXISTS expense_particulars (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id SERIAL PRIMARY KEY,
                 name TEXT UNIQUE NOT NULL,
                 ledger_id INTEGER,
                 description TEXT,
@@ -592,14 +795,14 @@ def init_db():
         ''')
         conn.execute('''
             CREATE TABLE IF NOT EXISTS expense_units (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id SERIAL PRIMARY KEY,
                 unit_name TEXT UNIQUE NOT NULL,
                 unit_symbol TEXT
             )
         ''')
         conn.execute('''
             CREATE TABLE IF NOT EXISTS other_vouchers (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id SERIAL PRIMARY KEY,
                 voucher_date DATE NOT NULL,
                 supplier_name TEXT,
                 particular_id INTEGER,
@@ -669,10 +872,164 @@ def init_db():
                 current_si += 1
                 conn.execute("UPDATE master_records SET si_no = ? WHERE id = ?", (str(current_si), row[0]))
         conn.commit()
+        conn.conn.autocommit = old_autocommit
+
+db_connection_error = None
 
 # Initialize DB on startup
-with app.app_context():
-    init_db()
+try:
+    with app.app_context():
+        init_db()
+except psycopg2.OperationalError as e:
+    db_connection_error = str(e)
+    print("\n" + "="*80)
+    print("  DATABASE CONNECTION ERROR")
+    print("="*80)
+    print(f"Could not connect to PostgreSQL database: {e}")
+    print("\nPlease verify your connection parameters in the '.env' file located in the 'goat_farm_app' directory.")
+    print("Specifically, make sure 'DB_PASSWORD' matches your PostgreSQL user's password.")
+    print("="*80 + "\n")
+
+@app.before_request
+def check_db_connection():
+    global db_connection_error
+    if db_connection_error:
+        # Re-check the connection in case they updated the .env file
+        try:
+            # Re-read .env variables manually in case they changed
+            from dotenv import load_dotenv
+            load_dotenv(os.path.join(base_dir, '.env'), override=True)
+            with get_db_connection() as conn:
+                pass
+            # If successful, reload database schema and clear the error flag
+            with app.app_context():
+                init_db()
+                init_employee_tables()
+            db_connection_error = None
+            return # Proceed to the normal route
+        except Exception as new_err:
+            # Still failed, render error page
+            return f"""
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Database Connection Error</title>
+                <style>
+                    body {{
+                        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                        background-color: #f3f4f6;
+                        color: #1f2937;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        height: 100vh;
+                        margin: 0;
+                    }}
+                    .card {{
+                        background: white;
+                        padding: 40px;
+                        border-radius: 16px;
+                        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+                        max-width: 600px;
+                        width: 90%;
+                    }}
+                    h1 {{
+                        color: #e11d48;
+                        font-size: 26px;
+                        margin-top: 0;
+                        border-bottom: 2px solid #ffe4e6;
+                        padding-bottom: 15px;
+                        display: flex;
+                        align-items: center;
+                        gap: 10px;
+                    }}
+                    p {{
+                        line-height: 1.6;
+                        color: #4b5563;
+                        font-size: 15px;
+                    }}
+                    .code-block {{
+                        background-color: #1f2937;
+                        color: #f9fafb;
+                        padding: 18px;
+                        border-radius: 8px;
+                        font-family: 'Fira Code', 'Courier New', Courier, monospace;
+                        font-size: 13px;
+                        white-space: pre-wrap;
+                        margin: 20px 0;
+                        border-left: 4px solid #ef4444;
+                        overflow-x: auto;
+                    }}
+                    .instruction {{
+                        background-color: #f0f9ff;
+                        border-left: 4px solid #0284c7;
+                        padding: 20px;
+                        margin: 20px 0;
+                        border-radius: 0 12px 12px 0;
+                    }}
+                    .instruction h3 {{
+                        margin-top: 0;
+                        color: #0369a1;
+                    }}
+                    .instruction ol {{
+                        margin-bottom: 0;
+                        padding-left: 20px;
+                    }}
+                    .instruction li {{
+                        margin: 10px 0;
+                    }}
+                    .highlight {{
+                        font-weight: bold;
+                        color: #0284c7;
+                        background: #e0f2fe;
+                        padding: 2px 6px;
+                        border-radius: 4px;
+                    }}
+                    .button-container {{
+                        margin-top: 25px;
+                        text-align: right;
+                    }}
+                    .btn {{
+                        background-color: #2563eb;
+                        color: white;
+                        border: none;
+                        padding: 10px 20px;
+                        border-radius: 8px;
+                        cursor: pointer;
+                        font-weight: 600;
+                        transition: background-color 0.2s;
+                        text-decoration: none;
+                        display: inline-block;
+                    }}
+                    .btn:hover {{
+                        background-color: #1d4ed8;
+                    }}
+                </style>
+            </head>
+            <body>
+                <div class="card">
+                    <h1>🔌 Database Connection Failed</h1>
+                    <p>The web application server is running, but it cannot connect to your PostgreSQL database.</p>
+                    
+                    <h3>Technical Error Details:</h3>
+                    <div class="code-block">{new_err}</div>
+                    
+                    <div class="instruction">
+                        <h3>How to fix this:</h3>
+                        <ol>
+                            <li>Open the file <span class="highlight">goat_farm_app/.env</span> in your text editor.</li>
+                            <li>Change <span class="highlight">DB_PASSWORD=postgres</span> to your actual PostgreSQL password.</li>
+                            <li>Save the file and click <strong>"Retry Connection"</strong> below.</li>
+                        </ol>
+                    </div>
+                    
+                    <div class="button-container">
+                        <button onclick="window.location.reload()" class="btn">Retry Connection</button>
+                    </div>
+                </div>
+            </body>
+            </html>
+            """
 
 @app.before_request
 def require_login():
@@ -1054,7 +1411,7 @@ def goats():
                IFNULL(SUM(CASE WHEN a.category = 'expense' THEN a.amount ELSE 0 END), 0) as total_expense
         FROM master_records m
         LEFT JOIN AllRecords a ON m.tag_no = a.tag_no
-        GROUP BY m.tag_no
+        GROUP BY m.tag_no, m.status, m.dob
         ORDER BY CAST(m.tag_no AS INTEGER) ASC
     ''').fetchall()
     
@@ -4260,6 +4617,8 @@ def init_employee_tables():
         # Populate sr_no if empty/null
         conn.execute('UPDATE employees SET sr_no = id WHERE sr_no IS NULL OR sr_no = 0')
         add_col("expenses", "bill_file", "TEXT")
+        add_col("expenses", "status", "TEXT DEFAULT 'Pending'")
+        add_col("expenses", "pnl_category", "TEXT DEFAULT 'Direct Expenses'")
         conn.execute('''CREATE TABLE IF NOT EXISTS employee_wages (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             employee_id INTEGER UNIQUE, daily_wage REAL DEFAULT 0,
@@ -4291,7 +4650,8 @@ def init_employee_tables():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             category TEXT, amount REAL, date DATE,
             description TEXT, vendor_name TEXT, payment_mode TEXT,
-            receipt_no TEXT, notes TEXT, status TEXT DEFAULT 'Pending')''')
+            receipt_no TEXT, notes TEXT, status TEXT DEFAULT 'Pending',
+            pnl_category TEXT DEFAULT 'Direct Expenses')''')
         conn.execute('''CREATE TABLE IF NOT EXISTS equipment (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL, type TEXT, purchase_date DATE, purchase_cost REAL,
@@ -4326,7 +4686,8 @@ def init_employee_tables():
 
 
 with app.app_context():
-    init_employee_tables()
+    if not db_connection_error:
+        init_employee_tables()
 
 @app.route('/employees')
 def employees():
@@ -4432,7 +4793,7 @@ def attendance_view():
     date_filter = request.args.get('date', datetime.now().strftime('%Y-%m-%d'))
     
     # Fetch all active employees
-    emps = db.execute('SELECT * FROM employees WHERE status="Active" ORDER BY CAST(sr_no AS INTEGER) ASC').fetchall()
+    emps = db.execute("SELECT * FROM employees WHERE status='Active' ORDER BY CAST(sr_no AS INTEGER) ASC").fetchall()
     
     # Fetch existing attendance records for the selected date
     existing = db.execute('SELECT * FROM attendance WHERE date = ?', (date_filter,)).fetchall()
@@ -4448,7 +4809,7 @@ def attendance_save():
         flash('Date is required!', 'danger')
         return redirect(url_for('attendance_view'))
         
-    emps = db.execute('SELECT id FROM employees WHERE status="Active"').fetchall()
+    emps = db.execute("SELECT id FROM employees WHERE status='Active'").fetchall()
     for emp in emps:
         emp_id = emp['id']
         status = request.form.get(f'status_{emp_id}', 'Present')
@@ -4660,7 +5021,7 @@ def tasks():
         p.append(status_filter)
     q += ' ORDER BY t.due_date ASC'
     records = db.execute(q, p).fetchall()
-    emps = db.execute('SELECT * FROM employees WHERE status="Active" ORDER BY name').fetchall()
+    emps = db.execute("SELECT * FROM employees WHERE status='Active' ORDER BY name").fetchall()
     statuses = ['Pending', 'In Progress', 'Completed']
     return render_template('tasks.html', records=records, employees=emps, statuses=statuses, status_filter=status_filter)
 
@@ -4699,7 +5060,7 @@ def leaves():
         p.append(status_filter)
     q += ' ORDER BY l.start_date DESC'
     records = db.execute(q, p).fetchall()
-    emps = db.execute('SELECT * FROM employees WHERE status="Active" ORDER BY name').fetchall()
+    emps = db.execute("SELECT * FROM employees WHERE status='Active' ORDER BY name").fetchall()
     statuses = ['Pending', 'Approved', 'Rejected']
     return render_template('leaves.html', records=records, employees=emps, statuses=statuses, status_filter=status_filter)
 

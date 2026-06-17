@@ -1,6 +1,6 @@
 # 🐐 Ranga Farms — Goat Farm Management System
 
-A comprehensive full-stack web application for managing all operations of a goat farm, built with **Flask**, **SQLite**, and **Bootstrap**.
+A comprehensive full-stack web application for managing all operations of a goat farm, built with **Flask**, **PostgreSQL**, and **Bootstrap**.
 
 ## ✨ Features
 
@@ -55,10 +55,10 @@ Final-Ranga-Web-Project/
 ├── README.md
 ├── .gitignore
 └── goat_farm_app/
-    ├── Project_goatfarm.py     # Main Flask application
-    ├── db_migration.py         # Database migration scripts
-    ├── seed_mock_data.py       # Sample data seeder
-    ├── requirements.txt        # Python dependencies
+    ├── Project_goatfarm.py     # Main Flask application with PostgreSQL support
+    ├── db_migration.py         # Dynamic PostgreSQL schema migrations
+    ├── seed_mock_data.py       # PostgreSQL sample data seeder
+    ├── requirements.txt        # Python dependencies (includes psycopg2-binary)
     ├── static/
     │   ├── css/style.css       # Custom styles
     │   └── js/main.js          # Client-side JavaScript
@@ -73,7 +73,31 @@ Final-Ranga-Web-Project/
 
 ### Prerequisites
 - Python 3.8+
+- PostgreSQL database instance
 - pip
+
+### Database Configuration
+Before running the application, make sure PostgreSQL is running. 
+
+By default, the application connects to a local PostgreSQL instance using:
+- **Host**: `localhost`
+- **Port**: `5432`
+- **Database**: `goat_farm`
+- **User**: `postgres`
+- **Password**: `postgres`
+
+To customize these connection credentials (both locally and when deploying online), configure them directly in your environment variables:
+- `DB_HOST`
+- `DB_PORT`
+- `DB_NAME`
+- `DB_USER`
+- `DB_PASSWORD`
+- `DB_SSLMODE` (defaults to `prefer`)
+
+Or set a single connection URI:
+- `DATABASE_URL` (e.g. `postgresql://user:password@host:port/database_name`)
+
+Create a new PostgreSQL database matching your configuration name (defaults to `goat_farm`).
 
 ### Installation
 
@@ -93,14 +117,15 @@ source .venv/bin/activate
 
 # Install dependencies
 pip install -r goat_farm_app/requirements.txt
-
-# Run the application
-python goat_farm_app/Project_goatfarm.py
 ```
 
-The app will be available at `http://localhost:5000`.
+### Run the Application
+```bash
+python goat_farm_app/Project_goatfarm.py
+```
+The app will be available at `http://localhost:5001`.
 
-### Seed Sample Data (Optional)
+### Seed Sample Data (Optional, for clean databases)
 ```bash
 python goat_farm_app/seed_mock_data.py
 ```
@@ -110,7 +135,7 @@ python goat_farm_app/seed_mock_data.py
 | Layer      | Technology       |
 |------------|------------------|
 | Backend    | Flask 3.0        |
-| Database   | SQLite           |
+| Database   | PostgreSQL       |
 | Frontend   | Bootstrap + Jinja2 |
 | Auth       | Werkzeug 3.0     |
 | Language   | Python 3         |
