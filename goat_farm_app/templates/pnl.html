@@ -427,17 +427,33 @@
                         {% endif %}
                         
                         <!-- Direct Expenses -->
-                        <tr class="sub-section-row collapsible-header" data-target="direct-expenses">
-                            <td class="indent-1 fw-bold"><i class="bi bi-chevron-right me-1 text-muted toggle-chevron"></i><i class="bi bi-arrow-right-circle me-2 text-warning"></i>Direct Expenses</td>
-                            <td class="financial-number fw-bold">₹{{ "%.2f"|format(total_direct_expenses) }}</td>
+                        {% for grp_name, grp_data in direct_expenses_tree.items() %}
+                        <tr class="sub-section-row collapsible-header" data-target="direct-exp-grp-{{ loop.index }}">
+                            <td class="indent-1 fw-bold">
+                                <i class="bi bi-chevron-right me-1 text-muted toggle-chevron"></i>
+                                <i class="bi bi-arrow-right-circle me-2 text-warning"></i>{{ grp_name }}
+                            </td>
+                            <td class="financial-number fw-bold">₹{{ "%.2f"|format(grp_data.ledger_group_total) }}</td>
                         </tr>
-                        {% for sub_cat, amount in direct_expenses.items() %}
-                            {% if amount > 0 %}
-                            <tr class="direct-expenses-child drilldown-link" style="display: none;" onclick="viewDrilldown('{{ sub_cat }}')">
-                                <td class="indent-2 text-muted">{{ sub_cat }}</td>
-                                <td class="financial-number text-muted">₹{{ "%.2f"|format(amount) }}</td>
-                            </tr>
-                            {% endif %}
+                        
+                        {% for ldr_name, ldr_data in grp_data.accounts.items() %}
+                        <tr class="direct-exp-grp-{{ loop.parent.index }}-child collapsible-header" data-target="direct-exp-ldr-{{ loop.parent.index }}-{{ loop.index }}" style="display: none; background-color: #f8fafc;">
+                            <td class="indent-2 fw-semibold" style="padding-left: 40px !important;">
+                                <i class="bi bi-chevron-right me-1 text-muted toggle-chevron"></i>
+                                <i class="bi bi-folder2 me-2 text-primary"></i>{{ ldr_name }}
+                            </td>
+                            <td class="financial-number fw-semibold">₹{{ "%.2f"|format(ldr_data.ledger_account_total) }}</td>
+                        </tr>
+                        
+                        {% for part_name, part_data in ldr_data.particulars.items() %}
+                        <tr class="direct-exp-ldr-{{ loop.parent.parent.index }}-{{ loop.parent.index }}-child drilldown-link" style="display: none;" onclick="viewDrilldown('{{ part_name }}')">
+                            <td class="indent-3 text-muted" style="padding-left: 65px !important;">
+                                <i class="bi bi-tag me-2 text-secondary"></i>{{ part_name }}
+                            </td>
+                            <td class="financial-number text-muted">₹{{ "%.2f"|format(part_data.amount) }}</td>
+                        </tr>
+                        {% endfor %}
+                        {% endfor %}
                         {% endfor %}
                         
                         <!-- Gross Profit c/o -->
@@ -462,31 +478,63 @@
                     </thead>
                     <tbody>
                         <!-- Sales Accounts -->
-                        <tr class="sub-section-row collapsible-header" data-target="sales-accounts">
-                            <td class="indent-1 fw-bold"><i class="bi bi-chevron-right me-1 text-muted toggle-chevron"></i><i class="bi bi-graph-up me-2 text-success"></i>Sales Accounts</td>
-                            <td class="financial-number fw-bold">₹{{ "%.2f"|format(total_sales) }}</td>
+                        {% for grp_name, grp_data in sales_accounts_tree.items() %}
+                        <tr class="sub-section-row collapsible-header" data-target="sales-grp-{{ loop.index }}">
+                            <td class="indent-1 fw-bold">
+                                <i class="bi bi-chevron-right me-1 text-muted toggle-chevron"></i>
+                                <i class="bi bi-graph-up me-2 text-success"></i>{{ grp_name }}
+                            </td>
+                            <td class="financial-number fw-bold">₹{{ "%.2f"|format(grp_data.ledger_group_total) }}</td>
                         </tr>
-                        {% for sub_cat, amount in sales_accounts.items() %}
-                            {% if amount > 0 %}
-                            <tr class="sales-accounts-child drilldown-link" style="display: none;" onclick="viewDrilldown('{{ sub_cat }}')">
-                                <td class="indent-2 text-muted">{{ sub_cat }}</td>
-                                <td class="financial-number text-muted">₹{{ "%.2f"|format(amount) }}</td>
-                            </tr>
-                            {% endif %}
+                        
+                        {% for ldr_name, ldr_data in grp_data.accounts.items() %}
+                        <tr class="sales-grp-{{ loop.parent.index }}-child collapsible-header" data-target="sales-ldr-{{ loop.parent.index }}-{{ loop.index }}" style="display: none; background-color: #f8fafc;">
+                            <td class="indent-2 fw-semibold" style="padding-left: 40px !important;">
+                                <i class="bi bi-chevron-right me-1 text-muted toggle-chevron"></i>
+                                <i class="bi bi-folder2 me-2 text-primary"></i>{{ ldr_name }}
+                            </td>
+                            <td class="financial-number fw-semibold">₹{{ "%.2f"|format(ldr_data.ledger_account_total) }}</td>
+                        </tr>
+                        
+                        {% for part_name, part_data in ldr_data.particulars.items() %}
+                        <tr class="sales-ldr-{{ loop.parent.parent.index }}-{{ loop.parent.index }}-child drilldown-link" style="display: none;" onclick="viewDrilldown('{{ part_name }}')">
+                            <td class="indent-3 text-muted" style="padding-left: 65px !important;">
+                                <i class="bi bi-tag me-2 text-secondary"></i>{{ part_name }}
+                            </td>
+                            <td class="financial-number text-muted">₹{{ "%.2f"|format(part_data.amount) }}</td>
+                        </tr>
+                        {% endfor %}
+                        {% endfor %}
                         {% endfor %}
                         
                         <!-- Direct Incomes -->
-                        <tr class="sub-section-row collapsible-header" data-target="direct-incomes">
-                            <td class="indent-1 fw-bold"><i class="bi bi-chevron-right me-1 text-muted toggle-chevron"></i><i class="bi bi-wallet2 me-2"></i>Direct Incomes</td>
-                            <td class="financial-number fw-bold">₹{{ "%.2f"|format(total_direct_income) }}</td>
+                        {% for grp_name, grp_data in direct_incomes_tree.items() %}
+                        <tr class="sub-section-row collapsible-header" data-target="direct-inc-grp-{{ loop.index }}">
+                            <td class="indent-1 fw-bold">
+                                <i class="bi bi-chevron-right me-1 text-muted toggle-chevron"></i>
+                                <i class="bi bi-wallet2 me-2"></i>{{ grp_name }}
+                            </td>
+                            <td class="financial-number fw-bold">₹{{ "%.2f"|format(grp_data.ledger_group_total) }}</td>
                         </tr>
-                        {% for sub_cat, amount in direct_incomes.items() %}
-                            {% if amount > 0 %}
-                            <tr class="direct-incomes-child drilldown-link" style="display: none;" onclick="viewDrilldown('{{ sub_cat }}')">
-                                <td class="indent-2 text-muted">{{ sub_cat }}</td>
-                                <td class="financial-number text-muted">₹{{ "%.2f"|format(amount) }}</td>
-                            </tr>
-                            {% endif %}
+                        
+                        {% for ldr_name, ldr_data in grp_data.accounts.items() %}
+                        <tr class="direct-inc-grp-{{ loop.parent.index }}-child collapsible-header" data-target="direct-inc-ldr-{{ loop.parent.index }}-{{ loop.index }}" style="display: none; background-color: #f8fafc;">
+                            <td class="indent-2 fw-semibold" style="padding-left: 40px !important;">
+                                <i class="bi bi-chevron-right me-1 text-muted toggle-chevron"></i>
+                                <i class="bi bi-folder2 me-2 text-primary"></i>{{ ldr_name }}
+                            </td>
+                            <td class="financial-number fw-semibold">₹{{ "%.2f"|format(ldr_data.ledger_account_total) }}</td>
+                        </tr>
+                        
+                        {% for part_name, part_data in ldr_data.particulars.items() %}
+                        <tr class="direct-inc-ldr-{{ loop.parent.parent.index }}-{{ loop.parent.index }}-child drilldown-link" style="display: none;" onclick="viewDrilldown('{{ part_name }}')">
+                            <td class="indent-3 text-muted" style="padding-left: 65px !important;">
+                                <i class="bi bi-tag me-2 text-secondary"></i>{{ part_name }}
+                            </td>
+                            <td class="financial-number text-muted">₹{{ "%.2f"|format(part_data.amount) }}</td>
+                        </tr>
+                        {% endfor %}
+                        {% endfor %}
                         {% endfor %}
                         
                         <!-- Closing Stock -->
@@ -541,19 +589,34 @@
                             <td class="financial-number">₹{{ "%.2f"|format(gross_profit|abs) }}</td>
                         </tr>
                         {% endif %}
-                        
-                        <!-- Indirect Expenses -->
-                        <tr class="sub-section-row collapsible-header" data-target="indirect-expenses">
-                            <td class="indent-1 fw-bold"><i class="bi bi-chevron-right me-1 text-muted toggle-chevron"></i><i class="bi bi-lightbulb me-2 text-secondary"></i>Indirect Expenses</td>
-                            <td class="financial-number fw-bold">₹{{ "%.2f"|format(total_indirect_expenses) }}</td>
+                                         <!-- Indirect Expenses -->
+                        {% for grp_name, grp_data in indirect_expenses_tree.items() %}
+                        <tr class="sub-section-row collapsible-header" data-target="indirect-exp-grp-{{ loop.index }}">
+                            <td class="indent-1 fw-bold">
+                                <i class="bi bi-chevron-right me-1 text-muted toggle-chevron"></i>
+                                <i class="bi bi-lightbulb me-2 text-secondary"></i>{{ grp_name }}
+                            </td>
+                            <td class="financial-number fw-bold">₹{{ "%.2f"|format(grp_data.ledger_group_total) }}</td>
                         </tr>
-                        {% for sub_cat, amount in indirect_expenses.items() %}
-                            {% if amount > 0 %}
-                            <tr class="indirect-expenses-child drilldown-link" style="display: none;" onclick="viewDrilldown('{{ sub_cat }}')">
-                                <td class="indent-2 text-muted">{{ sub_cat }}</td>
-                                <td class="financial-number text-muted">₹{{ "%.2f"|format(amount) }}</td>
-                            </tr>
-                            {% endif %}
+                        
+                        {% for ldr_name, ldr_data in grp_data.accounts.items() %}
+                        <tr class="indirect-exp-grp-{{ loop.parent.index }}-child collapsible-header" data-target="indirect-exp-ldr-{{ loop.parent.index }}-{{ loop.index }}" style="display: none; background-color: #f8fafc;">
+                            <td class="indent-2 fw-semibold" style="padding-left: 40px !important;">
+                                <i class="bi bi-chevron-right me-1 text-muted toggle-chevron"></i>
+                                <i class="bi bi-folder2 me-2 text-primary"></i>{{ ldr_name }}
+                            </td>
+                            <td class="financial-number fw-semibold">₹{{ "%.2f"|format(ldr_data.ledger_account_total) }}</td>
+                        </tr>
+                        
+                        {% for part_name, part_data in ldr_data.particulars.items() %}
+                        <tr class="indirect-exp-ldr-{{ loop.parent.parent.index }}-{{ loop.parent.index }}-child drilldown-link" style="display: none;" onclick="viewDrilldown('{{ part_name }}')">
+                            <td class="indent-3 text-muted" style="padding-left: 65px !important;">
+                                <i class="bi bi-tag me-2 text-secondary"></i>{{ part_name }}
+                            </td>
+                            <td class="financial-number text-muted">₹{{ "%.2f"|format(part_data.amount) }}</td>
+                        </tr>
+                        {% endfor %}
+                        {% endfor %}
                         {% endfor %}
                         
                         <!-- Net Profit -->
@@ -566,7 +629,7 @@
                     </tbody>
                 </table>
             </div>
-
+ 
             <!-- Right Side (Credit - Gross Profit b/d, Indirect Incomes, Nett Loss) -->
             <div class="col-md-6">
                 <table class="table table-financial mb-0">
@@ -580,17 +643,33 @@
                         {% endif %}
                         
                         <!-- Indirect Incomes -->
-                        <tr class="sub-section-row collapsible-header" data-target="indirect-incomes">
-                            <td class="indent-1 fw-bold"><i class="bi bi-chevron-right me-1 text-muted toggle-chevron"></i><i class="bi bi-percent me-2 text-info"></i>Indirect Incomes</td>
-                            <td class="financial-number fw-bold">₹{{ "%.2f"|format(total_indirect_income) }}</td>
+                        {% for grp_name, grp_data in indirect_incomes_tree.items() %}
+                        <tr class="sub-section-row collapsible-header" data-target="indirect-inc-grp-{{ loop.index }}">
+                            <td class="indent-1 fw-bold">
+                                <i class="bi bi-chevron-right me-1 text-muted toggle-chevron"></i>
+                                <i class="bi bi-percent me-2 text-info"></i>{{ grp_name }}
+                            </td>
+                            <td class="financial-number fw-bold">₹{{ "%.2f"|format(grp_data.ledger_group_total) }}</td>
                         </tr>
-                        {% for sub_cat, amount in indirect_incomes.items() %}
-                            {% if amount > 0 %}
-                            <tr class="indirect-incomes-child drilldown-link" style="display: none;" onclick="viewDrilldown('{{ sub_cat }}')">
-                                <td class="indent-2 text-muted">{{ sub_cat }}</td>
-                                <td class="financial-number text-muted">₹{{ "%.2f"|format(amount) }}</td>
-                            </tr>
-                            {% endif %}
+                        
+                        {% for ldr_name, ldr_data in grp_data.accounts.items() %}
+                        <tr class="indirect-inc-grp-{{ loop.parent.index }}-child collapsible-header" data-target="indirect-inc-ldr-{{ loop.parent.index }}-{{ loop.index }}" style="display: none; background-color: #f8fafc;">
+                            <td class="indent-2 fw-semibold" style="padding-left: 40px !important;">
+                                <i class="bi bi-chevron-right me-1 text-muted toggle-chevron"></i>
+                                <i class="bi bi-folder2 me-2 text-primary"></i>{{ ldr_name }}
+                            </td>
+                            <td class="financial-number fw-semibold">₹{{ "%.2f"|format(ldr_data.ledger_account_total) }}</td>
+                        </tr>
+                        
+                        {% for part_name, part_data in ldr_data.particulars.items() %}
+                        <tr class="indirect-inc-ldr-{{ loop.parent.parent.index }}-{{ loop.parent.index }}-child drilldown-link" style="display: none;" onclick="viewDrilldown('{{ part_name }}')">
+                            <td class="indent-3 text-muted" style="padding-left: 65px !important;">
+                                <i class="bi bi-tag me-2 text-secondary"></i>{{ part_name }}
+                            </td>
+                            <td class="financial-number text-muted">₹{{ "%.2f"|format(part_data.amount) }}</td>
+                        </tr>
+                        {% endfor %}
+                        {% endfor %}
                         {% endfor %}
                         
                         <!-- Net Loss -->
@@ -726,38 +805,51 @@
                     <td></td>
                     <td></td>
                 </tr>
-                <!-- Sales Accounts -->
+                <!-- Sales Accounts Tree -->
+                {% for grp_name, grp_data in sales_accounts_tree.items() %}
+                <tr class="fw-bold">
+                    <td class="ps-3">{{ grp_name }}</td>
+                    <td></td>
+                    <td class="text-end font-monospace">₹{{ "%.2f"|format(grp_data.ledger_group_total) }}</td>
+                </tr>
+                {% for ldr_name, ldr_data in grp_data.accounts.items() %}
                 <tr>
-                    <td class="ps-4">Sales Accounts</td>
-                    <td class="text-end font-monospace">₹{{ "%.2f"|format(total_sales) }}</td>
+                    <td class="ps-4">{{ ldr_name }}</td>
+                    <td class="text-end font-monospace">₹{{ "%.2f"|format(ldr_data.ledger_account_total) }}</td>
                     <td></td>
                 </tr>
-                {% for sub_cat, amount in sales_accounts.items() %}
-                    {% if amount > 0 %}
-                    <tr class="text-muted small">
-                        <td class="ps-5"><em>{{ sub_cat }}</em></td>
-                        <td class="text-end font-monospace">₹{{ "%.2f"|format(amount) }}</td>
-                        <td></td>
-                    </tr>
-                    {% endif %}
-                {% endfor %}
-                <!-- Direct Incomes -->
-                {% if total_direct_income > 0 %}
-                <tr>
-                    <td class="ps-4">Direct Incomes</td>
-                    <td class="text-end font-monospace">₹{{ "%.2f"|format(total_direct_income) }}</td>
+                {% for part_name, part_data in ldr_data.particulars.items() %}
+                <tr class="text-muted small">
+                    <td class="ps-5"><em>{{ part_name }}</em></td>
+                    <td class="text-end font-monospace">₹{{ "%.2f"|format(part_data.amount) }}</td>
                     <td></td>
                 </tr>
-                {% for sub_cat, amount in direct_incomes.items() %}
-                    {% if amount > 0 %}
-                    <tr class="text-muted small">
-                        <td class="ps-5"><em>{{ sub_cat }}</em></td>
-                        <td class="text-end font-monospace">₹{{ "%.2f"|format(amount) }}</td>
-                        <td></td>
-                    </tr>
-                    {% endif %}
                 {% endfor %}
-                {% endif %}
+                {% endfor %}
+                {% endfor %}
+                
+                <!-- Direct Incomes Tree -->
+                {% for grp_name, grp_data in direct_incomes_tree.items() %}
+                <tr class="fw-bold">
+                    <td class="ps-3">{{ grp_name }}</td>
+                    <td></td>
+                    <td class="text-end font-monospace">₹{{ "%.2f"|format(grp_data.ledger_group_total) }}</td>
+                </tr>
+                {% for ldr_name, ldr_data in grp_data.accounts.items() %}
+                <tr>
+                    <td class="ps-4">{{ ldr_name }}</td>
+                    <td class="text-end font-monospace">₹{{ "%.2f"|format(ldr_data.ledger_account_total) }}</td>
+                    <td></td>
+                </tr>
+                {% for part_name, part_data in ldr_data.particulars.items() %}
+                <tr class="text-muted small">
+                    <td class="ps-5"><em>{{ part_name }}</em></td>
+                    <td class="text-end font-monospace">₹{{ "%.2f"|format(part_data.amount) }}</td>
+                    <td></td>
+                </tr>
+                {% endfor %}
+                {% endfor %}
+                {% endfor %}
                 <tr class="fw-bold" style="background-color: #f8fafc;">
                     <td class="ps-3">Total Revenue & Direct Income (A)</td>
                     <td></td>
@@ -779,19 +871,27 @@
                 {% endif %}
 
                 {% if total_direct_expenses > 0 %}
+                <!-- Direct Expenses Tree -->
+                {% for grp_name, grp_data in direct_expenses_tree.items() %}
+                <tr class="fw-bold">
+                    <td class="ps-3">Add: {{ grp_name }}</td>
+                    <td></td>
+                    <td class="text-end font-monospace">₹{{ "%.2f"|format(grp_data.ledger_group_total) }}</td>
+                </tr>
+                {% for ldr_name, ldr_data in grp_data.accounts.items() %}
                 <tr>
-                    <td class="ps-4">Add: Direct Expenses</td>
-                    <td class="text-end font-monospace">₹{{ "%.2f"|format(total_direct_expenses) }}</td>
+                    <td class="ps-4">{{ ldr_name }}</td>
+                    <td class="text-end font-monospace">₹{{ "%.2f"|format(ldr_data.ledger_account_total) }}</td>
                     <td></td>
                 </tr>
-                {% for sub_cat, amount in direct_expenses.items() %}
-                    {% if amount > 0 %}
-                    <tr class="text-muted small">
-                        <td class="ps-5"><em>{{ sub_cat }}</em></td>
-                        <td class="text-end font-monospace">₹{{ "%.2f"|format(amount) }}</td>
-                        <td></td>
-                    </tr>
-                    {% endif %}
+                {% for part_name, part_data in ldr_data.particulars.items() %}
+                <tr class="text-muted small">
+                    <td class="ps-5"><em>{{ part_name }}</em></td>
+                    <td class="text-end font-monospace">₹{{ "%.2f"|format(part_data.amount) }}</td>
+                    <td></td>
+                </tr>
+                {% endfor %}
+                {% endfor %}
                 {% endfor %}
                 {% endif %}
                 {% if include_stock %}
@@ -822,14 +922,27 @@
                     <td></td>
                     <td></td>
                 </tr>
-                {% for sub_cat, amount in indirect_expenses.items() %}
-                    {% if amount > 0 %}
-                    <tr>
-                        <td class="ps-4">{{ sub_cat }}</td>
-                        <td class="text-end font-monospace">₹{{ "%.2f"|format(amount) }}</td>
-                        <td></td>
-                    </tr>
-                    {% endif %}
+                <!-- Indirect Expenses Tree -->
+                {% for grp_name, grp_data in indirect_expenses_tree.items() %}
+                <tr class="fw-bold">
+                    <td class="ps-3">{{ grp_name }}</td>
+                    <td></td>
+                    <td class="text-end font-monospace">₹{{ "%.2f"|format(grp_data.ledger_group_total) }}</td>
+                </tr>
+                {% for ldr_name, ldr_data in grp_data.accounts.items() %}
+                <tr>
+                    <td class="ps-4">{{ ldr_name }}</td>
+                    <td class="text-end font-monospace">₹{{ "%.2f"|format(ldr_data.ledger_account_total) }}</td>
+                    <td></td>
+                </tr>
+                {% for part_name, part_data in ldr_data.particulars.items() %}
+                <tr class="text-muted small">
+                    <td class="ps-5"><em>{{ part_name }}</em></td>
+                    <td class="text-end font-monospace">₹{{ "%.2f"|format(part_data.amount) }}</td>
+                    <td></td>
+                </tr>
+                {% endfor %}
+                {% endfor %}
                 {% endfor %}
                 <tr class="fw-bold" style="background-color: #f8fafc;">
                     <td class="ps-3">Total Indirect Expenses (D)</td>
@@ -845,14 +958,27 @@
                     <td></td>
                     <td></td>
                 </tr>
-                {% for sub_cat, amount in indirect_incomes.items() %}
-                    {% if amount > 0 %}
-                    <tr>
-                        <td class="ps-4">{{ sub_cat }}</td>
-                        <td class="text-end font-monospace">₹{{ "%.2f"|format(amount) }}</td>
-                        <td></td>
-                    </tr>
-                    {% endif %}
+                <!-- Indirect Incomes Tree -->
+                {% for grp_name, grp_data in indirect_incomes_tree.items() %}
+                <tr class="fw-bold">
+                    <td class="ps-3">{{ grp_name }}</td>
+                    <td></td>
+                    <td class="text-end font-monospace">₹{{ "%.2f"|format(grp_data.ledger_group_total) }}</td>
+                </tr>
+                {% for ldr_name, ldr_data in grp_data.accounts.items() %}
+                <tr>
+                    <td class="ps-4">{{ ldr_name }}</td>
+                    <td class="text-end font-monospace">₹{{ "%.2f"|format(ldr_data.ledger_account_total) }}</td>
+                    <td></td>
+                </tr>
+                {% for part_name, part_data in ldr_data.particulars.items() %}
+                <tr class="text-muted small">
+                    <td class="ps-5"><em>{{ part_name }}</em></td>
+                    <td class="text-end font-monospace">₹{{ "%.2f"|format(part_data.amount) }}</td>
+                    <td></td>
+                </tr>
+                {% endfor %}
+                {% endfor %}
                 {% endfor %}
                 <tr class="fw-bold" style="background-color: #f8fafc;">
                     <td class="ps-3">Total Indirect Incomes (E)</td>
@@ -1014,6 +1140,20 @@ document.addEventListener("DOMContentLoaded", function() {
     // Pre-fetch all transaction details on load in background
     fetchDetailedLedgerData();
 
+    // Recursive collapse function to collapse descendants
+    function collapseRow(header) {
+        if (!header.classList.contains('expanded')) return;
+        header.classList.remove('expanded');
+        const targetGroup = header.getAttribute('data-target');
+        const childRows = document.querySelectorAll(`.${targetGroup}-child`);
+        childRows.forEach(row => {
+            row.style.display = 'none';
+            if (row.classList.contains('collapsible-header')) {
+                collapseRow(row);
+            }
+        });
+    }
+
     // Toggle collapsible categories
     document.querySelectorAll('.collapsible-header').forEach(header => {
         header.addEventListener('click', function(e) {
@@ -1025,10 +1165,7 @@ document.addEventListener("DOMContentLoaded", function() {
             const isCurrentlyExpanded = this.classList.contains('expanded');
             
             if (isCurrentlyExpanded) {
-                this.classList.remove('expanded');
-                childRows.forEach(row => {
-                    row.style.display = 'none';
-                });
+                collapseRow(this);
             } else {
                 this.classList.add('expanded');
                 childRows.forEach(row => {

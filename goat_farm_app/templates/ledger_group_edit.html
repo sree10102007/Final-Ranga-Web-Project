@@ -24,6 +24,17 @@
                         <div class="form-text small text-muted"><i class="bi bi-info-circle me-1"></i>System default group name cannot be changed, but description can be updated.</div>
                         {% endif %}
                     </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark">Group Type <span class="text-danger">*</span></label>
+                        <select name="group_type" class="form-select rounded-3" {% if is_default %}disabled style="background:#f1f5f9; cursor:not-allowed;"{% endif %}>
+                            <option value="Expense" {% if group.group_type == 'Expense' %}selected{% endif %}>Expense</option>
+                            <option value="Income" {% if group.group_type == 'Income' %}selected{% endif %}>Income</option>
+                        </select>
+                        {% if is_default %}
+                        <input type="hidden" name="group_type" value="{{ group.group_type }}">
+                        <div class="form-text small text-muted"><i class="bi bi-info-circle me-1"></i>System default group types cannot be changed.</div>
+                        {% endif %}
+                    </div>
                     <div class="mb-4">
                         <label class="form-label small fw-bold text-dark">Description</label>
                         <textarea name="description" class="form-control rounded-3" rows="3">{{ group.description or '' }}</textarea>
