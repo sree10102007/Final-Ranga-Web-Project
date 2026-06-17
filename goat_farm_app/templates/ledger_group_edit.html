@@ -13,27 +13,32 @@
                 <p class="text-muted small mb-0">Update ledger group details</p>
             </div>
         </div>
-        
+
+        {% if is_default %}
+        <div class="alert alert-warning border-0 rounded-4 d-flex align-items-start gap-2 mb-4 py-3 px-4" style="background: #fefce8; border-left: 4px solid #f59e0b !important;">
+            <i class="bi bi-shield-check text-warning mt-1 fs-5"></i>
+            <div>
+                <div class="fw-bold text-dark small">System Default Group</div>
+                <div class="text-muted small mt-1">This is a built-in group used by the P&amp;L statement engine. You may edit any field, but renaming it will also update all linked ledger accounts automatically. Exercise caution.</div>
+            </div>
+        </div>
+        {% endif %}
+
         <div class="card border-0 shadow-sm rounded-4">
             <div class="card-body p-5">
                 <form method="post">
                     <div class="mb-3">
                         <label class="form-label small fw-bold text-dark">Group Name <span class="text-danger">*</span></label>
-                        <input type="text" name="group_name" class="form-control rounded-3" required value="{{ group.group_name }}" {% if is_default %}readonly title="Default group names cannot be renamed" style="background:#f1f5f9; cursor:not-allowed;"{% endif %}>
-                        {% if is_default %}
-                        <div class="form-text small text-muted"><i class="bi bi-info-circle me-1"></i>System default group name cannot be changed, but description can be updated.</div>
-                        {% endif %}
+                        <input type="text" name="group_name" class="form-control rounded-3" required value="{{ group.group_name }}">
+                        <div class="form-text small text-muted">Changing the name will automatically update all linked ledger accounts.</div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label small fw-bold text-dark">Group Type <span class="text-danger">*</span></label>
-                        <select name="group_type" class="form-select rounded-3" {% if is_default %}disabled style="background:#f1f5f9; cursor:not-allowed;"{% endif %}>
+                        <select name="group_type" class="form-select rounded-3">
                             <option value="Expense" {% if group.group_type == 'Expense' %}selected{% endif %}>Expense</option>
                             <option value="Income" {% if group.group_type == 'Income' %}selected{% endif %}>Income</option>
                         </select>
-                        {% if is_default %}
-                        <input type="hidden" name="group_type" value="{{ group.group_type }}">
-                        <div class="form-text small text-muted"><i class="bi bi-info-circle me-1"></i>System default group types cannot be changed.</div>
-                        {% endif %}
+                        <div class="form-text small text-muted">Determines which side of the P&amp;L this group appears on.</div>
                     </div>
                     <div class="mb-4">
                         <label class="form-label small fw-bold text-dark">Description</label>

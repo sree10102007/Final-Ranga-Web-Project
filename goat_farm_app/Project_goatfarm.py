@@ -2363,7 +2363,7 @@ def medicine():
         p.append(f"%{tag_search}%")
         
     if month_filter:
-        q += ' AND strftime("%Y-%m", consultation_date) = ?'
+        q += " AND TO_CHAR(consultation_date, 'YYYY-MM') = ?"
         p.append(month_filter)
         
     q += ' ORDER BY consultation_date ASC, id ASC'
@@ -2987,7 +2987,7 @@ def vaccine():
         p.extend([f"%{tag_search}%", f"%{tag_search}%"])
         
     if month_filter:
-        q += ' AND strftime("%Y-%m", vaccine_date) = ?'
+        q += " AND TO_CHAR(vaccine_date, 'YYYY-MM') = ?"
         p.append(month_filter)
         
     q += ' ORDER BY CAST(sr_no AS INTEGER) ASC, id ASC'
@@ -4857,7 +4857,8 @@ def attendance_summary():
         SUM(CASE WHEN a.status IN ('P', 'Present') THEN 1 ELSE 0 END) as present,
         SUM(CASE WHEN a.status IN ('L', 'Leave', 'On Leave') THEN 1 ELSE 0 END) as leave
         FROM employees e
-        LEFT JOIN attendance a ON e.id=a.employee_id AND strftime('%m', a.date)=? AND strftime('%Y', a.date)=?
+        LEFT JOIN attendance a ON e.id=a.employee_id
+            AND TO_CHAR(a.date, 'MM') = ? AND TO_CHAR(a.date, 'YYYY') = ?
         GROUP BY e.id ORDER BY CAST(e.sr_no AS INTEGER) ASC''', (month, year)).fetchall()
     farm = db.execute('SELECT * FROM farm_info LIMIT 1').fetchone()
     return render_template('attendance_summary.html', data=data, month=month, year=year, farm=farm)
@@ -5125,11 +5126,11 @@ def expenses():
         p.append(f'%{category}%')
         
     if month and month != 'All':
-        q += " AND strftime('%m', date) = ?"
+        q += " AND TO_CHAR(date, 'MM') = ?"
         p.append(f"{int(month):02d}")
         
     if year and year != 'All':
-        q += " AND strftime('%Y', date) = ?"
+        q += " AND TO_CHAR(date, 'YYYY') = ?"
         p.append(str(year))
         
     q += ' ORDER BY date DESC'
@@ -5452,21 +5453,18 @@ def ledger_group_edit(gid):
         gdesc = request.form.get('description', '').strip()
         gtype = request.form.get('group_type', 'Expense').strip()
         if gname:
-            if is_default and gname != group['group_name']:
-                flash('Cannot rename default ledger groups.', 'danger')
-                return redirect(url_for('expense_ledgers', tab='groups'))
-            if is_default and gtype != group['group_type']:
-                flash('Cannot change type of default ledger groups.', 'danger')
-                return redirect(url_for('expense_ledgers', tab='groups'))
             try:
                 old_name = group['group_name']
                 db.execute('UPDATE ledger_groups SET group_name=?, description=?, group_type=? WHERE id=?', (gname, gdesc, gtype, gid))
                 # Propagate name change to expense_ledgers
-                db.execute('UPDATE expense_ledgers SET ledger_group=? WHERE ledger_group=?', (gname, old_name))
+                if gname != old_name:
+                    db.execute('UPDATE expense_ledgers SET ledger_group=? WHERE ledger_group=?', (gname, old_name))
                 db.commit()
                 flash('Ledger Group updated successfully!', 'success')
             except Exception:
                 flash('Ledger Group name already exists!', 'danger')
+        else:
+            flash('Group name cannot be empty.', 'danger')
         return redirect(url_for('expense_ledgers', tab='groups'))
         
     return render_template('ledger_group_edit.html', group=group, is_default=is_default)
@@ -5682,7 +5680,8 @@ def salary_report():
     data = db.execute('''SELECT e.id, e.name, e.role, e.wage_type, e.wage_rate, e.sr_no,
         SUM(CASE WHEN a.status IN ('P', 'Present') THEN 1 ELSE 0 END) as present_days
         FROM employees e
-        LEFT JOIN attendance a ON e.id=a.employee_id AND strftime('%m', a.date)=? AND strftime('%Y', a.date)=?
+        LEFT JOIN attendance a ON e.id=a.employee_id
+            AND TO_CHAR(a.date, 'MM') = ? AND TO_CHAR(a.date, 'YYYY') = ?
         GROUP BY e.id ORDER BY CAST(e.sr_no AS INTEGER) ASC''', (month, year)).fetchall()
 
     employees = []
