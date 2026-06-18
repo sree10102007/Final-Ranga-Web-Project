@@ -22,6 +22,25 @@ try:
 except ImportError:
     pass
 
+def validate_env():
+    required_vars = ['SECRET_KEY']
+    if not os.environ.get('DATABASE_URL'):
+        required_vars.extend(['DB_HOST', 'DB_PORT', 'DB_NAME', 'DB_USER', 'DB_PASSWORD'])
+    
+    missing_or_placeholder = []
+    for var in required_vars:
+        val = os.environ.get(var)
+        if not val or 'your_' in val.lower():
+            missing_or_placeholder.append(var)
+            
+    if missing_or_placeholder:
+        print(f"CRITICAL CONFIGURATION ERROR: Missing or placeholder environment variables: {', '.join(missing_or_placeholder)}")
+        print("Please copy .env.example to .env and configure the actual connection and secret key settings.")
+        sys.exit(1)
+
+validate_env()
+
+
 
 # Map SQLite exceptions to psycopg2 exceptions for backward compatibility in catch blocks
 class DummySqlite3:
@@ -178,14 +197,14 @@ def get_db_connection():
     if db_url:
         return psycopg2.connect(db_url)
     
-    db_name = os.environ.get('DB_NAME', 'goat_farm')
+    db_name = os.environ.get('DB_NAME')
     try:
         return psycopg2.connect(
-            host=os.environ.get('DB_HOST', 'localhost'),
-            port=os.environ.get('DB_PORT', '5432'),
+            host=os.environ.get('DB_HOST'),
+            port=os.environ.get('DB_PORT'),
             database=db_name,
-            user=os.environ.get('DB_USER', 'postgres'),
-            password=os.environ.get('DB_PASSWORD', 'postgres'),
+            user=os.environ.get('DB_USER'),
+            password=os.environ.get('DB_PASSWORD'),
             sslmode=os.environ.get('DB_SSLMODE', 'prefer')
         )
     except psycopg2.OperationalError as e:
@@ -193,11 +212,11 @@ def get_db_connection():
             try:
                 # Connect to default 'postgres' database to create the target database
                 conn = psycopg2.connect(
-                    host=os.environ.get('DB_HOST', 'localhost'),
-                    port=os.environ.get('DB_PORT', '5432'),
+                    host=os.environ.get('DB_HOST'),
+                    port=os.environ.get('DB_PORT'),
                     database='postgres',
-                    user=os.environ.get('DB_USER', 'postgres'),
-                    password=os.environ.get('DB_PASSWORD', 'postgres'),
+                    user=os.environ.get('DB_USER'),
+                    password=os.environ.get('DB_PASSWORD'),
                     sslmode=os.environ.get('DB_SSLMODE', 'prefer')
                 )
                 conn.autocommit = True
@@ -206,11 +225,11 @@ def get_db_connection():
                 conn.close()
                 # Retry connecting to the newly created database
                 return psycopg2.connect(
-                    host=os.environ.get('DB_HOST', 'localhost'),
-                    port=os.environ.get('DB_PORT', '5432'),
+                    host=os.environ.get('DB_HOST'),
+                    port=os.environ.get('DB_PORT'),
                     database=db_name,
-                    user=os.environ.get('DB_USER', 'postgres'),
-                    password=os.environ.get('DB_PASSWORD', 'postgres'),
+                    user=os.environ.get('DB_USER'),
+                    password=os.environ.get('DB_PASSWORD'),
                     sslmode=os.environ.get('DB_SSLMODE', 'prefer')
                 )
             except Exception:
@@ -218,8 +237,180 @@ def get_db_connection():
         else:
             raise e
 
+import logging
+from logging.handlers import RotatingFileHandler
+from flask_wtf.csrf import CSRFProtect, CSRFError
+from datetime import timedelta
+import uuid
+import mimetypes
+
+class Config:
+    DEBUG = False
+    TESTING = False
+    SECRET_KEY = os.environ.get('SECRET_KEY')
+    SESSION_COOKIE_SECURE = True
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SAMESITE = 'Lax'
+    # Limit maximum file upload size to 16 Megabytes (Large-file DoS protection)
+    MAX_CONTENT_LENGTH = 16 * 1024 * 1024
+
+class DevelopmentConfig(Config):
+    DEBUG = True
+    SESSION_COOKIE_SECURE = False
+
+class TestingConfig(Config):
+    TESTING = True
+    SESSION_COOKIE_SECURE = False
+
+class ProductionConfig(Config):
+    pass
+
+config_by_name = {
+    'development': DevelopmentConfig,
+    'testing': TestingConfig,
+    'production': ProductionConfig
+}
+
 app = Flask(__name__, root_path=base_dir)
-app.secret_key = 'dev_secret_key_for_goat_farm'
+
+flask_env = os.environ.get('FLASK_ENV', 'production').lower()
+config_class = config_by_name.get(flask_env, ProductionConfig)
+app.config.from_object(config_class)
+
+# Initialize global CSRF protection
+csrf = CSRFProtect(app)
+
+# Ensure FLASK_DEBUG can override only in non-production environments
+if os.environ.get('FLASK_DEBUG') in ['1', 'true', 'True']:
+    if flask_env != 'production':
+        app.config['DEBUG'] = True
+    else:
+        app.config['DEBUG'] = False
+
+# Fallback session secret key validation if missing
+if not app.config.get('SECRET_KEY'):
+    raise RuntimeError("SECRET_KEY environment variable is required but not set.")
+
+# --- Logging Setup ---
+# Create logs directory if it doesn't exist
+os.makedirs(os.path.join(base_dir, 'logs'), exist_ok=True)
+log_formatter = logging.Formatter('%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]')
+file_handler = RotatingFileHandler(os.path.join(base_dir, 'logs/app.log'), maxBytes=10240000, backupCount=10)
+file_handler.setFormatter(log_formatter)
+file_handler.setLevel(logging.INFO)
+
+# Set custom filters to strip database password or secret values if accidentally printed (secure logging)
+class SensitiveDataFilter(logging.Filter):
+    def filter(self, record):
+        if not isinstance(record.msg, str):
+            return True
+        sensitive_keywords = ['password', 'secret_key', 'token', 'key']
+        for keyword in sensitive_keywords:
+            if keyword in record.msg.lower():
+                record.msg = "[REDACTED SENSITIVE LOG]"
+        return True
+
+file_handler.addFilter(SensitiveDataFilter())
+app.logger.addHandler(file_handler)
+app.logger.setLevel(logging.INFO)
+app.logger.info('Goat Farm app starting up')
+
+# --- Session Inactivity / Idle Timeout Hook ---
+@app.before_request
+def check_session_timeout():
+    # Allow asset serving, CSS/JS, and login/register without timeout checks
+    if request.endpoint in ['static', 'login', 'register', 'logout']:
+        return
+        
+    if 'user_id' in session:
+        session.permanent = True
+        now = datetime.utcnow()
+        last_activity_str = session.get('last_activity')
+        
+        if last_activity_str:
+            try:
+                last_activity = datetime.fromisoformat(last_activity_str)
+                # Force logout if user is idle for more than 15 minutes
+                if now - last_activity > timedelta(minutes=15):
+                    session.clear()
+                    flash('Your session has expired due to inactivity. Please log in again.', 'warning')
+                    return redirect(url_for('login'))
+            except ValueError:
+                pass
+        session['last_activity'] = now.isoformat()
+
+# --- File Upload Security Helpers ---
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'pdf'}
+ALLOWED_MIMETYPES = {'image/png', 'image/jpeg', 'application/pdf'}
+MAGIC_SIGNATURES = {
+    'png': b'\x89PNG\r\n\x1a\n',
+    'jpg': b'\xff\xd8\xff',
+    'jpeg': b'\xff\xd8\xff',
+    'pdf': b'%PDF'
+}
+
+def is_secure_file(file_stream, filename):
+    if not filename or '.' not in filename:
+        return False
+        
+    ext = filename.rsplit('.', 1)[1].lower()
+    if ext not in ALLOWED_EXTENSIONS:
+        return False
+        
+    # Check mime type
+    mime_type, _ = mimetypes.guess_type(filename)
+    if not mime_type or mime_type not in ALLOWED_MIMETYPES:
+        return False
+        
+    # Read first few bytes for magic bytes check
+    file_stream.seek(0)
+    header = file_stream.read(16)
+    file_stream.seek(0) # Reset stream position
+    
+    # Check header matches extension
+    sig = MAGIC_SIGNATURES.get(ext)
+    if sig and not header.startswith(sig):
+        return False
+        
+    return True
+
+def generate_secure_filename(filename):
+    ext = filename.rsplit('.', 1)[1].lower()
+    return f"{uuid.uuid4().hex}.{ext}"
+
+# --- Error Handlers ---
+@app.errorhandler(CSRFError)
+def handle_csrf_error(e):
+    app.logger.warning(f"CSRF Validation Failed: {e.description}")
+    if request.path.startswith('/api/') or request.headers.get('Accept') == 'application/json':
+        return jsonify({'success': False, 'error': f'CSRF token validation failed: {e.description}'}), 400
+    return render_template('csrf_error.html', reason=e.description), 400
+
+@app.errorhandler(403)
+def forbidden_error(error):
+    if request.path.startswith('/api/') or request.headers.get('Accept') == 'application/json':
+        return jsonify({'success': False, 'error': 'Forbidden'}), 403
+    return render_template('403.html'), 403
+
+@app.errorhandler(404)
+def not_found_error(error):
+    if request.path.startswith('/api/') or request.headers.get('Accept') == 'application/json':
+        return jsonify({'success': False, 'error': 'Not Found'}), 404
+    return render_template('404.html'), 404
+
+@app.errorhandler(500)
+@app.errorhandler(Exception)
+def internal_error(error):
+    # Log the traceback exception securely
+    app.logger.error(f'Server Error: {error}', exc_info=True)
+    if request.path.startswith('/api/') or request.headers.get('Accept') == 'application/json':
+        return jsonify({'success': False, 'error': 'Internal Server Error'}), 500
+    
+    # In development mode, display original error/traceback
+    if app.config.get('DEBUG'):
+        raise error
+    return render_template('500.html'), 500
+
 
 def get_db():
     db = getattr(g, '_database', None)
@@ -6665,4 +6856,7 @@ def delete_batch_reminder(id):
     return redirect(url_for('goat_batches'))
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5001)
+    # Default to production-safe settings when running directly.
+    # Debug mode is configured via Config classes and environment variable validation.
+    port = int(os.environ.get('PORT', 5001))
+    app.run(host='0.0.0.0', port=port)

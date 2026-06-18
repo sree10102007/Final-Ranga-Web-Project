@@ -5,6 +5,8 @@ import psycopg2.extras
 # Resolve root path
 base_dir = os.path.dirname(os.path.abspath(__file__))
 
+import sys
+
 # Load environment variables from .env file if dotenv is installed
 try:
     from dotenv import load_dotenv
@@ -12,19 +14,38 @@ try:
 except ImportError:
     pass
 
+def validate_env():
+    required_vars = []
+    if not os.environ.get('DATABASE_URL'):
+        required_vars.extend(['DB_HOST', 'DB_PORT', 'DB_NAME', 'DB_USER', 'DB_PASSWORD'])
+    
+    missing_or_placeholder = []
+    for var in required_vars:
+        val = os.environ.get(var)
+        if not val or 'your_' in val.lower():
+            missing_or_placeholder.append(var)
+            
+    if missing_or_placeholder:
+        print(f"CRITICAL CONFIGURATION ERROR: Missing or placeholder environment variables: {', '.join(missing_or_placeholder)}")
+        print("Please copy .env.example to .env and configure the actual connection settings.")
+        sys.exit(1)
+
+validate_env()
+
+
 def get_db_connection():
     db_url = os.environ.get('DATABASE_URL')
     if db_url:
         return psycopg2.connect(db_url)
     
-    db_name = os.environ.get('DB_NAME', 'goat_farm')
+    db_name = os.environ.get('DB_NAME')
     try:
         return psycopg2.connect(
-            host=os.environ.get('DB_HOST', 'localhost'),
-            port=os.environ.get('DB_PORT', '5432'),
+            host=os.environ.get('DB_HOST'),
+            port=os.environ.get('DB_PORT'),
             database=db_name,
-            user=os.environ.get('DB_USER', 'postgres'),
-            password=os.environ.get('DB_PASSWORD', 'postgres'),
+            user=os.environ.get('DB_USER'),
+            password=os.environ.get('DB_PASSWORD'),
             sslmode=os.environ.get('DB_SSLMODE', 'prefer')
         )
     except psycopg2.OperationalError as e:
@@ -32,11 +53,11 @@ def get_db_connection():
             try:
                 # Connect to default 'postgres' database to create the target database
                 conn = psycopg2.connect(
-                    host=os.environ.get('DB_HOST', 'localhost'),
-                    port=os.environ.get('DB_PORT', '5432'),
+                    host=os.environ.get('DB_HOST'),
+                    port=os.environ.get('DB_PORT'),
                     database='postgres',
-                    user=os.environ.get('DB_USER', 'postgres'),
-                    password=os.environ.get('DB_PASSWORD', 'postgres'),
+                    user=os.environ.get('DB_USER'),
+                    password=os.environ.get('DB_PASSWORD'),
                     sslmode=os.environ.get('DB_SSLMODE', 'prefer')
                 )
                 conn.autocommit = True
@@ -45,11 +66,11 @@ def get_db_connection():
                 conn.close()
                 # Retry connecting to the newly created database
                 return psycopg2.connect(
-                    host=os.environ.get('DB_HOST', 'localhost'),
-                    port=os.environ.get('DB_PORT', '5432'),
+                    host=os.environ.get('DB_HOST'),
+                    port=os.environ.get('DB_PORT'),
                     database=db_name,
-                    user=os.environ.get('DB_USER', 'postgres'),
-                    password=os.environ.get('DB_PASSWORD', 'postgres'),
+                    user=os.environ.get('DB_USER'),
+                    password=os.environ.get('DB_PASSWORD'),
                     sslmode=os.environ.get('DB_SSLMODE', 'prefer')
                 )
             except Exception:

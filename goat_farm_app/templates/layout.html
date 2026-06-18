@@ -287,7 +287,61 @@
     var observer = new MutationObserver(function() { setDates(); });
     observer.observe(document.body, { childList: true, subtree: true });
   })();
+
+  // Global CSRF injection for standard forms and AJAX fetch/XHR
+  document.addEventListener('DOMContentLoaded', function() {
+    const csrfToken = "{{ csrf_token() }}";
+    
+    // Inject hidden input to all standard forms
+    function injectCsrfInputs() {
+      document.querySelectorAll('form').forEach(form => {
+        if (form.method.toUpperCase() === 'POST' && !form.querySelector('input[name="csrf_token"]')) {
+          const input = document.createElement('input');
+          input.type = 'hidden';
+          input.name = 'csrf_token';
+          input.value = csrfToken;
+          form.appendChild(input);
+        }
+      });
+    }
+    
+    injectCsrfInputs();
+    
+    // Observe DOM changes to inject token to any dynamically added forms
+    const formObserver = new MutationObserver(function() { injectCsrfInputs(); });
+    formObserver.observe(document.body, { childList: true, subtree: true });
+
+    // Intercept standard fetch API to append X-CSRFToken header
+    const originalFetch = window.fetch;
+    window.fetch = function(url, options = {}) {
+      if (options.method && options.method.toUpperCase() !== 'GET') {
+        options.headers = options.headers || {};
+        if (options.headers instanceof Headers) {
+          options.headers.set('X-CSRFToken', csrfToken);
+        } else {
+          options.headers['X-CSRFToken'] = csrfToken;
+        }
+      }
+      return originalFetch(url, options);
+    };
+
+    // Intercept XMLHttpRequest to append X-CSRFToken header
+    const originalOpen = XMLHttpRequest.prototype.open;
+    XMLHttpRequest.prototype.open = function(method, url, ...args) {
+      this._method = method;
+      return originalOpen.apply(this, [method, url, ...args]);
+    };
+    
+    const originalSend = XMLHttpRequest.prototype.send;
+    XMLHttpRequest.prototype.send = function(body) {
+      if (this._method && this._method.toUpperCase() !== 'GET') {
+        this.setRequestHeader('X-CSRFToken', csrfToken);
+      }
+      return originalSend.apply(this, [body]);
+    };
+  });
 </script>
+
 
 {% if just_logged_in %}
 <script>
