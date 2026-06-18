@@ -428,7 +428,8 @@
                         
                         <!-- Direct Expenses -->
                         {% for grp_name, grp_data in direct_expenses_tree.items() %}
-                        <tr class="sub-section-row collapsible-header" data-target="direct-exp-grp-{{ loop.index }}">
+                        {% set grp_loop = loop %}
+                        <tr class="sub-section-row collapsible-header" data-target="direct-exp-grp-{{ grp_loop.index }}">
                             <td class="indent-1 fw-bold">
                                 <i class="bi bi-chevron-right me-1 text-muted toggle-chevron"></i>
                                 <i class="bi bi-arrow-right-circle me-2 text-warning"></i>{{ grp_name }}
@@ -437,7 +438,8 @@
                         </tr>
                         
                         {% for ldr_name, ldr_data in grp_data.accounts.items() %}
-                        <tr class="direct-exp-grp-{{ loop.parent.index }}-child collapsible-header" data-target="direct-exp-ldr-{{ loop.parent.index }}-{{ loop.index }}" style="display: none; background-color: #f8fafc;">
+                        {% set ldr_loop = loop %}
+                        <tr class="direct-exp-grp-{{ grp_loop.index }}-child collapsible-header" data-target="direct-exp-ldr-{{ grp_loop.index }}-{{ ldr_loop.index }}" style="display: none; background-color: #f8fafc;">
                             <td class="indent-2 fw-semibold" style="padding-left: 40px !important;">
                                 <i class="bi bi-chevron-right me-1 text-muted toggle-chevron"></i>
                                 <i class="bi bi-folder2 me-2 text-primary"></i>{{ ldr_name }}
@@ -446,7 +448,7 @@
                         </tr>
                         
                         {% for part_name, part_data in ldr_data.particulars.items() %}
-                        <tr class="direct-exp-ldr-{{ loop.parent.parent.index }}-{{ loop.parent.index }}-child drilldown-link" style="display: none;" onclick="viewDrilldown('{{ part_name }}')">
+                        <tr class="direct-exp-ldr-{{ grp_loop.index }}-{{ ldr_loop.index }}-child drilldown-link" style="display: none;" onclick="viewDrilldown('{{ part_name }}')">
                             <td class="indent-3 text-muted" style="padding-left: 65px !important;">
                                 <i class="bi bi-tag me-2 text-secondary"></i>{{ part_name }}
                             </td>
@@ -479,7 +481,8 @@
                     <tbody>
                         <!-- Sales Accounts -->
                         {% for grp_name, grp_data in sales_accounts_tree.items() %}
-                        <tr class="sub-section-row collapsible-header" data-target="sales-grp-{{ loop.index }}">
+                        {% set grp_loop = loop %}
+                        <tr class="sub-section-row collapsible-header" data-target="sales-grp-{{ grp_loop.index }}">
                             <td class="indent-1 fw-bold">
                                 <i class="bi bi-chevron-right me-1 text-muted toggle-chevron"></i>
                                 <i class="bi bi-graph-up me-2 text-success"></i>{{ grp_name }}
@@ -488,7 +491,8 @@
                         </tr>
                         
                         {% for ldr_name, ldr_data in grp_data.accounts.items() %}
-                        <tr class="sales-grp-{{ loop.parent.index }}-child collapsible-header" data-target="sales-ldr-{{ loop.parent.index }}-{{ loop.index }}" style="display: none; background-color: #f8fafc;">
+                        {% set ldr_loop = loop %}
+                        <tr class="sales-grp-{{ grp_loop.index }}-child collapsible-header" data-target="sales-ldr-{{ grp_loop.index }}-{{ ldr_loop.index }}" style="display: none; background-color: #f8fafc;">
                             <td class="indent-2 fw-semibold" style="padding-left: 40px !important;">
                                 <i class="bi bi-chevron-right me-1 text-muted toggle-chevron"></i>
                                 <i class="bi bi-folder2 me-2 text-primary"></i>{{ ldr_name }}
@@ -497,7 +501,7 @@
                         </tr>
                         
                         {% for part_name, part_data in ldr_data.particulars.items() %}
-                        <tr class="sales-ldr-{{ loop.parent.parent.index }}-{{ loop.parent.index }}-child drilldown-link" style="display: none;" onclick="viewDrilldown('{{ part_name }}')">
+                        <tr class="sales-ldr-{{ grp_loop.index }}-{{ ldr_loop.index }}-child drilldown-link" style="display: none;" onclick="viewDrilldown('{{ part_name }}')">
                             <td class="indent-3 text-muted" style="padding-left: 65px !important;">
                                 <i class="bi bi-tag me-2 text-secondary"></i>{{ part_name }}
                             </td>
@@ -509,7 +513,8 @@
                         
                         <!-- Direct Incomes -->
                         {% for grp_name, grp_data in direct_incomes_tree.items() %}
-                        <tr class="sub-section-row collapsible-header" data-target="direct-inc-grp-{{ loop.index }}">
+                        {% set grp_loop = loop %}
+                        <tr class="sub-section-row collapsible-header" data-target="direct-inc-grp-{{ grp_loop.index }}">
                             <td class="indent-1 fw-bold">
                                 <i class="bi bi-chevron-right me-1 text-muted toggle-chevron"></i>
                                 <i class="bi bi-wallet2 me-2"></i>{{ grp_name }}
@@ -518,7 +523,8 @@
                         </tr>
                         
                         {% for ldr_name, ldr_data in grp_data.accounts.items() %}
-                        <tr class="direct-inc-grp-{{ loop.parent.index }}-child collapsible-header" data-target="direct-inc-ldr-{{ loop.parent.index }}-{{ loop.index }}" style="display: none; background-color: #f8fafc;">
+                        {% set ldr_loop = loop %}
+                        <tr class="direct-inc-grp-{{ grp_loop.index }}-child collapsible-header" data-target="direct-inc-ldr-{{ grp_loop.index }}-{{ ldr_loop.index }}" style="display: none; background-color: #f8fafc;">
                             <td class="indent-2 fw-semibold" style="padding-left: 40px !important;">
                                 <i class="bi bi-chevron-right me-1 text-muted toggle-chevron"></i>
                                 <i class="bi bi-folder2 me-2 text-primary"></i>{{ ldr_name }}
@@ -527,7 +533,7 @@
                         </tr>
                         
                         {% for part_name, part_data in ldr_data.particulars.items() %}
-                        <tr class="direct-inc-ldr-{{ loop.parent.parent.index }}-{{ loop.parent.index }}-child drilldown-link" style="display: none;" onclick="viewDrilldown('{{ part_name }}')">
+                        <tr class="direct-inc-ldr-{{ grp_loop.index }}-{{ ldr_loop.index }}-child drilldown-link" style="display: none;" onclick="viewDrilldown('{{ part_name }}')">
                             <td class="indent-3 text-muted" style="padding-left: 65px !important;">
                                 <i class="bi bi-tag me-2 text-secondary"></i>{{ part_name }}
                             </td>
@@ -591,7 +597,8 @@
                         {% endif %}
                                          <!-- Indirect Expenses -->
                         {% for grp_name, grp_data in indirect_expenses_tree.items() %}
-                        <tr class="sub-section-row collapsible-header" data-target="indirect-exp-grp-{{ loop.index }}">
+                        {% set grp_loop = loop %}
+                        <tr class="sub-section-row collapsible-header" data-target="indirect-exp-grp-{{ grp_loop.index }}">
                             <td class="indent-1 fw-bold">
                                 <i class="bi bi-chevron-right me-1 text-muted toggle-chevron"></i>
                                 <i class="bi bi-lightbulb me-2 text-secondary"></i>{{ grp_name }}
@@ -600,7 +607,8 @@
                         </tr>
                         
                         {% for ldr_name, ldr_data in grp_data.accounts.items() %}
-                        <tr class="indirect-exp-grp-{{ loop.parent.index }}-child collapsible-header" data-target="indirect-exp-ldr-{{ loop.parent.index }}-{{ loop.index }}" style="display: none; background-color: #f8fafc;">
+                        {% set ldr_loop = loop %}
+                        <tr class="indirect-exp-grp-{{ grp_loop.index }}-child collapsible-header" data-target="indirect-exp-ldr-{{ grp_loop.index }}-{{ ldr_loop.index }}" style="display: none; background-color: #f8fafc;">
                             <td class="indent-2 fw-semibold" style="padding-left: 40px !important;">
                                 <i class="bi bi-chevron-right me-1 text-muted toggle-chevron"></i>
                                 <i class="bi bi-folder2 me-2 text-primary"></i>{{ ldr_name }}
@@ -609,7 +617,7 @@
                         </tr>
                         
                         {% for part_name, part_data in ldr_data.particulars.items() %}
-                        <tr class="indirect-exp-ldr-{{ loop.parent.parent.index }}-{{ loop.parent.index }}-child drilldown-link" style="display: none;" onclick="viewDrilldown('{{ part_name }}')">
+                        <tr class="indirect-exp-ldr-{{ grp_loop.index }}-{{ ldr_loop.index }}-child drilldown-link" style="display: none;" onclick="viewDrilldown('{{ part_name }}')">
                             <td class="indent-3 text-muted" style="padding-left: 65px !important;">
                                 <i class="bi bi-tag me-2 text-secondary"></i>{{ part_name }}
                             </td>
@@ -644,7 +652,8 @@
                         
                         <!-- Indirect Incomes -->
                         {% for grp_name, grp_data in indirect_incomes_tree.items() %}
-                        <tr class="sub-section-row collapsible-header" data-target="indirect-inc-grp-{{ loop.index }}">
+                        {% set grp_loop = loop %}
+                        <tr class="sub-section-row collapsible-header" data-target="indirect-inc-grp-{{ grp_loop.index }}">
                             <td class="indent-1 fw-bold">
                                 <i class="bi bi-chevron-right me-1 text-muted toggle-chevron"></i>
                                 <i class="bi bi-percent me-2 text-info"></i>{{ grp_name }}
@@ -653,7 +662,8 @@
                         </tr>
                         
                         {% for ldr_name, ldr_data in grp_data.accounts.items() %}
-                        <tr class="indirect-inc-grp-{{ loop.parent.index }}-child collapsible-header" data-target="indirect-inc-ldr-{{ loop.parent.index }}-{{ loop.index }}" style="display: none; background-color: #f8fafc;">
+                        {% set ldr_loop = loop %}
+                        <tr class="indirect-inc-grp-{{ grp_loop.index }}-child collapsible-header" data-target="indirect-inc-ldr-{{ grp_loop.index }}-{{ ldr_loop.index }}" style="display: none; background-color: #f8fafc;">
                             <td class="indent-2 fw-semibold" style="padding-left: 40px !important;">
                                 <i class="bi bi-chevron-right me-1 text-muted toggle-chevron"></i>
                                 <i class="bi bi-folder2 me-2 text-primary"></i>{{ ldr_name }}
@@ -662,7 +672,7 @@
                         </tr>
                         
                         {% for part_name, part_data in ldr_data.particulars.items() %}
-                        <tr class="indirect-inc-ldr-{{ loop.parent.parent.index }}-{{ loop.parent.index }}-child drilldown-link" style="display: none;" onclick="viewDrilldown('{{ part_name }}')">
+                        <tr class="indirect-inc-ldr-{{ grp_loop.index }}-{{ ldr_loop.index }}-child drilldown-link" style="display: none;" onclick="viewDrilldown('{{ part_name }}')">
                             <td class="indent-3 text-muted" style="padding-left: 65px !important;">
                                 <i class="bi bi-tag me-2 text-secondary"></i>{{ part_name }}
                             </td>

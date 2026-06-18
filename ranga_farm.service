@@ -1,0 +1,31 @@
+[Unit]
+Description=Gunicorn instance to serve Ranga Farms Flask Application
+After=network.target
+
+[Service]
+# 1. Run under non-privileged system user boundaries
+User=appuser
+Group=appgroup
+WorkingDirectory=/app
+
+# 2. Environment Configurations Setup
+Environment=FLASK_ENV=production
+Environment=PATH=/root/.local/bin:/usr/bin:/usr/local/bin
+EnvironmentFile=/app/.env
+
+# 3. Startup Exec Commands
+ExecStart=/root/.local/bin/gunicorn --config gunicorn.conf.py Project_goatfarm:app
+
+# 4. Resilience Restart Policies
+Restart=always
+RestartSec=5
+KillSignal=SIGTERM
+PrivateTmp=true
+
+# 5. Security Restrictions
+ProtectSystem=full
+ProtectHome=true
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

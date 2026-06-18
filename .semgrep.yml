@@ -1,0 +1,34 @@
+# Semgrep Configuration rules for OWASP Top 10 validations
+rules:
+  - id: flask-debug-mode
+    pattern: |
+      $APP = Flask(...)
+      ...
+      $APP.run(..., debug=True, ...)
+    message: Flask debug mode is enabled. Ensure debug is False in production.
+    languages: [python]
+    severity: ERROR
+
+  - id: insecure-randomness
+    pattern: |
+      import random
+      ...
+      random.randint(...)
+    message: Use secrets module for cryptographically secure random values (ASVS 6.2).
+    languages: [python]
+    severity: WARNING
+
+  - id: sql-injection-concatenation
+    pattern: |
+      $DB.execute(..., $SQL + $VAL)
+    message: Potential SQL Injection via string concatenation. Use parameterized queries instead.
+    languages: [python]
+    severity: ERROR
+
+  - id: csrf-protection-missing
+    pattern: |
+      $APP = Flask(...)
+      # missing CSRFProtect($APP)
+    message: CSRF protection is not globally enabled for the Flask application.
+    languages: [python]
+    severity: ERROR

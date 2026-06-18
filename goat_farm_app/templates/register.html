@@ -16,10 +16,34 @@
                 <form method="POST">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <div class="mb-3"><label>Username</label><input type="text" name="username" class="form-control" required></div>
-                    <div class="mb-3"><label>Password</label><input type="password" name="password" class="form-control" required></div>
+                    <div class="mb-3"><label>Password</label><input type="password" name="password" id="password" class="form-control" required></div>
+                    <div class="mb-3"><label>Confirm Password</label><input type="password" name="confirm_password" id="confirm_password" class="form-control" required></div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="show_password" onclick="togglePasswordVisibility()">
+                        <label class="form-check-label" for="show_password">Show Password</label>
+                    </div>
+                    {% if is_admin %}
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" name="is_admin" class="form-check-input" id="is_admin">
+                        <label class="form-check-label" for="is_admin">Administrator Account</label>
+                    </div>
+                    {% endif %}
                     <button class="btn btn-primary w-100 mb-3" type="submit">Register</button>
                     <div class="text-center"><a href="{{ url_for('login') }}">Back to Login</a></div>
                 </form>
+                <script>
+                function togglePasswordVisibility() {
+                    var p = document.getElementById("password");
+                    var cp = document.getElementById("confirm_password");
+                    if (p.type === "password") {
+                        p.type = "text";
+                        cp.type = "text";
+                    } else {
+                        p.type = "password";
+                        cp.type = "password";
+                    }
+                }
+                </script>
             </div>
         </div>
     </div>

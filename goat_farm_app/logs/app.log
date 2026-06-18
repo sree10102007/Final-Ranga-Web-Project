@@ -1,3 +1,211 @@
 2026-06-18 09:49:54,184 INFO: Goat Farm app starting up [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:307]
 2026-06-18 10:01:57,558 INFO: Goat Farm app starting up [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:316]
 2026-06-18 10:01:58,287 INFO: Goat Farm app starting up [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:316]
+2026-06-18 10:17:19,062 INFO: Goat Farm app starting up [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:316]
+2026-06-18 10:17:30,212 INFO: Goat Farm app starting up [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:316]
+2026-06-18 10:26:55,488 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:364]
+2026-06-18 10:26:56,277 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:364]
+2026-06-18 10:31:57,799 ERROR: Server Error: 'jinja2.runtime.LoopContext object' has no attribute 'parent' [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:453]
+Traceback (most recent call last):
+  File "C:\Users\Suressvar\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\flask\app.py", line 867, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\Suressvar\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\flask\app.py", line 852, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py", line 6541, in pnl
+    return render_template('pnl.html',
+                           from_date=from_date,
+    ...<23 lines>...
+                           direct_incomes_tree=direct_incomes_tree,
+                           indirect_incomes_tree=indirect_incomes_tree)
+  File "C:\Users\Suressvar\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\flask\templating.py", line 152, in render_template
+    return _render(app, template, context)
+  File "C:\Users\Suressvar\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\flask\templating.py", line 133, in _render
+    rv = template.render(context)
+  File "C:\Users\Suressvar\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\jinja2\environment.py", line 1295, in render
+    self.environment.handle_exception()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Suressvar\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\jinja2\environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\templates\pnl.html", line 1, in top-level template code
+    {% extends 'layout.html' %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\templates\layout.html", line 218, in top-level template code
+    {% block content %}{% endblock %}
+    ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\templates\pnl.html", line 521, in block 'content'
+    <tr class="direct-inc-grp-{{ loop.parent.index }}-child collapsible-header" data-target="direct-inc-ldr-{{ loop.parent.index }}-{{ loop.index }}" style="display: none; background-color: #f8fafc;">
+    ^
+  File "C:\Users\Suressvar\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\jinja2\environment.py", line 490, in getattr
+    return getattr(obj, attribute)
+jinja2.exceptions.UndefinedError: 'jinja2.runtime.LoopContext object' has no attribute 'parent'
+2026-06-18 10:32:04,120 ERROR: Server Error: 'jinja2.runtime.LoopContext object' has no attribute 'parent' [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:453]
+Traceback (most recent call last):
+  File "C:\Users\Suressvar\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\flask\app.py", line 867, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\Suressvar\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\flask\app.py", line 852, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py", line 6541, in pnl
+    return render_template('pnl.html',
+                           from_date=from_date,
+    ...<23 lines>...
+                           direct_incomes_tree=direct_incomes_tree,
+                           indirect_incomes_tree=indirect_incomes_tree)
+  File "C:\Users\Suressvar\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\flask\templating.py", line 152, in render_template
+    return _render(app, template, context)
+  File "C:\Users\Suressvar\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\flask\templating.py", line 133, in _render
+    rv = template.render(context)
+  File "C:\Users\Suressvar\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\jinja2\environment.py", line 1295, in render
+    self.environment.handle_exception()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Suressvar\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\jinja2\environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\templates\pnl.html", line 1, in top-level template code
+    {% extends 'layout.html' %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\templates\layout.html", line 218, in top-level template code
+    {% block content %}{% endblock %}
+    ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\templates\pnl.html", line 521, in block 'content'
+    <tr class="direct-inc-grp-{{ loop.parent.index }}-child collapsible-header" data-target="direct-inc-ldr-{{ loop.parent.index }}-{{ loop.index }}" style="display: none; background-color: #f8fafc;">
+    ^
+  File "C:\Users\Suressvar\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\jinja2\environment.py", line 490, in getattr
+    return getattr(obj, attribute)
+jinja2.exceptions.UndefinedError: 'jinja2.runtime.LoopContext object' has no attribute 'parent'
+2026-06-18 10:37:41,972 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:364]
+2026-06-18 10:41:45,053 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:516]
+2026-06-18 10:41:55,979 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:533]
+2026-06-18 10:42:07,760 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:542]
+2026-06-18 10:43:40,969 ERROR: Server Error: 429 Too Many Requests: 50 per 1 hour [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:631]
+Traceback (most recent call last):
+  File "C:\Users\Suressvar\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\flask\app.py", line 865, in full_dispatch_request
+    rv = self.preprocess_request()
+  File "C:\Users\Suressvar\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\flask\app.py", line 1239, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+  File "C:\Users\Suressvar\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\flask_limiter\extension.py", line 1160, in _check_request_limit
+    raise e
+  File "C:\Users\Suressvar\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\flask_limiter\extension.py", line 1157, in _check_request_limit
+    self.__evaluate_limits(endpoint, all_limits)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\flask_limiter\extension.py", line 1141, in __evaluate_limits
+    raise RateLimitExceeded(
+    ...<2 lines>...
+    )
+flask_limiter.errors.RateLimitExceeded: 429 Too Many Requests: 50 per 1 hour
+2026-06-18 10:43:41,133 ERROR: Server Error: 429 Too Many Requests: 50 per 1 hour [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:631]
+Traceback (most recent call last):
+  File "C:\Users\Suressvar\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\flask\app.py", line 865, in full_dispatch_request
+    rv = self.preprocess_request()
+  File "C:\Users\Suressvar\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\flask\app.py", line 1239, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+  File "C:\Users\Suressvar\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\flask_limiter\extension.py", line 1160, in _check_request_limit
+    raise e
+  File "C:\Users\Suressvar\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\flask_limiter\extension.py", line 1157, in _check_request_limit
+    self.__evaluate_limits(endpoint, all_limits)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\flask_limiter\extension.py", line 1141, in __evaluate_limits
+    raise RateLimitExceeded(
+    ...<2 lines>...
+    )
+flask_limiter.errors.RateLimitExceeded: 429 Too Many Requests: 50 per 1 hour
+2026-06-18 10:43:41,902 ERROR: Server Error: 429 Too Many Requests: 50 per 1 hour [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:631]
+Traceback (most recent call last):
+  File "C:\Users\Suressvar\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\flask\app.py", line 865, in full_dispatch_request
+    rv = self.preprocess_request()
+  File "C:\Users\Suressvar\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\flask\app.py", line 1239, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+  File "C:\Users\Suressvar\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\flask_limiter\extension.py", line 1160, in _check_request_limit
+    raise e
+  File "C:\Users\Suressvar\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\flask_limiter\extension.py", line 1157, in _check_request_limit
+    self.__evaluate_limits(endpoint, all_limits)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\flask_limiter\extension.py", line 1141, in __evaluate_limits
+    raise RateLimitExceeded(
+    ...<2 lines>...
+    )
+flask_limiter.errors.RateLimitExceeded: 429 Too Many Requests: 50 per 1 hour
+2026-06-18 10:43:43,128 ERROR: Server Error: 429 Too Many Requests: 50 per 1 hour [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:631]
+Traceback (most recent call last):
+  File "C:\Users\Suressvar\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\flask\app.py", line 865, in full_dispatch_request
+    rv = self.preprocess_request()
+  File "C:\Users\Suressvar\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\flask\app.py", line 1239, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+  File "C:\Users\Suressvar\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\flask_limiter\extension.py", line 1160, in _check_request_limit
+    raise e
+  File "C:\Users\Suressvar\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\flask_limiter\extension.py", line 1157, in _check_request_limit
+    self.__evaluate_limits(endpoint, all_limits)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\flask_limiter\extension.py", line 1141, in __evaluate_limits
+    raise RateLimitExceeded(
+    ...<2 lines>...
+    )
+flask_limiter.errors.RateLimitExceeded: 429 Too Many Requests: 50 per 1 hour
+2026-06-18 10:43:43,413 ERROR: Server Error: 429 Too Many Requests: 50 per 1 hour [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:631]
+Traceback (most recent call last):
+  File "C:\Users\Suressvar\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\flask\app.py", line 865, in full_dispatch_request
+    rv = self.preprocess_request()
+  File "C:\Users\Suressvar\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\flask\app.py", line 1239, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+  File "C:\Users\Suressvar\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\flask_limiter\extension.py", line 1160, in _check_request_limit
+    raise e
+  File "C:\Users\Suressvar\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\flask_limiter\extension.py", line 1157, in _check_request_limit
+    self.__evaluate_limits(endpoint, all_limits)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\flask_limiter\extension.py", line 1141, in __evaluate_limits
+    raise RateLimitExceeded(
+    ...<2 lines>...
+    )
+flask_limiter.errors.RateLimitExceeded: 429 Too Many Requests: 50 per 1 hour
+2026-06-18 10:45:59,869 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:609]
+2026-06-18 10:46:11,420 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:609]
+2026-06-18 10:46:22,068 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:613]
+2026-06-18 10:46:34,845 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:613]
+2026-06-18 10:46:46,634 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:613]
+2026-06-18 10:46:58,442 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:613]
+2026-06-18 10:47:11,071 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:613]
+2026-06-18 10:47:21,777 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:613]
+2026-06-18 11:23:05,286 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:613]
+2026-06-18 11:24:15,490 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:613]
+2026-06-18 11:24:25,598 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:613]
+2026-06-18 11:24:41,014 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:613]
+2026-06-18 11:30:15,666 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:613]
+2026-06-18 11:33:03,508 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:613]
+2026-06-18 11:33:52,591 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:613]
+2026-06-18 11:37:18,859 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:613]
+2026-06-18 11:37:54,024 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:613]
+2026-06-18 11:40:53,456 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:614]
+2026-06-18 11:41:17,060 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:614]
+2026-06-18 11:46:51,851 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:613]
+2026-06-18 11:50:10,704 ERROR: [REDACTED SENSITIVE LOG] [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:702]
+Traceback (most recent call last):
+  File "C:\Users\Suressvar\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\flask\app.py", line 867, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\Suressvar\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\flask\app.py", line 852, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py", line 1778, in mfa_enroll
+    img.save(buffered, format="PNG")
+    ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: PyPNGImage.save() got an unexpected keyword argument 'format'
+2026-06-18 11:53:47,479 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:613]
+2026-06-18 11:53:54,490 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:613]
+2026-06-18 11:55:22,257 ERROR: [REDACTED SENSITIVE LOG] [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:702]
+Traceback (most recent call last):
+  File "C:\Users\Suressvar\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\flask\app.py", line 867, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\Suressvar\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\flask\app.py", line 852, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py", line 1783, in mfa_enroll
+    img.save(buffered, format="PNG")
+    ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: PyPNGImage.save() got an unexpected keyword argument 'format'
+2026-06-18 11:55:47,638 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:613]
+2026-06-18 12:00:24,368 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:613]
+2026-06-18 12:00:29,353 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:613]
+2026-06-18 12:00:33,278 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:613]
+2026-06-18 12:00:37,212 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:613]
+2026-06-18 12:00:48,415 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:613]
+2026-06-18 12:01:03,590 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:613]
+2026-06-18 12:01:04,356 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:613]

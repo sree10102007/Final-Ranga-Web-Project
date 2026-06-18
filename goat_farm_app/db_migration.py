@@ -94,6 +94,28 @@ def migrate():
     conn.autocommit = True
     cursor = conn.cursor()
 
+    # Check/Create users table and add security columns
+    print("Checking users table security columns...")
+    cursor.execute('''CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        username TEXT UNIQUE NOT NULL,
+        password TEXT NOT NULL
+    )''')
+    
+    def add_user_column(col, col_type):
+        try:
+            cursor.execute(f"ALTER TABLE users ADD COLUMN IF NOT EXISTS {col} {col_type}")
+        except Exception as e:
+            print(f"Error adding column {col} to users: {e}")
+            
+    add_user_column("mfa_secret", "TEXT")
+    add_user_column("mfa_enabled", "INTEGER DEFAULT 0")
+    add_user_column("backup_codes", "TEXT")
+    add_user_column("login_attempts", "INTEGER DEFAULT 0")
+    add_user_column("locked_until", "TIMESTAMP DEFAULT NULL")
+    add_user_column("password_history", "TEXT")
+
+
     def get_columns(table_name):
         try:
             # Query information_schema for column names

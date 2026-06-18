@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ranga_farm_app
+    ports:
+      - "5001:5001"
+    env_file:
+      - ./goat_farm_app/.env
+    restart: unless-stopped
+    
+    # 1. Resource Limits (Prevention of Denial of Service / Resource Exhaustion)
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+
+    # 2. Kernel & System Security Controls
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+    # 3. Filesystem Hardening (Read-only root filesystem with writable zones isolated)
+    read_only: true
+    tmpfs:
+      - /tmp:size=32M
+    volumes:
+      - app_logs:/app/logs
+      - app_uploads:/app/static/uploads
+
+volumes:
+  app_logs:
+    driver: local
+  app_uploads:
+    driver: local

@@ -3,3 +3,8 @@ Werkzeug==3.0.1
 psycopg2-binary
 python-dotenv
 Flask-WTF==1.2.1
+pyotp==2.9.0
+qrcode==7.4.2
+Flask-Limiter==3.7.0
+cryptography
+

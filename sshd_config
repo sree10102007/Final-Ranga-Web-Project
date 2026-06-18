@@ -1,0 +1,37 @@
+# Hardened SSH Daemon Configuration Baseline
+# Path: /etc/ssh/sshd_config
+
+# 1. Connection & Protocol
+Port 22
+Protocol 2
+AddressFamily inet
+
+# 2. Authentication Security
+PermitRootLogin no
+PubkeyAuthentication yes
+AuthorizedKeysFile .ssh/authorized_keys
+
+# Disable password authentication (Force Public Key only)
+PasswordAuthentication no
+PermitEmptyPasswords no
+ChallengeResponseAuthentication no
+KerberosAuthentication no
+GSSAPIAuthentication no
+
+# 3. Session Hardening
+MaxAuthTries 3
+ClientAliveInterval 300
+ClientAliveCountMax 0
+LoginGraceTime 30
+
+# 4. Access Control Boundaries
+AllowUsers manager admin sree
+X11Forwarding no
+AllowTcpForwarding no
+PermitUserEnvironment no
+PermitTunnel no
+
+# 5. Cryptography Ciphers (Modern and secure only)
+KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org,diffie-hellman-group16-sha512,diffie-hellman-group18-sha512
+Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com
+MACs hmac-sha2-512-etm@openssh.com
