@@ -209,3 +209,46 @@ TypeError: PyPNGImage.save() got an unexpected keyword argument 'format'
 2026-06-18 12:00:48,415 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:613]
 2026-06-18 12:01:03,590 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:613]
 2026-06-18 12:01:04,356 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:613]
+2026-06-18 14:37:54,494 INFO: Goat Farm app starting up [in C:\Users\acer\OneDrive\Documents\werty\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:613]
+2026-06-19 15:06:27,363 INFO: Goat Farm app starting up [in C:\Users\acer\OneDrive\Documents\werty\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:613]
+2026-06-19 15:17:58,981 ERROR: Server Error: 429 Too Many Requests: 50 per 1 hour [in C:\Users\acer\OneDrive\Documents\werty\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:702]
+Traceback (most recent call last):
+  File "c:\Users\acer\OneDrive\Documents\werty\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 865, in full_dispatch_request
+    rv = self.preprocess_request()
+  File "c:\Users\acer\OneDrive\Documents\werty\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1239, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+  File "c:\Users\acer\OneDrive\Documents\werty\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1160, in _check_request_limit
+    raise e
+  File "c:\Users\acer\OneDrive\Documents\werty\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1157, in _check_request_limit
+    self.__evaluate_limits(endpoint, all_limits)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\acer\OneDrive\Documents\werty\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1141, in __evaluate_limits
+    raise RateLimitExceeded(
+    ...<2 lines>...
+    )
+flask_limiter.errors.RateLimitExceeded: 429 Too Many Requests: 50 per 1 hour
+2026-06-19 15:20:22,153 ERROR: Server Error: 429 Too Many Requests: 50 per 1 hour [in C:\Users\acer\OneDrive\Documents\werty\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:702]
+Traceback (most recent call last):
+  File "c:\Users\acer\OneDrive\Documents\werty\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 865, in full_dispatch_request
+    rv = self.preprocess_request()
+  File "c:\Users\acer\OneDrive\Documents\werty\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1239, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+  File "c:\Users\acer\OneDrive\Documents\werty\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1160, in _check_request_limit
+    raise e
+  File "c:\Users\acer\OneDrive\Documents\werty\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1157, in _check_request_limit
+    self.__evaluate_limits(endpoint, all_limits)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\acer\OneDrive\Documents\werty\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1141, in __evaluate_limits
+    raise RateLimitExceeded(
+    ...<2 lines>...
+    )
+flask_limiter.errors.RateLimitExceeded: 429 Too Many Requests: 50 per 1 hour
+2026-06-19 15:39:59,401 INFO: Goat Farm app starting up [in C:\Users\acer\OneDrive\Documents\werty\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:614]
+2026-06-19 15:56:12,586 INFO: Goat Farm app starting up [in C:\Users\acer\OneDrive\Documents\werty\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:991]
+2026-06-19 15:57:01,269 INFO: Goat Farm app starting up [in C:\Users\acer\OneDrive\Documents\werty\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:991]
+2026-06-19 16:24:46,653 INFO: Goat Farm app starting up [in C:\Users\acer\OneDrive\Documents\werty\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:1028]
+2026-06-19 16:26:07,596 INFO: Goat Farm app starting up [in C:\Users\acer\OneDrive\Documents\werty\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:1029]
+2026-06-19 16:26:27,520 INFO: Goat Farm app starting up [in C:\Users\acer\OneDrive\Documents\werty\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:1029]
+2026-06-19 16:44:15,695 INFO: Goat Farm app starting up [in C:\Users\acer\OneDrive\Documents\werty\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:1028]
+2026-06-20 12:43:58,496 INFO: Goat Farm app starting up [in C:\Users\acer\OneDrive\Documents\werty\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:1028]
+2026-06-20 19:39:02,386 INFO: Goat Farm app starting up [in C:\Users\acer\OneDrive\Documents\werty\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:1028]

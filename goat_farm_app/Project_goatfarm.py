@@ -29,6 +29,24 @@ try:
 except ImportError:
     pass
 
+def validate_env():
+    required_vars = ['SECRET_KEY', 'DB_ENCRYPTION_KEY']
+    if not os.environ.get('DATABASE_URL'):
+        required_vars.extend(['DB_HOST', 'DB_PORT', 'DB_NAME', 'DB_USER', 'DB_PASSWORD'])
+    
+    missing_or_placeholder = []
+    for var in required_vars:
+        val = os.environ.get(var)
+        if not val or 'your_' in val.lower():
+            missing_or_placeholder.append(var)
+            
+    if missing_or_placeholder:
+        print(f"CRITICAL CONFIGURATION ERROR: Missing or placeholder environment variables: {', '.join(missing_or_placeholder)}")
+        print("Please copy .env.example to .env and configure the actual connection and secret key settings.")
+        sys.exit(1)
+
+validate_env()
+
 from cryptography.fernet import Fernet
 import logging
 from logging.handlers import RotatingFileHandler
@@ -119,9 +137,9 @@ class DatabaseEncryptor:
         # Load key from environment or fallback to developer key
         key = os.environ.get('DB_ENCRYPTION_KEY')
         if not key:
-            key = base64.urlsafe_b64encode(b"development_fallback_key_32bytes")
             if os.environ.get('FLASK_ENV', 'production').lower() == 'production':
-                db_logger.warning("DB_ENCRYPTION_KEY is not set in production! Falling back to unsafe development key.")
+                raise RuntimeError("CRITICAL SECURITY ERROR: DB_ENCRYPTION_KEY environment variable is not set in production mode!")
+            key = base64.urlsafe_b64encode(b"development_fallback_key_32bytes")
         else:
             try:
                 base64.urlsafe_b64decode(key)
@@ -248,23 +266,7 @@ def encrypt_query_params(sql, params):
                         
     return tuple(params_list)
 
-def validate_env():
-    required_vars = ['SECRET_KEY']
-    if not os.environ.get('DATABASE_URL'):
-        required_vars.extend(['DB_HOST', 'DB_PORT', 'DB_NAME', 'DB_USER', 'DB_PASSWORD'])
-    
-    missing_or_placeholder = []
-    for var in required_vars:
-        val = os.environ.get(var)
-        if not val or 'your_' in val.lower():
-            missing_or_placeholder.append(var)
-            
-    if missing_or_placeholder:
-        print(f"CRITICAL CONFIGURATION ERROR: Missing or placeholder environment variables: {', '.join(missing_or_placeholder)}")
-        print("Please copy .env.example to .env and configure the actual connection and secret key settings.")
-        sys.exit(1)
-
-validate_env()
+# Environment validated at top of file
 
 
 
@@ -435,59 +437,90 @@ class PostgresConnectionWrapper:
         else:
             self.commit()
 
-def get_db_connection():
+from psycopg2.pool import ThreadedConnectionPool
+
+db_pool = None
+
+def init_db_pool():
+    global db_pool
     db_url = os.environ.get('DATABASE_URL')
     
     flask_env = os.environ.get('FLASK_ENV', 'production').lower()
     default_ssl = 'require' if flask_env == 'production' else 'prefer'
     sslmode = os.environ.get('DB_SSLMODE', default_ssl)
     
+    min_conn = int(os.environ.get('DB_POOL_MIN', 2))
+    max_conn = int(os.environ.get('DB_POOL_MAX', 20))
+    
     if db_url:
-        # If connection string contains no sslmode, we can append it if not sqlite (wait, it's postgres)
-        if 'sslmode=' not in db_url and 'sqlite:' not in db_url:
+        if 'sslmode=' not in db_url:
             separator = '&' if '?' in db_url else '?'
             db_url = f"{db_url}{separator}sslmode={sslmode}"
-        return psycopg2.connect(db_url)
-    
-    db_name = os.environ.get('DB_NAME')
-    try:
-        return psycopg2.connect(
-            host=os.environ.get('DB_HOST'),
-            port=os.environ.get('DB_PORT'),
-            database=db_name,
-            user=os.environ.get('DB_USER'),
-            password=os.environ.get('DB_PASSWORD'),
-            sslmode=sslmode
-        )
-    except psycopg2.OperationalError as e:
-        if "does not exist" in str(e):
-            try:
-                # Connect to default 'postgres' database to create the target database
-                conn = psycopg2.connect(
-                    host=os.environ.get('DB_HOST'),
-                    port=os.environ.get('DB_PORT'),
-                    database='postgres',
-                    user=os.environ.get('DB_USER'),
-                    password=os.environ.get('DB_PASSWORD'),
-                    sslmode=sslmode
-                )
-                conn.autocommit = True
-                with conn.cursor() as cursor:
-                    cursor.execute(f'CREATE DATABASE "{db_name}"')
-                conn.close()
-                # Retry connecting to the newly created database
-                return psycopg2.connect(
-                    host=os.environ.get('DB_HOST'),
-                    port=os.environ.get('DB_PORT'),
-                    database=db_name,
-                    user=os.environ.get('DB_USER'),
-                    password=os.environ.get('DB_PASSWORD'),
-                    sslmode=sslmode
-                )
-            except Exception:
+        db_pool = ThreadedConnectionPool(min_conn, max_conn, dsn=db_url)
+    else:
+        db_name = os.environ.get('DB_NAME')
+        try:
+            db_pool = ThreadedConnectionPool(
+                min_conn, max_conn,
+                host=os.environ.get('DB_HOST'),
+                port=os.environ.get('DB_PORT'),
+                database=db_name,
+                user=os.environ.get('DB_USER'),
+                password=os.environ.get('DB_PASSWORD'),
+                sslmode=sslmode
+            )
+        except psycopg2.OperationalError as e:
+            if "does not exist" in str(e):
+                try:
+                    # Connect to default 'postgres' database to create the target database
+                    conn = psycopg2.connect(
+                        host=os.environ.get('DB_HOST'),
+                        port=os.environ.get('DB_PORT'),
+                        database='postgres',
+                        user=os.environ.get('DB_USER'),
+                        password=os.environ.get('DB_PASSWORD'),
+                        sslmode=sslmode
+                    )
+                    conn.autocommit = True
+                    with conn.cursor() as cursor:
+                        cursor.execute(f'CREATE DATABASE "{db_name}"')
+                    conn.close()
+                    # Retry establishing the thread connection pool
+                    db_pool = ThreadedConnectionPool(
+                        min_conn, max_conn,
+                        host=os.environ.get('DB_HOST'),
+                        port=os.environ.get('DB_PORT'),
+                        database=db_name,
+                        user=os.environ.get('DB_USER'),
+                        password=os.environ.get('DB_PASSWORD'),
+                        sslmode=sslmode
+                    )
+                except Exception:
+                    raise e
+            else:
                 raise e
-        else:
-            raise e
+
+def get_db_connection():
+    global db_pool
+    if db_pool is None:
+        init_db_pool()
+    
+    conn = None
+    try:
+        conn = db_pool.getconn()
+        # Verify connectivity health with a ping
+        with conn.cursor() as cur:
+            cur.execute("SELECT 1")
+        conn.commit()  # Reset transaction state so autocommit can be modified afterwards
+        return conn
+    except (psycopg2.InterfaceError, psycopg2.OperationalError, AttributeError):
+        # Discard the stale connection and allocate a fresh one
+        if conn is not None:
+            try:
+                db_pool.putconn(conn, close=True)
+            except Exception:
+                pass
+        return db_pool.getconn()
 
 import logging
 from logging.handlers import RotatingFileHandler
@@ -515,7 +548,7 @@ class TestingConfig(Config):
     SESSION_COOKIE_SECURE = False
 
 class ProductionConfig(Config):
-    pass
+    PREFERRED_URL_SCHEME = 'https'
 
 config_by_name = {
     'development': DevelopmentConfig,
@@ -529,16 +562,397 @@ flask_env = os.environ.get('FLASK_ENV', 'production').lower()
 config_class = config_by_name.get(flask_env, ProductionConfig)
 app.config.from_object(config_class)
 
+# Werkzeug ProxyFix middleware to correctly resolve client IP and HTTPS behind reverse proxies
+from werkzeug.middleware.proxy_fix import ProxyFix
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
+
 # Initialize global CSRF protection
 csrf = CSRFProtect(app)
 
-# Initialize Flask-Limiter for brute-force defense
+# --- Production-Grade Rate Limiting Architecture ---
+import time
+import os
+import sys
+from urllib.parse import urlparse
+from limits.storage.base import Storage
+import limits.storage
+
+# Retrieve the real standard library sqlite3 module since it's mocked globally
+if 'sqlite3' in sys.modules:
+    _old_sqlite3 = sys.modules['sqlite3']
+    del sys.modules['sqlite3']
+    try:
+        import sqlite3 as real_sqlite3
+    finally:
+        sys.modules['sqlite3'] = _old_sqlite3
+else:
+    import sqlite3 as real_sqlite3
+
+class SQLiteStorage(Storage):
+    STORAGE_SCHEME = ["sqlite"]
+
+    def __init__(self, uri: str, **options):
+        super().__init__(uri, **options)
+        parsed = urlparse(uri)
+        db_path = parsed.path
+        if db_path.startswith('/') and len(db_path) > 2 and db_path[2] == ':':
+            db_path = db_path[1:]
+        self.db_path = os.path.abspath(db_path)
+        self._init_db()
+
+    def _get_conn(self):
+        conn = real_sqlite3.connect(self.db_path, timeout=5)
+        conn.row_factory = real_sqlite3.Row
+        return conn
+
+    def _init_db(self):
+        with self._get_conn() as conn:
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS rate_limits (
+                    key TEXT PRIMARY KEY,
+                    value INTEGER NOT NULL,
+                    expires_at REAL NOT NULL
+                )
+            """)
+            conn.execute("CREATE INDEX IF NOT EXISTS idx_expires_at ON rate_limits(expires_at)")
+            conn.commit()
+
+    @property
+    def base_exceptions(self):
+        return (real_sqlite3.Error,)
+
+    def incr(self, key: str, expiry: int, amount: int = 1) -> int:
+        now = time.time()
+        expires_at = now + expiry
+        with self._get_conn() as conn:
+            conn.execute("DELETE FROM rate_limits WHERE expires_at < ?", (now,))
+            row = conn.execute("SELECT value, expires_at FROM rate_limits WHERE key = ?", (key,)).fetchone()
+            if row:
+                new_value = row['value'] + amount
+                conn.execute("UPDATE rate_limits SET value = ? WHERE key = ?", (new_value, key))
+                conn.commit()
+                return new_value
+            else:
+                conn.execute("INSERT OR REPLACE INTO rate_limits (key, value, expires_at) VALUES (?, ?, ?)",
+                             (key, amount, expires_at))
+                conn.commit()
+                return amount
+
+    def get(self, key: str) -> int:
+        now = time.time()
+        with self._get_conn() as conn:
+            row = conn.execute("SELECT value FROM rate_limits WHERE key = ? AND expires_at >= ?", (key, now)).fetchone()
+            return row['value'] if row else 0
+
+    def get_expiry(self, key: str) -> float:
+        now = time.time()
+        with self._get_conn() as conn:
+            row = conn.execute("SELECT expires_at FROM rate_limits WHERE key = ? AND expires_at >= ?", (key, now)).fetchone()
+            return row['expires_at'] if row else now
+
+    def check(self) -> bool:
+        try:
+            with self._get_conn() as conn:
+                conn.execute("SELECT 1").fetchone()
+            return True
+        except Exception:
+            return False
+
+    def reset(self) -> int:
+        with self._get_conn() as conn:
+            cursor = conn.execute("DELETE FROM rate_limits")
+            conn.commit()
+            return cursor.rowcount
+
+    def clear(self, key: str) -> None:
+        with self._get_conn() as conn:
+            conn.execute("DELETE FROM rate_limits WHERE key = ?", (key,))
+            conn.commit()
+
+# Register the custom SQLite storage backend in limits SCHEMES
+limits.storage.SCHEMES["sqlite"] = SQLiteStorage
+
+
+
+def rate_limit_key():
+    try:
+        from flask import session
+        if 'user_id' in session:
+            return f"user:{session['user_id']}"
+    except Exception:
+        pass
+    try:
+        from flask_login import current_user
+        if current_user.is_authenticated:
+            return f"user:{current_user.id}"
+    except Exception:
+        pass
+    return get_remote_address()
+
+def get_limiter_storage_uri():
+    # 1. Try REDIS_URL from environment
+    redis_url = os.environ.get('REDIS_URL')
+    if redis_url:
+        try:
+            import redis
+            r = redis.from_url(redis_url, socket_connect_timeout=1)
+            r.ping()
+            return redis_url
+        except Exception as e:
+            app.logger.warning(f"Redis configured at {redis_url} but connection failed: {e}. Trying SQL fallback.")
+            
+    # 2. Try Database-backed storage fallback (using our custom SQLite backend)
+    try:
+        db_path = os.path.join(base_dir, 'limiter.db').replace('\\', '/')
+        return f"sqlite:///{db_path}"
+    except Exception as e:
+        app.logger.warning(f"SQLite storage setup failed: {e}. Falling back to memory://.")
+        return "memory://"
+
+def get_dynamic_limit():
+    """
+    Dynamically returns the rate limit based on endpoint categorization,
+    HTTP method, file upload presence, and repeated polling detection.
+    """
+    from flask import request
+    
+    endpoint = request.endpoint
+    if not endpoint:
+        return "2000 per hour"  # Safe default fallback for unidentified requests
+        
+    path = request.path.lower()
+    method = request.method.upper()
+    
+    # 1. Exempt routes (Static files & Logout)
+    if endpoint in ['static', 'logout'] or '/static/' in path:
+        return None
+        
+    # 2. File Uploads (100/hour)
+    try:
+        if request.files and any(f.filename for f in request.files.values()):
+            return "100 per hour"
+    except Exception:
+        pass
+
+    # 3. Authentication & Password Reset
+    if endpoint == 'login':
+        return "10 per minute"
+    if endpoint == 'mfa_verify_login':
+        return "10 per minute"
+    if endpoint == 'register':
+        return "5 per minute"
+    if 'reset' in path or 'forgot' in path or 'password' in path and 'edit' not in path:
+        return "5 per hour"
+        
+    # 4. Export reports / high-resource invoices (50/hour)
+    if (endpoint in ['reports_list', 'generate_invoice', 'generate_invoice_txt', 'generate_invoice_pdf', 'sales_invoice', 'sales_invoice_txt'] or 
+        'report' in path or 'invoice' in path or '/pnl' in path or endpoint == 'pnl'):
+        return "50 per hour"
+        
+    # 5. Admin-only actions (100/hour)
+    if (endpoint in ['manage_users', 'delete_user', 'unlock_user', 'clear_all_data', 'expense_approve'] or
+        'admin' in path or 'approve' in path or 'unlock' in path or 'clear' in path):
+        return "100 per hour"
+        
+    # 6. Record Deletion (100/hour)
+    if 'delete' in endpoint or 'delete' in path:
+        return "100 per hour"
+        
+    # 7. Record Creation (300/hour)
+    if (method == 'POST' and ('add' in endpoint or 'save' in endpoint or 'create' in endpoint or 'consume' in endpoint or 'buy' in endpoint or 
+                              'add' in path or 'save' in path or 'create' in path or 'consume' in path or 'buy' in path)):
+        return "300 per hour"
+        
+    # 8. Record Editing (300/hour)
+    if ('edit' in endpoint or 'update' in endpoint or 'edit' in path or 'update' in path or 'wages_edit' in endpoint):
+        return "300 per hour"
+        
+    # 9. Polled endpoints / Notifications (2000/hour)
+    if endpoint == 'api_notifications' or '/api/notifications' in path:
+        return "2000 per hour"
+    if endpoint == 'get_feed_stock' or '/get_feed_stock/' in path:
+        return "2000 per hour"
+        
+    # 10. Search endpoints (500/hour)
+    if endpoint == 'search' or 'search' in path or 'lookup' in path or endpoint == 'api_goat_lookup':
+        return "500 per hour"
+        
+    # 11. Dashboards (1000/hour)
+    if endpoint in ['dashboard', 'index'] or path == '/' or path == '/dashboard':
+        return "1000 per hour"
+        
+    # 12. Record viewing / read-only list pages (2000/hour)
+    if method == 'GET':
+        return "2000 per hour"
+        
+    # General default fallback
+    return "300 per hour"
+
+# Initialize Flask-Limiter with dynamic keys, storage, and fallback
 limiter = Limiter(
-    key_func=get_remote_address,
+    key_func=rate_limit_key,
     app=app,
-    default_limits=["200 per day", "50 per hour"],
-    storage_uri="memory://"
+    default_limits=[get_dynamic_limit],
+    storage_uri=get_limiter_storage_uri()
 )
+
+from flask_limiter.errors import RateLimitExceeded
+
+@app.errorhandler(RateLimitExceeded)
+def handle_rate_limit_exceeded(e):
+    # Log security event
+    log_security_event("rate_limit_exceeded", f"Rate limit exceeded: {e.description}")
+    
+    retry_after = getattr(e, 'retry_after', 60)
+    if retry_after is None:
+        retry_after = 60
+        
+    if request.path.startswith('/api/') or request.headers.get('Accept') == 'application/json' or request.is_json:
+        response = jsonify({
+            "success": False,
+            "error": "Too many requests",
+            "retry_after": f"{retry_after} seconds"
+        })
+        response.headers['Retry-After'] = str(retry_after)
+        return response, 429
+        
+    try:
+        return render_template('rate_limit.html', retry_after=retry_after), 429
+    except Exception:
+        # High-end fallback HTML response if template fails
+        return f"""
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Rate Limit Exceeded - Ranga Farms</title>
+            <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+            <style>
+                body {{
+                    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+                    color: #f8fafc;
+                    font-family: 'Outfit', sans-serif;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    height: 100vh;
+                    margin: 0;
+                    overflow: hidden;
+                }}
+                .card {{
+                    background: rgba(30, 41, 59, 0.45);
+                    backdrop-filter: blur(16px);
+                    -webkit-backdrop-filter: blur(16px);
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                    border-radius: 24px;
+                    padding: 3rem;
+                    text-align: center;
+                    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+                    max-width: 480px;
+                    width: 90%;
+                    animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+                }}
+                @keyframes fadeInUp {{
+                    from {{ opacity: 0; transform: translateY(20px); }}
+                    to {{ opacity: 1; transform: translateY(0); }}
+                }}
+                .icon {{
+                    width: 80px;
+                    height: 80px;
+                    background: linear-gradient(135deg, #ef4444 0%, #f43f5e 100%);
+                    border-radius: 50%;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    margin: 0 auto 2rem;
+                    box-shadow: 0 10px 25px -5px rgba(239, 68, 68, 0.4);
+                }}
+                .icon svg {{
+                    width: 40px;
+                    height: 40px;
+                    fill: none;
+                    stroke: white;
+                    stroke-width: 2.5;
+                    stroke-linecap: round;
+                    stroke-linejoin: round;
+                }}
+                h1 {{
+                    font-size: 2.25rem;
+                    font-weight: 800;
+                    margin: 0 0 1rem;
+                    background: linear-gradient(to right, #fca5a5, #f43f5e);
+                    -webkit-background-clip: text;
+                    -webkit-text-fill-color: transparent;
+                }}
+                p {{
+                    font-size: 1.1rem;
+                    line-height: 1.6;
+                    color: #94a3b8;
+                    margin: 0 0 2rem;
+                }}
+                .timer {{
+                    font-size: 1.25rem;
+                    font-weight: 600;
+                    background: rgba(244, 63, 94, 0.1);
+                    border: 1px solid rgba(244, 63, 94, 0.2);
+                    padding: 0.75rem 1.5rem;
+                    border-radius: 12px;
+                    display: inline-block;
+                    color: #fda4af;
+                    margin-bottom: 2rem;
+                }}
+                .btn {{
+                    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+                    color: white;
+                    border: none;
+                    padding: 1rem 2rem;
+                    font-size: 1rem;
+                    font-weight: 600;
+                    border-radius: 12px;
+                    cursor: pointer;
+                    text-decoration: none;
+                    display: inline-block;
+                    transition: all 0.2s ease;
+                    box-shadow: 0 10px 20px -5px rgba(99, 102, 241, 0.4);
+                }}
+                .btn:hover {{
+                    transform: translateY(-2px);
+                    box-shadow: 0 15px 25px -5px rgba(99, 102, 241, 0.5);
+                }}
+            </style>
+        </head>
+        <body>
+            <div class="card">
+                <div class="icon">
+                    <svg viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                </div>
+                <h1>Too Many Requests</h1>
+                <p>You have made too many requests in a short period. To protect our system against automated scraping and abuse, your access has been temporarily limited.</p>
+                <div class="timer">Please try again in <span id="countdown">{retry_after}</span> seconds.</div>
+                <div>
+                    <button class="btn" onclick="location.reload()">Refresh Page</button>
+                </div>
+            </div>
+            <script>
+                let seconds = {retry_after};
+                const countdownEl = document.getElementById('countdown');
+                const interval = setInterval(() => {{
+                    seconds--;
+                    if (seconds <= 0) {{
+                        clearInterval(interval);
+                        location.reload();
+                    }} else {{
+                        countdownEl.textContent = seconds;
+                    }}
+                }}, 1000);
+            </script>
+        </body>
+        </html>
+        """, 429
 
 # Global security response headers middleware
 @app.after_request
@@ -548,6 +962,7 @@ def add_security_headers(response):
     response.headers['X-XSS-Protection'] = '1; mode=block'
     response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains; preload'
     response.headers['Referrer-Policy'] = 'no-referrer-when-downgrade'
+    response.headers['Permissions-Policy'] = 'geolocation=(), microphone=(), camera=()'
     # Content-Security-Policy: Allow Bootstrap, Icons, FontAwesome, Google fonts, inline script tags from our forms.
     response.headers['Content-Security-Policy'] = (
         "default-src 'self'; "
@@ -719,7 +1134,21 @@ def get_db():
 def close_connection(exception):
     db = getattr(g, '_database', None)
     if db is not None:
-        db.close()
+        global db_pool
+        if db_pool is not None:
+            discard = (exception is not None)
+            try:
+                db_pool.putconn(db.conn, close=discard)
+            except Exception:
+                try:
+                    db_pool.putconn(db.conn)
+                except Exception:
+                    pass
+        else:
+            try:
+                db.conn.close()
+            except Exception:
+                pass
 
 
 def calculate_age_str(dob_str):
@@ -1627,6 +2056,8 @@ def login():
                            (attempts, locked_until_time, user['id']))
                 db.commit()
         else:
+            # Perform a dummy password check to mitigate username enumeration timing attacks
+            check_password_hash(generate_password_hash('dummy_password_hash_value'), 'dummy_password_hash_value')
             log_security_event('LOGIN_FAILURE', f"Attempted login with non-existent username: {username}", username=username)
             flash('Invalid username or password.', 'danger')
             
@@ -4401,6 +4832,26 @@ def health():
     vaccine_count = db.execute('SELECT COUNT(*) FROM vaccine_records').fetchone()[0]
     doctor_count = db.execute('SELECT COUNT(*) FROM doctor_details').fetchone()[0]
     return render_template('health.html', vaccine_count=vaccine_count, doctor_count=doctor_count)
+
+@app.route('/healthz')
+def healthz():
+    try:
+        db = get_db()
+        db.execute('SELECT 1').fetchone()
+        return jsonify({
+            "status": "healthy",
+            "timestamp": datetime.utcnow().isoformat() + "Z",
+            "services": {
+                "database": "connected"
+            }
+        }), 200
+    except Exception as e:
+        app.logger.critical(f"Health check failed: {str(e)}", exc_info=True)
+        return jsonify({
+            "status": "unhealthy",
+            "timestamp": datetime.utcnow().isoformat() + "Z",
+            "error": str(e)
+        }), 500
 
 @app.route('/eligible_to_sell')
 def eligible_to_sell():
@@ -7488,5 +7939,7 @@ def delete_batch_reminder(id):
 if __name__ == '__main__':
     # Default to production-safe settings when running directly.
     # Debug mode is configured via Config classes and environment variable validation.
+    flask_env = os.environ.get('FLASK_ENV', 'production').lower()
+    is_debug = (flask_env == 'development')
     port = int(os.environ.get('PORT', 5001))
-    app.run(host='0.0.0.0', port=port)
+    app.run(host='0.0.0.0', port=port, debug=is_debug)
