@@ -31335,3 +31335,2122 @@
 2026-06-20 19:40:05,319 - INFO - User: 1 | Query: SELECT id, batch_name, reminder_type, item_name, reminder_date
         FROM batch_reminders
         WHERE reminder_date <= %s AND is_completed = 0 | Param Count: 1
+2026-06-20 19:50:47,167 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS users (
+                id SERIAL PRIMARY KEY,
+                username TEXT UNIQUE NOT NULL,
+                password TEXT NOT NULL
+            ) | Param Count: 0
+2026-06-20 19:50:47,168 - INFO - User: system | Query: ALTER TABLE users ADD COLUMN IF NOT EXISTS mfa_secret TEXT | Param Count: 0
+2026-06-20 19:50:47,172 - INFO - User: system | Query: ALTER TABLE users ADD COLUMN IF NOT EXISTS mfa_enabled INTEGER DEFAULT 0 | Param Count: 0
+2026-06-20 19:50:47,173 - INFO - User: system | Query: ALTER TABLE users ADD COLUMN IF NOT EXISTS backup_codes TEXT | Param Count: 0
+2026-06-20 19:50:47,174 - INFO - User: system | Query: ALTER TABLE users ADD COLUMN IF NOT EXISTS login_attempts INTEGER DEFAULT 0 | Param Count: 0
+2026-06-20 19:50:47,175 - INFO - User: system | Query: ALTER TABLE users ADD COLUMN IF NOT EXISTS locked_until TIMESTAMP DEFAULT NULL | Param Count: 0
+2026-06-20 19:50:47,175 - INFO - User: system | Query: ALTER TABLE users ADD COLUMN IF NOT EXISTS password_history TEXT | Param Count: 0
+2026-06-20 19:50:47,176 - INFO - User: system | Query: ALTER TABLE users ADD COLUMN IF NOT EXISTS is_admin INTEGER DEFAULT 0 | Param Count: 0
+2026-06-20 19:50:47,177 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS goats_data (
+                id SERIAL PRIMARY KEY,
+                tag_number TEXT NOT NULL,
+                date DATE NOT NULL,
+                category TEXT NOT NULL,
+                type TEXT NOT NULL,
+                amount REAL NOT NULL,
+                notes TEXT
+            ) | Param Count: 0
+2026-06-20 19:50:47,178 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS master_records (
+                id SERIAL PRIMARY KEY,
+                si_no TEXT, tag_no TEXT UNIQUE NOT NULL, breed TEXT, breed_percent TEXT,
+                status TEXT, sold TEXT, expired TEXT, gender TEXT, purchase_date DATE,
+                color TEXT, weight_kg REAL, purchase_amount REAL, insurance_date DATE,
+                vaccination TEXT, vaccination_period TEXT, vaccination_next_due DATE, medicine TEXT, medicine_period TEXT,
+                feed TEXT, feed_amount TEXT, mating_date DATE, mating_goat_no TEXT,
+                goat_week_period TEXT, delivery_date DATE, new_goat_gender TEXT,
+                new_goat_color TEXT, birth_weight REAL, selling_date DATE, selling_weight REAL,
+                selling_price REAL, mortality_date DATE, mortality_weight REAL,
+                mortality_reason TEXT, insurance_claim_amount REAL, insurance_inform_date DATE,
+                insurance_claim_date DATE, dob DATE
+            ) | Param Count: 0
+2026-06-20 19:50:47,179 - INFO - User: system | Query: ALTER TABLE master_records ADD COLUMN IF NOT EXISTS vaccination_next_due DATE | Param Count: 0
+2026-06-20 19:50:47,180 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS sales_records (
+                id SERIAL PRIMARY KEY,
+                sr_no TEXT,
+                tag_id TEXT NOT NULL,
+                breed TEXT,
+                breed_percent TEXT,
+                gender TEXT,
+                weight REAL,
+                sold_price REAL,
+                date_of_sale DATE,
+                buyer_name TEXT,
+                buyer_city TEXT,
+                buyer_contact TEXT
+            ) | Param Count: 0
+2026-06-20 19:50:47,181 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS other_sales_records (
+                id SERIAL PRIMARY KEY,
+                sr_no TEXT,
+                item_name TEXT NOT NULL,
+                quantity REAL,
+                unit TEXT,
+                price_per_unit REAL,
+                total_amount REAL,
+                date_of_sale DATE,
+                buyer_name TEXT,
+                buyer_city TEXT,
+                buyer_contact TEXT,
+                notes TEXT
+            ) | Param Count: 0
+2026-06-20 19:50:47,181 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS medicine_records (
+                id SERIAL PRIMARY KEY,
+                sr_no TEXT,
+                tag_no TEXT NOT NULL,
+                breed TEXT,
+                breed_percent TEXT,
+                med1_date DATE, med1_name TEXT,
+                vac1_date DATE, vac1_name TEXT,
+                med2_date DATE, med2_name TEXT,
+                med3_date DATE, med3_name TEXT,
+                vac2_date DATE, vac2_name TEXT,
+                medicine_amount REAL,
+                vaccine_amount REAL
+            ) | Param Count: 0
+2026-06-20 19:50:47,182 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS mortality_records (
+                id SERIAL PRIMARY KEY,
+                sr_no TEXT,
+                tag_id TEXT NOT NULL,
+                breed TEXT,
+                breed_percent TEXT,
+                gender TEXT,
+                birth_date DATE,
+                expired_date DATE,
+                total_age_month TEXT,
+                weight_kgs REAL,
+                insurance_inform_date DATE,
+                insurance_claim_date DATE,
+                current_value REAL,
+                claim_amount REAL,
+                cause_of_death TEXT
+            ) | Param Count: 0
+2026-06-20 19:50:47,182 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS feed_inventory (
+                id SERIAL PRIMARY KEY,
+                feed_name TEXT NOT NULL,
+                opening_stock REAL DEFAULT 0,
+                purchased_qty REAL DEFAULT 0,
+                used_qty REAL DEFAULT 0,
+                wastage_qty REAL DEFAULT 0,
+                closing_stock REAL DEFAULT 0,
+                unit TEXT,
+                cost_per_unit REAL DEFAULT 0,
+                total_cost REAL DEFAULT 0,
+                purchase_date DATE,
+                supplier TEXT
+            ) | Param Count: 0
+2026-06-20 19:50:47,183 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS medicine_inventory (
+                id SERIAL PRIMARY KEY,
+                medicine_name TEXT NOT NULL,
+                opening_stock REAL DEFAULT 0,
+                purchased_qty REAL DEFAULT 0,
+                used_qty REAL DEFAULT 0,
+                wastage_qty REAL DEFAULT 0,
+                closing_stock REAL DEFAULT 0,
+                unit TEXT,
+                cost_per_unit REAL DEFAULT 0,
+                total_cost REAL DEFAULT 0,
+                purchase_date DATE,
+                supplier TEXT,
+                alert_level REAL DEFAULT 0
+            ) | Param Count: 0
+2026-06-20 19:50:47,184 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS vaccine_inventory (
+                id SERIAL PRIMARY KEY,
+                vaccine_name TEXT NOT NULL,
+                opening_stock REAL DEFAULT 0,
+                purchased_qty REAL DEFAULT 0,
+                used_qty REAL DEFAULT 0,
+                wastage_qty REAL DEFAULT 0,
+                closing_stock REAL DEFAULT 0,
+                unit TEXT,
+                cost_per_unit REAL DEFAULT 0,
+                total_cost REAL DEFAULT 0,
+                purchase_date DATE,
+                supplier TEXT,
+                alert_level REAL DEFAULT 0
+            ) | Param Count: 0
+2026-06-20 19:50:47,184 - INFO - User: system | Query: ALTER TABLE feed_inventory ADD COLUMN IF NOT EXISTS wastage_qty REAL DEFAULT 0 | Param Count: 0
+2026-06-20 19:50:47,186 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS kid_records (
+                id SERIAL PRIMARY KEY,
+                s_no TEXT,
+                kid_id TEXT NOT NULL,
+                breed TEXT,
+                breed_percent TEXT,
+                gender TEXT,
+                color TEXT,
+                litter_size INTEGER,
+                birth_date DATE,
+                age_month TEXT,
+                birth_weight REAL,
+                mother_id TEXT,
+                father_id TEXT
+            ) | Param Count: 0
+2026-06-20 19:50:47,186 - INFO - User: system | Query: ALTER TABLE kid_records ADD COLUMN IF NOT EXISTS mother_id TEXT | Param Count: 0
+2026-06-20 19:50:47,187 - INFO - User: system | Query: ALTER TABLE kid_records ADD COLUMN IF NOT EXISTS father_id TEXT | Param Count: 0
+2026-06-20 19:50:47,188 - INFO - User: system | Query: ALTER TABLE kid_records ADD COLUMN IF NOT EXISTS insurance_policy_no TEXT | Param Count: 0
+2026-06-20 19:50:47,189 - INFO - User: system | Query: ALTER TABLE kid_records ADD COLUMN IF NOT EXISTS insurance_company TEXT | Param Count: 0
+2026-06-20 19:50:47,190 - INFO - User: system | Query: ALTER TABLE kid_records ADD COLUMN IF NOT EXISTS insurance_expiry DATE | Param Count: 0
+2026-06-20 19:50:47,191 - INFO - User: system | Query: ALTER TABLE kid_records ADD COLUMN IF NOT EXISTS insurance_amount REAL | Param Count: 0
+2026-06-20 19:50:47,192 - INFO - User: system | Query: ALTER TABLE master_records ADD COLUMN IF NOT EXISTS kit_status TEXT DEFAULT 'No' | Param Count: 0
+2026-06-20 19:50:47,193 - INFO - User: system | Query: ALTER TABLE master_records ADD COLUMN IF NOT EXISTS dob DATE | Param Count: 0
+2026-06-20 19:50:47,194 - INFO - User: system | Query: ALTER TABLE feed_inventory ADD COLUMN IF NOT EXISTS purchase_id INTEGER | Param Count: 0
+2026-06-20 19:50:47,195 - INFO - User: system | Query: ALTER TABLE medicine_inventory ADD COLUMN IF NOT EXISTS purchase_id INTEGER | Param Count: 0
+2026-06-20 19:50:47,196 - INFO - User: system | Query: ALTER TABLE vaccine_inventory ADD COLUMN IF NOT EXISTS purchase_id INTEGER | Param Count: 0
+2026-06-20 19:50:47,197 - INFO - User: system | Query: ALTER TABLE purchases ADD COLUMN IF NOT EXISTS pnl_category TEXT DEFAULT 'Purchase' | Param Count: 0
+2026-06-20 19:50:47,198 - INFO - User: system | Query: ALTER TABLE feed_purchases ADD COLUMN IF NOT EXISTS pnl_category TEXT DEFAULT 'Purchase' | Param Count: 0
+2026-06-20 19:50:47,199 - INFO - User: system | Query: ALTER TABLE medicine_purchases ADD COLUMN IF NOT EXISTS pnl_category TEXT DEFAULT 'Purchase' | Param Count: 0
+2026-06-20 19:50:47,200 - INFO - User: system | Query: ALTER TABLE vaccine_purchases ADD COLUMN IF NOT EXISTS pnl_category TEXT DEFAULT 'Purchase' | Param Count: 0
+2026-06-20 19:50:47,201 - INFO - User: system | Query: ALTER TABLE equipment ADD COLUMN IF NOT EXISTS pnl_category TEXT DEFAULT 'Purchase' | Param Count: 0
+2026-06-20 19:50:47,202 - INFO - User: system | Query: ALTER TABLE sales_records ADD COLUMN IF NOT EXISTS pnl_category TEXT DEFAULT 'Sales' | Param Count: 0
+2026-06-20 19:50:47,203 - INFO - User: system | Query: ALTER TABLE other_sales_records ADD COLUMN IF NOT EXISTS pnl_category TEXT DEFAULT 'Sales' | Param Count: 0
+2026-06-20 19:50:47,204 - INFO - User: system | Query: ALTER TABLE expenses ADD COLUMN IF NOT EXISTS pnl_category TEXT DEFAULT 'Direct Expenses' | Param Count: 0
+2026-06-20 19:50:47,205 - INFO - User: system | Query: ALTER TABLE purchases ADD COLUMN IF NOT EXISTS bill_date DATE | Param Count: 0
+2026-06-20 19:50:47,205 - INFO - User: system | Query: ALTER TABLE purchases ADD COLUMN IF NOT EXISTS bill_no TEXT | Param Count: 0
+2026-06-20 19:50:47,206 - INFO - User: system | Query: ALTER TABLE feed_purchases ADD COLUMN IF NOT EXISTS bill_date DATE | Param Count: 0
+2026-06-20 19:50:47,207 - INFO - User: system | Query: ALTER TABLE feed_purchases ADD COLUMN IF NOT EXISTS bill_no TEXT | Param Count: 0
+2026-06-20 19:50:47,208 - INFO - User: system | Query: ALTER TABLE feed_purchases ADD COLUMN IF NOT EXISTS notes TEXT | Param Count: 0
+2026-06-20 19:50:47,209 - INFO - User: system | Query: ALTER TABLE medicine_purchases ADD COLUMN IF NOT EXISTS bill_date DATE | Param Count: 0
+2026-06-20 19:50:47,209 - INFO - User: system | Query: ALTER TABLE medicine_purchases ADD COLUMN IF NOT EXISTS bill_no TEXT | Param Count: 0
+2026-06-20 19:50:47,210 - INFO - User: system | Query: ALTER TABLE medicine_purchases ADD COLUMN IF NOT EXISTS notes TEXT | Param Count: 0
+2026-06-20 19:50:47,211 - INFO - User: system | Query: ALTER TABLE vaccine_purchases ADD COLUMN IF NOT EXISTS bill_date DATE | Param Count: 0
+2026-06-20 19:50:47,212 - INFO - User: system | Query: ALTER TABLE vaccine_purchases ADD COLUMN IF NOT EXISTS bill_no TEXT | Param Count: 0
+2026-06-20 19:50:47,212 - INFO - User: system | Query: ALTER TABLE vaccine_purchases ADD COLUMN IF NOT EXISTS notes TEXT | Param Count: 0
+2026-06-20 19:50:47,213 - INFO - User: system | Query: ALTER TABLE purchases ADD COLUMN IF NOT EXISTS particular_id INTEGER | Param Count: 0
+2026-06-20 19:50:47,214 - INFO - User: system | Query: ALTER TABLE purchases ADD COLUMN IF NOT EXISTS particular_name TEXT | Param Count: 0
+2026-06-20 19:50:47,215 - INFO - User: system | Query: ALTER TABLE feed_purchases ADD COLUMN IF NOT EXISTS particular_id INTEGER | Param Count: 0
+2026-06-20 19:50:47,216 - INFO - User: system | Query: ALTER TABLE feed_purchases ADD COLUMN IF NOT EXISTS particular_name TEXT | Param Count: 0
+2026-06-20 19:50:47,216 - INFO - User: system | Query: ALTER TABLE medicine_purchases ADD COLUMN IF NOT EXISTS particular_id INTEGER | Param Count: 0
+2026-06-20 19:50:47,217 - INFO - User: system | Query: ALTER TABLE medicine_purchases ADD COLUMN IF NOT EXISTS particular_name TEXT | Param Count: 0
+2026-06-20 19:50:47,218 - INFO - User: system | Query: ALTER TABLE vaccine_purchases ADD COLUMN IF NOT EXISTS particular_id INTEGER | Param Count: 0
+2026-06-20 19:50:47,219 - INFO - User: system | Query: ALTER TABLE vaccine_purchases ADD COLUMN IF NOT EXISTS particular_name TEXT | Param Count: 0
+2026-06-20 19:50:47,220 - INFO - User: system | Query: ALTER TABLE expenses ADD COLUMN IF NOT EXISTS particular_id INTEGER | Param Count: 0
+2026-06-20 19:50:47,221 - INFO - User: system | Query: ALTER TABLE expenses ADD COLUMN IF NOT EXISTS bill_date DATE | Param Count: 0
+2026-06-20 19:50:47,222 - INFO - User: system | Query: ALTER TABLE expenses ADD COLUMN IF NOT EXISTS bill_no TEXT | Param Count: 0
+2026-06-20 19:50:47,223 - INFO - User: system | Query: ALTER TABLE expenses ADD COLUMN IF NOT EXISTS quantity REAL | Param Count: 0
+2026-06-20 19:50:47,224 - INFO - User: system | Query: ALTER TABLE expenses ADD COLUMN IF NOT EXISTS unit_id INTEGER | Param Count: 0
+2026-06-20 19:50:47,225 - INFO - User: system | Query: ALTER TABLE expenses ADD COLUMN IF NOT EXISTS unit_name TEXT | Param Count: 0
+2026-06-20 19:50:47,225 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS equipment (
+                id SERIAL PRIMARY KEY,
+                name TEXT,
+                type TEXT,
+                purchase_date DATE,
+                purchase_cost REAL,
+                supplier TEXT,
+                status TEXT,
+                notes TEXT,
+                assigned_employee TEXT,
+                service_due_date DATE
+            ) | Param Count: 0
+2026-06-20 19:50:47,226 - INFO - User: system | Query: ALTER TABLE equipment ADD COLUMN IF NOT EXISTS assigned_employee TEXT | Param Count: 0
+2026-06-20 19:50:47,227 - INFO - User: system | Query: ALTER TABLE equipment ADD COLUMN IF NOT EXISTS service_due_date DATE | Param Count: 0
+2026-06-20 19:50:47,228 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS medicine_history (
+                id SERIAL PRIMARY KEY,
+                tag_no TEXT NOT NULL,
+                doctor_name TEXT,
+                consultation_date DATE NOT NULL,
+                medicine_name TEXT NOT NULL,
+                dose TEXT,
+                quantity TEXT,
+                cost REAL NOT NULL,
+                notes TEXT
+            ) | Param Count: 0
+2026-06-20 19:50:47,228 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS breeds (
+                id SERIAL PRIMARY KEY,
+                breed_name TEXT UNIQUE NOT NULL,
+                description TEXT
+            ) | Param Count: 0
+2026-06-20 19:50:47,229 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS suppliers (
+                id SERIAL PRIMARY KEY,
+                supplier_name TEXT UNIQUE NOT NULL,
+                contact_person TEXT,
+                phone TEXT,
+                address TEXT,
+                supplier_type TEXT
+            ) | Param Count: 0
+2026-06-20 19:50:47,229 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS feed_purchases (
+                id SERIAL PRIMARY KEY,
+                feed_name TEXT NOT NULL,
+                quantity REAL NOT NULL,
+                unit TEXT,
+                cost REAL NOT NULL,
+                purchase_date DATE NOT NULL,
+                supplier TEXT
+            ) | Param Count: 0
+2026-06-20 19:50:47,229 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS medicine_purchases (
+                id SERIAL PRIMARY KEY,
+                medicine_name TEXT NOT NULL,
+                dose_unit TEXT,
+                quantity REAL NOT NULL,
+                cost REAL NOT NULL,
+                purchase_date DATE NOT NULL,
+                supplier TEXT
+            ) | Param Count: 0
+2026-06-20 19:50:47,230 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS vaccine_purchases (
+                id SERIAL PRIMARY KEY,
+                vaccine_name TEXT NOT NULL,
+                quantity REAL NOT NULL,
+                cost REAL NOT NULL,
+                purchase_date DATE NOT NULL,
+                supplier TEXT
+            ) | Param Count: 0
+2026-06-20 19:50:47,230 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS purchases (
+                id SERIAL PRIMARY KEY,
+                seller_name TEXT NOT NULL,
+                invoice_details TEXT,
+                purchase_date DATE NOT NULL,
+                tag_id TEXT NOT NULL,
+                price REAL NOT NULL
+            ) | Param Count: 0
+2026-06-20 19:50:47,231 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS farm_info (
+                id SERIAL PRIMARY KEY,
+                farm_name TEXT,
+                farm_address TEXT,
+                farm_city TEXT,
+                farm_phone TEXT,
+                bank_name TEXT,
+                account_number TEXT,
+                ifsc_code TEXT
+            ) | Param Count: 0
+2026-06-20 19:50:47,231 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS vaccine_records (
+                id SERIAL PRIMARY KEY,
+                sr_no TEXT,
+                tag_no TEXT NOT NULL,
+                vaccine_date DATE NOT NULL,
+                vaccine_name TEXT NOT NULL,
+                amount_spent REAL,
+                additional_vaccines TEXT,
+                additional_medicines TEXT,
+                required_vaccines TEXT,
+                required_medicines TEXT,
+                notes TEXT
+            ) | Param Count: 0
+2026-06-20 19:50:47,231 - INFO - User: system | Query: ALTER TABLE vaccine_records ADD COLUMN IF NOT EXISTS next_due_date DATE | Param Count: 0
+2026-06-20 19:50:47,233 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS doctor_details (
+                id SERIAL PRIMARY KEY,
+                doctor_name TEXT NOT NULL,
+                specialization TEXT,
+                contact_number TEXT,
+                email TEXT,
+                clinic_name TEXT,
+                clinic_address TEXT,
+                clinic_city TEXT,
+                availability TEXT,
+                registration_number TEXT,
+                notes TEXT
+            ) | Param Count: 0
+2026-06-20 19:50:47,233 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS eligible_to_sell (
+                id SERIAL PRIMARY KEY,
+                tag_id TEXT UNIQUE NOT NULL,
+                tag_no TEXT NOT NULL,
+                breed TEXT,
+                gender TEXT,
+                weight_kg REAL,
+                date_added DATE,
+                FOREIGN KEY (tag_id) REFERENCES master_records(tag_no)
+            ) | Param Count: 0
+2026-06-20 19:50:47,234 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS user_login_tracking (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER NOT NULL,
+                last_login_date DATE DEFAULT NULL,
+                has_seen_weight_notification INTEGER DEFAULT 0,
+                FOREIGN KEY (user_id) REFERENCES users(id)
+            ) | Param Count: 0
+2026-06-20 19:50:47,234 - INFO - User: system | Query: ALTER TABLE feed_inventory ADD COLUMN IF NOT EXISTS alert_level REAL DEFAULT 0 | Param Count: 0
+2026-06-20 19:50:47,235 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS batch_reminders (
+                id SERIAL PRIMARY KEY,
+                batch_name TEXT NOT NULL,
+                reminder_type TEXT NOT NULL,
+                item_name TEXT NOT NULL,
+                reminder_date DATE NOT NULL,
+                is_completed INTEGER DEFAULT 0
+            ) | Param Count: 0
+2026-06-20 19:50:47,236 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS ledger_groups (
+                id SERIAL PRIMARY KEY,
+                group_name TEXT UNIQUE NOT NULL,
+                description TEXT,
+                group_type TEXT DEFAULT 'Expense'
+            ) | Param Count: 0
+2026-06-20 19:50:47,236 - INFO - User: system | Query: ALTER TABLE ledger_groups ADD COLUMN IF NOT EXISTS group_type TEXT DEFAULT 'Expense' | Param Count: 0
+2026-06-20 19:50:47,237 - INFO - User: system | Query: SELECT 1 FROM ledger_groups WHERE group_name = %s | Param Count: 1
+2026-06-20 19:50:47,239 - INFO - User: system | Query: UPDATE ledger_groups SET group_type = %s WHERE group_name = %s AND group_type IS NULL | Param Count: 2
+2026-06-20 19:50:47,240 - INFO - User: system | Query: SELECT 1 FROM ledger_groups WHERE group_name = %s | Param Count: 1
+2026-06-20 19:50:47,241 - INFO - User: system | Query: UPDATE ledger_groups SET group_type = %s WHERE group_name = %s AND group_type IS NULL | Param Count: 2
+2026-06-20 19:50:47,241 - INFO - User: system | Query: SELECT 1 FROM ledger_groups WHERE group_name = %s | Param Count: 1
+2026-06-20 19:50:47,242 - INFO - User: system | Query: UPDATE ledger_groups SET group_type = %s WHERE group_name = %s AND group_type IS NULL | Param Count: 2
+2026-06-20 19:50:47,242 - INFO - User: system | Query: SELECT 1 FROM ledger_groups WHERE group_name = %s | Param Count: 1
+2026-06-20 19:50:47,243 - INFO - User: system | Query: UPDATE ledger_groups SET group_type = %s WHERE group_name = %s AND group_type IS NULL | Param Count: 2
+2026-06-20 19:50:47,243 - INFO - User: system | Query: SELECT 1 FROM ledger_groups WHERE group_name = %s | Param Count: 1
+2026-06-20 19:50:47,244 - INFO - User: system | Query: UPDATE ledger_groups SET group_type = %s WHERE group_name = %s AND group_type IS NULL | Param Count: 2
+2026-06-20 19:50:47,244 - INFO - User: system | Query: SELECT 1 FROM ledger_groups WHERE group_name = %s | Param Count: 1
+2026-06-20 19:50:47,245 - INFO - User: system | Query: UPDATE ledger_groups SET group_type = %s WHERE group_name = %s AND group_type IS NULL | Param Count: 2
+2026-06-20 19:50:47,245 - INFO - User: system | Query: SELECT 1 FROM ledger_groups WHERE group_name = %s | Param Count: 1
+2026-06-20 19:50:47,246 - INFO - User: system | Query: UPDATE ledger_groups SET group_type = %s WHERE group_name = %s AND group_type IS NULL | Param Count: 2
+2026-06-20 19:50:47,246 - INFO - User: system | Query: SELECT 1 FROM ledger_groups WHERE group_name = %s | Param Count: 1
+2026-06-20 19:50:47,247 - INFO - User: system | Query: UPDATE ledger_groups SET group_type = %s WHERE group_name = %s AND group_type IS NULL | Param Count: 2
+2026-06-20 19:50:47,247 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS expense_ledgers (
+                id SERIAL PRIMARY KEY,
+                ledger_name TEXT UNIQUE NOT NULL,
+                ledger_group TEXT DEFAULT 'Direct Expenses',
+                description TEXT
+            ) | Param Count: 0
+2026-06-20 19:50:47,248 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS expense_particulars (
+                id SERIAL PRIMARY KEY,
+                name TEXT UNIQUE NOT NULL,
+                ledger_id INTEGER,
+                description TEXT,
+                FOREIGN KEY (ledger_id) REFERENCES expense_ledgers(id)
+            ) | Param Count: 0
+2026-06-20 19:50:47,248 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS expense_units (
+                id SERIAL PRIMARY KEY,
+                unit_name TEXT UNIQUE NOT NULL,
+                unit_symbol TEXT
+            ) | Param Count: 0
+2026-06-20 19:50:47,249 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS other_vouchers (
+                id SERIAL PRIMARY KEY,
+                voucher_date DATE NOT NULL,
+                supplier_name TEXT,
+                particular_id INTEGER,
+                particular_name TEXT,
+                bill_date DATE,
+                bill_no TEXT,
+                quantity REAL,
+                unit_id INTEGER,
+                unit_name TEXT,
+                amount REAL NOT NULL DEFAULT 0,
+                notes TEXT,
+                pnl_category TEXT DEFAULT 'Direct Expenses',
+                FOREIGN KEY (particular_id) REFERENCES expense_particulars(id),
+                FOREIGN KEY (unit_id) REFERENCES expense_units(id)
+            ) | Param Count: 0
+2026-06-20 19:50:47,249 - INFO - User: system | Query: SELECT COUNT(*) FROM expense_units | Param Count: 0
+2026-06-20 19:50:47,251 - INFO - User: system | Query: SELECT COUNT(*) FROM expense_ledgers | Param Count: 0
+2026-06-20 19:50:47,252 - INFO - User: system | Query: SELECT * FROM users WHERE username = %s | Param Count: 1
+2026-06-20 19:50:47,253 - INFO - User: system | Query: UPDATE users SET is_admin = 1 WHERE username = %s | Param Count: 1
+2026-06-20 19:50:47,478 - INFO - User: system | Query: SELECT id FROM master_records WHERE si_no IS NULL OR si_no = '' ORDER BY id ASC | Param Count: 0
+2026-06-20 19:50:47,534 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS employees (
+            id SERIAL PRIMARY KEY,
+            name TEXT NOT NULL, role TEXT, phone TEXT, address TEXT,
+            join_date DATE, wage_type TEXT, wage_rate REAL DEFAULT 0,
+            status TEXT DEFAULT 'Active', notes TEXT,
+            aadhar_no TEXT, pan_no TEXT, bank_name TEXT, account_no TEXT, ifsc_code TEXT) | Param Count: 0
+2026-06-20 19:50:47,534 - INFO - User: system | Query: ALTER TABLE employees ADD COLUMN sr_no INTEGER | Param Count: 0
+2026-06-20 19:50:47,537 - INFO - User: system | Query: ALTER TABLE employees ADD COLUMN aadhar_no TEXT | Param Count: 0
+2026-06-20 19:50:47,538 - INFO - User: system | Query: ALTER TABLE employees ADD COLUMN pan_no TEXT | Param Count: 0
+2026-06-20 19:50:47,539 - INFO - User: system | Query: ALTER TABLE employees ADD COLUMN bank_name TEXT | Param Count: 0
+2026-06-20 19:50:47,539 - INFO - User: system | Query: ALTER TABLE employees ADD COLUMN account_no TEXT | Param Count: 0
+2026-06-20 19:50:47,540 - INFO - User: system | Query: ALTER TABLE employees ADD COLUMN ifsc_code TEXT | Param Count: 0
+2026-06-20 19:50:47,541 - INFO - User: system | Query: UPDATE employees SET sr_no = id WHERE sr_no IS NULL OR sr_no = 0 | Param Count: 0
+2026-06-20 19:50:47,542 - INFO - User: system | Query: ALTER TABLE expenses ADD COLUMN bill_file TEXT | Param Count: 0
+2026-06-20 19:50:47,543 - INFO - User: system | Query: ALTER TABLE expenses ADD COLUMN status TEXT DEFAULT 'Pending' | Param Count: 0
+2026-06-20 19:50:47,544 - INFO - User: system | Query: ALTER TABLE expenses ADD COLUMN pnl_category TEXT DEFAULT 'Direct Expenses' | Param Count: 0
+2026-06-20 19:50:47,545 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS employee_wages (
+            id SERIAL PRIMARY KEY,
+            employee_id INTEGER UNIQUE, daily_wage REAL DEFAULT 0,
+            weekly_salary REAL DEFAULT 0, monthly_salary REAL DEFAULT 0,
+            overtime_rate REAL DEFAULT 0, bonus REAL DEFAULT 0,
+            advance_salary REAL DEFAULT 0, pending_payment REAL DEFAULT 0,
+            last_updated DATE) | Param Count: 0
+2026-06-20 19:50:47,545 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS attendance (
+            id SERIAL PRIMARY KEY,
+            employee_id INTEGER, date DATE, status TEXT, notes TEXT) | Param Count: 0
+2026-06-20 19:50:47,546 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS salary_payments (
+            id SERIAL PRIMARY KEY,
+            employee_id INTEGER, month INTEGER, year INTEGER,
+            total_days INTEGER, present_days INTEGER, gross_salary REAL,
+            deductions REAL, net_salary REAL, paid_date DATE,
+            payment_mode TEXT) | Param Count: 0
+2026-06-20 19:50:47,546 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS tasks (
+            id SERIAL PRIMARY KEY,
+            employee_id INTEGER, task_name TEXT, description TEXT,
+            assigned_date DATE, due_date DATE, priority TEXT DEFAULT 'Medium',
+            status TEXT DEFAULT 'Pending', completion_percentage INTEGER DEFAULT 0) | Param Count: 0
+2026-06-20 19:50:47,547 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS leaves (
+            id SERIAL PRIMARY KEY,
+            employee_id INTEGER, leave_type TEXT, start_date DATE,
+            end_date DATE, reason TEXT, status TEXT DEFAULT 'Pending') | Param Count: 0
+2026-06-20 19:50:47,547 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS expense_categories (
+            id SERIAL PRIMARY KEY, category_name TEXT UNIQUE) | Param Count: 0
+2026-06-20 19:50:47,548 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS expenses (
+            id SERIAL PRIMARY KEY,
+            category TEXT, amount REAL, date DATE,
+            description TEXT, vendor_name TEXT, payment_mode TEXT,
+            receipt_no TEXT, notes TEXT, status TEXT DEFAULT 'Pending',
+            pnl_category TEXT DEFAULT 'Direct Expenses') | Param Count: 0
+2026-06-20 19:50:47,549 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS equipment (
+            id SERIAL PRIMARY KEY,
+            name TEXT NOT NULL, type TEXT, purchase_date DATE, purchase_cost REAL,
+            supplier TEXT, status TEXT DEFAULT 'Good', notes TEXT) | Param Count: 0
+2026-06-20 19:50:47,549 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS equipment_services (
+            id SERIAL PRIMARY KEY,
+            equipment_id INTEGER,
+            vendor_name TEXT,
+            service_date DATE NOT NULL,
+            service_cost REAL DEFAULT 0,
+            description TEXT,
+            status TEXT,
+            notes TEXT
+        ) | Param Count: 0
+2026-06-20 19:50:47,550 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS finances (
+            id SERIAL PRIMARY KEY,
+            type TEXT, category TEXT, amount REAL, date DATE,
+            description TEXT, reference_id TEXT, notes TEXT
+        ) | Param Count: 0
+2026-06-20 19:50:47,551 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS farm_settings (
+            id SERIAL PRIMARY KEY,
+            farm_name TEXT, address TEXT, phone TEXT, email TEXT,
+            bank_name TEXT, account_no TEXT, ifsc_code TEXT,
+            gst_no TEXT, logo_path TEXT
+        ) | Param Count: 0
+2026-06-20 19:50:47,551 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS reports (
+            id SERIAL PRIMARY KEY,
+            report_type TEXT, generated_date DATE,
+            from_date DATE, to_date DATE, file_path TEXT, notes TEXT
+        ) | Param Count: 0
+2026-06-20 19:50:52,515 - INFO - User: 1 | Query: SELECT COUNT(*) FROM master_records WHERE status = 'Active' | Param Count: 0
+2026-06-20 19:50:52,516 - INFO - User: 1 | Query: SELECT COUNT(*) FROM kid_records | Param Count: 0
+2026-06-20 19:50:52,517 - INFO - User: 1 | Query: SELECT COUNT(*) FROM employees WHERE status = 'Active' | Param Count: 0
+2026-06-20 19:50:52,518 - INFO - User: 1 | Query: SELECT SUM(sold_price) FROM sales_records | Param Count: 0
+2026-06-20 19:50:52,520 - INFO - User: 1 | Query: SELECT SUM(total_amount) FROM other_sales_records | Param Count: 0
+2026-06-20 19:50:52,521 - INFO - User: 1 | Query: SELECT SUM(price) FROM purchases | Param Count: 0
+2026-06-20 19:50:52,523 - INFO - User: 1 | Query: SELECT SUM(total_cost) FROM feed_inventory | Param Count: 0
+2026-06-20 19:50:52,524 - INFO - User: 1 | Query: SELECT SUM(cost) FROM medicine_purchases | Param Count: 0
+2026-06-20 19:50:52,526 - INFO - User: 1 | Query: SELECT SUM(cost) FROM vaccine_purchases | Param Count: 0
+2026-06-20 19:50:52,527 - INFO - User: 1 | Query: SELECT SUM(net_salary) FROM salary_payments | Param Count: 0
+2026-06-20 19:50:52,531 - INFO - User: 1 | Query: SELECT SUM(service_cost) FROM equipment_services | Param Count: 0
+2026-06-20 19:50:52,533 - INFO - User: 1 | Query: SELECT SUM(amount) FROM expenses WHERE status='Approved' AND LOWER(COALESCE(category, '')) NOT ILIKE '%labor%' AND LOWER(COALESCE(category, '')) NOT ILIKE '%labour%' | Param Count: 0
+2026-06-20 19:50:52,535 - INFO - User: 1 | Query: SELECT * FROM master_records ORDER BY id ASC LIMIT 10 | Param Count: 0
+2026-06-20 19:50:52,608 - INFO - User: 1 | Query: SELECT COUNT(*) FROM master_records WHERE weight_kg >= 25 AND status != 'Sold' AND status IS NOT NULL | Param Count: 0
+2026-06-20 19:50:52,610 - INFO - User: 1 | Query: SELECT is_admin FROM users WHERE id = %s | Param Count: 1
+2026-06-20 19:50:53,265 - INFO - User: 1 | Query: SELECT has_seen_weight_notification FROM user_login_tracking WHERE user_id = %s | Param Count: 1
+2026-06-20 19:50:53,266 - INFO - User: 1 | Query: SELECT f.feed_name, f.closing_stock, f.alert_level, f.unit
+        FROM feed_inventory f
+        INNER JOIN (
+            SELECT feed_name, MAX(id) as max_id
+            FROM feed_inventory
+            GROUP BY feed_name
+        ) latest ON f.id = latest.max_id | Param Count: 0
+2026-06-20 19:50:53,268 - INFO - User: 1 | Query: SELECT m.medicine_name, m.closing_stock, m.alert_level, m.unit
+        FROM medicine_inventory m
+        INNER JOIN (
+            SELECT medicine_name, MAX(id) as max_id
+            FROM medicine_inventory
+            GROUP BY medicine_name
+        ) latest ON m.id = latest.max_id | Param Count: 0
+2026-06-20 19:50:53,270 - INFO - User: 1 | Query: SELECT v.vaccine_name, v.closing_stock, v.alert_level, v.unit
+        FROM vaccine_inventory v
+        INNER JOIN (
+            SELECT vaccine_name, MAX(id) as max_id
+            FROM vaccine_inventory
+            GROUP BY vaccine_name
+        ) latest ON v.id = latest.max_id | Param Count: 0
+2026-06-20 19:50:53,271 - INFO - User: 1 | Query: SELECT id, batch_name, reminder_type, item_name, reminder_date
+        FROM batch_reminders
+        WHERE reminder_date <= %s AND is_completed = 0 | Param Count: 1
+2026-06-20 19:50:53,404 - INFO - User: 1 | Query: SELECT COUNT(*) FROM master_records WHERE weight_kg >= 25 AND status != 'Sold' AND status IS NOT NULL | Param Count: 0
+2026-06-20 19:50:53,404 - INFO - User: 1 | Query: SELECT is_admin FROM users WHERE id = %s | Param Count: 1
+2026-06-20 19:50:56,943 - INFO - User: 1 | Query: SELECT COUNT(*) FROM master_records WHERE status = 'Active' | Param Count: 0
+2026-06-20 19:50:56,944 - INFO - User: 1 | Query: SELECT COUNT(*) FROM kid_records | Param Count: 0
+2026-06-20 19:50:56,945 - INFO - User: 1 | Query: SELECT COUNT(*) FROM employees WHERE status = 'Active' | Param Count: 0
+2026-06-20 19:50:56,946 - INFO - User: 1 | Query: SELECT SUM(sold_price) FROM sales_records | Param Count: 0
+2026-06-20 19:50:56,947 - INFO - User: 1 | Query: SELECT SUM(total_amount) FROM other_sales_records | Param Count: 0
+2026-06-20 19:50:56,948 - INFO - User: 1 | Query: SELECT SUM(price) FROM purchases | Param Count: 0
+2026-06-20 19:50:56,949 - INFO - User: 1 | Query: SELECT SUM(total_cost) FROM feed_inventory | Param Count: 0
+2026-06-20 19:50:56,949 - INFO - User: 1 | Query: SELECT SUM(cost) FROM medicine_purchases | Param Count: 0
+2026-06-20 19:50:56,950 - INFO - User: 1 | Query: SELECT SUM(cost) FROM vaccine_purchases | Param Count: 0
+2026-06-20 19:50:56,951 - INFO - User: 1 | Query: SELECT SUM(net_salary) FROM salary_payments | Param Count: 0
+2026-06-20 19:50:56,951 - INFO - User: 1 | Query: SELECT SUM(service_cost) FROM equipment_services | Param Count: 0
+2026-06-20 19:50:56,952 - INFO - User: 1 | Query: SELECT SUM(amount) FROM expenses WHERE status='Approved' AND LOWER(COALESCE(category, '')) NOT ILIKE '%labor%' AND LOWER(COALESCE(category, '')) NOT ILIKE '%labour%' | Param Count: 0
+2026-06-20 19:50:56,953 - INFO - User: 1 | Query: SELECT * FROM master_records ORDER BY id ASC LIMIT 10 | Param Count: 0
+2026-06-20 19:50:56,954 - INFO - User: 1 | Query: SELECT COUNT(*) FROM master_records WHERE weight_kg >= 25 AND status != 'Sold' AND status IS NOT NULL | Param Count: 0
+2026-06-20 19:50:56,955 - INFO - User: 1 | Query: SELECT is_admin FROM users WHERE id = %s | Param Count: 1
+2026-06-20 19:50:57,020 - INFO - User: 1 | Query: SELECT has_seen_weight_notification FROM user_login_tracking WHERE user_id = %s | Param Count: 1
+2026-06-20 19:50:57,021 - INFO - User: 1 | Query: SELECT f.feed_name, f.closing_stock, f.alert_level, f.unit
+        FROM feed_inventory f
+        INNER JOIN (
+            SELECT feed_name, MAX(id) as max_id
+            FROM feed_inventory
+            GROUP BY feed_name
+        ) latest ON f.id = latest.max_id | Param Count: 0
+2026-06-20 19:50:57,023 - INFO - User: 1 | Query: SELECT m.medicine_name, m.closing_stock, m.alert_level, m.unit
+        FROM medicine_inventory m
+        INNER JOIN (
+            SELECT medicine_name, MAX(id) as max_id
+            FROM medicine_inventory
+            GROUP BY medicine_name
+        ) latest ON m.id = latest.max_id | Param Count: 0
+2026-06-20 19:50:57,024 - INFO - User: 1 | Query: SELECT v.vaccine_name, v.closing_stock, v.alert_level, v.unit
+        FROM vaccine_inventory v
+        INNER JOIN (
+            SELECT vaccine_name, MAX(id) as max_id
+            FROM vaccine_inventory
+            GROUP BY vaccine_name
+        ) latest ON v.id = latest.max_id | Param Count: 0
+2026-06-20 19:50:57,025 - INFO - User: 1 | Query: SELECT id, batch_name, reminder_type, item_name, reminder_date
+        FROM batch_reminders
+        WHERE reminder_date <= %s AND is_completed = 0 | Param Count: 1
+2026-06-20 19:50:58,986 - INFO - User: 1 | Query: SELECT * FROM medicine_history WHERE 1=1 ORDER BY consultation_date ASC, id ASC | Param Count: 0
+2026-06-20 19:50:59,012 - INFO - User: 1 | Query: SELECT COUNT(*) FROM master_records WHERE weight_kg >= 25 AND status != 'Sold' AND status IS NOT NULL | Param Count: 0
+2026-06-20 19:50:59,014 - INFO - User: 1 | Query: SELECT is_admin FROM users WHERE id = %s | Param Count: 1
+2026-06-20 19:50:59,127 - INFO - User: 1 | Query: SELECT has_seen_weight_notification FROM user_login_tracking WHERE user_id = %s | Param Count: 1
+2026-06-20 19:50:59,128 - INFO - User: 1 | Query: SELECT f.feed_name, f.closing_stock, f.alert_level, f.unit
+        FROM feed_inventory f
+        INNER JOIN (
+            SELECT feed_name, MAX(id) as max_id
+            FROM feed_inventory
+            GROUP BY feed_name
+        ) latest ON f.id = latest.max_id | Param Count: 0
+2026-06-20 19:50:59,129 - INFO - User: 1 | Query: SELECT m.medicine_name, m.closing_stock, m.alert_level, m.unit
+        FROM medicine_inventory m
+        INNER JOIN (
+            SELECT medicine_name, MAX(id) as max_id
+            FROM medicine_inventory
+            GROUP BY medicine_name
+        ) latest ON m.id = latest.max_id | Param Count: 0
+2026-06-20 19:50:59,131 - INFO - User: 1 | Query: SELECT v.vaccine_name, v.closing_stock, v.alert_level, v.unit
+        FROM vaccine_inventory v
+        INNER JOIN (
+            SELECT vaccine_name, MAX(id) as max_id
+            FROM vaccine_inventory
+            GROUP BY vaccine_name
+        ) latest ON v.id = latest.max_id | Param Count: 0
+2026-06-20 19:50:59,132 - INFO - User: 1 | Query: SELECT id, batch_name, reminder_type, item_name, reminder_date
+        FROM batch_reminders
+        WHERE reminder_date <= %s AND is_completed = 0 | Param Count: 1
+2026-06-20 19:50:59,661 - INFO - User: 1 | Query: SELECT * FROM vaccine_records WHERE 1=1 ORDER BY CAST(sr_no AS INTEGER) ASC, id ASC | Param Count: 0
+2026-06-20 19:50:59,705 - INFO - User: 1 | Query: SELECT COUNT(*) FROM master_records WHERE weight_kg >= 25 AND status != 'Sold' AND status IS NOT NULL | Param Count: 0
+2026-06-20 19:50:59,707 - INFO - User: 1 | Query: SELECT is_admin FROM users WHERE id = %s | Param Count: 1
+2026-06-20 19:50:59,780 - INFO - User: 1 | Query: SELECT has_seen_weight_notification FROM user_login_tracking WHERE user_id = %s | Param Count: 1
+2026-06-20 19:50:59,781 - INFO - User: 1 | Query: SELECT f.feed_name, f.closing_stock, f.alert_level, f.unit
+        FROM feed_inventory f
+        INNER JOIN (
+            SELECT feed_name, MAX(id) as max_id
+            FROM feed_inventory
+            GROUP BY feed_name
+        ) latest ON f.id = latest.max_id | Param Count: 0
+2026-06-20 19:50:59,782 - INFO - User: 1 | Query: SELECT m.medicine_name, m.closing_stock, m.alert_level, m.unit
+        FROM medicine_inventory m
+        INNER JOIN (
+            SELECT medicine_name, MAX(id) as max_id
+            FROM medicine_inventory
+            GROUP BY medicine_name
+        ) latest ON m.id = latest.max_id | Param Count: 0
+2026-06-20 19:50:59,784 - INFO - User: 1 | Query: SELECT v.vaccine_name, v.closing_stock, v.alert_level, v.unit
+        FROM vaccine_inventory v
+        INNER JOIN (
+            SELECT vaccine_name, MAX(id) as max_id
+            FROM vaccine_inventory
+            GROUP BY vaccine_name
+        ) latest ON v.id = latest.max_id | Param Count: 0
+2026-06-20 19:50:59,785 - INFO - User: 1 | Query: SELECT id, batch_name, reminder_type, item_name, reminder_date
+        FROM batch_reminders
+        WHERE reminder_date <= %s AND is_completed = 0 | Param Count: 1
+2026-06-20 19:51:00,726 - INFO - User: 1 | Query: SELECT * FROM mortality_records ORDER BY CAST(sr_no AS INTEGER) ASC | Param Count: 0
+2026-06-20 19:51:00,767 - INFO - User: 1 | Query: SELECT COUNT(*) FROM master_records WHERE weight_kg >= 25 AND status != 'Sold' AND status IS NOT NULL | Param Count: 0
+2026-06-20 19:51:00,768 - INFO - User: 1 | Query: SELECT is_admin FROM users WHERE id = %s | Param Count: 1
+2026-06-20 19:51:00,830 - INFO - User: 1 | Query: SELECT has_seen_weight_notification FROM user_login_tracking WHERE user_id = %s | Param Count: 1
+2026-06-20 19:51:00,831 - INFO - User: 1 | Query: SELECT f.feed_name, f.closing_stock, f.alert_level, f.unit
+        FROM feed_inventory f
+        INNER JOIN (
+            SELECT feed_name, MAX(id) as max_id
+            FROM feed_inventory
+            GROUP BY feed_name
+        ) latest ON f.id = latest.max_id | Param Count: 0
+2026-06-20 19:51:00,832 - INFO - User: 1 | Query: SELECT m.medicine_name, m.closing_stock, m.alert_level, m.unit
+        FROM medicine_inventory m
+        INNER JOIN (
+            SELECT medicine_name, MAX(id) as max_id
+            FROM medicine_inventory
+            GROUP BY medicine_name
+        ) latest ON m.id = latest.max_id | Param Count: 0
+2026-06-20 19:51:00,834 - INFO - User: 1 | Query: SELECT v.vaccine_name, v.closing_stock, v.alert_level, v.unit
+        FROM vaccine_inventory v
+        INNER JOIN (
+            SELECT vaccine_name, MAX(id) as max_id
+            FROM vaccine_inventory
+            GROUP BY vaccine_name
+        ) latest ON v.id = latest.max_id | Param Count: 0
+2026-06-20 19:51:00,836 - INFO - User: 1 | Query: SELECT id, batch_name, reminder_type, item_name, reminder_date
+        FROM batch_reminders
+        WHERE reminder_date <= %s AND is_completed = 0 | Param Count: 1
+2026-06-20 19:51:01,345 - INFO - User: 1 | Query: SELECT * FROM doctor_details ORDER BY doctor_name ASC | Param Count: 0
+2026-06-20 19:51:01,383 - INFO - User: 1 | Query: SELECT COUNT(*) FROM master_records WHERE weight_kg >= 25 AND status != 'Sold' AND status IS NOT NULL | Param Count: 0
+2026-06-20 19:51:01,385 - INFO - User: 1 | Query: SELECT is_admin FROM users WHERE id = %s | Param Count: 1
+2026-06-20 19:51:01,455 - INFO - User: 1 | Query: SELECT has_seen_weight_notification FROM user_login_tracking WHERE user_id = %s | Param Count: 1
+2026-06-20 19:51:01,456 - INFO - User: 1 | Query: SELECT f.feed_name, f.closing_stock, f.alert_level, f.unit
+        FROM feed_inventory f
+        INNER JOIN (
+            SELECT feed_name, MAX(id) as max_id
+            FROM feed_inventory
+            GROUP BY feed_name
+        ) latest ON f.id = latest.max_id | Param Count: 0
+2026-06-20 19:51:01,457 - INFO - User: 1 | Query: SELECT m.medicine_name, m.closing_stock, m.alert_level, m.unit
+        FROM medicine_inventory m
+        INNER JOIN (
+            SELECT medicine_name, MAX(id) as max_id
+            FROM medicine_inventory
+            GROUP BY medicine_name
+        ) latest ON m.id = latest.max_id | Param Count: 0
+2026-06-20 19:51:01,458 - INFO - User: 1 | Query: SELECT v.vaccine_name, v.closing_stock, v.alert_level, v.unit
+        FROM vaccine_inventory v
+        INNER JOIN (
+            SELECT vaccine_name, MAX(id) as max_id
+            FROM vaccine_inventory
+            GROUP BY vaccine_name
+        ) latest ON v.id = latest.max_id | Param Count: 0
+2026-06-20 19:51:01,460 - INFO - User: 1 | Query: SELECT id, batch_name, reminder_type, item_name, reminder_date
+        FROM batch_reminders
+        WHERE reminder_date <= %s AND is_completed = 0 | Param Count: 1
+2026-06-22 20:39:48,807 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS users (
+                id SERIAL PRIMARY KEY,
+                username TEXT UNIQUE NOT NULL,
+                password TEXT NOT NULL
+            ) | Param Count: 0
+2026-06-22 20:39:48,823 - INFO - User: system | Query: ALTER TABLE users ADD COLUMN IF NOT EXISTS mfa_secret TEXT | Param Count: 0
+2026-06-22 20:39:48,839 - INFO - User: system | Query: ALTER TABLE users ADD COLUMN IF NOT EXISTS mfa_enabled INTEGER DEFAULT 0 | Param Count: 0
+2026-06-22 20:39:48,842 - INFO - User: system | Query: ALTER TABLE users ADD COLUMN IF NOT EXISTS backup_codes TEXT | Param Count: 0
+2026-06-22 20:39:48,843 - INFO - User: system | Query: ALTER TABLE users ADD COLUMN IF NOT EXISTS login_attempts INTEGER DEFAULT 0 | Param Count: 0
+2026-06-22 20:39:48,844 - INFO - User: system | Query: ALTER TABLE users ADD COLUMN IF NOT EXISTS locked_until TIMESTAMP DEFAULT NULL | Param Count: 0
+2026-06-22 20:39:48,846 - INFO - User: system | Query: ALTER TABLE users ADD COLUMN IF NOT EXISTS password_history TEXT | Param Count: 0
+2026-06-22 20:39:48,847 - INFO - User: system | Query: ALTER TABLE users ADD COLUMN IF NOT EXISTS is_admin INTEGER DEFAULT 0 | Param Count: 0
+2026-06-22 20:39:48,848 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS goats_data (
+                id SERIAL PRIMARY KEY,
+                tag_number TEXT NOT NULL,
+                date DATE NOT NULL,
+                category TEXT NOT NULL,
+                type TEXT NOT NULL,
+                amount REAL NOT NULL,
+                notes TEXT
+            ) | Param Count: 0
+2026-06-22 20:39:48,848 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS master_records (
+                id SERIAL PRIMARY KEY,
+                si_no TEXT, tag_no TEXT UNIQUE NOT NULL, breed TEXT, breed_percent TEXT,
+                status TEXT, sold TEXT, expired TEXT, gender TEXT, purchase_date DATE,
+                color TEXT, weight_kg REAL, purchase_amount REAL, insurance_date DATE,
+                vaccination TEXT, vaccination_period TEXT, vaccination_next_due DATE, medicine TEXT, medicine_period TEXT,
+                feed TEXT, feed_amount TEXT, mating_date DATE, mating_goat_no TEXT,
+                goat_week_period TEXT, delivery_date DATE, new_goat_gender TEXT,
+                new_goat_color TEXT, birth_weight REAL, selling_date DATE, selling_weight REAL,
+                selling_price REAL, mortality_date DATE, mortality_weight REAL,
+                mortality_reason TEXT, insurance_claim_amount REAL, insurance_inform_date DATE,
+                insurance_claim_date DATE, dob DATE
+            ) | Param Count: 0
+2026-06-22 20:39:48,848 - INFO - User: system | Query: ALTER TABLE master_records ADD COLUMN IF NOT EXISTS vaccination_next_due DATE | Param Count: 0
+2026-06-22 20:39:48,850 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS sales_records (
+                id SERIAL PRIMARY KEY,
+                sr_no TEXT,
+                tag_id TEXT NOT NULL,
+                breed TEXT,
+                breed_percent TEXT,
+                gender TEXT,
+                weight REAL,
+                sold_price REAL,
+                date_of_sale DATE,
+                buyer_name TEXT,
+                buyer_city TEXT,
+                buyer_contact TEXT
+            ) | Param Count: 0
+2026-06-22 20:39:48,851 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS other_sales_records (
+                id SERIAL PRIMARY KEY,
+                sr_no TEXT,
+                item_name TEXT NOT NULL,
+                quantity REAL,
+                unit TEXT,
+                price_per_unit REAL,
+                total_amount REAL,
+                date_of_sale DATE,
+                buyer_name TEXT,
+                buyer_city TEXT,
+                buyer_contact TEXT,
+                notes TEXT
+            ) | Param Count: 0
+2026-06-22 20:39:48,851 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS medicine_records (
+                id SERIAL PRIMARY KEY,
+                sr_no TEXT,
+                tag_no TEXT NOT NULL,
+                breed TEXT,
+                breed_percent TEXT,
+                med1_date DATE, med1_name TEXT,
+                vac1_date DATE, vac1_name TEXT,
+                med2_date DATE, med2_name TEXT,
+                med3_date DATE, med3_name TEXT,
+                vac2_date DATE, vac2_name TEXT,
+                medicine_amount REAL,
+                vaccine_amount REAL
+            ) | Param Count: 0
+2026-06-22 20:39:48,852 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS mortality_records (
+                id SERIAL PRIMARY KEY,
+                sr_no TEXT,
+                tag_id TEXT NOT NULL,
+                breed TEXT,
+                breed_percent TEXT,
+                gender TEXT,
+                birth_date DATE,
+                expired_date DATE,
+                total_age_month TEXT,
+                weight_kgs REAL,
+                insurance_inform_date DATE,
+                insurance_claim_date DATE,
+                current_value REAL,
+                claim_amount REAL,
+                cause_of_death TEXT
+            ) | Param Count: 0
+2026-06-22 20:39:48,852 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS feed_inventory (
+                id SERIAL PRIMARY KEY,
+                feed_name TEXT NOT NULL,
+                opening_stock REAL DEFAULT 0,
+                purchased_qty REAL DEFAULT 0,
+                used_qty REAL DEFAULT 0,
+                wastage_qty REAL DEFAULT 0,
+                closing_stock REAL DEFAULT 0,
+                unit TEXT,
+                cost_per_unit REAL DEFAULT 0,
+                total_cost REAL DEFAULT 0,
+                purchase_date DATE,
+                supplier TEXT
+            ) | Param Count: 0
+2026-06-22 20:39:48,853 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS medicine_inventory (
+                id SERIAL PRIMARY KEY,
+                medicine_name TEXT NOT NULL,
+                opening_stock REAL DEFAULT 0,
+                purchased_qty REAL DEFAULT 0,
+                used_qty REAL DEFAULT 0,
+                wastage_qty REAL DEFAULT 0,
+                closing_stock REAL DEFAULT 0,
+                unit TEXT,
+                cost_per_unit REAL DEFAULT 0,
+                total_cost REAL DEFAULT 0,
+                purchase_date DATE,
+                supplier TEXT,
+                alert_level REAL DEFAULT 0
+            ) | Param Count: 0
+2026-06-22 20:39:48,853 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS vaccine_inventory (
+                id SERIAL PRIMARY KEY,
+                vaccine_name TEXT NOT NULL,
+                opening_stock REAL DEFAULT 0,
+                purchased_qty REAL DEFAULT 0,
+                used_qty REAL DEFAULT 0,
+                wastage_qty REAL DEFAULT 0,
+                closing_stock REAL DEFAULT 0,
+                unit TEXT,
+                cost_per_unit REAL DEFAULT 0,
+                total_cost REAL DEFAULT 0,
+                purchase_date DATE,
+                supplier TEXT,
+                alert_level REAL DEFAULT 0
+            ) | Param Count: 0
+2026-06-22 20:39:48,854 - INFO - User: system | Query: ALTER TABLE feed_inventory ADD COLUMN IF NOT EXISTS wastage_qty REAL DEFAULT 0 | Param Count: 0
+2026-06-22 20:39:48,855 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS kid_records (
+                id SERIAL PRIMARY KEY,
+                s_no TEXT,
+                kid_id TEXT NOT NULL,
+                breed TEXT,
+                breed_percent TEXT,
+                gender TEXT,
+                color TEXT,
+                litter_size INTEGER,
+                birth_date DATE,
+                age_month TEXT,
+                birth_weight REAL,
+                mother_id TEXT,
+                father_id TEXT
+            ) | Param Count: 0
+2026-06-22 20:39:48,856 - INFO - User: system | Query: ALTER TABLE kid_records ADD COLUMN IF NOT EXISTS mother_id TEXT | Param Count: 0
+2026-06-22 20:39:48,858 - INFO - User: system | Query: ALTER TABLE kid_records ADD COLUMN IF NOT EXISTS father_id TEXT | Param Count: 0
+2026-06-22 20:39:48,858 - INFO - User: system | Query: ALTER TABLE kid_records ADD COLUMN IF NOT EXISTS insurance_policy_no TEXT | Param Count: 0
+2026-06-22 20:39:48,859 - INFO - User: system | Query: ALTER TABLE kid_records ADD COLUMN IF NOT EXISTS insurance_company TEXT | Param Count: 0
+2026-06-22 20:39:48,860 - INFO - User: system | Query: ALTER TABLE kid_records ADD COLUMN IF NOT EXISTS insurance_expiry DATE | Param Count: 0
+2026-06-22 20:39:48,860 - INFO - User: system | Query: ALTER TABLE kid_records ADD COLUMN IF NOT EXISTS insurance_amount REAL | Param Count: 0
+2026-06-22 20:39:48,862 - INFO - User: system | Query: ALTER TABLE master_records ADD COLUMN IF NOT EXISTS kit_status TEXT DEFAULT 'No' | Param Count: 0
+2026-06-22 20:39:48,864 - INFO - User: system | Query: ALTER TABLE master_records ADD COLUMN IF NOT EXISTS dob DATE | Param Count: 0
+2026-06-22 20:39:48,865 - INFO - User: system | Query: ALTER TABLE feed_inventory ADD COLUMN IF NOT EXISTS purchase_id INTEGER | Param Count: 0
+2026-06-22 20:39:48,866 - INFO - User: system | Query: ALTER TABLE medicine_inventory ADD COLUMN IF NOT EXISTS purchase_id INTEGER | Param Count: 0
+2026-06-22 20:39:48,867 - INFO - User: system | Query: ALTER TABLE vaccine_inventory ADD COLUMN IF NOT EXISTS purchase_id INTEGER | Param Count: 0
+2026-06-22 20:39:48,868 - INFO - User: system | Query: ALTER TABLE purchases ADD COLUMN IF NOT EXISTS pnl_category TEXT DEFAULT 'Purchase' | Param Count: 0
+2026-06-22 20:39:48,870 - INFO - User: system | Query: ALTER TABLE feed_purchases ADD COLUMN IF NOT EXISTS pnl_category TEXT DEFAULT 'Purchase' | Param Count: 0
+2026-06-22 20:39:48,870 - INFO - User: system | Query: ALTER TABLE medicine_purchases ADD COLUMN IF NOT EXISTS pnl_category TEXT DEFAULT 'Purchase' | Param Count: 0
+2026-06-22 20:39:48,871 - INFO - User: system | Query: ALTER TABLE vaccine_purchases ADD COLUMN IF NOT EXISTS pnl_category TEXT DEFAULT 'Purchase' | Param Count: 0
+2026-06-22 20:39:48,872 - INFO - User: system | Query: ALTER TABLE equipment ADD COLUMN IF NOT EXISTS pnl_category TEXT DEFAULT 'Purchase' | Param Count: 0
+2026-06-22 20:39:48,873 - INFO - User: system | Query: ALTER TABLE sales_records ADD COLUMN IF NOT EXISTS pnl_category TEXT DEFAULT 'Sales' | Param Count: 0
+2026-06-22 20:39:48,874 - INFO - User: system | Query: ALTER TABLE other_sales_records ADD COLUMN IF NOT EXISTS pnl_category TEXT DEFAULT 'Sales' | Param Count: 0
+2026-06-22 20:39:48,875 - INFO - User: system | Query: ALTER TABLE expenses ADD COLUMN IF NOT EXISTS pnl_category TEXT DEFAULT 'Direct Expenses' | Param Count: 0
+2026-06-22 20:39:48,877 - INFO - User: system | Query: ALTER TABLE purchases ADD COLUMN IF NOT EXISTS bill_date DATE | Param Count: 0
+2026-06-22 20:39:48,877 - INFO - User: system | Query: ALTER TABLE purchases ADD COLUMN IF NOT EXISTS bill_no TEXT | Param Count: 0
+2026-06-22 20:39:48,878 - INFO - User: system | Query: ALTER TABLE feed_purchases ADD COLUMN IF NOT EXISTS bill_date DATE | Param Count: 0
+2026-06-22 20:39:48,879 - INFO - User: system | Query: ALTER TABLE feed_purchases ADD COLUMN IF NOT EXISTS bill_no TEXT | Param Count: 0
+2026-06-22 20:39:48,880 - INFO - User: system | Query: ALTER TABLE feed_purchases ADD COLUMN IF NOT EXISTS notes TEXT | Param Count: 0
+2026-06-22 20:39:48,881 - INFO - User: system | Query: ALTER TABLE medicine_purchases ADD COLUMN IF NOT EXISTS bill_date DATE | Param Count: 0
+2026-06-22 20:39:48,883 - INFO - User: system | Query: ALTER TABLE medicine_purchases ADD COLUMN IF NOT EXISTS bill_no TEXT | Param Count: 0
+2026-06-22 20:39:48,884 - INFO - User: system | Query: ALTER TABLE medicine_purchases ADD COLUMN IF NOT EXISTS notes TEXT | Param Count: 0
+2026-06-22 20:39:48,884 - INFO - User: system | Query: ALTER TABLE vaccine_purchases ADD COLUMN IF NOT EXISTS bill_date DATE | Param Count: 0
+2026-06-22 20:39:48,885 - INFO - User: system | Query: ALTER TABLE vaccine_purchases ADD COLUMN IF NOT EXISTS bill_no TEXT | Param Count: 0
+2026-06-22 20:39:48,887 - INFO - User: system | Query: ALTER TABLE vaccine_purchases ADD COLUMN IF NOT EXISTS notes TEXT | Param Count: 0
+2026-06-22 20:39:48,888 - INFO - User: system | Query: ALTER TABLE purchases ADD COLUMN IF NOT EXISTS particular_id INTEGER | Param Count: 0
+2026-06-22 20:39:48,888 - INFO - User: system | Query: ALTER TABLE purchases ADD COLUMN IF NOT EXISTS particular_name TEXT | Param Count: 0
+2026-06-22 20:39:48,889 - INFO - User: system | Query: ALTER TABLE feed_purchases ADD COLUMN IF NOT EXISTS particular_id INTEGER | Param Count: 0
+2026-06-22 20:39:48,890 - INFO - User: system | Query: ALTER TABLE feed_purchases ADD COLUMN IF NOT EXISTS particular_name TEXT | Param Count: 0
+2026-06-22 20:39:48,890 - INFO - User: system | Query: ALTER TABLE medicine_purchases ADD COLUMN IF NOT EXISTS particular_id INTEGER | Param Count: 0
+2026-06-22 20:39:48,891 - INFO - User: system | Query: ALTER TABLE medicine_purchases ADD COLUMN IF NOT EXISTS particular_name TEXT | Param Count: 0
+2026-06-22 20:39:48,892 - INFO - User: system | Query: ALTER TABLE vaccine_purchases ADD COLUMN IF NOT EXISTS particular_id INTEGER | Param Count: 0
+2026-06-22 20:39:48,893 - INFO - User: system | Query: ALTER TABLE vaccine_purchases ADD COLUMN IF NOT EXISTS particular_name TEXT | Param Count: 0
+2026-06-22 20:39:48,894 - INFO - User: system | Query: ALTER TABLE expenses ADD COLUMN IF NOT EXISTS particular_id INTEGER | Param Count: 0
+2026-06-22 20:39:48,895 - INFO - User: system | Query: ALTER TABLE expenses ADD COLUMN IF NOT EXISTS bill_date DATE | Param Count: 0
+2026-06-22 20:39:48,896 - INFO - User: system | Query: ALTER TABLE expenses ADD COLUMN IF NOT EXISTS bill_no TEXT | Param Count: 0
+2026-06-22 20:39:48,896 - INFO - User: system | Query: ALTER TABLE expenses ADD COLUMN IF NOT EXISTS quantity REAL | Param Count: 0
+2026-06-22 20:39:48,897 - INFO - User: system | Query: ALTER TABLE expenses ADD COLUMN IF NOT EXISTS unit_id INTEGER | Param Count: 0
+2026-06-22 20:39:48,898 - INFO - User: system | Query: ALTER TABLE expenses ADD COLUMN IF NOT EXISTS unit_name TEXT | Param Count: 0
+2026-06-22 20:39:48,900 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS equipment (
+                id SERIAL PRIMARY KEY,
+                name TEXT,
+                type TEXT,
+                purchase_date DATE,
+                purchase_cost REAL,
+                supplier TEXT,
+                status TEXT,
+                notes TEXT,
+                assigned_employee TEXT,
+                service_due_date DATE
+            ) | Param Count: 0
+2026-06-22 20:39:48,900 - INFO - User: system | Query: ALTER TABLE equipment ADD COLUMN IF NOT EXISTS assigned_employee TEXT | Param Count: 0
+2026-06-22 20:39:48,901 - INFO - User: system | Query: ALTER TABLE equipment ADD COLUMN IF NOT EXISTS service_due_date DATE | Param Count: 0
+2026-06-22 20:39:48,902 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS medicine_history (
+                id SERIAL PRIMARY KEY,
+                tag_no TEXT NOT NULL,
+                doctor_name TEXT,
+                consultation_date DATE NOT NULL,
+                medicine_name TEXT NOT NULL,
+                dose TEXT,
+                quantity TEXT,
+                cost REAL NOT NULL,
+                notes TEXT
+            ) | Param Count: 0
+2026-06-22 20:39:48,902 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS breeds (
+                id SERIAL PRIMARY KEY,
+                breed_name TEXT UNIQUE NOT NULL,
+                description TEXT
+            ) | Param Count: 0
+2026-06-22 20:39:48,902 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS suppliers (
+                id SERIAL PRIMARY KEY,
+                supplier_name TEXT UNIQUE NOT NULL,
+                contact_person TEXT,
+                phone TEXT,
+                address TEXT,
+                supplier_type TEXT
+            ) | Param Count: 0
+2026-06-22 20:39:48,903 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS feed_purchases (
+                id SERIAL PRIMARY KEY,
+                feed_name TEXT NOT NULL,
+                quantity REAL NOT NULL,
+                unit TEXT,
+                cost REAL NOT NULL,
+                purchase_date DATE NOT NULL,
+                supplier TEXT
+            ) | Param Count: 0
+2026-06-22 20:39:48,903 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS medicine_purchases (
+                id SERIAL PRIMARY KEY,
+                medicine_name TEXT NOT NULL,
+                dose_unit TEXT,
+                quantity REAL NOT NULL,
+                cost REAL NOT NULL,
+                purchase_date DATE NOT NULL,
+                supplier TEXT
+            ) | Param Count: 0
+2026-06-22 20:39:48,904 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS vaccine_purchases (
+                id SERIAL PRIMARY KEY,
+                vaccine_name TEXT NOT NULL,
+                quantity REAL NOT NULL,
+                cost REAL NOT NULL,
+                purchase_date DATE NOT NULL,
+                supplier TEXT
+            ) | Param Count: 0
+2026-06-22 20:39:48,905 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS purchases (
+                id SERIAL PRIMARY KEY,
+                seller_name TEXT NOT NULL,
+                invoice_details TEXT,
+                purchase_date DATE NOT NULL,
+                tag_id TEXT NOT NULL,
+                price REAL NOT NULL
+            ) | Param Count: 0
+2026-06-22 20:39:48,905 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS farm_info (
+                id SERIAL PRIMARY KEY,
+                farm_name TEXT,
+                farm_address TEXT,
+                farm_city TEXT,
+                farm_phone TEXT,
+                bank_name TEXT,
+                account_number TEXT,
+                ifsc_code TEXT
+            ) | Param Count: 0
+2026-06-22 20:39:48,906 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS vaccine_records (
+                id SERIAL PRIMARY KEY,
+                sr_no TEXT,
+                tag_no TEXT NOT NULL,
+                vaccine_date DATE NOT NULL,
+                vaccine_name TEXT NOT NULL,
+                amount_spent REAL,
+                additional_vaccines TEXT,
+                additional_medicines TEXT,
+                required_vaccines TEXT,
+                required_medicines TEXT,
+                notes TEXT
+            ) | Param Count: 0
+2026-06-22 20:39:48,906 - INFO - User: system | Query: ALTER TABLE vaccine_records ADD COLUMN IF NOT EXISTS next_due_date DATE | Param Count: 0
+2026-06-22 20:39:48,907 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS doctor_details (
+                id SERIAL PRIMARY KEY,
+                doctor_name TEXT NOT NULL,
+                specialization TEXT,
+                contact_number TEXT,
+                email TEXT,
+                clinic_name TEXT,
+                clinic_address TEXT,
+                clinic_city TEXT,
+                availability TEXT,
+                registration_number TEXT,
+                notes TEXT
+            ) | Param Count: 0
+2026-06-22 20:39:48,908 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS eligible_to_sell (
+                id SERIAL PRIMARY KEY,
+                tag_id TEXT UNIQUE NOT NULL,
+                tag_no TEXT NOT NULL,
+                breed TEXT,
+                gender TEXT,
+                weight_kg REAL,
+                date_added DATE,
+                FOREIGN KEY (tag_id) REFERENCES master_records(tag_no)
+            ) | Param Count: 0
+2026-06-22 20:39:48,908 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS user_login_tracking (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER NOT NULL,
+                last_login_date DATE DEFAULT NULL,
+                has_seen_weight_notification INTEGER DEFAULT 0,
+                FOREIGN KEY (user_id) REFERENCES users(id)
+            ) | Param Count: 0
+2026-06-22 20:39:48,908 - INFO - User: system | Query: ALTER TABLE feed_inventory ADD COLUMN IF NOT EXISTS alert_level REAL DEFAULT 0 | Param Count: 0
+2026-06-22 20:39:48,910 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS batch_reminders (
+                id SERIAL PRIMARY KEY,
+                batch_name TEXT NOT NULL,
+                reminder_type TEXT NOT NULL,
+                item_name TEXT NOT NULL,
+                reminder_date DATE NOT NULL,
+                is_completed INTEGER DEFAULT 0
+            ) | Param Count: 0
+2026-06-22 20:39:48,910 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS ledger_groups (
+                id SERIAL PRIMARY KEY,
+                group_name TEXT UNIQUE NOT NULL,
+                description TEXT,
+                group_type TEXT DEFAULT 'Expense'
+            ) | Param Count: 0
+2026-06-22 20:39:48,911 - INFO - User: system | Query: ALTER TABLE ledger_groups ADD COLUMN IF NOT EXISTS group_type TEXT DEFAULT 'Expense' | Param Count: 0
+2026-06-22 20:39:48,912 - INFO - User: system | Query: SELECT 1 FROM ledger_groups WHERE group_name = %s | Param Count: 1
+2026-06-22 20:39:48,924 - INFO - User: system | Query: UPDATE ledger_groups SET group_type = %s WHERE group_name = %s AND group_type IS NULL | Param Count: 2
+2026-06-22 20:39:48,932 - INFO - User: system | Query: SELECT 1 FROM ledger_groups WHERE group_name = %s | Param Count: 1
+2026-06-22 20:39:48,932 - INFO - User: system | Query: UPDATE ledger_groups SET group_type = %s WHERE group_name = %s AND group_type IS NULL | Param Count: 2
+2026-06-22 20:39:48,933 - INFO - User: system | Query: SELECT 1 FROM ledger_groups WHERE group_name = %s | Param Count: 1
+2026-06-22 20:39:48,934 - INFO - User: system | Query: UPDATE ledger_groups SET group_type = %s WHERE group_name = %s AND group_type IS NULL | Param Count: 2
+2026-06-22 20:39:48,935 - INFO - User: system | Query: SELECT 1 FROM ledger_groups WHERE group_name = %s | Param Count: 1
+2026-06-22 20:39:48,936 - INFO - User: system | Query: UPDATE ledger_groups SET group_type = %s WHERE group_name = %s AND group_type IS NULL | Param Count: 2
+2026-06-22 20:39:48,936 - INFO - User: system | Query: SELECT 1 FROM ledger_groups WHERE group_name = %s | Param Count: 1
+2026-06-22 20:39:48,937 - INFO - User: system | Query: UPDATE ledger_groups SET group_type = %s WHERE group_name = %s AND group_type IS NULL | Param Count: 2
+2026-06-22 20:39:48,937 - INFO - User: system | Query: SELECT 1 FROM ledger_groups WHERE group_name = %s | Param Count: 1
+2026-06-22 20:39:48,938 - INFO - User: system | Query: UPDATE ledger_groups SET group_type = %s WHERE group_name = %s AND group_type IS NULL | Param Count: 2
+2026-06-22 20:39:48,938 - INFO - User: system | Query: SELECT 1 FROM ledger_groups WHERE group_name = %s | Param Count: 1
+2026-06-22 20:39:48,938 - INFO - User: system | Query: UPDATE ledger_groups SET group_type = %s WHERE group_name = %s AND group_type IS NULL | Param Count: 2
+2026-06-22 20:39:48,939 - INFO - User: system | Query: SELECT 1 FROM ledger_groups WHERE group_name = %s | Param Count: 1
+2026-06-22 20:39:48,939 - INFO - User: system | Query: UPDATE ledger_groups SET group_type = %s WHERE group_name = %s AND group_type IS NULL | Param Count: 2
+2026-06-22 20:39:48,940 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS expense_ledgers (
+                id SERIAL PRIMARY KEY,
+                ledger_name TEXT UNIQUE NOT NULL,
+                ledger_group TEXT DEFAULT 'Direct Expenses',
+                description TEXT
+            ) | Param Count: 0
+2026-06-22 20:39:48,941 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS expense_particulars (
+                id SERIAL PRIMARY KEY,
+                name TEXT UNIQUE NOT NULL,
+                ledger_id INTEGER,
+                description TEXT,
+                FOREIGN KEY (ledger_id) REFERENCES expense_ledgers(id)
+            ) | Param Count: 0
+2026-06-22 20:39:48,942 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS expense_units (
+                id SERIAL PRIMARY KEY,
+                unit_name TEXT UNIQUE NOT NULL,
+                unit_symbol TEXT
+            ) | Param Count: 0
+2026-06-22 20:39:48,942 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS other_vouchers (
+                id SERIAL PRIMARY KEY,
+                voucher_date DATE NOT NULL,
+                supplier_name TEXT,
+                particular_id INTEGER,
+                particular_name TEXT,
+                bill_date DATE,
+                bill_no TEXT,
+                quantity REAL,
+                unit_id INTEGER,
+                unit_name TEXT,
+                amount REAL NOT NULL DEFAULT 0,
+                notes TEXT,
+                pnl_category TEXT DEFAULT 'Direct Expenses',
+                FOREIGN KEY (particular_id) REFERENCES expense_particulars(id),
+                FOREIGN KEY (unit_id) REFERENCES expense_units(id)
+            ) | Param Count: 0
+2026-06-22 20:39:48,943 - INFO - User: system | Query: SELECT COUNT(*) FROM expense_units | Param Count: 0
+2026-06-22 20:39:48,949 - INFO - User: system | Query: SELECT COUNT(*) FROM expense_ledgers | Param Count: 0
+2026-06-22 20:39:48,950 - INFO - User: system | Query: SELECT * FROM users WHERE username = %s | Param Count: 1
+2026-06-22 20:39:48,953 - INFO - User: system | Query: UPDATE users SET is_admin = 1 WHERE username = %s | Param Count: 1
+2026-06-22 20:39:49,194 - INFO - User: system | Query: SELECT id FROM master_records WHERE si_no IS NULL OR si_no = '' ORDER BY id ASC | Param Count: 0
+2026-06-22 20:39:49,259 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS employees (
+            id SERIAL PRIMARY KEY,
+            name TEXT NOT NULL, role TEXT, phone TEXT, address TEXT,
+            join_date DATE, wage_type TEXT, wage_rate REAL DEFAULT 0,
+            status TEXT DEFAULT 'Active', notes TEXT,
+            aadhar_no TEXT, pan_no TEXT, bank_name TEXT, account_no TEXT, ifsc_code TEXT) | Param Count: 0
+2026-06-22 20:39:49,259 - INFO - User: system | Query: ALTER TABLE employees ADD COLUMN sr_no INTEGER | Param Count: 0
+2026-06-22 20:39:49,267 - INFO - User: system | Query: ALTER TABLE employees ADD COLUMN aadhar_no TEXT | Param Count: 0
+2026-06-22 20:39:49,268 - INFO - User: system | Query: ALTER TABLE employees ADD COLUMN pan_no TEXT | Param Count: 0
+2026-06-22 20:39:49,269 - INFO - User: system | Query: ALTER TABLE employees ADD COLUMN bank_name TEXT | Param Count: 0
+2026-06-22 20:39:49,271 - INFO - User: system | Query: ALTER TABLE employees ADD COLUMN account_no TEXT | Param Count: 0
+2026-06-22 20:39:49,271 - INFO - User: system | Query: ALTER TABLE employees ADD COLUMN ifsc_code TEXT | Param Count: 0
+2026-06-22 20:39:49,272 - INFO - User: system | Query: UPDATE employees SET sr_no = id WHERE sr_no IS NULL OR sr_no = 0 | Param Count: 0
+2026-06-22 20:39:49,274 - INFO - User: system | Query: ALTER TABLE expenses ADD COLUMN bill_file TEXT | Param Count: 0
+2026-06-22 20:39:49,275 - INFO - User: system | Query: ALTER TABLE expenses ADD COLUMN status TEXT DEFAULT 'Pending' | Param Count: 0
+2026-06-22 20:39:49,275 - INFO - User: system | Query: ALTER TABLE expenses ADD COLUMN pnl_category TEXT DEFAULT 'Direct Expenses' | Param Count: 0
+2026-06-22 20:39:49,276 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS employee_wages (
+            id SERIAL PRIMARY KEY,
+            employee_id INTEGER UNIQUE, daily_wage REAL DEFAULT 0,
+            weekly_salary REAL DEFAULT 0, monthly_salary REAL DEFAULT 0,
+            overtime_rate REAL DEFAULT 0, bonus REAL DEFAULT 0,
+            advance_salary REAL DEFAULT 0, pending_payment REAL DEFAULT 0,
+            last_updated DATE) | Param Count: 0
+2026-06-22 20:39:49,277 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS attendance (
+            id SERIAL PRIMARY KEY,
+            employee_id INTEGER, date DATE, status TEXT, notes TEXT) | Param Count: 0
+2026-06-22 20:39:49,277 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS salary_payments (
+            id SERIAL PRIMARY KEY,
+            employee_id INTEGER, month INTEGER, year INTEGER,
+            total_days INTEGER, present_days INTEGER, gross_salary REAL,
+            deductions REAL, net_salary REAL, paid_date DATE,
+            payment_mode TEXT) | Param Count: 0
+2026-06-22 20:39:49,278 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS tasks (
+            id SERIAL PRIMARY KEY,
+            employee_id INTEGER, task_name TEXT, description TEXT,
+            assigned_date DATE, due_date DATE, priority TEXT DEFAULT 'Medium',
+            status TEXT DEFAULT 'Pending', completion_percentage INTEGER DEFAULT 0) | Param Count: 0
+2026-06-22 20:39:49,278 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS leaves (
+            id SERIAL PRIMARY KEY,
+            employee_id INTEGER, leave_type TEXT, start_date DATE,
+            end_date DATE, reason TEXT, status TEXT DEFAULT 'Pending') | Param Count: 0
+2026-06-22 20:39:49,279 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS expense_categories (
+            id SERIAL PRIMARY KEY, category_name TEXT UNIQUE) | Param Count: 0
+2026-06-22 20:39:49,279 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS expenses (
+            id SERIAL PRIMARY KEY,
+            category TEXT, amount REAL, date DATE,
+            description TEXT, vendor_name TEXT, payment_mode TEXT,
+            receipt_no TEXT, notes TEXT, status TEXT DEFAULT 'Pending',
+            pnl_category TEXT DEFAULT 'Direct Expenses') | Param Count: 0
+2026-06-22 20:39:49,280 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS equipment (
+            id SERIAL PRIMARY KEY,
+            name TEXT NOT NULL, type TEXT, purchase_date DATE, purchase_cost REAL,
+            supplier TEXT, status TEXT DEFAULT 'Good', notes TEXT) | Param Count: 0
+2026-06-22 20:39:49,281 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS equipment_services (
+            id SERIAL PRIMARY KEY,
+            equipment_id INTEGER,
+            vendor_name TEXT,
+            service_date DATE NOT NULL,
+            service_cost REAL DEFAULT 0,
+            description TEXT,
+            status TEXT,
+            notes TEXT
+        ) | Param Count: 0
+2026-06-22 20:39:49,282 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS finances (
+            id SERIAL PRIMARY KEY,
+            type TEXT, category TEXT, amount REAL, date DATE,
+            description TEXT, reference_id TEXT, notes TEXT
+        ) | Param Count: 0
+2026-06-22 20:39:49,282 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS farm_settings (
+            id SERIAL PRIMARY KEY,
+            farm_name TEXT, address TEXT, phone TEXT, email TEXT,
+            bank_name TEXT, account_no TEXT, ifsc_code TEXT,
+            gst_no TEXT, logo_path TEXT
+        ) | Param Count: 0
+2026-06-22 20:39:49,283 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS reports (
+            id SERIAL PRIMARY KEY,
+            report_type TEXT, generated_date DATE,
+            from_date DATE, to_date DATE, file_path TEXT, notes TEXT
+        ) | Param Count: 0
+2026-06-22 20:39:53,862 - INFO - User: anonymous | Query: SELECT COUNT(*) FROM master_records WHERE weight_kg >= 25 AND status != 'Sold' AND status IS NOT NULL | Param Count: 0
+2026-06-22 20:39:54,059 - INFO - User: anonymous | Query: SELECT COUNT(*) FROM master_records WHERE weight_kg >= 25 AND status != 'Sold' AND status IS NOT NULL | Param Count: 0
+2026-06-22 20:39:57,243 - INFO - User: anonymous | Query: SELECT * FROM users WHERE username = %s | Param Count: 1
+2026-06-22 20:39:57,497 - INFO - User: anonymous | Query: UPDATE users SET login_attempts = 0, locked_until = NULL WHERE id = %s | Param Count: 1
+2026-06-22 20:39:57,502 - INFO - User: 1 | Query: SELECT * FROM user_login_tracking WHERE user_id = %s | Param Count: 1
+2026-06-22 20:39:57,506 - INFO - User: 1 | Query: UPDATE user_login_tracking SET last_login_date = %s, has_seen_weight_notification = %s WHERE user_id = %s | Param Count: 3
+2026-06-22 20:39:57,529 - INFO - User: 1 | Query: SELECT COUNT(*) FROM master_records WHERE status = 'Active' | Param Count: 0
+2026-06-22 20:39:57,530 - INFO - User: 1 | Query: SELECT COUNT(*) FROM kid_records | Param Count: 0
+2026-06-22 20:39:57,533 - INFO - User: 1 | Query: SELECT COUNT(*) FROM employees WHERE status = 'Active' | Param Count: 0
+2026-06-22 20:39:57,535 - INFO - User: 1 | Query: SELECT SUM(sold_price) FROM sales_records | Param Count: 0
+2026-06-22 20:39:57,537 - INFO - User: 1 | Query: SELECT SUM(total_amount) FROM other_sales_records | Param Count: 0
+2026-06-22 20:39:57,539 - INFO - User: 1 | Query: SELECT SUM(price) FROM purchases | Param Count: 0
+2026-06-22 20:39:57,542 - INFO - User: 1 | Query: SELECT SUM(total_cost) FROM feed_inventory | Param Count: 0
+2026-06-22 20:39:57,543 - INFO - User: 1 | Query: SELECT SUM(cost) FROM medicine_purchases | Param Count: 0
+2026-06-22 20:39:57,545 - INFO - User: 1 | Query: SELECT SUM(cost) FROM vaccine_purchases | Param Count: 0
+2026-06-22 20:39:57,548 - INFO - User: 1 | Query: SELECT SUM(net_salary) FROM salary_payments | Param Count: 0
+2026-06-22 20:39:57,552 - INFO - User: 1 | Query: SELECT SUM(service_cost) FROM equipment_services | Param Count: 0
+2026-06-22 20:39:57,554 - INFO - User: 1 | Query: SELECT SUM(amount) FROM expenses WHERE status='Approved' AND LOWER(COALESCE(category, '')) NOT ILIKE '%labor%' AND LOWER(COALESCE(category, '')) NOT ILIKE '%labour%' | Param Count: 0
+2026-06-22 20:39:57,560 - INFO - User: 1 | Query: SELECT * FROM master_records ORDER BY id ASC LIMIT 10 | Param Count: 0
+2026-06-22 20:39:57,625 - INFO - User: 1 | Query: SELECT COUNT(*) FROM master_records WHERE weight_kg >= 25 AND status != 'Sold' AND status IS NOT NULL | Param Count: 0
+2026-06-22 20:39:57,626 - INFO - User: 1 | Query: SELECT is_admin FROM users WHERE id = %s | Param Count: 1
+2026-06-22 20:39:58,070 - INFO - User: 1 | Query: SELECT has_seen_weight_notification FROM user_login_tracking WHERE user_id = %s | Param Count: 1
+2026-06-22 20:39:58,072 - INFO - User: 1 | Query: SELECT tag_no, color, weight_kg 
+            FROM master_records 
+            WHERE weight_kg >= 25 AND (status != 'Sold' OR status IS NULL) | Param Count: 0
+2026-06-22 20:39:58,074 - INFO - User: 1 | Query: SELECT tag_id FROM eligible_to_sell | Param Count: 0
+2026-06-22 20:39:58,077 - INFO - User: 1 | Query: SELECT COUNT(*) FROM master_records WHERE weight_kg >= 25 AND status != 'Sold' AND status IS NOT NULL | Param Count: 0
+2026-06-22 20:39:58,078 - INFO - User: 1 | Query: UPDATE user_login_tracking SET has_seen_weight_notification = 1 WHERE user_id = %s | Param Count: 1
+2026-06-22 20:39:58,080 - INFO - User: 1 | Query: SELECT f.feed_name, f.closing_stock, f.alert_level, f.unit
+        FROM feed_inventory f
+        INNER JOIN (
+            SELECT feed_name, MAX(id) as max_id
+            FROM feed_inventory
+            GROUP BY feed_name
+        ) latest ON f.id = latest.max_id | Param Count: 0
+2026-06-22 20:39:58,081 - INFO - User: 1 | Query: SELECT is_admin FROM users WHERE id = %s | Param Count: 1
+2026-06-22 20:39:58,090 - INFO - User: 1 | Query: SELECT m.medicine_name, m.closing_stock, m.alert_level, m.unit
+        FROM medicine_inventory m
+        INNER JOIN (
+            SELECT medicine_name, MAX(id) as max_id
+            FROM medicine_inventory
+            GROUP BY medicine_name
+        ) latest ON m.id = latest.max_id | Param Count: 0
+2026-06-22 20:39:58,094 - INFO - User: 1 | Query: SELECT v.vaccine_name, v.closing_stock, v.alert_level, v.unit
+        FROM vaccine_inventory v
+        INNER JOIN (
+            SELECT vaccine_name, MAX(id) as max_id
+            FROM vaccine_inventory
+            GROUP BY vaccine_name
+        ) latest ON v.id = latest.max_id | Param Count: 0
+2026-06-22 20:39:58,096 - INFO - User: 1 | Query: SELECT id, batch_name, reminder_type, item_name, reminder_date
+        FROM batch_reminders
+        WHERE reminder_date <= %s AND is_completed = 0 | Param Count: 1
+2026-06-22 20:40:01,166 - INFO - User: 1 | Query: SELECT COUNT(*) FROM expense_ledgers | Param Count: 0
+2026-06-22 20:40:01,167 - INFO - User: 1 | Query: SELECT COUNT(*) FROM ledger_groups | Param Count: 0
+2026-06-22 20:40:01,168 - INFO - User: 1 | Query: SELECT COUNT(*) FROM expense_particulars | Param Count: 0
+2026-06-22 20:40:01,170 - INFO - User: 1 | Query: SELECT COUNT(*) FROM expense_units | Param Count: 0
+2026-06-22 20:40:01,172 - INFO - User: 1 | Query: SELECT COUNT(*) FROM other_vouchers | Param Count: 0
+2026-06-22 20:40:01,173 - INFO - User: 1 | Query: SELECT SUM(amount) FROM other_vouchers | Param Count: 0
+2026-06-22 20:40:01,174 - INFO - User: 1 | Query: SELECT COUNT(*) FROM expenses | Param Count: 0
+2026-06-22 20:40:01,176 - INFO - User: 1 | Query: SELECT SUM(amount) FROM expenses WHERE status='Approved' OR status='Paid' | Param Count: 0
+2026-06-22 20:40:01,189 - INFO - User: 1 | Query: SELECT COUNT(*) FROM master_records WHERE weight_kg >= 25 AND status != 'Sold' AND status IS NOT NULL | Param Count: 0
+2026-06-22 20:40:01,190 - INFO - User: 1 | Query: SELECT is_admin FROM users WHERE id = %s | Param Count: 1
+2026-06-22 20:40:01,265 - INFO - User: 1 | Query: SELECT has_seen_weight_notification FROM user_login_tracking WHERE user_id = %s | Param Count: 1
+2026-06-22 20:40:01,266 - INFO - User: 1 | Query: SELECT f.feed_name, f.closing_stock, f.alert_level, f.unit
+        FROM feed_inventory f
+        INNER JOIN (
+            SELECT feed_name, MAX(id) as max_id
+            FROM feed_inventory
+            GROUP BY feed_name
+        ) latest ON f.id = latest.max_id | Param Count: 0
+2026-06-22 20:40:01,267 - INFO - User: 1 | Query: SELECT m.medicine_name, m.closing_stock, m.alert_level, m.unit
+        FROM medicine_inventory m
+        INNER JOIN (
+            SELECT medicine_name, MAX(id) as max_id
+            FROM medicine_inventory
+            GROUP BY medicine_name
+        ) latest ON m.id = latest.max_id | Param Count: 0
+2026-06-22 20:40:01,268 - INFO - User: 1 | Query: SELECT v.vaccine_name, v.closing_stock, v.alert_level, v.unit
+        FROM vaccine_inventory v
+        INNER JOIN (
+            SELECT vaccine_name, MAX(id) as max_id
+            FROM vaccine_inventory
+            GROUP BY vaccine_name
+        ) latest ON v.id = latest.max_id | Param Count: 0
+2026-06-22 20:40:01,269 - INFO - User: 1 | Query: SELECT id, batch_name, reminder_type, item_name, reminder_date
+        FROM batch_reminders
+        WHERE reminder_date <= %s AND is_completed = 0 | Param Count: 1
+2026-06-22 20:40:04,530 - INFO - User: 1 | Query: SELECT * FROM expense_ledgers ORDER BY ledger_group, ledger_name | Param Count: 0
+2026-06-22 20:40:04,534 - INFO - User: 1 | Query: SELECT * FROM ledger_groups ORDER BY group_name | Param Count: 0
+2026-06-22 20:40:04,535 - INFO - User: 1 | Query: SELECT ep.*, el.ledger_name, el.ledger_group, lg.group_type
+        FROM expense_particulars ep
+        LEFT JOIN expense_ledgers el ON ep.ledger_id = el.id
+        LEFT JOIN ledger_groups lg ON el.ledger_group = lg.group_name
+        ORDER BY ep.name | Param Count: 0
+2026-06-22 20:40:04,630 - INFO - User: 1 | Query: SELECT COUNT(*) FROM master_records WHERE weight_kg >= 25 AND status != 'Sold' AND status IS NOT NULL | Param Count: 0
+2026-06-22 20:40:04,631 - INFO - User: 1 | Query: SELECT is_admin FROM users WHERE id = %s | Param Count: 1
+2026-06-22 20:40:04,803 - INFO - User: 1 | Query: SELECT has_seen_weight_notification FROM user_login_tracking WHERE user_id = %s | Param Count: 1
+2026-06-22 20:40:04,805 - INFO - User: 1 | Query: SELECT f.feed_name, f.closing_stock, f.alert_level, f.unit
+        FROM feed_inventory f
+        INNER JOIN (
+            SELECT feed_name, MAX(id) as max_id
+            FROM feed_inventory
+            GROUP BY feed_name
+        ) latest ON f.id = latest.max_id | Param Count: 0
+2026-06-22 20:40:04,808 - INFO - User: 1 | Query: SELECT m.medicine_name, m.closing_stock, m.alert_level, m.unit
+        FROM medicine_inventory m
+        INNER JOIN (
+            SELECT medicine_name, MAX(id) as max_id
+            FROM medicine_inventory
+            GROUP BY medicine_name
+        ) latest ON m.id = latest.max_id | Param Count: 0
+2026-06-22 20:40:04,809 - INFO - User: 1 | Query: SELECT v.vaccine_name, v.closing_stock, v.alert_level, v.unit
+        FROM vaccine_inventory v
+        INNER JOIN (
+            SELECT vaccine_name, MAX(id) as max_id
+            FROM vaccine_inventory
+            GROUP BY vaccine_name
+        ) latest ON v.id = latest.max_id | Param Count: 0
+2026-06-22 20:40:04,811 - INFO - User: 1 | Query: SELECT id, batch_name, reminder_type, item_name, reminder_date
+        FROM batch_reminders
+        WHERE reminder_date <= %s AND is_completed = 0 | Param Count: 1
+2026-06-22 20:40:06,117 - INFO - User: 1 | Query: SELECT * FROM expense_units ORDER BY unit_name | Param Count: 0
+2026-06-22 20:40:06,157 - INFO - User: 1 | Query: SELECT COUNT(*) FROM master_records WHERE weight_kg >= 25 AND status != 'Sold' AND status IS NOT NULL | Param Count: 0
+2026-06-22 20:40:06,158 - INFO - User: 1 | Query: SELECT is_admin FROM users WHERE id = %s | Param Count: 1
+2026-06-22 20:40:06,230 - INFO - User: 1 | Query: SELECT has_seen_weight_notification FROM user_login_tracking WHERE user_id = %s | Param Count: 1
+2026-06-22 20:40:06,231 - INFO - User: 1 | Query: SELECT f.feed_name, f.closing_stock, f.alert_level, f.unit
+        FROM feed_inventory f
+        INNER JOIN (
+            SELECT feed_name, MAX(id) as max_id
+            FROM feed_inventory
+            GROUP BY feed_name
+        ) latest ON f.id = latest.max_id | Param Count: 0
+2026-06-22 20:40:06,232 - INFO - User: 1 | Query: SELECT m.medicine_name, m.closing_stock, m.alert_level, m.unit
+        FROM medicine_inventory m
+        INNER JOIN (
+            SELECT medicine_name, MAX(id) as max_id
+            FROM medicine_inventory
+            GROUP BY medicine_name
+        ) latest ON m.id = latest.max_id | Param Count: 0
+2026-06-22 20:40:06,233 - INFO - User: 1 | Query: SELECT v.vaccine_name, v.closing_stock, v.alert_level, v.unit
+        FROM vaccine_inventory v
+        INNER JOIN (
+            SELECT vaccine_name, MAX(id) as max_id
+            FROM vaccine_inventory
+            GROUP BY vaccine_name
+        ) latest ON v.id = latest.max_id | Param Count: 0
+2026-06-22 20:40:06,234 - INFO - User: 1 | Query: SELECT id, batch_name, reminder_type, item_name, reminder_date
+        FROM batch_reminders
+        WHERE reminder_date <= %s AND is_completed = 0 | Param Count: 1
+2026-06-22 20:40:08,693 - INFO - User: 1 | Query: SELECT * FROM employees ORDER BY CAST(sr_no AS INTEGER) ASC | Param Count: 0
+2026-06-22 20:40:08,725 - INFO - User: 1 | Query: SELECT COUNT(*) FROM master_records WHERE weight_kg >= 25 AND status != 'Sold' AND status IS NOT NULL | Param Count: 0
+2026-06-22 20:40:08,726 - INFO - User: 1 | Query: SELECT is_admin FROM users WHERE id = %s | Param Count: 1
+2026-06-22 20:40:08,791 - INFO - User: 1 | Query: SELECT has_seen_weight_notification FROM user_login_tracking WHERE user_id = %s | Param Count: 1
+2026-06-22 20:40:08,791 - INFO - User: 1 | Query: SELECT f.feed_name, f.closing_stock, f.alert_level, f.unit
+        FROM feed_inventory f
+        INNER JOIN (
+            SELECT feed_name, MAX(id) as max_id
+            FROM feed_inventory
+            GROUP BY feed_name
+        ) latest ON f.id = latest.max_id | Param Count: 0
+2026-06-22 20:40:08,793 - INFO - User: 1 | Query: SELECT m.medicine_name, m.closing_stock, m.alert_level, m.unit
+        FROM medicine_inventory m
+        INNER JOIN (
+            SELECT medicine_name, MAX(id) as max_id
+            FROM medicine_inventory
+            GROUP BY medicine_name
+        ) latest ON m.id = latest.max_id | Param Count: 0
+2026-06-22 20:40:08,794 - INFO - User: 1 | Query: SELECT v.vaccine_name, v.closing_stock, v.alert_level, v.unit
+        FROM vaccine_inventory v
+        INNER JOIN (
+            SELECT vaccine_name, MAX(id) as max_id
+            FROM vaccine_inventory
+            GROUP BY vaccine_name
+        ) latest ON v.id = latest.max_id | Param Count: 0
+2026-06-22 20:40:08,795 - INFO - User: 1 | Query: SELECT id, batch_name, reminder_type, item_name, reminder_date
+        FROM batch_reminders
+        WHERE reminder_date <= %s AND is_completed = 0 | Param Count: 1
+2026-06-22 20:40:12,639 - INFO - User: 1 | Query: SELECT e.id, e.name, e.role, e.wage_type, e.wage_rate, e.sr_no,
+        SUM(CASE WHEN a.status IN ('P', 'Present') THEN 1 ELSE 0 END) as present_days
+        FROM employees e
+        LEFT JOIN attendance a ON e.id=a.employee_id
+            AND TO_CHAR(a.date, 'MM') = %s AND TO_CHAR(a.date, 'YYYY') = %s
+        GROUP BY e.id ORDER BY CAST(e.sr_no AS INTEGER) ASC | Param Count: 2
+2026-06-22 20:40:12,654 - INFO - User: 1 | Query: SELECT SUM(net_salary) FROM salary_payments 
+                             WHERE employee_id=%s AND month=%s AND year=%s | Param Count: 3
+2026-06-22 20:40:12,655 - INFO - User: 1 | Query: SELECT * FROM farm_info LIMIT 1 | Param Count: 0
+2026-06-22 20:40:12,696 - INFO - User: 1 | Query: SELECT COUNT(*) FROM master_records WHERE weight_kg >= 25 AND status != 'Sold' AND status IS NOT NULL | Param Count: 0
+2026-06-22 20:40:12,697 - INFO - User: 1 | Query: SELECT is_admin FROM users WHERE id = %s | Param Count: 1
+2026-06-22 20:40:12,774 - INFO - User: 1 | Query: SELECT has_seen_weight_notification FROM user_login_tracking WHERE user_id = %s | Param Count: 1
+2026-06-22 20:40:12,775 - INFO - User: 1 | Query: SELECT f.feed_name, f.closing_stock, f.alert_level, f.unit
+        FROM feed_inventory f
+        INNER JOIN (
+            SELECT feed_name, MAX(id) as max_id
+            FROM feed_inventory
+            GROUP BY feed_name
+        ) latest ON f.id = latest.max_id | Param Count: 0
+2026-06-22 20:40:12,777 - INFO - User: 1 | Query: SELECT m.medicine_name, m.closing_stock, m.alert_level, m.unit
+        FROM medicine_inventory m
+        INNER JOIN (
+            SELECT medicine_name, MAX(id) as max_id
+            FROM medicine_inventory
+            GROUP BY medicine_name
+        ) latest ON m.id = latest.max_id | Param Count: 0
+2026-06-22 20:40:12,778 - INFO - User: 1 | Query: SELECT v.vaccine_name, v.closing_stock, v.alert_level, v.unit
+        FROM vaccine_inventory v
+        INNER JOIN (
+            SELECT vaccine_name, MAX(id) as max_id
+            FROM vaccine_inventory
+            GROUP BY vaccine_name
+        ) latest ON v.id = latest.max_id | Param Count: 0
+2026-06-22 20:40:12,779 - INFO - User: 1 | Query: SELECT id, batch_name, reminder_type, item_name, reminder_date
+        FROM batch_reminders
+        WHERE reminder_date <= %s AND is_completed = 0 | Param Count: 1
+2026-06-22 20:40:59,402 - INFO - User: 1 | Query: SELECT * FROM employees ORDER BY CAST(sr_no AS INTEGER) ASC | Param Count: 0
+2026-06-22 20:40:59,403 - INFO - User: 1 | Query: SELECT COUNT(*) FROM master_records WHERE weight_kg >= 25 AND status != 'Sold' AND status IS NOT NULL | Param Count: 0
+2026-06-22 20:40:59,405 - INFO - User: 1 | Query: SELECT is_admin FROM users WHERE id = %s | Param Count: 1
+2026-06-22 20:40:59,491 - INFO - User: 1 | Query: SELECT has_seen_weight_notification FROM user_login_tracking WHERE user_id = %s | Param Count: 1
+2026-06-22 20:40:59,492 - INFO - User: 1 | Query: SELECT f.feed_name, f.closing_stock, f.alert_level, f.unit
+        FROM feed_inventory f
+        INNER JOIN (
+            SELECT feed_name, MAX(id) as max_id
+            FROM feed_inventory
+            GROUP BY feed_name
+        ) latest ON f.id = latest.max_id | Param Count: 0
+2026-06-22 20:40:59,493 - INFO - User: 1 | Query: SELECT m.medicine_name, m.closing_stock, m.alert_level, m.unit
+        FROM medicine_inventory m
+        INNER JOIN (
+            SELECT medicine_name, MAX(id) as max_id
+            FROM medicine_inventory
+            GROUP BY medicine_name
+        ) latest ON m.id = latest.max_id | Param Count: 0
+2026-06-22 20:40:59,494 - INFO - User: 1 | Query: SELECT v.vaccine_name, v.closing_stock, v.alert_level, v.unit
+        FROM vaccine_inventory v
+        INNER JOIN (
+            SELECT vaccine_name, MAX(id) as max_id
+            FROM vaccine_inventory
+            GROUP BY vaccine_name
+        ) latest ON v.id = latest.max_id | Param Count: 0
+2026-06-22 20:40:59,495 - INFO - User: 1 | Query: SELECT id, batch_name, reminder_type, item_name, reminder_date
+        FROM batch_reminders
+        WHERE reminder_date <= %s AND is_completed = 0 | Param Count: 1
+2026-06-22 20:41:01,104 - INFO - User: 1 | Query: SELECT * FROM employees WHERE id=%s | Param Count: 1
+2026-06-22 20:41:01,106 - INFO - User: 1 | Query: SELECT 
+            SUM(CASE WHEN status IN ('P', 'Present') THEN 1 ELSE 0 END) as present_cnt,
+            SUM(CASE WHEN status IN ('L', 'Leave', 'On Leave') THEN 1 ELSE 0 END) as leave_cnt
+        FROM attendance WHERE employee_id = %s | Param Count: 1
+2026-06-22 20:41:01,109 - INFO - User: 1 | Query: SELECT * FROM employee_wages WHERE employee_id=%s | Param Count: 1
+2026-06-22 20:41:01,112 - INFO - User: 1 | Query: SELECT * FROM attendance WHERE employee_id=%s ORDER BY date DESC LIMIT 30 | Param Count: 1
+2026-06-22 20:41:01,113 - INFO - User: 1 | Query: SELECT * FROM salary_payments WHERE employee_id=%s ORDER BY paid_date DESC | Param Count: 1
+2026-06-22 20:41:01,191 - INFO - User: 1 | Query: SELECT COUNT(*) FROM master_records WHERE weight_kg >= 25 AND status != 'Sold' AND status IS NOT NULL | Param Count: 0
+2026-06-22 20:41:01,192 - INFO - User: 1 | Query: SELECT is_admin FROM users WHERE id = %s | Param Count: 1
+2026-06-22 20:41:01,257 - INFO - User: 1 | Query: SELECT has_seen_weight_notification FROM user_login_tracking WHERE user_id = %s | Param Count: 1
+2026-06-22 20:41:01,258 - INFO - User: 1 | Query: SELECT f.feed_name, f.closing_stock, f.alert_level, f.unit
+        FROM feed_inventory f
+        INNER JOIN (
+            SELECT feed_name, MAX(id) as max_id
+            FROM feed_inventory
+            GROUP BY feed_name
+        ) latest ON f.id = latest.max_id | Param Count: 0
+2026-06-22 20:41:01,260 - INFO - User: 1 | Query: SELECT m.medicine_name, m.closing_stock, m.alert_level, m.unit
+        FROM medicine_inventory m
+        INNER JOIN (
+            SELECT medicine_name, MAX(id) as max_id
+            FROM medicine_inventory
+            GROUP BY medicine_name
+        ) latest ON m.id = latest.max_id | Param Count: 0
+2026-06-22 20:41:01,262 - INFO - User: 1 | Query: SELECT v.vaccine_name, v.closing_stock, v.alert_level, v.unit
+        FROM vaccine_inventory v
+        INNER JOIN (
+            SELECT vaccine_name, MAX(id) as max_id
+            FROM vaccine_inventory
+            GROUP BY vaccine_name
+        ) latest ON v.id = latest.max_id | Param Count: 0
+2026-06-22 20:41:01,263 - INFO - User: 1 | Query: SELECT id, batch_name, reminder_type, item_name, reminder_date
+        FROM batch_reminders
+        WHERE reminder_date <= %s AND is_completed = 0 | Param Count: 1
+2026-06-22 20:41:15,904 - INFO - User: 1 | Query: SELECT * FROM employees ORDER BY CAST(sr_no AS INTEGER) ASC | Param Count: 0
+2026-06-22 20:41:15,905 - INFO - User: 1 | Query: SELECT COUNT(*) FROM master_records WHERE weight_kg >= 25 AND status != 'Sold' AND status IS NOT NULL | Param Count: 0
+2026-06-22 20:41:15,907 - INFO - User: 1 | Query: SELECT is_admin FROM users WHERE id = %s | Param Count: 1
+2026-06-22 20:41:15,976 - INFO - User: 1 | Query: SELECT has_seen_weight_notification FROM user_login_tracking WHERE user_id = %s | Param Count: 1
+2026-06-22 20:41:15,977 - INFO - User: 1 | Query: SELECT f.feed_name, f.closing_stock, f.alert_level, f.unit
+        FROM feed_inventory f
+        INNER JOIN (
+            SELECT feed_name, MAX(id) as max_id
+            FROM feed_inventory
+            GROUP BY feed_name
+        ) latest ON f.id = latest.max_id | Param Count: 0
+2026-06-22 20:41:15,978 - INFO - User: 1 | Query: SELECT m.medicine_name, m.closing_stock, m.alert_level, m.unit
+        FROM medicine_inventory m
+        INNER JOIN (
+            SELECT medicine_name, MAX(id) as max_id
+            FROM medicine_inventory
+            GROUP BY medicine_name
+        ) latest ON m.id = latest.max_id | Param Count: 0
+2026-06-22 20:41:15,979 - INFO - User: 1 | Query: SELECT v.vaccine_name, v.closing_stock, v.alert_level, v.unit
+        FROM vaccine_inventory v
+        INNER JOIN (
+            SELECT vaccine_name, MAX(id) as max_id
+            FROM vaccine_inventory
+            GROUP BY vaccine_name
+        ) latest ON v.id = latest.max_id | Param Count: 0
+2026-06-22 20:41:15,980 - INFO - User: 1 | Query: SELECT id, batch_name, reminder_type, item_name, reminder_date
+        FROM batch_reminders
+        WHERE reminder_date <= %s AND is_completed = 0 | Param Count: 1
+2026-06-23 22:32:13,785 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS users (
+                id SERIAL PRIMARY KEY,
+                username TEXT UNIQUE NOT NULL,
+                password TEXT NOT NULL
+            ) | Param Count: 0
+2026-06-23 22:32:13,808 - INFO - User: system | Query: ALTER TABLE users ADD COLUMN IF NOT EXISTS mfa_secret TEXT | Param Count: 0
+2026-06-23 22:32:13,827 - INFO - User: system | Query: ALTER TABLE users ADD COLUMN IF NOT EXISTS mfa_enabled INTEGER DEFAULT 0 | Param Count: 0
+2026-06-23 22:32:13,830 - INFO - User: system | Query: ALTER TABLE users ADD COLUMN IF NOT EXISTS backup_codes TEXT | Param Count: 0
+2026-06-23 22:32:13,831 - INFO - User: system | Query: ALTER TABLE users ADD COLUMN IF NOT EXISTS login_attempts INTEGER DEFAULT 0 | Param Count: 0
+2026-06-23 22:32:13,832 - INFO - User: system | Query: ALTER TABLE users ADD COLUMN IF NOT EXISTS locked_until TIMESTAMP DEFAULT NULL | Param Count: 0
+2026-06-23 22:32:13,834 - INFO - User: system | Query: ALTER TABLE users ADD COLUMN IF NOT EXISTS password_history TEXT | Param Count: 0
+2026-06-23 22:32:13,835 - INFO - User: system | Query: ALTER TABLE users ADD COLUMN IF NOT EXISTS is_admin INTEGER DEFAULT 0 | Param Count: 0
+2026-06-23 22:32:13,836 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS goats_data (
+                id SERIAL PRIMARY KEY,
+                tag_number TEXT NOT NULL,
+                date DATE NOT NULL,
+                category TEXT NOT NULL,
+                type TEXT NOT NULL,
+                amount REAL NOT NULL,
+                notes TEXT
+            ) | Param Count: 0
+2026-06-23 22:32:13,836 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS master_records (
+                id SERIAL PRIMARY KEY,
+                si_no TEXT, tag_no TEXT UNIQUE NOT NULL, breed TEXT, breed_percent TEXT,
+                status TEXT, sold TEXT, expired TEXT, gender TEXT, purchase_date DATE,
+                color TEXT, weight_kg REAL, purchase_amount REAL, insurance_date DATE,
+                vaccination TEXT, vaccination_period TEXT, vaccination_next_due DATE, medicine TEXT, medicine_period TEXT,
+                feed TEXT, feed_amount TEXT, mating_date DATE, mating_goat_no TEXT,
+                goat_week_period TEXT, delivery_date DATE, new_goat_gender TEXT,
+                new_goat_color TEXT, birth_weight REAL, selling_date DATE, selling_weight REAL,
+                selling_price REAL, mortality_date DATE, mortality_weight REAL,
+                mortality_reason TEXT, insurance_claim_amount REAL, insurance_inform_date DATE,
+                insurance_claim_date DATE, dob DATE
+            ) | Param Count: 0
+2026-06-23 22:32:13,837 - INFO - User: system | Query: ALTER TABLE master_records ADD COLUMN IF NOT EXISTS vaccination_next_due DATE | Param Count: 0
+2026-06-23 22:32:13,839 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS sales_records (
+                id SERIAL PRIMARY KEY,
+                sr_no TEXT,
+                tag_id TEXT NOT NULL,
+                breed TEXT,
+                breed_percent TEXT,
+                gender TEXT,
+                weight REAL,
+                sold_price REAL,
+                date_of_sale DATE,
+                buyer_name TEXT,
+                buyer_city TEXT,
+                buyer_contact TEXT
+            ) | Param Count: 0
+2026-06-23 22:32:13,839 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS other_sales_records (
+                id SERIAL PRIMARY KEY,
+                sr_no TEXT,
+                item_name TEXT NOT NULL,
+                quantity REAL,
+                unit TEXT,
+                price_per_unit REAL,
+                total_amount REAL,
+                date_of_sale DATE,
+                buyer_name TEXT,
+                buyer_city TEXT,
+                buyer_contact TEXT,
+                notes TEXT
+            ) | Param Count: 0
+2026-06-23 22:32:13,840 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS medicine_records (
+                id SERIAL PRIMARY KEY,
+                sr_no TEXT,
+                tag_no TEXT NOT NULL,
+                breed TEXT,
+                breed_percent TEXT,
+                med1_date DATE, med1_name TEXT,
+                vac1_date DATE, vac1_name TEXT,
+                med2_date DATE, med2_name TEXT,
+                med3_date DATE, med3_name TEXT,
+                vac2_date DATE, vac2_name TEXT,
+                medicine_amount REAL,
+                vaccine_amount REAL
+            ) | Param Count: 0
+2026-06-23 22:32:13,840 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS mortality_records (
+                id SERIAL PRIMARY KEY,
+                sr_no TEXT,
+                tag_id TEXT NOT NULL,
+                breed TEXT,
+                breed_percent TEXT,
+                gender TEXT,
+                birth_date DATE,
+                expired_date DATE,
+                total_age_month TEXT,
+                weight_kgs REAL,
+                insurance_inform_date DATE,
+                insurance_claim_date DATE,
+                current_value REAL,
+                claim_amount REAL,
+                cause_of_death TEXT
+            ) | Param Count: 0
+2026-06-23 22:32:13,841 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS feed_inventory (
+                id SERIAL PRIMARY KEY,
+                feed_name TEXT NOT NULL,
+                opening_stock REAL DEFAULT 0,
+                purchased_qty REAL DEFAULT 0,
+                used_qty REAL DEFAULT 0,
+                wastage_qty REAL DEFAULT 0,
+                closing_stock REAL DEFAULT 0,
+                unit TEXT,
+                cost_per_unit REAL DEFAULT 0,
+                total_cost REAL DEFAULT 0,
+                purchase_date DATE,
+                supplier TEXT
+            ) | Param Count: 0
+2026-06-23 22:32:13,841 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS medicine_inventory (
+                id SERIAL PRIMARY KEY,
+                medicine_name TEXT NOT NULL,
+                opening_stock REAL DEFAULT 0,
+                purchased_qty REAL DEFAULT 0,
+                used_qty REAL DEFAULT 0,
+                wastage_qty REAL DEFAULT 0,
+                closing_stock REAL DEFAULT 0,
+                unit TEXT,
+                cost_per_unit REAL DEFAULT 0,
+                total_cost REAL DEFAULT 0,
+                purchase_date DATE,
+                supplier TEXT,
+                alert_level REAL DEFAULT 0
+            ) | Param Count: 0
+2026-06-23 22:32:13,842 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS vaccine_inventory (
+                id SERIAL PRIMARY KEY,
+                vaccine_name TEXT NOT NULL,
+                opening_stock REAL DEFAULT 0,
+                purchased_qty REAL DEFAULT 0,
+                used_qty REAL DEFAULT 0,
+                wastage_qty REAL DEFAULT 0,
+                closing_stock REAL DEFAULT 0,
+                unit TEXT,
+                cost_per_unit REAL DEFAULT 0,
+                total_cost REAL DEFAULT 0,
+                purchase_date DATE,
+                supplier TEXT,
+                alert_level REAL DEFAULT 0
+            ) | Param Count: 0
+2026-06-23 22:32:13,842 - INFO - User: system | Query: ALTER TABLE feed_inventory ADD COLUMN IF NOT EXISTS wastage_qty REAL DEFAULT 0 | Param Count: 0
+2026-06-23 22:32:13,843 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS kid_records (
+                id SERIAL PRIMARY KEY,
+                s_no TEXT,
+                kid_id TEXT NOT NULL,
+                breed TEXT,
+                breed_percent TEXT,
+                gender TEXT,
+                color TEXT,
+                litter_size INTEGER,
+                birth_date DATE,
+                age_month TEXT,
+                birth_weight REAL,
+                mother_id TEXT,
+                father_id TEXT
+            ) | Param Count: 0
+2026-06-23 22:32:13,844 - INFO - User: system | Query: ALTER TABLE kid_records ADD COLUMN IF NOT EXISTS mother_id TEXT | Param Count: 0
+2026-06-23 22:32:13,846 - INFO - User: system | Query: ALTER TABLE kid_records ADD COLUMN IF NOT EXISTS father_id TEXT | Param Count: 0
+2026-06-23 22:32:13,847 - INFO - User: system | Query: ALTER TABLE kid_records ADD COLUMN IF NOT EXISTS insurance_policy_no TEXT | Param Count: 0
+2026-06-23 22:32:13,847 - INFO - User: system | Query: ALTER TABLE kid_records ADD COLUMN IF NOT EXISTS insurance_company TEXT | Param Count: 0
+2026-06-23 22:32:13,848 - INFO - User: system | Query: ALTER TABLE kid_records ADD COLUMN IF NOT EXISTS insurance_expiry DATE | Param Count: 0
+2026-06-23 22:32:13,849 - INFO - User: system | Query: ALTER TABLE kid_records ADD COLUMN IF NOT EXISTS insurance_amount REAL | Param Count: 0
+2026-06-23 22:32:13,850 - INFO - User: system | Query: ALTER TABLE master_records ADD COLUMN IF NOT EXISTS kit_status TEXT DEFAULT 'No' | Param Count: 0
+2026-06-23 22:32:13,853 - INFO - User: system | Query: ALTER TABLE master_records ADD COLUMN IF NOT EXISTS dob DATE | Param Count: 0
+2026-06-23 22:32:13,854 - INFO - User: system | Query: ALTER TABLE feed_inventory ADD COLUMN IF NOT EXISTS purchase_id INTEGER | Param Count: 0
+2026-06-23 22:32:13,855 - INFO - User: system | Query: ALTER TABLE medicine_inventory ADD COLUMN IF NOT EXISTS purchase_id INTEGER | Param Count: 0
+2026-06-23 22:32:13,857 - INFO - User: system | Query: ALTER TABLE vaccine_inventory ADD COLUMN IF NOT EXISTS purchase_id INTEGER | Param Count: 0
+2026-06-23 22:32:13,859 - INFO - User: system | Query: ALTER TABLE purchases ADD COLUMN IF NOT EXISTS pnl_category TEXT DEFAULT 'Purchase' | Param Count: 0
+2026-06-23 22:32:13,860 - INFO - User: system | Query: ALTER TABLE feed_purchases ADD COLUMN IF NOT EXISTS pnl_category TEXT DEFAULT 'Purchase' | Param Count: 0
+2026-06-23 22:32:13,861 - INFO - User: system | Query: ALTER TABLE medicine_purchases ADD COLUMN IF NOT EXISTS pnl_category TEXT DEFAULT 'Purchase' | Param Count: 0
+2026-06-23 22:32:13,863 - INFO - User: system | Query: ALTER TABLE vaccine_purchases ADD COLUMN IF NOT EXISTS pnl_category TEXT DEFAULT 'Purchase' | Param Count: 0
+2026-06-23 22:32:13,865 - INFO - User: system | Query: ALTER TABLE equipment ADD COLUMN IF NOT EXISTS pnl_category TEXT DEFAULT 'Purchase' | Param Count: 0
+2026-06-23 22:32:13,866 - INFO - User: system | Query: ALTER TABLE sales_records ADD COLUMN IF NOT EXISTS pnl_category TEXT DEFAULT 'Sales' | Param Count: 0
+2026-06-23 22:32:13,867 - INFO - User: system | Query: ALTER TABLE other_sales_records ADD COLUMN IF NOT EXISTS pnl_category TEXT DEFAULT 'Sales' | Param Count: 0
+2026-06-23 22:32:13,868 - INFO - User: system | Query: ALTER TABLE expenses ADD COLUMN IF NOT EXISTS pnl_category TEXT DEFAULT 'Direct Expenses' | Param Count: 0
+2026-06-23 22:32:13,869 - INFO - User: system | Query: ALTER TABLE purchases ADD COLUMN IF NOT EXISTS bill_date DATE | Param Count: 0
+2026-06-23 22:32:13,870 - INFO - User: system | Query: ALTER TABLE purchases ADD COLUMN IF NOT EXISTS bill_no TEXT | Param Count: 0
+2026-06-23 22:32:13,871 - INFO - User: system | Query: ALTER TABLE feed_purchases ADD COLUMN IF NOT EXISTS bill_date DATE | Param Count: 0
+2026-06-23 22:32:13,872 - INFO - User: system | Query: ALTER TABLE feed_purchases ADD COLUMN IF NOT EXISTS bill_no TEXT | Param Count: 0
+2026-06-23 22:32:13,873 - INFO - User: system | Query: ALTER TABLE feed_purchases ADD COLUMN IF NOT EXISTS notes TEXT | Param Count: 0
+2026-06-23 22:32:13,874 - INFO - User: system | Query: ALTER TABLE medicine_purchases ADD COLUMN IF NOT EXISTS bill_date DATE | Param Count: 0
+2026-06-23 22:32:13,875 - INFO - User: system | Query: ALTER TABLE medicine_purchases ADD COLUMN IF NOT EXISTS bill_no TEXT | Param Count: 0
+2026-06-23 22:32:13,876 - INFO - User: system | Query: ALTER TABLE medicine_purchases ADD COLUMN IF NOT EXISTS notes TEXT | Param Count: 0
+2026-06-23 22:32:13,877 - INFO - User: system | Query: ALTER TABLE vaccine_purchases ADD COLUMN IF NOT EXISTS bill_date DATE | Param Count: 0
+2026-06-23 22:32:13,878 - INFO - User: system | Query: ALTER TABLE vaccine_purchases ADD COLUMN IF NOT EXISTS bill_no TEXT | Param Count: 0
+2026-06-23 22:32:13,879 - INFO - User: system | Query: ALTER TABLE vaccine_purchases ADD COLUMN IF NOT EXISTS notes TEXT | Param Count: 0
+2026-06-23 22:32:13,880 - INFO - User: system | Query: ALTER TABLE purchases ADD COLUMN IF NOT EXISTS particular_id INTEGER | Param Count: 0
+2026-06-23 22:32:13,882 - INFO - User: system | Query: ALTER TABLE purchases ADD COLUMN IF NOT EXISTS particular_name TEXT | Param Count: 0
+2026-06-23 22:32:13,883 - INFO - User: system | Query: ALTER TABLE feed_purchases ADD COLUMN IF NOT EXISTS particular_id INTEGER | Param Count: 0
+2026-06-23 22:32:13,883 - INFO - User: system | Query: ALTER TABLE feed_purchases ADD COLUMN IF NOT EXISTS particular_name TEXT | Param Count: 0
+2026-06-23 22:32:13,884 - INFO - User: system | Query: ALTER TABLE medicine_purchases ADD COLUMN IF NOT EXISTS particular_id INTEGER | Param Count: 0
+2026-06-23 22:32:13,885 - INFO - User: system | Query: ALTER TABLE medicine_purchases ADD COLUMN IF NOT EXISTS particular_name TEXT | Param Count: 0
+2026-06-23 22:32:13,886 - INFO - User: system | Query: ALTER TABLE vaccine_purchases ADD COLUMN IF NOT EXISTS particular_id INTEGER | Param Count: 0
+2026-06-23 22:32:13,887 - INFO - User: system | Query: ALTER TABLE vaccine_purchases ADD COLUMN IF NOT EXISTS particular_name TEXT | Param Count: 0
+2026-06-23 22:32:13,889 - INFO - User: system | Query: ALTER TABLE expenses ADD COLUMN IF NOT EXISTS particular_id INTEGER | Param Count: 0
+2026-06-23 22:32:13,889 - INFO - User: system | Query: ALTER TABLE expenses ADD COLUMN IF NOT EXISTS bill_date DATE | Param Count: 0
+2026-06-23 22:32:13,890 - INFO - User: system | Query: ALTER TABLE expenses ADD COLUMN IF NOT EXISTS bill_no TEXT | Param Count: 0
+2026-06-23 22:32:13,891 - INFO - User: system | Query: ALTER TABLE expenses ADD COLUMN IF NOT EXISTS quantity REAL | Param Count: 0
+2026-06-23 22:32:13,892 - INFO - User: system | Query: ALTER TABLE expenses ADD COLUMN IF NOT EXISTS unit_id INTEGER | Param Count: 0
+2026-06-23 22:32:13,894 - INFO - User: system | Query: ALTER TABLE expenses ADD COLUMN IF NOT EXISTS unit_name TEXT | Param Count: 0
+2026-06-23 22:32:13,895 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS equipment (
+                id SERIAL PRIMARY KEY,
+                name TEXT,
+                type TEXT,
+                purchase_date DATE,
+                purchase_cost REAL,
+                supplier TEXT,
+                status TEXT,
+                notes TEXT,
+                assigned_employee TEXT,
+                service_due_date DATE
+            ) | Param Count: 0
+2026-06-23 22:32:13,895 - INFO - User: system | Query: ALTER TABLE equipment ADD COLUMN IF NOT EXISTS assigned_employee TEXT | Param Count: 0
+2026-06-23 22:32:13,896 - INFO - User: system | Query: ALTER TABLE equipment ADD COLUMN IF NOT EXISTS service_due_date DATE | Param Count: 0
+2026-06-23 22:32:13,897 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS medicine_history (
+                id SERIAL PRIMARY KEY,
+                tag_no TEXT NOT NULL,
+                doctor_name TEXT,
+                consultation_date DATE NOT NULL,
+                medicine_name TEXT NOT NULL,
+                dose TEXT,
+                quantity TEXT,
+                cost REAL NOT NULL,
+                notes TEXT
+            ) | Param Count: 0
+2026-06-23 22:32:13,898 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS breeds (
+                id SERIAL PRIMARY KEY,
+                breed_name TEXT UNIQUE NOT NULL,
+                description TEXT
+            ) | Param Count: 0
+2026-06-23 22:32:13,899 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS suppliers (
+                id SERIAL PRIMARY KEY,
+                supplier_name TEXT UNIQUE NOT NULL,
+                contact_person TEXT,
+                phone TEXT,
+                address TEXT,
+                supplier_type TEXT
+            ) | Param Count: 0
+2026-06-23 22:32:13,899 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS feed_purchases (
+                id SERIAL PRIMARY KEY,
+                feed_name TEXT NOT NULL,
+                quantity REAL NOT NULL,
+                unit TEXT,
+                cost REAL NOT NULL,
+                purchase_date DATE NOT NULL,
+                supplier TEXT
+            ) | Param Count: 0
+2026-06-23 22:32:13,900 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS medicine_purchases (
+                id SERIAL PRIMARY KEY,
+                medicine_name TEXT NOT NULL,
+                dose_unit TEXT,
+                quantity REAL NOT NULL,
+                cost REAL NOT NULL,
+                purchase_date DATE NOT NULL,
+                supplier TEXT
+            ) | Param Count: 0
+2026-06-23 22:32:13,900 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS vaccine_purchases (
+                id SERIAL PRIMARY KEY,
+                vaccine_name TEXT NOT NULL,
+                quantity REAL NOT NULL,
+                cost REAL NOT NULL,
+                purchase_date DATE NOT NULL,
+                supplier TEXT
+            ) | Param Count: 0
+2026-06-23 22:32:13,901 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS purchases (
+                id SERIAL PRIMARY KEY,
+                seller_name TEXT NOT NULL,
+                invoice_details TEXT,
+                purchase_date DATE NOT NULL,
+                tag_id TEXT NOT NULL,
+                price REAL NOT NULL
+            ) | Param Count: 0
+2026-06-23 22:32:13,901 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS farm_info (
+                id SERIAL PRIMARY KEY,
+                farm_name TEXT,
+                farm_address TEXT,
+                farm_city TEXT,
+                farm_phone TEXT,
+                bank_name TEXT,
+                account_number TEXT,
+                ifsc_code TEXT
+            ) | Param Count: 0
+2026-06-23 22:32:13,902 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS vaccine_records (
+                id SERIAL PRIMARY KEY,
+                sr_no TEXT,
+                tag_no TEXT NOT NULL,
+                vaccine_date DATE NOT NULL,
+                vaccine_name TEXT NOT NULL,
+                amount_spent REAL,
+                additional_vaccines TEXT,
+                additional_medicines TEXT,
+                required_vaccines TEXT,
+                required_medicines TEXT,
+                notes TEXT
+            ) | Param Count: 0
+2026-06-23 22:32:13,902 - INFO - User: system | Query: ALTER TABLE vaccine_records ADD COLUMN IF NOT EXISTS next_due_date DATE | Param Count: 0
+2026-06-23 22:32:13,903 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS doctor_details (
+                id SERIAL PRIMARY KEY,
+                doctor_name TEXT NOT NULL,
+                specialization TEXT,
+                contact_number TEXT,
+                email TEXT,
+                clinic_name TEXT,
+                clinic_address TEXT,
+                clinic_city TEXT,
+                availability TEXT,
+                registration_number TEXT,
+                notes TEXT
+            ) | Param Count: 0
+2026-06-23 22:32:13,904 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS eligible_to_sell (
+                id SERIAL PRIMARY KEY,
+                tag_id TEXT UNIQUE NOT NULL,
+                tag_no TEXT NOT NULL,
+                breed TEXT,
+                gender TEXT,
+                weight_kg REAL,
+                date_added DATE,
+                FOREIGN KEY (tag_id) REFERENCES master_records(tag_no)
+            ) | Param Count: 0
+2026-06-23 22:32:13,905 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS user_login_tracking (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER NOT NULL,
+                last_login_date DATE DEFAULT NULL,
+                has_seen_weight_notification INTEGER DEFAULT 0,
+                FOREIGN KEY (user_id) REFERENCES users(id)
+            ) | Param Count: 0
+2026-06-23 22:32:13,905 - INFO - User: system | Query: ALTER TABLE feed_inventory ADD COLUMN IF NOT EXISTS alert_level REAL DEFAULT 0 | Param Count: 0
+2026-06-23 22:32:13,906 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS batch_reminders (
+                id SERIAL PRIMARY KEY,
+                batch_name TEXT NOT NULL,
+                reminder_type TEXT NOT NULL,
+                item_name TEXT NOT NULL,
+                reminder_date DATE NOT NULL,
+                is_completed INTEGER DEFAULT 0
+            ) | Param Count: 0
+2026-06-23 22:32:13,907 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS ledger_groups (
+                id SERIAL PRIMARY KEY,
+                group_name TEXT UNIQUE NOT NULL,
+                description TEXT,
+                group_type TEXT DEFAULT 'Expense'
+            ) | Param Count: 0
+2026-06-23 22:32:13,907 - INFO - User: system | Query: ALTER TABLE ledger_groups ADD COLUMN IF NOT EXISTS group_type TEXT DEFAULT 'Expense' | Param Count: 0
+2026-06-23 22:32:13,908 - INFO - User: system | Query: SELECT 1 FROM ledger_groups WHERE group_name = %s | Param Count: 1
+2026-06-23 22:32:13,922 - INFO - User: system | Query: UPDATE ledger_groups SET group_type = %s WHERE group_name = %s AND group_type IS NULL | Param Count: 2
+2026-06-23 22:32:13,927 - INFO - User: system | Query: SELECT 1 FROM ledger_groups WHERE group_name = %s | Param Count: 1
+2026-06-23 22:32:13,927 - INFO - User: system | Query: UPDATE ledger_groups SET group_type = %s WHERE group_name = %s AND group_type IS NULL | Param Count: 2
+2026-06-23 22:32:13,928 - INFO - User: system | Query: SELECT 1 FROM ledger_groups WHERE group_name = %s | Param Count: 1
+2026-06-23 22:32:13,929 - INFO - User: system | Query: UPDATE ledger_groups SET group_type = %s WHERE group_name = %s AND group_type IS NULL | Param Count: 2
+2026-06-23 22:32:13,930 - INFO - User: system | Query: SELECT 1 FROM ledger_groups WHERE group_name = %s | Param Count: 1
+2026-06-23 22:32:13,930 - INFO - User: system | Query: UPDATE ledger_groups SET group_type = %s WHERE group_name = %s AND group_type IS NULL | Param Count: 2
+2026-06-23 22:32:13,931 - INFO - User: system | Query: SELECT 1 FROM ledger_groups WHERE group_name = %s | Param Count: 1
+2026-06-23 22:32:13,931 - INFO - User: system | Query: UPDATE ledger_groups SET group_type = %s WHERE group_name = %s AND group_type IS NULL | Param Count: 2
+2026-06-23 22:32:13,932 - INFO - User: system | Query: SELECT 1 FROM ledger_groups WHERE group_name = %s | Param Count: 1
+2026-06-23 22:32:13,932 - INFO - User: system | Query: UPDATE ledger_groups SET group_type = %s WHERE group_name = %s AND group_type IS NULL | Param Count: 2
+2026-06-23 22:32:13,933 - INFO - User: system | Query: SELECT 1 FROM ledger_groups WHERE group_name = %s | Param Count: 1
+2026-06-23 22:32:13,933 - INFO - User: system | Query: UPDATE ledger_groups SET group_type = %s WHERE group_name = %s AND group_type IS NULL | Param Count: 2
+2026-06-23 22:32:13,934 - INFO - User: system | Query: SELECT 1 FROM ledger_groups WHERE group_name = %s | Param Count: 1
+2026-06-23 22:32:13,935 - INFO - User: system | Query: UPDATE ledger_groups SET group_type = %s WHERE group_name = %s AND group_type IS NULL | Param Count: 2
+2026-06-23 22:32:13,936 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS expense_ledgers (
+                id SERIAL PRIMARY KEY,
+                ledger_name TEXT UNIQUE NOT NULL,
+                ledger_group TEXT DEFAULT 'Direct Expenses',
+                description TEXT
+            ) | Param Count: 0
+2026-06-23 22:32:13,936 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS expense_particulars (
+                id SERIAL PRIMARY KEY,
+                name TEXT UNIQUE NOT NULL,
+                ledger_id INTEGER,
+                description TEXT,
+                FOREIGN KEY (ledger_id) REFERENCES expense_ledgers(id)
+            ) | Param Count: 0
+2026-06-23 22:32:13,937 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS expense_units (
+                id SERIAL PRIMARY KEY,
+                unit_name TEXT UNIQUE NOT NULL,
+                unit_symbol TEXT
+            ) | Param Count: 0
+2026-06-23 22:32:13,938 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS other_vouchers (
+                id SERIAL PRIMARY KEY,
+                voucher_date DATE NOT NULL,
+                supplier_name TEXT,
+                particular_id INTEGER,
+                particular_name TEXT,
+                bill_date DATE,
+                bill_no TEXT,
+                quantity REAL,
+                unit_id INTEGER,
+                unit_name TEXT,
+                amount REAL NOT NULL DEFAULT 0,
+                notes TEXT,
+                pnl_category TEXT DEFAULT 'Direct Expenses',
+                FOREIGN KEY (particular_id) REFERENCES expense_particulars(id),
+                FOREIGN KEY (unit_id) REFERENCES expense_units(id)
+            ) | Param Count: 0
+2026-06-23 22:32:13,938 - INFO - User: system | Query: SELECT COUNT(*) FROM expense_units | Param Count: 0
+2026-06-23 22:32:13,944 - INFO - User: system | Query: SELECT COUNT(*) FROM expense_ledgers | Param Count: 0
+2026-06-23 22:32:13,946 - INFO - User: system | Query: SELECT * FROM users WHERE username = %s | Param Count: 1
+2026-06-23 22:32:13,950 - INFO - User: system | Query: UPDATE users SET is_admin = 1 WHERE username = %s | Param Count: 1
+2026-06-23 22:32:14,202 - INFO - User: system | Query: SELECT id FROM master_records WHERE si_no IS NULL OR si_no = '' ORDER BY id ASC | Param Count: 0
+2026-06-23 22:32:14,272 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS employees (
+            id SERIAL PRIMARY KEY,
+            name TEXT NOT NULL, role TEXT, phone TEXT, address TEXT,
+            join_date DATE, wage_type TEXT, wage_rate REAL DEFAULT 0,
+            status TEXT DEFAULT 'Active', notes TEXT,
+            aadhar_no TEXT, pan_no TEXT, bank_name TEXT, account_no TEXT, ifsc_code TEXT) | Param Count: 0
+2026-06-23 22:32:14,273 - INFO - User: system | Query: ALTER TABLE employees ADD COLUMN sr_no INTEGER | Param Count: 0
+2026-06-23 22:32:14,278 - INFO - User: system | Query: ALTER TABLE employees ADD COLUMN aadhar_no TEXT | Param Count: 0
+2026-06-23 22:32:14,279 - INFO - User: system | Query: ALTER TABLE employees ADD COLUMN pan_no TEXT | Param Count: 0
+2026-06-23 22:32:14,280 - INFO - User: system | Query: ALTER TABLE employees ADD COLUMN bank_name TEXT | Param Count: 0
+2026-06-23 22:32:14,282 - INFO - User: system | Query: ALTER TABLE employees ADD COLUMN account_no TEXT | Param Count: 0
+2026-06-23 22:32:14,283 - INFO - User: system | Query: ALTER TABLE employees ADD COLUMN ifsc_code TEXT | Param Count: 0
+2026-06-23 22:32:14,283 - INFO - User: system | Query: UPDATE employees SET sr_no = id WHERE sr_no IS NULL OR sr_no = 0 | Param Count: 0
+2026-06-23 22:32:14,287 - INFO - User: system | Query: ALTER TABLE expenses ADD COLUMN bill_file TEXT | Param Count: 0
+2026-06-23 22:32:14,288 - INFO - User: system | Query: ALTER TABLE expenses ADD COLUMN status TEXT DEFAULT 'Pending' | Param Count: 0
+2026-06-23 22:32:14,289 - INFO - User: system | Query: ALTER TABLE expenses ADD COLUMN pnl_category TEXT DEFAULT 'Direct Expenses' | Param Count: 0
+2026-06-23 22:32:14,290 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS employee_wages (
+            id SERIAL PRIMARY KEY,
+            employee_id INTEGER UNIQUE, daily_wage REAL DEFAULT 0,
+            weekly_salary REAL DEFAULT 0, monthly_salary REAL DEFAULT 0,
+            overtime_rate REAL DEFAULT 0, bonus REAL DEFAULT 0,
+            advance_salary REAL DEFAULT 0, pending_payment REAL DEFAULT 0,
+            last_updated DATE) | Param Count: 0
+2026-06-23 22:32:14,290 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS attendance (
+            id SERIAL PRIMARY KEY,
+            employee_id INTEGER, date DATE, status TEXT, notes TEXT) | Param Count: 0
+2026-06-23 22:32:14,291 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS salary_payments (
+            id SERIAL PRIMARY KEY,
+            employee_id INTEGER, month INTEGER, year INTEGER,
+            total_days INTEGER, present_days INTEGER, gross_salary REAL,
+            deductions REAL, net_salary REAL, paid_date DATE,
+            payment_mode TEXT) | Param Count: 0
+2026-06-23 22:32:14,292 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS tasks (
+            id SERIAL PRIMARY KEY,
+            employee_id INTEGER, task_name TEXT, description TEXT,
+            assigned_date DATE, due_date DATE, priority TEXT DEFAULT 'Medium',
+            status TEXT DEFAULT 'Pending', completion_percentage INTEGER DEFAULT 0) | Param Count: 0
+2026-06-23 22:32:14,293 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS leaves (
+            id SERIAL PRIMARY KEY,
+            employee_id INTEGER, leave_type TEXT, start_date DATE,
+            end_date DATE, reason TEXT, status TEXT DEFAULT 'Pending') | Param Count: 0
+2026-06-23 22:32:14,294 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS expense_categories (
+            id SERIAL PRIMARY KEY, category_name TEXT UNIQUE) | Param Count: 0
+2026-06-23 22:32:14,295 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS expenses (
+            id SERIAL PRIMARY KEY,
+            category TEXT, amount REAL, date DATE,
+            description TEXT, vendor_name TEXT, payment_mode TEXT,
+            receipt_no TEXT, notes TEXT, status TEXT DEFAULT 'Pending',
+            pnl_category TEXT DEFAULT 'Direct Expenses') | Param Count: 0
+2026-06-23 22:32:14,295 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS equipment (
+            id SERIAL PRIMARY KEY,
+            name TEXT NOT NULL, type TEXT, purchase_date DATE, purchase_cost REAL,
+            supplier TEXT, status TEXT DEFAULT 'Good', notes TEXT) | Param Count: 0
+2026-06-23 22:32:14,296 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS equipment_services (
+            id SERIAL PRIMARY KEY,
+            equipment_id INTEGER,
+            vendor_name TEXT,
+            service_date DATE NOT NULL,
+            service_cost REAL DEFAULT 0,
+            description TEXT,
+            status TEXT,
+            notes TEXT
+        ) | Param Count: 0
+2026-06-23 22:32:14,297 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS finances (
+            id SERIAL PRIMARY KEY,
+            type TEXT, category TEXT, amount REAL, date DATE,
+            description TEXT, reference_id TEXT, notes TEXT
+        ) | Param Count: 0
+2026-06-23 22:32:14,297 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS farm_settings (
+            id SERIAL PRIMARY KEY,
+            farm_name TEXT, address TEXT, phone TEXT, email TEXT,
+            bank_name TEXT, account_no TEXT, ifsc_code TEXT,
+            gst_no TEXT, logo_path TEXT
+        ) | Param Count: 0
+2026-06-23 22:32:14,298 - INFO - User: system | Query: CREATE TABLE IF NOT EXISTS reports (
+            id SERIAL PRIMARY KEY,
+            report_type TEXT, generated_date DATE,
+            from_date DATE, to_date DATE, file_path TEXT, notes TEXT
+        ) | Param Count: 0
+2026-06-23 22:32:35,372 - INFO - User: anonymous | Query: SELECT COUNT(*) FROM master_records WHERE weight_kg >= 25 AND status != 'Sold' AND status IS NOT NULL | Param Count: 0
+2026-06-23 22:32:35,609 - INFO - User: anonymous | Query: SELECT COUNT(*) FROM master_records WHERE weight_kg >= 25 AND status != 'Sold' AND status IS NOT NULL | Param Count: 0
+2026-06-23 22:32:39,589 - INFO - User: anonymous | Query: SELECT * FROM users WHERE username = %s | Param Count: 1
+2026-06-23 22:32:39,882 - INFO - User: anonymous | Query: UPDATE users SET login_attempts = 0, locked_until = NULL WHERE id = %s | Param Count: 1
+2026-06-23 22:32:39,887 - INFO - User: 1 | Query: SELECT * FROM user_login_tracking WHERE user_id = %s | Param Count: 1
+2026-06-23 22:32:39,892 - INFO - User: 1 | Query: UPDATE user_login_tracking SET last_login_date = %s, has_seen_weight_notification = %s WHERE user_id = %s | Param Count: 3
+2026-06-23 22:32:39,917 - INFO - User: 1 | Query: SELECT COUNT(*) FROM master_records WHERE status = 'Active' | Param Count: 0
+2026-06-23 22:32:39,918 - INFO - User: 1 | Query: SELECT COUNT(*) FROM kid_records | Param Count: 0
+2026-06-23 22:32:39,921 - INFO - User: 1 | Query: SELECT COUNT(*) FROM employees WHERE status = 'Active' | Param Count: 0
+2026-06-23 22:32:39,923 - INFO - User: 1 | Query: SELECT SUM(sold_price) FROM sales_records | Param Count: 0
+2026-06-23 22:32:39,926 - INFO - User: 1 | Query: SELECT SUM(total_amount) FROM other_sales_records | Param Count: 0
+2026-06-23 22:32:39,929 - INFO - User: 1 | Query: SELECT SUM(price) FROM purchases | Param Count: 0
+2026-06-23 22:32:39,933 - INFO - User: 1 | Query: SELECT SUM(total_cost) FROM feed_inventory | Param Count: 0
+2026-06-23 22:32:39,936 - INFO - User: 1 | Query: SELECT SUM(cost) FROM medicine_purchases | Param Count: 0
+2026-06-23 22:32:39,938 - INFO - User: 1 | Query: SELECT SUM(cost) FROM vaccine_purchases | Param Count: 0
+2026-06-23 22:32:39,941 - INFO - User: 1 | Query: SELECT SUM(net_salary) FROM salary_payments | Param Count: 0
+2026-06-23 22:32:39,945 - INFO - User: 1 | Query: SELECT SUM(service_cost) FROM equipment_services | Param Count: 0
+2026-06-23 22:32:39,951 - INFO - User: 1 | Query: SELECT SUM(amount) FROM expenses WHERE status='Approved' AND LOWER(COALESCE(category, '')) NOT ILIKE '%labor%' AND LOWER(COALESCE(category, '')) NOT ILIKE '%labour%' | Param Count: 0
+2026-06-23 22:32:39,957 - INFO - User: 1 | Query: SELECT * FROM master_records ORDER BY id ASC LIMIT 10 | Param Count: 0
+2026-06-23 22:32:40,009 - INFO - User: 1 | Query: SELECT COUNT(*) FROM master_records WHERE weight_kg >= 25 AND status != 'Sold' AND status IS NOT NULL | Param Count: 0
+2026-06-23 22:32:40,010 - INFO - User: 1 | Query: SELECT is_admin FROM users WHERE id = %s | Param Count: 1
+2026-06-23 22:32:40,483 - INFO - User: 1 | Query: SELECT has_seen_weight_notification FROM user_login_tracking WHERE user_id = %s | Param Count: 1
+2026-06-23 22:32:40,485 - INFO - User: 1 | Query: SELECT tag_no, color, weight_kg 
+            FROM master_records 
+            WHERE weight_kg >= 25 AND (status != 'Sold' OR status IS NULL) | Param Count: 0
+2026-06-23 22:32:40,489 - INFO - User: 1 | Query: SELECT tag_id FROM eligible_to_sell | Param Count: 0
+2026-06-23 22:32:40,490 - INFO - User: 1 | Query: SELECT COUNT(*) FROM master_records WHERE weight_kg >= 25 AND status != 'Sold' AND status IS NOT NULL | Param Count: 0
+2026-06-23 22:32:40,493 - INFO - User: 1 | Query: UPDATE user_login_tracking SET has_seen_weight_notification = 1 WHERE user_id = %s | Param Count: 1
+2026-06-23 22:32:40,494 - INFO - User: 1 | Query: SELECT is_admin FROM users WHERE id = %s | Param Count: 1
+2026-06-23 22:32:40,496 - INFO - User: 1 | Query: SELECT f.feed_name, f.closing_stock, f.alert_level, f.unit
+        FROM feed_inventory f
+        INNER JOIN (
+            SELECT feed_name, MAX(id) as max_id
+            FROM feed_inventory
+            GROUP BY feed_name
+        ) latest ON f.id = latest.max_id | Param Count: 0
+2026-06-23 22:32:40,505 - INFO - User: 1 | Query: SELECT m.medicine_name, m.closing_stock, m.alert_level, m.unit
+        FROM medicine_inventory m
+        INNER JOIN (
+            SELECT medicine_name, MAX(id) as max_id
+            FROM medicine_inventory
+            GROUP BY medicine_name
+        ) latest ON m.id = latest.max_id | Param Count: 0
+2026-06-23 22:32:40,508 - INFO - User: 1 | Query: SELECT v.vaccine_name, v.closing_stock, v.alert_level, v.unit
+        FROM vaccine_inventory v
+        INNER JOIN (
+            SELECT vaccine_name, MAX(id) as max_id
+            FROM vaccine_inventory
+            GROUP BY vaccine_name
+        ) latest ON v.id = latest.max_id | Param Count: 0
+2026-06-23 22:32:40,511 - INFO - User: 1 | Query: SELECT id, batch_name, reminder_type, item_name, reminder_date
+        FROM batch_reminders
+        WHERE reminder_date <= %s AND is_completed = 0 | Param Count: 1
+2026-06-23 22:32:52,944 - INFO - User: 1 | Query: WITH AllRecords AS (
+            SELECT tag_number as tag_no, date, category, amount FROM goats_data
+            UNION ALL
+            SELECT tag_id as tag_no, date_of_sale as date, 'income' as category, sold_price as amount FROM sales_records WHERE date_of_sale IS NOT NULL
+            UNION ALL
+            SELECT tag_no, COALESCE(med1_date, vac1_date) as date, 'expense' as category, COALESCE(medicine_amount, 0) + COALESCE(vaccine_amount, 0) as amount FROM medicine_records WHERE (med1_date IS NOT NULL OR vac1_date IS NOT NULL)
+            UNION ALL
+            SELECT tag_id as tag_no, expired_date as date, 'expense' as category, COALESCE(current_value, 0) as amount FROM mortality_records WHERE expired_date IS NOT NULL
+            UNION ALL
+            SELECT tag_id as tag_no, insurance_claim_date as date, 'income' as category, COALESCE(claim_amount, 0) as amount FROM mortality_records WHERE insurance_claim_date IS NOT NULL
+            UNION ALL
+            SELECT tag_no, purchase_date as date, 'expense' as category, COALESCE(purchase_amount, 0) as amount FROM master_records WHERE purchase_date IS NOT NULL
+        )
+        SELECT m.tag_no as tag_number, 
+               m.status,
+               m.dob,
+               COUNT(a.amount) as total_records,
+               COALESCE(SUM(CASE WHEN a.category = 'income' THEN a.amount ELSE 0 END), 0) as total_income,
+               COALESCE(SUM(CASE WHEN a.category = 'expense' THEN a.amount ELSE 0 END), 0) as total_expense
+        FROM master_records m
+        LEFT JOIN AllRecords a ON m.tag_no = a.tag_no
+        GROUP BY m.tag_no, m.status, m.dob
+        ORDER BY CAST(m.tag_no AS INTEGER) ASC | Param Count: 0
+2026-06-23 22:32:52,983 - INFO - User: 1 | Query: SELECT COUNT(*) FROM master_records WHERE weight_kg >= 25 AND status != 'Sold' AND status IS NOT NULL | Param Count: 0
+2026-06-23 22:32:52,984 - INFO - User: 1 | Query: SELECT is_admin FROM users WHERE id = %s | Param Count: 1
+2026-06-23 22:32:53,056 - INFO - User: 1 | Query: SELECT has_seen_weight_notification FROM user_login_tracking WHERE user_id = %s | Param Count: 1
+2026-06-23 22:32:53,057 - INFO - User: 1 | Query: SELECT f.feed_name, f.closing_stock, f.alert_level, f.unit
+        FROM feed_inventory f
+        INNER JOIN (
+            SELECT feed_name, MAX(id) as max_id
+            FROM feed_inventory
+            GROUP BY feed_name
+        ) latest ON f.id = latest.max_id | Param Count: 0
+2026-06-23 22:32:53,059 - INFO - User: 1 | Query: SELECT m.medicine_name, m.closing_stock, m.alert_level, m.unit
+        FROM medicine_inventory m
+        INNER JOIN (
+            SELECT medicine_name, MAX(id) as max_id
+            FROM medicine_inventory
+            GROUP BY medicine_name
+        ) latest ON m.id = latest.max_id | Param Count: 0
+2026-06-23 22:32:53,060 - INFO - User: 1 | Query: SELECT v.vaccine_name, v.closing_stock, v.alert_level, v.unit
+        FROM vaccine_inventory v
+        INNER JOIN (
+            SELECT vaccine_name, MAX(id) as max_id
+            FROM vaccine_inventory
+            GROUP BY vaccine_name
+        ) latest ON v.id = latest.max_id | Param Count: 0
+2026-06-23 22:32:53,061 - INFO - User: 1 | Query: SELECT id, batch_name, reminder_type, item_name, reminder_date
+        FROM batch_reminders
+        WHERE reminder_date <= %s AND is_completed = 0 | Param Count: 1
+2026-06-23 22:32:54,101 - INFO - User: 1 | Query: SELECT * FROM master_records ORDER BY id ASC | Param Count: 0
+2026-06-23 22:32:54,165 - INFO - User: 1 | Query: SELECT COUNT(*) FROM master_records WHERE weight_kg >= 25 AND status != 'Sold' AND status IS NOT NULL | Param Count: 0
+2026-06-23 22:32:54,166 - INFO - User: 1 | Query: SELECT is_admin FROM users WHERE id = %s | Param Count: 1
+2026-06-23 22:32:54,268 - INFO - User: 1 | Query: SELECT has_seen_weight_notification FROM user_login_tracking WHERE user_id = %s | Param Count: 1
+2026-06-23 22:32:54,269 - INFO - User: 1 | Query: SELECT f.feed_name, f.closing_stock, f.alert_level, f.unit
+        FROM feed_inventory f
+        INNER JOIN (
+            SELECT feed_name, MAX(id) as max_id
+            FROM feed_inventory
+            GROUP BY feed_name
+        ) latest ON f.id = latest.max_id | Param Count: 0
+2026-06-23 22:32:54,271 - INFO - User: 1 | Query: SELECT m.medicine_name, m.closing_stock, m.alert_level, m.unit
+        FROM medicine_inventory m
+        INNER JOIN (
+            SELECT medicine_name, MAX(id) as max_id
+            FROM medicine_inventory
+            GROUP BY medicine_name
+        ) latest ON m.id = latest.max_id | Param Count: 0
+2026-06-23 22:32:54,273 - INFO - User: 1 | Query: SELECT v.vaccine_name, v.closing_stock, v.alert_level, v.unit
+        FROM vaccine_inventory v
+        INNER JOIN (
+            SELECT vaccine_name, MAX(id) as max_id
+            FROM vaccine_inventory
+            GROUP BY vaccine_name
+        ) latest ON v.id = latest.max_id | Param Count: 0
+2026-06-23 22:32:54,274 - INFO - User: 1 | Query: SELECT id, batch_name, reminder_type, item_name, reminder_date
+        FROM batch_reminders
+        WHERE reminder_date <= %s AND is_completed = 0 | Param Count: 1
+2026-06-23 22:32:55,193 - INFO - User: 1 | Query: SELECT * FROM kid_records ORDER BY birth_date DESC | Param Count: 0
+2026-06-23 22:32:55,230 - INFO - User: 1 | Query: SELECT COUNT(*) FROM master_records WHERE weight_kg >= 25 AND status != 'Sold' AND status IS NOT NULL | Param Count: 0
+2026-06-23 22:32:55,231 - INFO - User: 1 | Query: SELECT is_admin FROM users WHERE id = %s | Param Count: 1
+2026-06-23 22:32:55,301 - INFO - User: 1 | Query: SELECT has_seen_weight_notification FROM user_login_tracking WHERE user_id = %s | Param Count: 1
+2026-06-23 22:32:55,302 - INFO - User: 1 | Query: SELECT f.feed_name, f.closing_stock, f.alert_level, f.unit
+        FROM feed_inventory f
+        INNER JOIN (
+            SELECT feed_name, MAX(id) as max_id
+            FROM feed_inventory
+            GROUP BY feed_name
+        ) latest ON f.id = latest.max_id | Param Count: 0
+2026-06-23 22:32:55,304 - INFO - User: 1 | Query: SELECT m.medicine_name, m.closing_stock, m.alert_level, m.unit
+        FROM medicine_inventory m
+        INNER JOIN (
+            SELECT medicine_name, MAX(id) as max_id
+            FROM medicine_inventory
+            GROUP BY medicine_name
+        ) latest ON m.id = latest.max_id | Param Count: 0
+2026-06-23 22:32:55,305 - INFO - User: 1 | Query: SELECT v.vaccine_name, v.closing_stock, v.alert_level, v.unit
+        FROM vaccine_inventory v
+        INNER JOIN (
+            SELECT vaccine_name, MAX(id) as max_id
+            FROM vaccine_inventory
+            GROUP BY vaccine_name
+        ) latest ON v.id = latest.max_id | Param Count: 0
+2026-06-23 22:32:55,307 - INFO - User: 1 | Query: SELECT id, batch_name, reminder_type, item_name, reminder_date
+        FROM batch_reminders
+        WHERE reminder_date <= %s AND is_completed = 0 | Param Count: 1
+2026-06-23 22:32:56,647 - INFO - User: 1 | Query: SELECT ets.tag_id, 
+               COALESCE(mr.breed, ets.breed) as breed, 
+               COALESCE(mr.gender, ets.gender) as gender, 
+               COALESCE(mr.weight_kg, ets.weight_kg) as weight_kg, 
+               COALESCE(mr.status, 'Active') as status,
+               ets.date_added
+        FROM eligible_to_sell ets
+        LEFT JOIN master_records mr ON ets.tag_id = mr.tag_no
+        ORDER BY ets.date_added DESC | Param Count: 0
+2026-06-23 22:32:56,703 - INFO - User: 1 | Query: SELECT COUNT(*) FROM master_records WHERE weight_kg >= 25 AND status != 'Sold' AND status IS NOT NULL | Param Count: 0
+2026-06-23 22:32:56,704 - INFO - User: 1 | Query: SELECT is_admin FROM users WHERE id = %s | Param Count: 1
+2026-06-23 22:32:56,819 - INFO - User: 1 | Query: SELECT has_seen_weight_notification FROM user_login_tracking WHERE user_id = %s | Param Count: 1
+2026-06-23 22:32:56,820 - INFO - User: 1 | Query: SELECT f.feed_name, f.closing_stock, f.alert_level, f.unit
+        FROM feed_inventory f
+        INNER JOIN (
+            SELECT feed_name, MAX(id) as max_id
+            FROM feed_inventory
+            GROUP BY feed_name
+        ) latest ON f.id = latest.max_id | Param Count: 0
+2026-06-23 22:32:56,821 - INFO - User: 1 | Query: SELECT m.medicine_name, m.closing_stock, m.alert_level, m.unit
+        FROM medicine_inventory m
+        INNER JOIN (
+            SELECT medicine_name, MAX(id) as max_id
+            FROM medicine_inventory
+            GROUP BY medicine_name
+        ) latest ON m.id = latest.max_id | Param Count: 0
+2026-06-23 22:32:56,823 - INFO - User: 1 | Query: SELECT v.vaccine_name, v.closing_stock, v.alert_level, v.unit
+        FROM vaccine_inventory v
+        INNER JOIN (
+            SELECT vaccine_name, MAX(id) as max_id
+            FROM vaccine_inventory
+            GROUP BY vaccine_name
+        ) latest ON v.id = latest.max_id | Param Count: 0
+2026-06-23 22:32:56,824 - INFO - User: 1 | Query: SELECT id, batch_name, reminder_type, item_name, reminder_date
+        FROM batch_reminders
+        WHERE reminder_date <= %s AND is_completed = 0 | Param Count: 1

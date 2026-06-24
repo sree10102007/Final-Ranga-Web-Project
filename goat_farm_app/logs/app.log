@@ -252,3 +252,6 @@ flask_limiter.errors.RateLimitExceeded: 429 Too Many Requests: 50 per 1 hour
 2026-06-19 16:44:15,695 INFO: Goat Farm app starting up [in C:\Users\acer\OneDrive\Documents\werty\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:1028]
 2026-06-20 12:43:58,496 INFO: Goat Farm app starting up [in C:\Users\acer\OneDrive\Documents\werty\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:1028]
 2026-06-20 19:39:02,386 INFO: Goat Farm app starting up [in C:\Users\acer\OneDrive\Documents\werty\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:1028]
+2026-06-20 19:50:47,040 INFO: Goat Farm app starting up [in C:\Users\acer\OneDrive\Documents\werty\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:1028]
+2026-06-22 20:39:48,605 INFO: Goat Farm app starting up [in C:\Users\acer\OneDrive\Documents\werty\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:1028]
+2026-06-23 22:32:13,564 INFO: Goat Farm app starting up [in C:\Users\acer\OneDrive\Documents\werty\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:1028]
