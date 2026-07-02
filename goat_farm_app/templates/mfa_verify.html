@@ -16,14 +16,14 @@
                     {% if messages %}{% for c, m in messages %}<div class="alert alert-{{c}} small">{{m}}</div>{% endfor %}{% endif %}
                 {% endwith %}
                 
-                <form method="POST" action="{{ url_for('mfa_verify_login') }}">
+                <form method="POST" action="{{ url_for('auth.mfa_verify_login') }}">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <div class="mb-4">
                         <label class="form-label small fw-bold">Verification Code / Recovery Code</label>
                         <input type="text" name="code" class="form-control rounded-3 text-center fs-4 font-monospace" placeholder="123456" required autocomplete="off">
                     </div>
                     <button class="btn btn-success w-100 mb-3 py-2 rounded-3 fw-bold" type="submit">Verify Code</button>
-                    <div class="text-center small"><a href="{{ url_for('login') }}" class="text-muted">Back to Login</a></div>
+                    <div class="text-center small"><a href="{{ url_for('auth.login') }}" class="text-muted">Back to Login</a></div>
                 </form>
             </div>
         </div>

@@ -209,3 +209,982 @@ TypeError: PyPNGImage.save() got an unexpected keyword argument 'format'
 2026-06-18 12:00:48,415 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:613]
 2026-06-18 12:01:03,590 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:613]
 2026-06-18 12:01:04,356 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:613]
+2026-06-20 20:17:25,235 INFO: Goat Farm app starting up [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:613]
+2026-06-20 20:17:29,909 INFO: Goat Farm app starting up [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:613]
+2026-06-20 20:18:02,208 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:613]
+2026-06-20 20:18:07,717 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:613]
+2026-06-20 20:23:07,745 ERROR: Server Error: column "pnl_category" does not exist
+LINE 1: ...S detail, purchase_date AS date, price AS amount, pnl_catego...
+                                                             ^
+ [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:702]
+Traceback (most recent call last):
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 867, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 852, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py", line 6771, in pnl
+    rows = db.execute("SELECT id, seller_name AS detail, purchase_date AS date, price AS amount, pnl_category, particular_id FROM purchases WHERE purchase_date BETWEEN ? AND ?", (from_date, to_date)).fetchall()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py", line 417, in execute
+    cur.execute(sql, params)
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py", line 363, in execute
+    raise e
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py", line 348, in execute
+    self.cursor.execute(translated_sql, params)
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\psycopg2\extras.py", line 146, in execute
+    return super().execute(query, vars)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.UndefinedColumn: column "pnl_category" does not exist
+LINE 1: ...S detail, purchase_date AS date, price AS amount, pnl_catego...
+                                                             ^
+
+2026-06-20 20:23:47,456 ERROR: Server Error: column "pnl_category" does not exist
+LINE 1: ...S detail, purchase_date AS date, price AS amount, pnl_catego...
+                                                             ^
+ [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:702]
+Traceback (most recent call last):
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 867, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 852, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py", line 6771, in pnl
+    rows = db.execute("SELECT id, seller_name AS detail, purchase_date AS date, price AS amount, pnl_category, particular_id FROM purchases WHERE purchase_date BETWEEN ? AND ?", (from_date, to_date)).fetchall()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py", line 417, in execute
+    cur.execute(sql, params)
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py", line 363, in execute
+    raise e
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py", line 348, in execute
+    self.cursor.execute(translated_sql, params)
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\psycopg2\extras.py", line 146, in execute
+    return super().execute(query, vars)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.UndefinedColumn: column "pnl_category" does not exist
+LINE 1: ...S detail, purchase_date AS date, price AS amount, pnl_catego...
+                                                             ^
+
+2026-06-20 20:23:47,906 ERROR: Server Error: column "pnl_category" does not exist
+LINE 1: ...S detail, purchase_date AS date, price AS amount, pnl_catego...
+                                                             ^
+ [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:702]
+Traceback (most recent call last):
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 867, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 852, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py", line 6771, in pnl
+    rows = db.execute("SELECT id, seller_name AS detail, purchase_date AS date, price AS amount, pnl_category, particular_id FROM purchases WHERE purchase_date BETWEEN ? AND ?", (from_date, to_date)).fetchall()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py", line 417, in execute
+    cur.execute(sql, params)
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py", line 363, in execute
+    raise e
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py", line 348, in execute
+    self.cursor.execute(translated_sql, params)
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\psycopg2\extras.py", line 146, in execute
+    return super().execute(query, vars)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.UndefinedColumn: column "pnl_category" does not exist
+LINE 1: ...S detail, purchase_date AS date, price AS amount, pnl_catego...
+                                                             ^
+
+2026-06-20 20:24:05,806 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:613]
+2026-06-20 20:24:45,906 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:613]
+2026-06-20 20:24:47,004 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:613]
+2026-06-20 20:29:40,800 ERROR: Server Error: 429 Too Many Requests: 50 per 1 hour [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:702]
+Traceback (most recent call last):
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 865, in full_dispatch_request
+    rv = self.preprocess_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1239, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1160, in _check_request_limit
+    raise e
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1157, in _check_request_limit
+    self.__evaluate_limits(endpoint, all_limits)
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1141, in __evaluate_limits
+    raise RateLimitExceeded(
+flask_limiter.errors.RateLimitExceeded: 429 Too Many Requests: 50 per 1 hour
+2026-06-20 20:29:44,618 ERROR: Server Error: 429 Too Many Requests: 50 per 1 hour [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:702]
+Traceback (most recent call last):
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 865, in full_dispatch_request
+    rv = self.preprocess_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1239, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1160, in _check_request_limit
+    raise e
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1157, in _check_request_limit
+    self.__evaluate_limits(endpoint, all_limits)
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1141, in __evaluate_limits
+    raise RateLimitExceeded(
+flask_limiter.errors.RateLimitExceeded: 429 Too Many Requests: 50 per 1 hour
+2026-06-20 20:29:50,118 ERROR: Server Error: 429 Too Many Requests: 50 per 1 hour [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:702]
+Traceback (most recent call last):
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 865, in full_dispatch_request
+    rv = self.preprocess_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1239, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1160, in _check_request_limit
+    raise e
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1157, in _check_request_limit
+    self.__evaluate_limits(endpoint, all_limits)
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1141, in __evaluate_limits
+    raise RateLimitExceeded(
+flask_limiter.errors.RateLimitExceeded: 429 Too Many Requests: 50 per 1 hour
+2026-06-20 20:29:53,804 ERROR: Server Error: 429 Too Many Requests: 50 per 1 hour [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:702]
+Traceback (most recent call last):
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 865, in full_dispatch_request
+    rv = self.preprocess_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1239, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1160, in _check_request_limit
+    raise e
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1157, in _check_request_limit
+    self.__evaluate_limits(endpoint, all_limits)
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1141, in __evaluate_limits
+    raise RateLimitExceeded(
+flask_limiter.errors.RateLimitExceeded: 429 Too Many Requests: 50 per 1 hour
+2026-06-20 20:29:59,474 ERROR: Server Error: 429 Too Many Requests: 50 per 1 hour [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:702]
+Traceback (most recent call last):
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 865, in full_dispatch_request
+    rv = self.preprocess_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1239, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1160, in _check_request_limit
+    raise e
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1157, in _check_request_limit
+    self.__evaluate_limits(endpoint, all_limits)
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1141, in __evaluate_limits
+    raise RateLimitExceeded(
+flask_limiter.errors.RateLimitExceeded: 429 Too Many Requests: 50 per 1 hour
+2026-06-20 20:30:01,185 ERROR: Server Error: 429 Too Many Requests: 50 per 1 hour [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:702]
+Traceback (most recent call last):
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 865, in full_dispatch_request
+    rv = self.preprocess_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1239, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1160, in _check_request_limit
+    raise e
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1157, in _check_request_limit
+    self.__evaluate_limits(endpoint, all_limits)
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1141, in __evaluate_limits
+    raise RateLimitExceeded(
+flask_limiter.errors.RateLimitExceeded: 429 Too Many Requests: 50 per 1 hour
+2026-06-20 20:30:04,509 ERROR: Server Error: 429 Too Many Requests: 50 per 1 hour [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:702]
+Traceback (most recent call last):
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 865, in full_dispatch_request
+    rv = self.preprocess_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1239, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1160, in _check_request_limit
+    raise e
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1157, in _check_request_limit
+    self.__evaluate_limits(endpoint, all_limits)
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1141, in __evaluate_limits
+    raise RateLimitExceeded(
+flask_limiter.errors.RateLimitExceeded: 429 Too Many Requests: 50 per 1 hour
+2026-06-20 20:30:28,941 ERROR: Server Error: 429 Too Many Requests: 50 per 1 hour [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:702]
+Traceback (most recent call last):
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 865, in full_dispatch_request
+    rv = self.preprocess_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1239, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1160, in _check_request_limit
+    raise e
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1157, in _check_request_limit
+    self.__evaluate_limits(endpoint, all_limits)
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1141, in __evaluate_limits
+    raise RateLimitExceeded(
+flask_limiter.errors.RateLimitExceeded: 429 Too Many Requests: 50 per 1 hour
+2026-06-20 20:30:33,361 ERROR: Server Error: 429 Too Many Requests: 50 per 1 hour [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:702]
+Traceback (most recent call last):
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 865, in full_dispatch_request
+    rv = self.preprocess_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1239, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1160, in _check_request_limit
+    raise e
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1157, in _check_request_limit
+    self.__evaluate_limits(endpoint, all_limits)
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1141, in __evaluate_limits
+    raise RateLimitExceeded(
+flask_limiter.errors.RateLimitExceeded: 429 Too Many Requests: 50 per 1 hour
+2026-06-20 20:30:36,885 ERROR: Server Error: 429 Too Many Requests: 50 per 1 hour [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:702]
+Traceback (most recent call last):
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 865, in full_dispatch_request
+    rv = self.preprocess_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1239, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1160, in _check_request_limit
+    raise e
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1157, in _check_request_limit
+    self.__evaluate_limits(endpoint, all_limits)
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1141, in __evaluate_limits
+    raise RateLimitExceeded(
+flask_limiter.errors.RateLimitExceeded: 429 Too Many Requests: 50 per 1 hour
+2026-06-20 20:31:49,363 ERROR: Server Error: 429 Too Many Requests: 50 per 1 hour [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:702]
+Traceback (most recent call last):
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 865, in full_dispatch_request
+    rv = self.preprocess_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1239, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1160, in _check_request_limit
+    raise e
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1157, in _check_request_limit
+    self.__evaluate_limits(endpoint, all_limits)
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1141, in __evaluate_limits
+    raise RateLimitExceeded(
+flask_limiter.errors.RateLimitExceeded: 429 Too Many Requests: 50 per 1 hour
+2026-06-20 20:31:54,142 ERROR: Server Error: 429 Too Many Requests: 50 per 1 hour [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:702]
+Traceback (most recent call last):
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 865, in full_dispatch_request
+    rv = self.preprocess_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1239, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1160, in _check_request_limit
+    raise e
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1157, in _check_request_limit
+    self.__evaluate_limits(endpoint, all_limits)
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1141, in __evaluate_limits
+    raise RateLimitExceeded(
+flask_limiter.errors.RateLimitExceeded: 429 Too Many Requests: 50 per 1 hour
+2026-06-20 20:31:56,717 ERROR: Server Error: 429 Too Many Requests: 50 per 1 hour [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:702]
+Traceback (most recent call last):
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 865, in full_dispatch_request
+    rv = self.preprocess_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1239, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1160, in _check_request_limit
+    raise e
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1157, in _check_request_limit
+    self.__evaluate_limits(endpoint, all_limits)
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1141, in __evaluate_limits
+    raise RateLimitExceeded(
+flask_limiter.errors.RateLimitExceeded: 429 Too Many Requests: 50 per 1 hour
+2026-06-20 20:31:58,748 ERROR: Server Error: 429 Too Many Requests: 50 per 1 hour [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:702]
+Traceback (most recent call last):
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 865, in full_dispatch_request
+    rv = self.preprocess_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1239, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1160, in _check_request_limit
+    raise e
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1157, in _check_request_limit
+    self.__evaluate_limits(endpoint, all_limits)
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1141, in __evaluate_limits
+    raise RateLimitExceeded(
+flask_limiter.errors.RateLimitExceeded: 429 Too Many Requests: 50 per 1 hour
+2026-06-20 20:32:06,721 ERROR: Server Error: 429 Too Many Requests: 50 per 1 hour [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:702]
+Traceback (most recent call last):
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 865, in full_dispatch_request
+    rv = self.preprocess_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1239, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1160, in _check_request_limit
+    raise e
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1157, in _check_request_limit
+    self.__evaluate_limits(endpoint, all_limits)
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1141, in __evaluate_limits
+    raise RateLimitExceeded(
+flask_limiter.errors.RateLimitExceeded: 429 Too Many Requests: 50 per 1 hour
+2026-06-20 20:32:08,387 ERROR: Server Error: 429 Too Many Requests: 50 per 1 hour [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:702]
+Traceback (most recent call last):
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 865, in full_dispatch_request
+    rv = self.preprocess_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1239, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1160, in _check_request_limit
+    raise e
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1157, in _check_request_limit
+    self.__evaluate_limits(endpoint, all_limits)
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1141, in __evaluate_limits
+    raise RateLimitExceeded(
+flask_limiter.errors.RateLimitExceeded: 429 Too Many Requests: 50 per 1 hour
+2026-06-20 20:32:17,183 ERROR: Server Error: 429 Too Many Requests: 50 per 1 hour [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:702]
+Traceback (most recent call last):
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 865, in full_dispatch_request
+    rv = self.preprocess_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1239, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1160, in _check_request_limit
+    raise e
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1157, in _check_request_limit
+    self.__evaluate_limits(endpoint, all_limits)
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1141, in __evaluate_limits
+    raise RateLimitExceeded(
+flask_limiter.errors.RateLimitExceeded: 429 Too Many Requests: 50 per 1 hour
+2026-06-20 20:32:23,861 ERROR: Server Error: 429 Too Many Requests: 50 per 1 hour [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:702]
+Traceback (most recent call last):
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 865, in full_dispatch_request
+    rv = self.preprocess_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1239, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1160, in _check_request_limit
+    raise e
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1157, in _check_request_limit
+    self.__evaluate_limits(endpoint, all_limits)
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1141, in __evaluate_limits
+    raise RateLimitExceeded(
+flask_limiter.errors.RateLimitExceeded: 429 Too Many Requests: 50 per 1 hour
+2026-06-20 20:32:29,401 ERROR: Server Error: 429 Too Many Requests: 50 per 1 hour [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:702]
+Traceback (most recent call last):
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 865, in full_dispatch_request
+    rv = self.preprocess_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1239, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1160, in _check_request_limit
+    raise e
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1157, in _check_request_limit
+    self.__evaluate_limits(endpoint, all_limits)
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1141, in __evaluate_limits
+    raise RateLimitExceeded(
+flask_limiter.errors.RateLimitExceeded: 429 Too Many Requests: 50 per 1 hour
+2026-06-20 20:32:42,174 ERROR: Server Error: 429 Too Many Requests: 50 per 1 hour [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:702]
+Traceback (most recent call last):
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 865, in full_dispatch_request
+    rv = self.preprocess_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1239, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1160, in _check_request_limit
+    raise e
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1157, in _check_request_limit
+    self.__evaluate_limits(endpoint, all_limits)
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1141, in __evaluate_limits
+    raise RateLimitExceeded(
+flask_limiter.errors.RateLimitExceeded: 429 Too Many Requests: 50 per 1 hour
+2026-06-20 20:32:45,102 ERROR: Server Error: 429 Too Many Requests: 50 per 1 hour [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:702]
+Traceback (most recent call last):
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 865, in full_dispatch_request
+    rv = self.preprocess_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1239, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1160, in _check_request_limit
+    raise e
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1157, in _check_request_limit
+    self.__evaluate_limits(endpoint, all_limits)
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1141, in __evaluate_limits
+    raise RateLimitExceeded(
+flask_limiter.errors.RateLimitExceeded: 429 Too Many Requests: 50 per 1 hour
+2026-06-20 20:32:49,474 ERROR: Server Error: 429 Too Many Requests: 50 per 1 hour [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:702]
+Traceback (most recent call last):
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 865, in full_dispatch_request
+    rv = self.preprocess_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1239, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1160, in _check_request_limit
+    raise e
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1157, in _check_request_limit
+    self.__evaluate_limits(endpoint, all_limits)
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1141, in __evaluate_limits
+    raise RateLimitExceeded(
+flask_limiter.errors.RateLimitExceeded: 429 Too Many Requests: 50 per 1 hour
+2026-06-20 20:32:54,103 ERROR: Server Error: 429 Too Many Requests: 50 per 1 hour [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:702]
+Traceback (most recent call last):
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 865, in full_dispatch_request
+    rv = self.preprocess_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1239, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1160, in _check_request_limit
+    raise e
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1157, in _check_request_limit
+    self.__evaluate_limits(endpoint, all_limits)
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1141, in __evaluate_limits
+    raise RateLimitExceeded(
+flask_limiter.errors.RateLimitExceeded: 429 Too Many Requests: 50 per 1 hour
+2026-06-20 20:33:42,312 ERROR: Server Error: 429 Too Many Requests: 50 per 1 hour [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:702]
+Traceback (most recent call last):
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 865, in full_dispatch_request
+    rv = self.preprocess_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1239, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1160, in _check_request_limit
+    raise e
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1157, in _check_request_limit
+    self.__evaluate_limits(endpoint, all_limits)
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1141, in __evaluate_limits
+    raise RateLimitExceeded(
+flask_limiter.errors.RateLimitExceeded: 429 Too Many Requests: 50 per 1 hour
+2026-06-20 20:33:44,548 ERROR: Server Error: 429 Too Many Requests: 50 per 1 hour [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:702]
+Traceback (most recent call last):
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 865, in full_dispatch_request
+    rv = self.preprocess_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1239, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1160, in _check_request_limit
+    raise e
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1157, in _check_request_limit
+    self.__evaluate_limits(endpoint, all_limits)
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1141, in __evaluate_limits
+    raise RateLimitExceeded(
+flask_limiter.errors.RateLimitExceeded: 429 Too Many Requests: 50 per 1 hour
+2026-06-20 20:33:47,066 ERROR: Server Error: 429 Too Many Requests: 50 per 1 hour [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:702]
+Traceback (most recent call last):
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 865, in full_dispatch_request
+    rv = self.preprocess_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1239, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1160, in _check_request_limit
+    raise e
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1157, in _check_request_limit
+    self.__evaluate_limits(endpoint, all_limits)
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1141, in __evaluate_limits
+    raise RateLimitExceeded(
+flask_limiter.errors.RateLimitExceeded: 429 Too Many Requests: 50 per 1 hour
+2026-06-20 20:34:26,085 ERROR: Server Error: 429 Too Many Requests: 50 per 1 hour [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:702]
+Traceback (most recent call last):
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 865, in full_dispatch_request
+    rv = self.preprocess_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1239, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1160, in _check_request_limit
+    raise e
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1157, in _check_request_limit
+    self.__evaluate_limits(endpoint, all_limits)
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1141, in __evaluate_limits
+    raise RateLimitExceeded(
+flask_limiter.errors.RateLimitExceeded: 429 Too Many Requests: 50 per 1 hour
+2026-06-20 20:34:29,483 ERROR: Server Error: 429 Too Many Requests: 50 per 1 hour [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:702]
+Traceback (most recent call last):
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 865, in full_dispatch_request
+    rv = self.preprocess_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1239, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1160, in _check_request_limit
+    raise e
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1157, in _check_request_limit
+    self.__evaluate_limits(endpoint, all_limits)
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1141, in __evaluate_limits
+    raise RateLimitExceeded(
+flask_limiter.errors.RateLimitExceeded: 429 Too Many Requests: 50 per 1 hour
+2026-06-20 20:34:31,778 ERROR: Server Error: 429 Too Many Requests: 50 per 1 hour [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:702]
+Traceback (most recent call last):
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 865, in full_dispatch_request
+    rv = self.preprocess_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1239, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1160, in _check_request_limit
+    raise e
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1157, in _check_request_limit
+    self.__evaluate_limits(endpoint, all_limits)
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1141, in __evaluate_limits
+    raise RateLimitExceeded(
+flask_limiter.errors.RateLimitExceeded: 429 Too Many Requests: 50 per 1 hour
+2026-06-20 20:35:52,595 ERROR: Server Error: 429 Too Many Requests: 50 per 1 hour [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:702]
+Traceback (most recent call last):
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 865, in full_dispatch_request
+    rv = self.preprocess_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1239, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1160, in _check_request_limit
+    raise e
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1157, in _check_request_limit
+    self.__evaluate_limits(endpoint, all_limits)
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1141, in __evaluate_limits
+    raise RateLimitExceeded(
+flask_limiter.errors.RateLimitExceeded: 429 Too Many Requests: 50 per 1 hour
+2026-06-20 20:36:00,208 ERROR: Server Error: 429 Too Many Requests: 50 per 1 hour [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:702]
+Traceback (most recent call last):
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 865, in full_dispatch_request
+    rv = self.preprocess_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1239, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1160, in _check_request_limit
+    raise e
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1157, in _check_request_limit
+    self.__evaluate_limits(endpoint, all_limits)
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1141, in __evaluate_limits
+    raise RateLimitExceeded(
+flask_limiter.errors.RateLimitExceeded: 429 Too Many Requests: 50 per 1 hour
+2026-06-20 20:36:10,275 ERROR: Server Error: 429 Too Many Requests: 50 per 1 hour [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:702]
+Traceback (most recent call last):
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 865, in full_dispatch_request
+    rv = self.preprocess_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1239, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1160, in _check_request_limit
+    raise e
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1157, in _check_request_limit
+    self.__evaluate_limits(endpoint, all_limits)
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1141, in __evaluate_limits
+    raise RateLimitExceeded(
+flask_limiter.errors.RateLimitExceeded: 429 Too Many Requests: 50 per 1 hour
+2026-06-20 20:36:28,752 ERROR: Server Error: 429 Too Many Requests: 50 per 1 hour [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:702]
+Traceback (most recent call last):
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 865, in full_dispatch_request
+    rv = self.preprocess_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1239, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1160, in _check_request_limit
+    raise e
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1157, in _check_request_limit
+    self.__evaluate_limits(endpoint, all_limits)
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1141, in __evaluate_limits
+    raise RateLimitExceeded(
+flask_limiter.errors.RateLimitExceeded: 429 Too Many Requests: 50 per 1 hour
+2026-06-20 20:36:35,162 ERROR: Server Error: 429 Too Many Requests: 50 per 1 hour [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:702]
+Traceback (most recent call last):
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 865, in full_dispatch_request
+    rv = self.preprocess_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1239, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1160, in _check_request_limit
+    raise e
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1157, in _check_request_limit
+    self.__evaluate_limits(endpoint, all_limits)
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1141, in __evaluate_limits
+    raise RateLimitExceeded(
+flask_limiter.errors.RateLimitExceeded: 429 Too Many Requests: 50 per 1 hour
+2026-06-20 20:36:44,237 ERROR: Server Error: 429 Too Many Requests: 50 per 1 hour [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:702]
+Traceback (most recent call last):
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 865, in full_dispatch_request
+    rv = self.preprocess_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1239, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1160, in _check_request_limit
+    raise e
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1157, in _check_request_limit
+    self.__evaluate_limits(endpoint, all_limits)
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1141, in __evaluate_limits
+    raise RateLimitExceeded(
+flask_limiter.errors.RateLimitExceeded: 429 Too Many Requests: 50 per 1 hour
+2026-06-20 20:37:00,994 ERROR: Server Error: 429 Too Many Requests: 50 per 1 hour [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:702]
+Traceback (most recent call last):
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 865, in full_dispatch_request
+    rv = self.preprocess_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1239, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1160, in _check_request_limit
+    raise e
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1157, in _check_request_limit
+    self.__evaluate_limits(endpoint, all_limits)
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1141, in __evaluate_limits
+    raise RateLimitExceeded(
+flask_limiter.errors.RateLimitExceeded: 429 Too Many Requests: 50 per 1 hour
+2026-06-20 20:37:03,024 ERROR: Server Error: 429 Too Many Requests: 50 per 1 hour [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:702]
+Traceback (most recent call last):
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 865, in full_dispatch_request
+    rv = self.preprocess_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1239, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1160, in _check_request_limit
+    raise e
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1157, in _check_request_limit
+    self.__evaluate_limits(endpoint, all_limits)
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1141, in __evaluate_limits
+    raise RateLimitExceeded(
+flask_limiter.errors.RateLimitExceeded: 429 Too Many Requests: 50 per 1 hour
+2026-06-20 20:37:04,589 ERROR: Server Error: 429 Too Many Requests: 50 per 1 hour [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:702]
+Traceback (most recent call last):
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 865, in full_dispatch_request
+    rv = self.preprocess_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1239, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1160, in _check_request_limit
+    raise e
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1157, in _check_request_limit
+    self.__evaluate_limits(endpoint, all_limits)
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1141, in __evaluate_limits
+    raise RateLimitExceeded(
+flask_limiter.errors.RateLimitExceeded: 429 Too Many Requests: 50 per 1 hour
+2026-06-20 20:37:06,515 ERROR: Server Error: 429 Too Many Requests: 50 per 1 hour [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:702]
+Traceback (most recent call last):
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 865, in full_dispatch_request
+    rv = self.preprocess_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1239, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1160, in _check_request_limit
+    raise e
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1157, in _check_request_limit
+    self.__evaluate_limits(endpoint, all_limits)
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1141, in __evaluate_limits
+    raise RateLimitExceeded(
+flask_limiter.errors.RateLimitExceeded: 429 Too Many Requests: 50 per 1 hour
+2026-06-20 20:39:09,191 ERROR: Server Error: 429 Too Many Requests: 50 per 1 hour [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:702]
+Traceback (most recent call last):
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 865, in full_dispatch_request
+    rv = self.preprocess_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1239, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1160, in _check_request_limit
+    raise e
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1157, in _check_request_limit
+    self.__evaluate_limits(endpoint, all_limits)
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1141, in __evaluate_limits
+    raise RateLimitExceeded(
+flask_limiter.errors.RateLimitExceeded: 429 Too Many Requests: 50 per 1 hour
+2026-06-20 20:39:11,497 ERROR: Server Error: 429 Too Many Requests: 50 per 1 hour [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:702]
+Traceback (most recent call last):
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 865, in full_dispatch_request
+    rv = self.preprocess_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1239, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1160, in _check_request_limit
+    raise e
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1157, in _check_request_limit
+    self.__evaluate_limits(endpoint, all_limits)
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1141, in __evaluate_limits
+    raise RateLimitExceeded(
+flask_limiter.errors.RateLimitExceeded: 429 Too Many Requests: 50 per 1 hour
+2026-06-20 23:19:57,152 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:613]
+2026-06-20 23:19:58,022 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:613]
+2026-06-26 17:32:07,203 INFO: Goat Farm app starting up [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:613]
+2026-06-26 17:32:08,141 INFO: Goat Farm app starting up [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:613]
+2026-07-01 00:35:54,104 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:613]
+2026-07-01 00:35:55,683 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:613]
+2026-07-01 00:52:15,463 WARNING: [REDACTED SENSITIVE LOG] [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:681]
+2026-07-01 00:52:16,118 WARNING: [REDACTED SENSITIVE LOG] [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:681]
+2026-07-01 00:52:16,749 WARNING: [REDACTED SENSITIVE LOG] [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:681]
+2026-07-01 00:52:17,541 WARNING: [REDACTED SENSITIVE LOG] [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:681]
+2026-07-01 00:52:18,161 WARNING: [REDACTED SENSITIVE LOG] [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:681]
+2026-07-01 00:52:18,749 WARNING: [REDACTED SENSITIVE LOG] [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:681]
+2026-07-01 00:52:21,962 WARNING: [REDACTED SENSITIVE LOG] [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:681]
+2026-07-01 00:52:32,428 WARNING: [REDACTED SENSITIVE LOG] [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:681]
+2026-07-01 00:52:36,977 WARNING: [REDACTED SENSITIVE LOG] [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:681]
+2026-07-01 00:52:37,605 WARNING: [REDACTED SENSITIVE LOG] [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:681]
+2026-07-01 00:52:39,756 WARNING: [REDACTED SENSITIVE LOG] [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:681]
+2026-07-01 00:52:40,355 WARNING: [REDACTED SENSITIVE LOG] [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:681]
+2026-07-01 00:52:51,586 WARNING: [REDACTED SENSITIVE LOG] [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:681]
+2026-07-01 00:52:52,852 WARNING: [REDACTED SENSITIVE LOG] [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:681]
+2026-07-01 00:52:54,982 WARNING: [REDACTED SENSITIVE LOG] [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:681]
+2026-07-01 00:53:15,336 WARNING: [REDACTED SENSITIVE LOG] [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:681]
+2026-07-02 17:51:28,389 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:119]
+2026-07-02 17:51:43,083 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:119]
+2026-07-02 17:51:43,913 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:119]
+2026-07-02 17:51:43,913 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:119]
+2026-07-02 17:51:44,488 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:119]
+2026-07-02 17:51:44,488 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:119]
+2026-07-02 17:51:44,488 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:119]
+2026-07-02 17:51:45,066 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:119]
+2026-07-02 17:51:45,066 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:119]
+2026-07-02 17:51:45,066 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:119]
+2026-07-02 17:51:45,066 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:119]
+2026-07-02 17:51:45,666 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:119]
+2026-07-02 17:51:45,666 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:119]
+2026-07-02 17:51:45,666 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:119]
+2026-07-02 17:51:45,666 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:119]
+2026-07-02 17:51:45,666 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:119]
+2026-07-02 17:51:55,100 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:119]
+2026-07-02 17:52:04,313 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:119]
+2026-07-02 17:52:32,761 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:120]
+2026-07-02 17:52:56,909 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:120]
+2026-07-02 17:52:57,215 ERROR: Server Error: name 'uuid' is not defined [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:209]
+Traceback (most recent call last):
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 865, in full_dispatch_request
+    rv = self.preprocess_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1239, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py", line 907, in check_db_connection
+    g.correlation_id = request.headers.get('X-Correlation-ID', str(uuid.uuid4()))
+                                                                   ^^^^
+NameError: name 'uuid' is not defined
+2026-07-02 17:52:57,509 ERROR: Server Error: name 'uuid' is not defined [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:209]
+Traceback (most recent call last):
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 865, in full_dispatch_request
+    rv = self.preprocess_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1239, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py", line 907, in check_db_connection
+    g.correlation_id = request.headers.get('X-Correlation-ID', str(uuid.uuid4()))
+                                                                   ^^^^
+NameError: name 'uuid' is not defined
+2026-07-02 17:52:57,604 ERROR: Server Error: name 'uuid' is not defined [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:209]
+Traceback (most recent call last):
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 865, in full_dispatch_request
+    rv = self.preprocess_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1239, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py", line 907, in check_db_connection
+    g.correlation_id = request.headers.get('X-Correlation-ID', str(uuid.uuid4()))
+                                                                   ^^^^
+NameError: name 'uuid' is not defined
+2026-07-02 17:52:57,613 ERROR: Server Error: name 'uuid' is not defined [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:209]
+Traceback (most recent call last):
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 865, in full_dispatch_request
+    rv = self.preprocess_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1239, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py", line 907, in check_db_connection
+    g.correlation_id = request.headers.get('X-Correlation-ID', str(uuid.uuid4()))
+                                                                   ^^^^
+NameError: name 'uuid' is not defined
+2026-07-02 17:52:57,665 ERROR: Server Error: name 'uuid' is not defined [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:209]
+Traceback (most recent call last):
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 865, in full_dispatch_request
+    rv = self.preprocess_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1239, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py", line 907, in check_db_connection
+    g.correlation_id = request.headers.get('X-Correlation-ID', str(uuid.uuid4()))
+                                                                   ^^^^
+NameError: name 'uuid' is not defined
+2026-07-02 17:53:47,020 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:121]
+2026-07-02 17:56:02,142 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\./goat_farm_app\Project_goatfarm.py:125]
+2026-07-02 17:56:08,686 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:125]
+2026-07-02 17:56:30,358 INFO: Goat Farm app starting up [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:125]
+2026-07-02 17:56:31,177 INFO: Goat Farm app starting up [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:125]
+2026-07-02 17:56:47,652 ERROR: Server Error: Could not build url for endpoint 'mfa_enroll'. Did you mean 'auth.mfa_enroll' instead? [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:214]
+Traceback (most recent call last):
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 867, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 852, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py", line 4490, in farm_settings
+    return render_template('farm_settings.html', settings=settings, mfa_enabled=mfa_enabled)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\templating.py", line 152, in render_template
+    return _render(app, template, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\templating.py", line 133, in _render
+    rv = template.render(context)
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\jinja2\environment.py", line 1295, in render
+    self.environment.handle_exception()
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\jinja2\environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\templates\farm_settings.html", line 1, in top-level template code
+    {% extends 'layout.html' %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\templates\layout.html", line 223, in top-level template code
+    {% block content %}{% endblock %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\templates\farm_settings.html", line 101, in block 'content'
+    <a href="{{ url_for('mfa_enroll') }}" class="btn btn-success btn-sm fw-bold">Enable MFA</a>
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1071, in url_for
+    return self.handle_url_build_error(error, endpoint, values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1060, in url_for
+    rv = url_adapter.build(  # type: ignore[union-attr]
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\werkzeug\routing\map.py", line 919, in build
+    raise BuildError(endpoint, values, method, self)
+werkzeug.routing.exceptions.BuildError: Could not build url for endpoint 'mfa_enroll'. Did you mean 'auth.mfa_enroll' instead?
+2026-07-02 17:56:52,040 ERROR: Server Error: Could not build url for endpoint 'mfa_enroll'. Did you mean 'auth.mfa_enroll' instead? [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:214]
+Traceback (most recent call last):
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 867, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 852, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py", line 4490, in farm_settings
+    return render_template('farm_settings.html', settings=settings, mfa_enabled=mfa_enabled)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\templating.py", line 152, in render_template
+    return _render(app, template, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\templating.py", line 133, in _render
+    rv = template.render(context)
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\jinja2\environment.py", line 1295, in render
+    self.environment.handle_exception()
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\jinja2\environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\templates\farm_settings.html", line 1, in top-level template code
+    {% extends 'layout.html' %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\templates\layout.html", line 223, in top-level template code
+    {% block content %}{% endblock %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\templates\farm_settings.html", line 101, in block 'content'
+    <a href="{{ url_for('mfa_enroll') }}" class="btn btn-success btn-sm fw-bold">Enable MFA</a>
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1071, in url_for
+    return self.handle_url_build_error(error, endpoint, values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1060, in url_for
+    rv = url_adapter.build(  # type: ignore[union-attr]
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\werkzeug\routing\map.py", line 919, in build
+    raise BuildError(endpoint, values, method, self)
+werkzeug.routing.exceptions.BuildError: Could not build url for endpoint 'mfa_enroll'. Did you mean 'auth.mfa_enroll' instead?
+2026-07-02 17:57:31,124 ERROR: Server Error: Could not build url for endpoint 'mfa_enroll'. Did you mean 'auth.mfa_enroll' instead? [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:214]
+Traceback (most recent call last):
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 867, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 852, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py", line 4490, in farm_settings
+    return render_template('farm_settings.html', settings=settings, mfa_enabled=mfa_enabled)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\templating.py", line 152, in render_template
+    return _render(app, template, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\templating.py", line 133, in _render
+    rv = template.render(context)
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\jinja2\environment.py", line 1295, in render
+    self.environment.handle_exception()
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\jinja2\environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\templates\farm_settings.html", line 1, in top-level template code
+    {% extends 'layout.html' %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\templates\layout.html", line 223, in top-level template code
+    {% block content %}{% endblock %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\templates\farm_settings.html", line 101, in block 'content'
+    <a href="{{ url_for('mfa_enroll') }}" class="btn btn-success btn-sm fw-bold">Enable MFA</a>
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1071, in url_for
+    return self.handle_url_build_error(error, endpoint, values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1060, in url_for
+    rv = url_adapter.build(  # type: ignore[union-attr]
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\werkzeug\routing\map.py", line 919, in build
+    raise BuildError(endpoint, values, method, self)
+werkzeug.routing.exceptions.BuildError: Could not build url for endpoint 'mfa_enroll'. Did you mean 'auth.mfa_enroll' instead?
+2026-07-02 17:59:12,518 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:125]
+2026-07-02 18:06:18,531 INFO: Goat Farm app starting up [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:125]
+2026-07-02 18:06:50,100 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:125]
+2026-07-02 18:14:20,393 INFO: Goat Farm app starting up [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:125]
+2026-07-02 18:14:31,889 INFO: Goat Farm app starting up [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:128]
+2026-07-02 18:14:39,259 INFO: Goat Farm app starting up [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:128]
+2026-07-02 18:15:27,667 INFO: Goat Farm app starting up [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:128]
+2026-07-02 18:20:04,754 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:128]
+2026-07-02 18:20:05,512 ERROR: Server Error: Could not build url for endpoint 'dashboard'. Did you mean 'livestock.dashboard' instead? [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:217]
+Traceback (most recent call last):
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 867, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 852, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\blueprints\livestock.py", line 76, in dashboard
+    return render_template('dashboard.html',
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\templating.py", line 152, in render_template
+    return _render(app, template, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\templating.py", line 133, in _render
+    rv = template.render(context)
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\jinja2\environment.py", line 1295, in render
+    self.environment.handle_exception()
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\jinja2\environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\templates\dashboard.html", line 1, in top-level template code
+    {% extends 'layout.html' %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\templates\layout.html", line 80, in top-level template code
+    <a href="{{ url_for('dashboard') }}" class="sidebar-brand">
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1071, in url_for
+    return self.handle_url_build_error(error, endpoint, values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1060, in url_for
+    rv = url_adapter.build(  # type: ignore[union-attr]
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\werkzeug\routing\map.py", line 919, in build
+    raise BuildError(endpoint, values, method, self)
+werkzeug.routing.exceptions.BuildError: Could not build url for endpoint 'dashboard'. Did you mean 'livestock.dashboard' instead?
+2026-07-02 18:22:03,016 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:128]
+2026-07-02 18:22:41,648 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:128]
+2026-07-02 18:42:11,199 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:128]
+2026-07-02 18:45:11,405 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:129]
+2026-07-02 18:46:21,061 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:129]
+2026-07-02 18:46:21,811 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:129]
+2026-07-02 18:47:42,615 INFO: Goat Farm app starting up [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:125]
+2026-07-02 18:47:43,429 INFO: Goat Farm app starting up [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:125]

@@ -52,7 +52,7 @@
             <a href="{{ url_for('feed') }}" class="btn btn-success rounded-pill px-4 py-2 fw-semibold">
                 <i class="bi bi-people me-1"></i>Batch Allocation Center
             </a>
-            <a href="{{ url_for('vouchers') }}" class="btn btn-outline-success rounded-pill px-4 py-2 fw-semibold">
+            <a href="{{ url_for('finance.vouchers') }}" class="btn btn-outline-success rounded-pill px-4 py-2 fw-semibold">
                 <i class="bi bi-cart-plus me-1"></i>Buy New Item
             </a>
         </div>
@@ -88,7 +88,7 @@
                             <span class="badge bg-warning text-dark px-2.5 py-1.5 rounded-pill small fw-bold" style="font-size: 0.75rem;"><i class="bi bi-exclamation-triangle-fill me-1"></i>Low</span>
                         {% endif %}
                         <button class="btn btn-sm btn-outline-secondary rounded-pill px-2.5" title="Set Reminder Threshold" onclick="openLimitModal('feed', '{{ feed_name }}', '{{ stock.alert_level }}', '{{ stock.unit }}')"><i class="bi bi-bell"></i></button>
-                        <a href="{{ url_for('voucher_add', v_type='feed', feed_name=feed_name, unit=stock.unit) }}" class="btn btn-sm btn-success rounded-pill px-3">Buy</a>
+                        <a href="{{ url_for('finance.voucher_add', v_type='feed', feed_name=feed_name, unit=stock.unit) }}" class="btn btn-sm btn-success rounded-pill px-3">Buy</a>
                     </div>
                 </div>
                 {% else %}
@@ -125,7 +125,7 @@
                             <span class="badge bg-warning text-dark px-2.5 py-1.5 rounded-pill small fw-bold" style="font-size: 0.75rem;"><i class="bi bi-exclamation-triangle-fill me-1"></i>Low</span>
                         {% endif %}
                         <button class="btn btn-sm btn-outline-secondary rounded-pill px-2.5" title="Set Reminder Threshold" onclick="openLimitModal('medicine', '{{ med_name }}', '{{ stock.alert_level }}', '{{ stock.unit }}')"><i class="bi bi-bell"></i></button>
-                        <a href="{{ url_for('voucher_add', v_type='health', sub_type='medicine', health_name=med_name, dose_unit=stock.unit) }}" class="btn btn-sm btn-primary rounded-pill px-3">Buy</a>
+                        <a href="{{ url_for('finance.voucher_add', v_type='health', sub_type='medicine', health_name=med_name, dose_unit=stock.unit) }}" class="btn btn-sm btn-primary rounded-pill px-3">Buy</a>
                     </div>
                 </div>
                 {% else %}
@@ -162,7 +162,7 @@
                             <span class="badge bg-warning text-dark px-2.5 py-1.5 rounded-pill small fw-bold" style="font-size: 0.75rem;"><i class="bi bi-exclamation-triangle-fill me-1"></i>Low</span>
                         {% endif %}
                         <button class="btn btn-sm btn-outline-secondary rounded-pill px-2.5" title="Set Reminder Threshold" onclick="openLimitModal('vaccine', '{{ vac_name }}', '{{ stock.alert_level }}', '{{ stock.unit }}')"><i class="bi bi-bell"></i></button>
-                        <a href="{{ url_for('voucher_add', v_type='health', sub_type='vaccine', health_name=vac_name, unit=stock.unit) }}" class="btn btn-sm btn-info text-white rounded-pill px-3">Buy</a>
+                        <a href="{{ url_for('finance.voucher_add', v_type='health', sub_type='vaccine', health_name=vac_name, unit=stock.unit) }}" class="btn btn-sm btn-info text-white rounded-pill px-3">Buy</a>
                     </div>
                 </div>
                 {% else %}

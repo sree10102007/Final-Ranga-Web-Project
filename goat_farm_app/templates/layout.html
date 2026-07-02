@@ -184,14 +184,14 @@
     <!-- SETTINGS & ACCOUNT -->
     <div class="mt-4">
       {% if is_admin_session %}
-      <a href="{{ url_for('manage_users') }}" class="sidebar-direct {% if request.endpoint == 'manage_users' %}active{% endif %}">
+      <a href="{{ url_for('auth.manage_users') }}" class="sidebar-direct {% if request.endpoint == 'auth.manage_users' %}active{% endif %}">
         <span class="link-icon"><i class="bi bi-people-fill"></i></span> Manage Users
       </a>
       {% endif %}
       <a href="{{ url_for('farm_settings') }}" class="sidebar-direct {% if request.endpoint == 'farm_settings' %}active{% endif %}">
         <span class="link-icon"><i class="bi bi-gear"></i></span> Farm Settings
       </a>
-      <a href="{{ url_for('logout') }}" class="sidebar-direct">
+      <a href="{{ url_for('auth.logout') }}" class="sidebar-direct">
         <span class="link-icon"><i class="bi bi-box-arrow-right"></i></span> Logout
       </a>
     </div>

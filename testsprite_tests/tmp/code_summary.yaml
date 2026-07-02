@@ -1,0 +1,42 @@
+version: "2"
+type: backend
+tech_stack:
+  - Python
+  - Flask
+  - PostgreSQL
+features:
+  - name: Authentication and MFA
+    description: User authentication, registration, login/logout, and MFA OTP enrollment/verification.
+    files:
+      - goat_farm_app/Project_goatfarm.py
+    endpoints:
+      - method: POST
+        path: /login
+        description: Log in to the application
+        auth_required: false
+      - method: POST
+        path: /register
+        description: Register a new user
+        auth_required: false
+      - method: POST
+        path: /mfa/verify-login
+        description: Verify MFA login OTP
+        auth_required: false
+  - name: Livestock Management
+    description: Manage goat records, births, categories, and tags.
+    files:
+      - goat_farm_app/Project_goatfarm.py
+    endpoints:
+      - method: GET
+        path: /dashboard
+        description: View dashboard metrics and quick links
+        auth_required: true
+      - method: GET
+        path: /records
+        description: View livestock directory
+        auth_required: true
+      - method: POST
+        path: /add_record
+        description: Add a new livestock record
+        auth_required: true
+known_limitations: []

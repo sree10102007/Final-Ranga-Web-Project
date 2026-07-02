@@ -88,7 +88,7 @@
                             <div>
                                 <strong>MFA Status:</strong> Enabled
                             </div>
-                            <form method="POST" action="{{ url_for('mfa_disable') }}">
+                            <form method="POST" action="{{ url_for('auth.mfa_disable') }}">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                 <button type="submit" class="btn btn-outline-danger btn-sm fw-bold">Disable MFA</button>
                             </form>
@@ -98,7 +98,7 @@
                             <div>
                                 <strong>MFA Status:</strong> Disabled
                             </div>
-                            <a href="{{ url_for('mfa_enroll') }}" class="btn btn-success btn-sm fw-bold">Enable MFA</a>
+                            <a href="{{ url_for('auth.mfa_enroll') }}" class="btn btn-success btn-sm fw-bold">Enable MFA</a>
                         </div>
                     {% endif %}
 

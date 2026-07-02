@@ -1,12 +1,19 @@
 import os
 import random
 from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional, Tuple, Union
+
 from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file, jsonify, g
 from werkzeug.security import generate_password_hash, check_password_hash
 import psycopg2
 import psycopg2.extras
 import sys
+import os
+parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if parent_dir not in sys.path:
+    sys.path.insert(0, parent_dir)
 import re
+import uuid
 import pyotp
 import qrcode
 import base64
@@ -33,512 +40,28 @@ from cryptography.fernet import Fernet
 import logging
 from logging.handlers import RotatingFileHandler
 
-# Database Audit Logger configuration
-log_dir = os.path.join(base_dir, 'logs')
-if not os.path.exists(log_dir):
-    os.makedirs(log_dir)
-
-db_audit_log_path = os.path.join(log_dir, 'db_audit.log')
-db_audit_handler = RotatingFileHandler(db_audit_log_path, maxBytes=10*1024*1024, backupCount=5)
-db_audit_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
-
-db_logger = logging.getLogger('db_audit')
-db_logger.setLevel(logging.INFO)
-db_logger.addHandler(db_audit_handler)
-
-import json
-import uuid
-
-# Structured JSON Formatter for SOC/auditing
-class JsonFormatter(logging.Formatter):
-    def format(self, record):
-        log_data = {
-            "timestamp": self.formatTime(record, "%Y-%m-%dT%H:%M:%SZ"),
-            "level": record.levelname,
-            "message": record.getMessage()
-        }
-        if isinstance(record.msg, dict):
-            log_data.update(record.msg)
-            if "message" in record.msg:
-                log_data["message"] = record.msg["message"]
-        return json.dumps(log_data)
-
-security_log_path = os.path.join(log_dir, 'security.json')
-security_handler = RotatingFileHandler(security_log_path, maxBytes=10*1024*1024, backupCount=5)
-security_handler.setFormatter(JsonFormatter())
-
-security_logger = logging.getLogger('security')
-security_logger.setLevel(logging.INFO)
-security_logger.addHandler(security_handler)
-
-def log_security_event(event_type, message, **kwargs):
-    correlation_id = 'unknown'
-    try:
-        from flask import g
-        correlation_id = getattr(g, 'correlation_id', 'unknown')
-    except Exception:
-        pass
-        
-    try:
-        from flask import request, session
-        user_id = session.get('user_id', 'anonymous')
-        ip_address = request.remote_addr
-        user_agent = request.user_agent.string
-        path = request.path
-        method = request.method
-    except Exception:
-        user_id = 'system'
-        ip_address = '127.0.0.1'
-        user_agent = 'internal'
-        path = '/'
-        method = 'SYSTEM'
-        
-    log_payload = {
-        "event_type": event_type,
-        "message": message,
-        "correlation_id": correlation_id,
-        "user_id": user_id,
-        "ip_address": ip_address,
-        "user_agent": user_agent,
-        "path": path,
-        "method": method
-    }
-    log_payload.update(kwargs)
-    
-    # Scrub sensitive fields (passwords, pins, secrets, keys)
-    sensitive_keys = {'password', 'secret', 'token', 'mfa_secret', 'key', 'backup_codes'}
-    for k in list(log_payload.keys()):
-        if any(sk in k.lower() for sk in sensitive_keys):
-            log_payload[k] = '[REDACTED]'
-            
-    security_logger.info(log_payload)
-
-# Database column-level encryption utility class
-class DatabaseEncryptor:
-    def __init__(self):
-        # Load key from environment or fallback to developer key
-        key = os.environ.get('DB_ENCRYPTION_KEY')
-        if not key:
-            key = base64.urlsafe_b64encode(b"development_fallback_key_32bytes")
-            if os.environ.get('FLASK_ENV', 'production').lower() == 'production':
-                db_logger.warning("DB_ENCRYPTION_KEY is not set in production! Falling back to unsafe development key.")
-        else:
-            try:
-                base64.urlsafe_b64decode(key)
-            except Exception:
-                key = base64.urlsafe_b64encode(key.ljust(32)[:32].encode())
-        self.fernet = Fernet(key)
-
-    def encrypt(self, val):
-        if val is None:
-            return None
-        val_str = str(val)
-        if val_str.startswith("ENC:"):
-            return val_str
-        try:
-            return "ENC:" + self.fernet.encrypt(val_str.encode('utf-8')).decode('utf-8')
-        except Exception as e:
-            db_logger.error(f"Encryption failed: {str(e)}")
-            return val_str
-
-    def decrypt(self, val):
-        if val is None:
-            return None
-        val_str = str(val)
-        if not val_str.startswith("ENC:"):
-            return val
-        try:
-            return self.fernet.decrypt(val_str[4:].encode('utf-8')).decode('utf-8')
-        except Exception as e:
-            db_logger.error(f"Decryption failed: {str(e)}")
-            return val_str
-
-db_encryptor = DatabaseEncryptor()
-
-# Decrypted row wrapper to transparently decrypt DictRow or tuple access on-the-fly
-class DecryptedRow:
-    def __init__(self, row):
-        self._row = row
-
-    def __getitem__(self, key):
-        val = self._row[key]
-        if isinstance(val, str) and val.startswith("ENC:"):
-            return db_encryptor.decrypt(val)
-        return val
-
-    def get(self, key, default=None):
-        try:
-            return self[key]
-        except KeyError:
-            return default
-
-    def __getattr__(self, name):
-        try:
-            val = getattr(self._row, name)
-            if isinstance(val, str) and val.startswith("ENC:"):
-                return db_encryptor.decrypt(val)
-            return val
-        except AttributeError:
-            try:
-                return self[name]
-            except KeyError:
-                raise AttributeError(f"'DecryptedRow' object has no attribute '{name}'")
-
-    def keys(self):
-        if hasattr(self._row, 'keys'):
-            return self._row.keys()
-        return []
-
-    def values(self):
-        return [self[k] for k in self.keys()]
-
-    def items(self):
-        return [(k, self[k]) for k in self.keys()]
-
-    def __iter__(self):
-        for val in self._row:
-            if isinstance(val, str) and val.startswith("ENC:"):
-                yield db_encryptor.decrypt(val)
-            else:
-                yield val
-
-    def __len__(self):
-        return len(self._row)
-
-    def __str__(self):
-        return str(self._row)
-
-    def __repr__(self):
-        return repr(self._row)
-
-# Parameter encryption parser helper
-def encrypt_query_params(sql, params):
-    if not params:
-        return params
-        
-    sensitive_columns = {'aadhar_no', 'pan_no', 'account_no', 'ifsc_code', 'mfa_secret', 'backup_codes', 'bank_name', 'gst_no'}
-    sql_upper = sql.upper().strip()
-    params_list = list(params)
-    
-    if sql_upper.startswith('INSERT'):
-        start_idx = sql.find('(')
-        end_idx = sql.find(')', start_idx)
-        if start_idx != -1 and end_idx != -1:
-            cols_str = sql[start_idx+1:end_idx]
-            cols = [c.strip().lower() for c in cols_str.split(',')]
-            for i, col in enumerate(cols):
-                if col in sensitive_columns and i < len(params_list):
-                    params_list[i] = db_encryptor.encrypt(params_list[i])
-                    
-    elif sql_upper.startswith('UPDATE'):
-        set_idx = sql_upper.find('SET')
-        where_idx = sql_upper.find('WHERE')
-        if set_idx != -1:
-            set_clause = sql[set_idx+3:where_idx] if where_idx != -1 else sql[set_idx+3:]
-            parts = set_clause.split(',')
-            param_idx = 0
-            for part in parts:
-                if '=' in part:
-                    col_name = part.split('=')[0].strip().lower()
-                    placeholders = part.count('?') + part.count('%s')
-                    for _ in range(placeholders):
-                        if col_name in sensitive_columns and param_idx < len(params_list):
-                            params_list[param_idx] = db_encryptor.encrypt(params_list[param_idx])
-                        param_idx += 1
-                        
-    return tuple(params_list)
-
-def validate_env():
-    required_vars = ['SECRET_KEY']
-    if not os.environ.get('DATABASE_URL'):
-        required_vars.extend(['DB_HOST', 'DB_PORT', 'DB_NAME', 'DB_USER', 'DB_PASSWORD'])
-    
-    missing_or_placeholder = []
-    for var in required_vars:
-        val = os.environ.get(var)
-        if not val or 'your_' in val.lower():
-            missing_or_placeholder.append(var)
-            
-    if missing_or_placeholder:
-        print(f"CRITICAL CONFIGURATION ERROR: Missing or placeholder environment variables: {', '.join(missing_or_placeholder)}")
-        print("Please copy .env.example to .env and configure the actual connection and secret key settings.")
-        sys.exit(1)
-
-validate_env()
-
-
-
-# Map SQLite exceptions to psycopg2 exceptions for backward compatibility in catch blocks
-class DummySqlite3:
-    OperationalError = (psycopg2.OperationalError, psycopg2.ProgrammingError)
-    IntegrityError = psycopg2.IntegrityError
-    Error = psycopg2.Error
-    Row = object
-
-sqlite3 = DummySqlite3
-sys.modules['sqlite3'] = DummySqlite3
-
-# Postgres Connection Wrapper classes
-class PostgresCursorWrapper:
-    def __init__(self, cursor, conn_wrapper):
-        self.cursor = cursor
-        self.conn_wrapper = conn_wrapper
-        self.lastrowid = None
-
-    def execute(self, sql, params=None):
-        import re
-        # Translate placeholder from SQLite (?) to Postgres (%s)
-        translated_sql = sql.replace('?', '%s')
-        
-        # Translate SQLite-specific IFNULL to PostgreSQL-compatible COALESCE
-        translated_sql = re.sub(r'\bIFNULL\b', 'COALESCE', translated_sql, flags=re.IGNORECASE)
-        
-        # Translate SQLite case-insensitive LIKE to PostgreSQL ILIKE
-        translated_sql = re.sub(r'\bLIKE\b', 'ILIKE', translated_sql, flags=re.IGNORECASE)
-        
-        # Translate AUTOINCREMENT to SERIAL
-        translated_sql = re.sub(r'\bINTEGER\s+PRIMARY\s+KEY\s+AUTOINCREMENT\b', 'SERIAL PRIMARY KEY', translated_sql, flags=re.IGNORECASE)
-        
-        # Check if query is an INSERT
-        is_insert = translated_sql.strip().upper().startswith('INSERT')
-        has_returning = 'RETURNING' in translated_sql.upper()
-        
-        if is_insert and not has_returning:
-            stripped = translated_sql.strip()
-            if stripped.endswith(';'):
-                translated_sql = stripped[:-1] + ' RETURNING id;'
-            else:
-                translated_sql = stripped + ' RETURNING id'
-        
-        if params is not None:
-            if not isinstance(params, (tuple, list)):
-                params = (params,)
-            # Convert empty strings to None to prevent PostgreSQL database type errors
-            new_params = []
-            for p in params:
-                if p == '':
-                    new_params.append(None)
-                else:
-                    new_params.append(p)
-            params = tuple(new_params)
-            
-        # Encrypt parameters for sensitive columns
-        params = encrypt_query_params(translated_sql, params)
-        
-        # Audit logging (excluding raw param values to prevent leakage)
-        try:
-            from flask import session
-            user_id = session.get('user_id', 'anonymous')
-        except Exception:
-            user_id = 'system'
-        param_count = len(params) if params else 0
-        db_logger.info(f"User: {user_id} | Query: {translated_sql.strip()} | Param Count: {param_count}")
-                 
-        # Check if inside transaction block to use savepoints
-        in_transaction = (self.conn_wrapper.conn.get_transaction_status() == psycopg2.extensions.TRANSACTION_STATUS_INTRANS)
-        
-        savepoint_name = None
-        if in_transaction:
-            savepoint_name = f"sp_{random.randint(1000000, 9999999)}"
-            # Execute savepoint on a separate temporary cursor so we don't clear the active query's results
-            with self.conn_wrapper.conn.cursor() as sp_cur:
-                sp_cur.execute(f"SAVEPOINT {savepoint_name}")
-            
-        try:
-            self.cursor.execute(translated_sql, params)
-            if is_insert and not has_returning:
-                row = self.cursor.fetchone()
-                if row:
-                    self.lastrowid = row[0]
-            if savepoint_name:
-                with self.conn_wrapper.conn.cursor() as sp_cur:
-                    sp_cur.execute(f"RELEASE SAVEPOINT {savepoint_name}")
-        except Exception as e:
-            if savepoint_name:
-                try:
-                    with self.conn_wrapper.conn.cursor() as sp_cur:
-                        sp_cur.execute(f"ROLLBACK TO SAVEPOINT {savepoint_name}")
-                except Exception:
-                    pass
-            raise e
-            
-        return self
-
-    def fetchone(self):
-        try:
-            row = self.cursor.fetchone()
-            return DecryptedRow(row) if row else None
-        except psycopg2.ProgrammingError:
-            # Handle cases where no results are returned (e.g. INSERT/UPDATE/DELETE queries)
-            return None
-
-    def fetchall(self):
-        try:
-            rows = self.cursor.fetchall()
-            return [DecryptedRow(r) for r in rows] if rows else []
-        except psycopg2.ProgrammingError:
-            return []
-
-    def fetchmany(self, size=None):
-        try:
-            if size is None:
-                rows = self.cursor.fetchmany()
-            else:
-                rows = self.cursor.fetchmany(size)
-            return [DecryptedRow(r) for r in rows] if rows else []
-        except psycopg2.ProgrammingError:
-            return []
-
-    @property
-    def description(self):
-        return self.cursor.description
-
-    @property
-    def rowcount(self):
-        return self.cursor.rowcount
-
-    def __iter__(self):
-        try:
-            for row in self.cursor:
-                yield DecryptedRow(row)
-        except psycopg2.ProgrammingError:
-            pass
-
-class PostgresConnectionWrapper:
-    def __init__(self, conn):
-        self.conn = conn
-
-    def cursor(self):
-        cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        return PostgresCursorWrapper(cur, self)
-
-    def execute(self, sql, params=None):
-        cur = self.cursor()
-        cur.execute(sql, params)
-        return cur
-
-    def commit(self):
-        self.conn.commit()
-
-    def rollback(self):
-        self.conn.rollback()
-
-    def close(self):
-        self.conn.close()
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        if exc_type is not None:
-            self.rollback()
-        else:
-            self.commit()
-
-def get_db_connection():
-    db_url = os.environ.get('DATABASE_URL')
-    
-    flask_env = os.environ.get('FLASK_ENV', 'production').lower()
-    default_ssl = 'require' if flask_env == 'production' else 'prefer'
-    sslmode = os.environ.get('DB_SSLMODE', default_ssl)
-    
-    if db_url:
-        # If connection string contains no sslmode, we can append it if not sqlite (wait, it's postgres)
-        if 'sslmode=' not in db_url and 'sqlite:' not in db_url:
-            separator = '&' if '?' in db_url else '?'
-            db_url = f"{db_url}{separator}sslmode={sslmode}"
-        return psycopg2.connect(db_url)
-    
-    db_name = os.environ.get('DB_NAME')
-    try:
-        return psycopg2.connect(
-            host=os.environ.get('DB_HOST'),
-            port=os.environ.get('DB_PORT'),
-            database=db_name,
-            user=os.environ.get('DB_USER'),
-            password=os.environ.get('DB_PASSWORD'),
-            sslmode=sslmode
-        )
-    except psycopg2.OperationalError as e:
-        if "does not exist" in str(e):
-            try:
-                # Connect to default 'postgres' database to create the target database
-                conn = psycopg2.connect(
-                    host=os.environ.get('DB_HOST'),
-                    port=os.environ.get('DB_PORT'),
-                    database='postgres',
-                    user=os.environ.get('DB_USER'),
-                    password=os.environ.get('DB_PASSWORD'),
-                    sslmode=sslmode
-                )
-                conn.autocommit = True
-                with conn.cursor() as cursor:
-                    cursor.execute(f'CREATE DATABASE "{db_name}"')
-                conn.close()
-                # Retry connecting to the newly created database
-                return psycopg2.connect(
-                    host=os.environ.get('DB_HOST'),
-                    port=os.environ.get('DB_PORT'),
-                    database=db_name,
-                    user=os.environ.get('DB_USER'),
-                    password=os.environ.get('DB_PASSWORD'),
-                    sslmode=sslmode
-                )
-            except Exception:
-                raise e
-        else:
-            raise e
-
-import logging
-from logging.handlers import RotatingFileHandler
-from flask_wtf.csrf import CSRFProtect, CSRFError
-from datetime import timedelta
-import uuid
-import mimetypes
-
-class Config:
-    DEBUG = False
-    TESTING = False
-    SECRET_KEY = os.environ.get('SECRET_KEY')
-    SESSION_COOKIE_SECURE = True
-    SESSION_COOKIE_HTTPONLY = True
-    SESSION_COOKIE_SAMESITE = 'Lax'
-    # Limit maximum file upload size to 16 Megabytes (Large-file DoS protection)
-    MAX_CONTENT_LENGTH = 16 * 1024 * 1024
-
-class DevelopmentConfig(Config):
-    DEBUG = True
-    SESSION_COOKIE_SECURE = False
-
-class TestingConfig(Config):
-    TESTING = True
-    SESSION_COOKIE_SECURE = False
-
-class ProductionConfig(Config):
-    pass
-
-config_by_name = {
-    'development': DevelopmentConfig,
-    'testing': TestingConfig,
-    'production': ProductionConfig
-}
-
-app = Flask(__name__, root_path=base_dir)
-
-flask_env = os.environ.get('FLASK_ENV', 'production').lower()
-config_class = config_by_name.get(flask_env, ProductionConfig)
-app.config.from_object(config_class)
-
-# Initialize global CSRF protection
-csrf = CSRFProtect(app)
-
-# Initialize Flask-Limiter for brute-force defense
-limiter = Limiter(
-    key_func=get_remote_address,
-    app=app,
-    default_limits=["200 per day", "50 per hour"],
-    storage_uri="memory://"
+from goat_farm_app.app_factory import create_app
+from goat_farm_app.extensions import (
+    csrf,
+    limiter,
+    get_db,
+    log_security_event,
+    db_encryptor,
+    validate_password_strength,
+    DatabaseEncryptor,
+    DecryptedRow,
+    encrypt_query_params,
+    PostgresCursorWrapper,
+    PostgresConnectionWrapper,
+    get_db_connection,
+    sqlite3
 )
+from flask_wtf.csrf import CSRFProtect, CSRFError
+
+# Initialize application using the Application Factory pattern
+app = create_app()
+
+
 
 # Global security response headers middleware
 @app.after_request
@@ -563,19 +86,8 @@ def add_security_headers(response):
         response.headers['X-Correlation-ID'] = correlation_id
     return response
 
-# Password complexity validation
-def validate_password_strength(password):
-    if len(password) < 12 or len(password) > 128:
-        return False, "Password must be between 12 and 128 characters long."
-    if not re.search(r"[A-Z]", password):
-        return False, "Password must contain at least one uppercase letter."
-    if not re.search(r"[a-z]", password):
-        return False, "Password must contain at least one lowercase letter."
-    if not re.search(r"\d", password):
-        return False, "Password must contain at least one number."
-    if not re.search(r"[!@#$%^&*(),.?\":{}|<>]", password):
-        return False, "Password must contain at least one special character."
-    return True, ""
+
+
 
 # Ensure FLASK_DEBUG can override only in non-production environments
 if os.environ.get('FLASK_DEBUG') in ['1', 'true', 'True']:
@@ -631,7 +143,7 @@ def check_session_timeout():
                 if now - last_activity > timedelta(minutes=15):
                     session.clear()
                     flash('Your session has expired due to inactivity. Please log in again.', 'warning')
-                    return redirect(url_for('login'))
+                    return redirect(url_for('auth.login'))
             except ValueError:
                 pass
         session['last_activity'] = now.isoformat()
@@ -709,17 +221,7 @@ def internal_error(error):
     return render_template('500.html'), 500
 
 
-def get_db():
-    db = getattr(g, '_database', None)
-    if db is None:
-        db = g._database = PostgresConnectionWrapper(get_db_connection())
-    return db
 
-@app.teardown_appcontext
-def close_connection(exception):
-    db = getattr(g, '_database', None)
-    if db is not None:
-        db.close()
 
 
 def calculate_age_str(dob_str):
@@ -1364,15 +866,17 @@ def init_db():
                 except Exception:
                     pass
         # Check if admin user exists
+        admin_password = os.environ.get('ADMIN_PASSWORD', 'admin123')
         user = conn.execute('SELECT * FROM users WHERE username = ?', ('admin',)).fetchone()
         if not user:
             conn.execute('INSERT INTO users (username, password, is_admin) VALUES (?, ?, 1)',
-                         ('admin', generate_password_hash('admin123')))
+                         ('admin', generate_password_hash(admin_password)))
         else:
             conn.execute('UPDATE users SET is_admin = 1 WHERE username = ?', ('admin',))
-            if not check_password_hash(user['password'], 'admin123'):
+            if not check_password_hash(user['password'], admin_password):
                 conn.execute('UPDATE users SET password = ? WHERE username = ?',
-                             (generate_password_hash('admin123'), 'admin'))
+                             (generate_password_hash(admin_password), 'admin'))
+
 
                          
         # Backfill si_no for master_records that have NULL or empty si_no
@@ -1548,355 +1052,9 @@ def check_db_connection():
 
 @app.before_request
 def require_login():
-    allowed_routes = ['login', 'static', 'goats', 'goat_detail', 'mfa_verify_login']
+    allowed_routes = ['auth.login', 'static', 'goats', 'goat_detail', 'auth.mfa_verify_login']
     if request.endpoint not in allowed_routes and 'user_id' not in session:
-        return redirect(url_for('login'))
-
-@app.route('/login', methods=['GET', 'POST'])
-@limiter.limit("10 per minute")
-def login():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        
-        db = get_db()
-        user = db.execute('SELECT * FROM users WHERE username = ?', (username,)).fetchone()
-        
-        if user:
-            # Check lockout
-            now = datetime.now()
-            if user['locked_until']:
-                locked_until = datetime.fromisoformat(user['locked_until']) if isinstance(user['locked_until'], str) else user['locked_until']
-                if locked_until > now:
-                    remaining = int((locked_until - now).total_seconds())
-                    log_security_event('LOGIN_LOCKED', f"Locked user {username} attempted login", username=username)
-                    flash(f'Account is locked due to too many failed attempts. Try again in {remaining} seconds.', 'danger')
-                    return render_template('login.html')
-            
-            if check_password_hash(user['password'], password):
-                # Reset login attempts
-                db.execute('UPDATE users SET login_attempts = 0, locked_until = NULL WHERE id = ?', (user['id'],))
-                db.commit()
-                
-                # Check MFA
-                if user['mfa_enabled']:
-                    session.clear()
-                    session['temp_mfa_user_id'] = user['id']
-                    log_security_event('MFA_CHALLENGE', f"MFA challenge presented to user {username}", username=username)
-                    return redirect(url_for('mfa_verify_login'))
-                
-                # Clear session to prevent fixation and rotate ID
-                session.clear()
-                session['user_id'] = user['id']
-                session['username'] = user['username']
-                
-                log_security_event('LOGIN_SUCCESS', f"User {username} logged in successfully", username=username)
-                
-                # Update login tracking
-                login_tracking = db.execute('SELECT * FROM user_login_tracking WHERE user_id = ?', (user['id'],)).fetchone()
-                today = datetime.now().strftime('%Y-%m-%d')
-                
-                if not login_tracking:
-                    db.execute('INSERT INTO user_login_tracking (user_id, last_login_date, has_seen_weight_notification) VALUES (?, ?, ?)',
-                              (user['id'], today, 0))
-                else:
-                    db.execute('UPDATE user_login_tracking SET last_login_date = ?, has_seen_weight_notification = ? WHERE user_id = ?',
-                              (today, 0, user['id']))
-                
-                db.commit()
-                
-                flash('Logged in successfully.', 'success')
-                return redirect(url_for('dashboard'))
-            else:
-                # Increment failed attempts
-                attempts = (user['login_attempts'] or 0) + 1
-                locked_until_time = None
-                if attempts >= 10:
-                    locked_until_time = (now + timedelta(minutes=10)).isoformat()
-                    log_security_event('ACCOUNT_LOCKOUT', f"Account locked (10 mins) for user {username} after 10 failures", username=username, failed_attempts=attempts)
-                    flash('Too many failed attempts. Your account is locked for 10 minutes.', 'danger')
-                elif attempts >= 5:
-                    locked_until_time = (now + timedelta(minutes=1)).isoformat()
-                    log_security_event('ACCOUNT_LOCKOUT', f"Account locked (1 min) for user {username} after 5 failures", username=username, failed_attempts=attempts)
-                    flash('Too many failed attempts. Your account is locked for 1 minute.', 'danger')
-                else:
-                    log_security_event('LOGIN_FAILURE', f"Invalid credentials for user {username}", username=username, failed_attempts=attempts)
-                    flash('Invalid username or password.', 'danger')
-                
-                db.execute('UPDATE users SET login_attempts = ?, locked_until = ? WHERE id = ?',
-                           (attempts, locked_until_time, user['id']))
-                db.commit()
-        else:
-            log_security_event('LOGIN_FAILURE', f"Attempted login with non-existent username: {username}", username=username)
-            flash('Invalid username or password.', 'danger')
-            
-    return render_template('login.html')
-
-@app.route('/logout')
-def logout():
-    username = session.get('username')
-    log_security_event('LOGOUT', f"User {username or 'anonymous'} logged out", username=username)
-    session.clear()
-    flash('Logged out successfully.', 'info')
-    return redirect(url_for('login'))
-
-@app.route('/register', methods=['GET', 'POST'])
-@limiter.limit("5 per minute")
-def register():
-    if 'user_id' not in session:
-        return redirect(url_for('login'))
-        
-    db = get_db()
-    current_user = db.execute('SELECT is_admin FROM users WHERE id = ?', (session['user_id'],)).fetchone()
-    if not current_user or int(current_user['is_admin']) != 1:
-        log_security_event('UNAUTHORIZED_ACCESS', f"Unauthorized access attempt to registration by user ID {session.get('user_id')}")
-        flash('Only administrators can register new accounts.', 'danger')
-        return redirect(url_for('dashboard'))
-        
-    if request.method == 'POST':
-        username = request.form['username'].strip()
-        password = request.form['password']
-        confirm_password = request.form.get('confirm_password')
-        is_admin_flag = 1 if request.form.get('is_admin') else 0
-        
-        if password != confirm_password:
-            flash('Passwords do not match.', 'danger')
-            return redirect(url_for('register'))
-            
-        # Enforce password strength validation
-        is_valid, msg = validate_password_strength(password)
-        if not is_valid:
-            log_security_event('REGISTRATION_FAILURE', f"Failed password strength check for {username}", username=username)
-            flash(msg, 'danger')
-            return redirect(url_for('register'))
-            
-        # Enforce account limit of 6
-        user_count = db.execute('SELECT COUNT(*) FROM users').fetchone()[0] or 0
-        if user_count >= 6:
-            log_security_event('REGISTRATION_DENIED', f"Registration limit reached (6 accounts max). Attempt by: {username}", username=username)
-            flash('Registration limit reached. A maximum of 6 accounts is allowed.', 'danger')
-            return redirect(url_for('register'))
-            
-        existing = db.execute('SELECT id FROM users WHERE username = ?', (username,)).fetchone()
-        if existing:
-            log_security_event('REGISTRATION_FAILURE', f"Username {username} already exists", username=username)
-            flash('Username already exists.', 'danger')
-            return redirect(url_for('register'))
-            
-        password_hash = generate_password_hash(password)
-        db.execute('INSERT INTO users (username, password, password_history, is_admin) VALUES (?, ?, ?, ?)',
-                   (username, password_hash, password_hash, is_admin_flag))
-        db.commit()
-        
-        log_security_event('USER_REGISTRATION', f"New user {username} (admin={is_admin_flag}) successfully registered by admin {session.get('username')}", username=username)
-        flash('Registration successful!', 'success')
-        return redirect(url_for('manage_users'))
-        
-    return render_template('register.html', is_admin=True)
-
-@app.route('/manage_users')
-def manage_users():
-    if 'user_id' not in session:
-        return redirect(url_for('login'))
-    db = get_db()
-    current_user = db.execute('SELECT is_admin FROM users WHERE id = ?', (session['user_id'],)).fetchone()
-    if not current_user or int(current_user['is_admin']) != 1:
-        log_security_event('UNAUTHORIZED_ACCESS', "Unauthorized access attempt to manage_users")
-        flash('Administrator privileges required.', 'danger')
-        return redirect(url_for('dashboard'))
-        
-    users = db.execute('SELECT id, username, is_admin, mfa_enabled, login_attempts, locked_until FROM users ORDER BY id').fetchall()
-    return render_template('manage_users.html', users=users)
-
-@app.route('/delete_user/<int:user_id>', methods=['POST'])
-def delete_user(user_id):
-    if 'user_id' not in session:
-        return redirect(url_for('login'))
-    db = get_db()
-    current_user = db.execute('SELECT is_admin FROM users WHERE id = ?', (session['user_id'],)).fetchone()
-    if not current_user or int(current_user['is_admin']) != 1:
-        log_security_event('UNAUTHORIZED_ACCESS', f"Unauthorized user deletion attempt by user ID {session.get('user_id')}")
-        flash('Administrator privileges required.', 'danger')
-        return redirect(url_for('dashboard'))
-        
-    if user_id == session['user_id']:
-        flash('You cannot delete your own account.', 'danger')
-        return redirect(url_for('manage_users'))
-        
-    user = db.execute('SELECT username FROM users WHERE id = ?', (user_id,)).fetchone()
-    if user:
-        db.execute('DELETE FROM user_login_tracking WHERE user_id = ?', (user_id,))
-        db.execute('DELETE FROM users WHERE id = ?', (user_id,))
-        db.commit()
-        log_security_event('USER_DELETION', f"User {user['username']} deleted by admin {session.get('username')}", username=user['username'])
-        flash('User deleted successfully.', 'success')
-    else:
-        flash('User not found.', 'danger')
-        
-    return redirect(url_for('manage_users'))
-
-@app.route('/unlock_user/<int:user_id>', methods=['POST'])
-def unlock_user(user_id):
-    if 'user_id' not in session:
-        return redirect(url_for('login'))
-    db = get_db()
-    current_user = db.execute('SELECT is_admin FROM users WHERE id = ?', (session['user_id'],)).fetchone()
-    if not current_user or int(current_user['is_admin']) != 1:
-        log_security_event('UNAUTHORIZED_ACCESS', f"Unauthorized user unlock attempt by user ID {session.get('user_id')}")
-        flash('Administrator privileges required.', 'danger')
-        return redirect(url_for('dashboard'))
-        
-    user = db.execute('SELECT username FROM users WHERE id = ?', (user_id,)).fetchone()
-    if user:
-        db.execute('UPDATE users SET login_attempts = 0, locked_until = NULL WHERE id = ?', (user_id,))
-        db.commit()
-        log_security_event('USER_UNLOCK', f"User {user['username']} unlocked by admin {session.get('username')}", username=user['username'])
-        flash('User account unlocked successfully.', 'success')
-    else:
-        flash('User not found.', 'danger')
-        
-    return redirect(url_for('manage_users'))
-
-@app.route('/mfa/enroll', methods=['GET'])
-def mfa_enroll():
-    if 'user_id' not in session:
-        return redirect(url_for('login'))
-    
-    db = get_db()
-    user = db.execute('SELECT * FROM users WHERE id = ?', (session['user_id'],)).fetchone()
-    
-    if user['mfa_enabled']:
-        flash('MFA is already enabled on your account.', 'info')
-        return redirect(url_for('farm_settings'))
-        
-    secret = pyotp.random_base32()
-    totp = pyotp.TOTP(secret)
-    provisioning_uri = totp.provisioning_uri(name=user['username'], issuer_name="Ranga Farms")
-    
-    # Generate QR Code
-    qr = qrcode.QRCode(version=1, box_size=10, border=1)
-    qr.add_data(provisioning_uri)
-    qr.make(fit=True)
-    img = qr.make_image(fill_color="black", back_color="white")
-    
-    buffered = io.BytesIO()
-    try:
-        img.save(buffered, format="PNG")
-    except TypeError:
-        img.save(buffered)
-    qr_base64 = base64.b64encode(buffered.getvalue()).decode('utf-8')
-    
-    # Generate 10 one-time recovery codes
-    backup_codes_raw = [f"{random.randint(100000, 999999)}" for _ in range(10)]
-    backup_codes_hashed = [generate_password_hash(c) for c in backup_codes_raw]
-    
-    # Store temporary secret and recovery codes in session so we only save to DB when verified
-    session['temp_mfa_secret'] = secret
-    session['temp_backup_codes'] = backup_codes_hashed
-    
-    return render_template('mfa_enroll.html', secret=secret, qr_code=qr_base64, backup_codes=backup_codes_raw)
-
-@app.route('/mfa/verify-setup', methods=['POST'])
-def mfa_verify_setup():
-    if 'user_id' not in session:
-        return redirect(url_for('login'))
-        
-    code = request.form.get('code', '').strip()
-    secret = session.get('temp_mfa_secret')
-    backup_codes = session.get('temp_backup_codes')
-    
-    if not secret or not backup_codes:
-        flash('MFA session expired. Please try again.', 'danger')
-        return redirect(url_for('mfa_enroll'))
-        
-    totp = pyotp.TOTP(secret)
-    if totp.verify(code):
-        db = get_db()
-        backup_codes_str = ",".join(backup_codes)
-        db.execute('UPDATE users SET mfa_secret = ?, mfa_enabled = 1, backup_codes = ? WHERE id = ?',
-                   (secret, backup_codes_str, session['user_id']))
-        db.commit()
-        
-        session.pop('temp_mfa_secret', None)
-        session.pop('temp_backup_codes', None)
-        
-        log_security_event('MFA_ENABLED', f"User ID {session['user_id']} successfully enabled MFA")
-        flash('MFA enabled successfully! Please store your recovery codes securely.', 'success')
-        return redirect(url_for('farm_settings'))
-    else:
-        log_security_event('MFA_SETUP_FAILURE', f"MFA setup code verification failed for user ID {session['user_id']}")
-        flash('Invalid verification code. Please try again.', 'danger')
-        return redirect(url_for('mfa_enroll'))
-
-@app.route('/mfa/verify-login', methods=['GET', 'POST'])
-@limiter.limit("10 per minute")
-def mfa_verify_login():
-    temp_user_id = session.get('temp_mfa_user_id')
-    if not temp_user_id:
-        return redirect(url_for('login'))
-        
-    if request.method == 'POST':
-        code = request.form.get('code', '').strip()
-        db = get_db()
-        user = db.execute('SELECT * FROM users WHERE id = ?', (temp_user_id,)).fetchone()
-        
-        # Check standard TOTP
-        totp = pyotp.TOTP(user['mfa_secret'])
-        if totp.verify(code):
-            session.pop('temp_mfa_user_id', None)
-            session.clear()
-            session['user_id'] = user['id']
-            session['username'] = user['username']
-            
-            log_security_event('MFA_LOGIN_SUCCESS', f"User {user['username']} logged in successfully with MFA TOTP", username=user['username'])
-            
-            login_tracking = db.execute('SELECT * FROM user_login_tracking WHERE user_id = ?', (user['id'],)).fetchone()
-            today = datetime.now().strftime('%Y-%m-%d')
-            if not login_tracking:
-                db.execute('INSERT INTO user_login_tracking (user_id, last_login_date, has_seen_weight_notification) VALUES (?, ?, ?)',
-                          (user['id'], today, 0))
-            else:
-                db.execute('UPDATE user_login_tracking SET last_login_date = ?, has_seen_weight_notification = ? WHERE user_id = ?',
-                          (today, 0, user['id']))
-            db.commit()
-            flash('Logged in successfully.', 'success')
-            return redirect(url_for('dashboard'))
-            
-        # Check backup recovery codes
-        if user['backup_codes']:
-            codes_list = user['backup_codes'].split(',')
-            for index, hashed_code in enumerate(codes_list):
-                if check_password_hash(hashed_code, code):
-                    codes_list.pop(index)
-                    new_backup_codes_str = ",".join(codes_list)
-                    db.execute('UPDATE users SET backup_codes = ? WHERE id = ?', (new_backup_codes_str, user['id']))
-                    db.commit()
-                    
-                    session.pop('temp_mfa_user_id', None)
-                    session.clear()
-                    session['user_id'] = user['id']
-                    session['username'] = user['username']
-                    
-                    log_security_event('MFA_RECOVERY_LOGIN_SUCCESS', f"User {user['username']} logged in using recovery backup code", username=user['username'])
-                    flash('Logged in successfully using a recovery code. Note: this recovery code is now deactivated.', 'success')
-                    return redirect(url_for('dashboard'))
-                    
-        log_security_event('MFA_LOGIN_FAILURE', f"MFA code verification failed for user {user['username']}", username=user['username'])
-        flash('Invalid verification or recovery code.', 'danger')
-        
-    return render_template('mfa_verify.html')
-
-@app.route('/mfa/disable', methods=['POST'])
-def mfa_disable():
-    if 'user_id' not in session:
-        return redirect(url_for('login'))
-        
-    db = get_db()
-    db.execute('UPDATE users SET mfa_secret = NULL, mfa_enabled = 0, backup_codes = NULL WHERE id = ?', (session['user_id'],))
-    db.commit()
-    log_security_event('MFA_DISABLED', f"User ID {session['user_id']} disabled MFA")
-    flash('MFA has been disabled on your account.', 'warning')
-    return redirect(url_for('farm_settings'))
+        return redirect(url_for('auth.login'))
 
 @app.route('/')
 @app.route('/dashboard')
@@ -6224,7 +5382,7 @@ def expense_ledger_delete(lid):
 @app.route('/ledger_groups', methods=['GET', 'POST'])
 def ledger_groups():
     if 'user_id' not in session:
-        return redirect(url_for('login'))
+        return redirect(url_for('auth.login'))
     db = get_db()
     if request.method == 'POST':
         action = request.form.get('action', 'add')
@@ -6247,7 +5405,7 @@ def ledger_groups():
 @app.route('/ledger_group_edit/<int:gid>', methods=['GET', 'POST'])
 def ledger_group_edit(gid):
     if 'user_id' not in session:
-        return redirect(url_for('login'))
+        return redirect(url_for('auth.login'))
     db = get_db()
     group = db.execute('SELECT * FROM ledger_groups WHERE id=?', (gid,)).fetchone()
     if not group:
@@ -6281,7 +5439,7 @@ def ledger_group_edit(gid):
 @app.route('/ledger_group_delete/<int:gid>', methods=['POST'])
 def ledger_group_delete(gid):
     if 'user_id' not in session:
-        return redirect(url_for('login'))
+        return redirect(url_for('auth.login'))
     db = get_db()
     group = db.execute('SELECT * FROM ledger_groups WHERE id=?', (gid,)).fetchone()
     if not group:
@@ -6559,7 +5717,7 @@ def salary_report():
 @app.route('/pnl', methods=['GET', 'POST'])
 def pnl():
     if 'user_id' not in session:
-        return redirect(url_for('login'))
+        return redirect(url_for('auth.login'))
         
     db = get_db()
     

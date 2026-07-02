@@ -1,0 +1,52 @@
+[
+  {
+    "id": "TC001",
+    "title": "postregisteruseraccountcreation",
+    "description": "Test user registration with valid details to ensure account is created successfully and appropriate success status is returned."
+  },
+  {
+    "id": "TC002",
+    "title": "postregisterduplicateuserregistration",
+    "description": "Test user registration with an existing email or username to verify the system returns a 409 conflict or validation error."
+  },
+  {
+    "id": "TC003",
+    "title": "postloginvalidcredentials",
+    "description": "Test login with correct username and password to confirm successful authentication and session creation."
+  },
+  {
+    "id": "TC004",
+    "title": "postlogininvalidcredentials",
+    "description": "Test login with incorrect credentials to ensure the system returns a 401 unauthorized response."
+  },
+  {
+    "id": "TC005",
+    "title": "postmfaverifyloginvalidotp",
+    "description": "Test MFA verification with a valid OTP to confirm access is granted and a success response is returned."
+  },
+  {
+    "id": "TC006",
+    "title": "postmfaverifylogininvalidotp",
+    "description": "Test MFA verification with an invalid or expired OTP to verify the system returns a 400 or 401 error indicating verification failure."
+  },
+  {
+    "id": "TC007",
+    "title": "getdashboardwithauthentication",
+    "description": "Test accessing the dashboard endpoint with a valid authenticated session to receive 200 status and dashboard metrics."
+  },
+  {
+    "id": "TC008",
+    "title": "getdashboardwithoutauthentication",
+    "description": "Test accessing the dashboard endpoint without valid authentication to ensure a 401 unauthorized response is returned."
+  },
+  {
+    "id": "TC009",
+    "title": "getrecordswithauthentication",
+    "description": "Test retrieving the livestock directory with a valid session to confirm 200 status and correct data is returned."
+  },
+  {
+    "id": "TC010",
+    "title": "postaddrecordvaliddata",
+    "description": "Test adding a new livestock record with complete and valid goat data to verify successful record creation and appropriate success status."
+  }
+]

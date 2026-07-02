@@ -45,7 +45,7 @@
                     <h6 class="fw-bold mb-0"><i class="bi bi-plus-circle me-2"></i>Create New Ledger</h6>
                 </div>
                 <div class="card-body p-4">
-                    <form method="post" action="{{ url_for('expense_ledgers') }}">
+                    <form method="post" action="{{ url_for('finance.expense_ledgers') }}">
                         <input type="hidden" name="action" value="add">
                         <div class="mb-3">
                             <label class="form-label small fw-bold text-dark">Ledger Name <span class="text-danger">*</span></label>
@@ -98,10 +98,10 @@
                             {% if l.description %}<div class="text-muted small">{{ l.description }}</div>{% endif %}
                         </div>
                         <div class="d-flex gap-2">
-                            <a href="{{ url_for('expense_ledger_edit', lid=l.id) }}" class="btn btn-outline-warning btn-sm rounded-pill px-3">
+                            <a href="{{ url_for('finance.expense_ledger_edit', lid=l.id) }}" class="btn btn-outline-warning btn-sm rounded-pill px-3">
                                 <i class="bi bi-pencil me-1"></i>Edit
                             </a>
-                            <form action="{{ url_for('expense_ledger_delete', lid=l.id) }}" method="post" class="d-inline" onsubmit="return confirm('Delete this ledger?');">
+                            <form action="{{ url_for('finance.expense_ledger_delete', lid=l.id) }}" method="post" class="d-inline" onsubmit="return confirm('Delete this ledger?');">
                                 <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3">
                                     <i class="bi bi-trash me-1"></i>Delete
                                 </button>
@@ -126,10 +126,10 @@
                             <div class="text-danger small mt-1"><i class="bi bi-exclamation-triangle me-1"></i>Current Group: "{{ l.ledger_group or 'None' }}" (Deleted)</div>
                         </div>
                         <div class="d-flex gap-2">
-                            <a href="{{ url_for('expense_ledger_edit', lid=l.id) }}" class="btn btn-outline-warning btn-sm rounded-pill px-3">
+                            <a href="{{ url_for('finance.expense_ledger_edit', lid=l.id) }}" class="btn btn-outline-warning btn-sm rounded-pill px-3">
                                 <i class="bi bi-pencil me-1"></i>Edit
                             </a>
-                            <form action="{{ url_for('expense_ledger_delete', lid=l.id) }}" method="post" class="d-inline" onsubmit="return confirm('Delete this ledger?');">
+                            <form action="{{ url_for('finance.expense_ledger_delete', lid=l.id) }}" method="post" class="d-inline" onsubmit="return confirm('Delete this ledger?');">
                                 <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3">
                                     <i class="bi bi-trash me-1"></i>Delete
                                 </button>
@@ -159,7 +159,7 @@
                     <h6 class="fw-bold mb-0"><i class="bi bi-plus-circle me-2"></i>Create New Group</h6>
                 </div>
                 <div class="card-body p-4">
-                    <form method="post" action="{{ url_for('ledger_groups') }}">
+                    <form method="post" action="{{ url_for('finance.ledger_groups') }}">
                         <input type="hidden" name="action" value="add">
                         <div class="mb-3">
                             <label class="form-label small fw-bold text-dark">Group Name <span class="text-danger">*</span></label>
@@ -208,11 +208,11 @@
                             {% endif %}
                         </div>
                         <div class="d-flex gap-2">
-                            <a href="{{ url_for('ledger_group_edit', gid=g.id) }}" class="btn btn-outline-warning btn-sm rounded-pill px-3">
+                            <a href="{{ url_for('finance.ledger_group_edit', gid=g.id) }}" class="btn btn-outline-warning btn-sm rounded-pill px-3">
                                 <i class="bi bi-pencil me-1"></i>Edit
                             </a>
                             {% if g.group_name not in default_groups %}
-                            <form action="{{ url_for('ledger_group_delete', gid=g.id) }}" method="post" class="d-inline" onsubmit="return confirm('WARNING: Are you sure you want to permanently delete this Ledger Group? This action cannot be undone. Any linked ledgers will become unassigned.');">
+                            <form action="{{ url_for('finance.ledger_group_delete', gid=g.id) }}" method="post" class="d-inline" onsubmit="return confirm('WARNING: Are you sure you want to permanently delete this Ledger Group? This action cannot be undone. Any linked ledgers will become unassigned.');">
                                 <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3">
                                     <i class="bi bi-trash me-1"></i>Delete
                                 </button>
@@ -237,7 +237,7 @@
                     <h6 class="fw-bold mb-0"><i class="bi bi-plus-circle me-2"></i>Create New Particular</h6>
                 </div>
                 <div class="card-body p-4">
-                    <form method="post" action="{{ url_for('expense_particulars') }}">
+                    <form method="post" action="{{ url_for('finance.expense_particulars') }}">
                         <input type="hidden" name="action" value="add">
                         <div class="mb-3">
                             <label class="form-label small fw-bold text-dark">Particular Name <span class="text-danger">*</span></label>
@@ -294,10 +294,10 @@
                             {% endif %}
                         </div>
                         <div class="d-flex gap-2">
-                            <a href="{{ url_for('expense_particular_edit', pid=p.id) }}" class="btn btn-outline-warning btn-sm rounded-pill px-3">
+                            <a href="{{ url_for('finance.expense_particular_edit', pid=p.id) }}" class="btn btn-outline-warning btn-sm rounded-pill px-3">
                                 <i class="bi bi-pencil me-1"></i>Edit
                             </a>
-                            <form action="{{ url_for('expense_particular_delete', pid=p.id) }}" method="post" class="d-inline" onsubmit="return confirm('Delete this particular?');">
+                            <form action="{{ url_for('finance.expense_particular_delete', pid=p.id) }}" method="post" class="d-inline" onsubmit="return confirm('Delete this particular?');">
                                 <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3">
                                     <i class="bi bi-trash me-1"></i>Delete
                                 </button>

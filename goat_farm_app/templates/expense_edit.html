@@ -48,7 +48,7 @@
                             </select>
                             <input type="hidden" name="particular_name" id="particular_name_hidden" value="{{ record['category'] or '' }}">
                             <div class="form-text">
-                                <a href="{{ url_for('expense_particulars') }}" target="_blank" class="text-decoration-none small">
+                                <a href="{{ url_for('finance.expense_particulars') }}" target="_blank" class="text-decoration-none small">
                                     <i class="bi bi-plus-circle me-1"></i>Create new particular
                                 </a>
                             </div>
@@ -96,7 +96,7 @@
                                 </select>
                                 <input type="hidden" name="unit_name" id="unit_name_hidden" value="{{ record['unit_name'] or '' }}">
                                 <div class="form-text">
-                                    <a href="{{ url_for('expense_units_view') }}" target="_blank" class="text-decoration-none small">
+                                    <a href="{{ url_for('finance.expense_units_view') }}" target="_blank" class="text-decoration-none small">
                                         <i class="bi bi-plus-circle me-1"></i>Add new unit
                                     </a>
                                 </div>

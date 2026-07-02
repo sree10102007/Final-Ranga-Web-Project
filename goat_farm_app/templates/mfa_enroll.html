@@ -23,7 +23,7 @@
                 </div>
             </div>
 
-            <form method="POST" action="{{ url_for('mfa_verify_setup') }}">
+            <form method="POST" action="{{ url_for('auth.mfa_verify_setup') }}">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <input type="hidden" name="secret" value="{{ secret }}">
                 <div class="mb-3">

@@ -6,7 +6,7 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
     <div class="d-flex align-items-center gap-3">
-        <a href="{{ url_for('vouchers') }}" class="btn btn-outline-secondary rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; padding: 0;">
+        <a href="{{ url_for('finance.vouchers') }}" class="btn btn-outline-secondary rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; padding: 0;">
             <i class="bi bi-arrow-left fs-5"></i>
         </a>
         <div>
@@ -20,7 +20,7 @@
             <p class="text-muted small mb-0">Master Register grouped month-wise</p>
         </div>
     </div>
-    <a href="{{ url_for('voucher_add', v_type=v_type) }}" class="btn btn-success shadow-sm rounded-pill px-4 py-2">
+    <a href="{{ url_for('finance.voucher_add', v_type=v_type) }}" class="btn btn-success shadow-sm rounded-pill px-4 py-2">
         <i class="bi bi-plus-circle me-2"></i>Create New {{ v_type|capitalize }} Voucher
     </a>
 </div>
@@ -157,11 +157,11 @@
                             <!-- Right Area: Actions -->
                             <div class="col-auto">
                                 <div class="d-flex gap-2">
-                                    <a href="{% if r.sub_type %}{{ url_for('voucher_edit', v_type=v_type, sub_type=r.sub_type, id=r.id) }}{% else %}{{ url_for('voucher_edit', v_type=v_type, id=r.id) }}{% endif %}" 
+                                    <a href="{% if r.sub_type %}{{ url_for('finance.voucher_edit', v_type=v_type, sub_type=r.sub_type, id=r.id) }}{% else %}{{ url_for('finance.voucher_edit', v_type=v_type, id=r.id) }}{% endif %}" 
                                        class="btn btn-sm btn-outline-warning border rounded-pill px-3 py-1.5 d-flex align-items-center gap-1" title="Alter Voucher">
                                         <i class="bi bi-pencil-square"></i> Alter
                                     </a>
-                                    <form action="{% if r.sub_type %}{{ url_for('voucher_delete', v_type=v_type, sub_type=r.sub_type, id=r.id) }}{% else %}{{ url_for('voucher_delete', v_type=v_type, id=r.id) }}{% endif %}" 
+                                    <form action="{% if r.sub_type %}{{ url_for('finance.voucher_delete', v_type=v_type, sub_type=r.sub_type, id=r.id) }}{% else %}{{ url_for('finance.voucher_delete', v_type=v_type, id=r.id) }}{% endif %}" 
                                           method="POST" class="m-0 d-inline" 
                                           onsubmit="return confirm('WARNING: Are you sure you want to permanently delete this Voucher? This will reverse any linked ledger changes.');">
                                         <button type="submit" class="btn btn-sm btn-outline-danger border rounded-pill px-3 py-1.5 d-flex align-items-center gap-1" title="Delete Voucher">
@@ -185,7 +185,7 @@
         </div>
         <h4 class="text-muted">No Vouchers Recorded</h4>
         <p class="text-muted mx-auto" style="max-width: 500px;">There are no vouchers recorded under this category yet. Click the button above to log your first payment voucher.</p>
-        <a href="{{ url_for('voucher_add', v_type=v_type) }}" class="btn btn-success mt-2 rounded-pill px-4">Create First Voucher</a>
+        <a href="{{ url_for('finance.voucher_add', v_type=v_type) }}" class="btn btn-success mt-2 rounded-pill px-4">Create First Voucher</a>
     </div>
 {% endif %}
 

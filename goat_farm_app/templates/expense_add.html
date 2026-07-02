@@ -47,14 +47,14 @@
                             </select>
                             <input type="hidden" name="particular_name" id="particular_name_hidden" value="">
                             <div class="form-text">
-                                <a href="{{ url_for('expense_particulars') }}" target="_blank" class="text-decoration-none small">
+                                <a href="{{ url_for('finance.expense_particulars') }}" target="_blank" class="text-decoration-none small">
                                     <i class="bi bi-plus-circle me-1"></i>Create new particular
                                 </a>
                             </div>
                             {% else %}
                             <div class="alert alert-warning small rounded-3 mb-2 border-0 py-2">
                                 <i class="bi bi-exclamation-triangle me-2"></i>No particulars defined.
-                                <a href="{{ url_for('expense_particulars') }}" class="fw-bold">Create particulars first</a>
+                                <a href="{{ url_for('finance.expense_particulars') }}" class="fw-bold">Create particulars first</a>
                             </div>
                             <input type="text" name="particular_name" class="form-control" required
                                    placeholder="Enter expense type e.g. Consumables, Repairs">
@@ -95,7 +95,7 @@
                                 </select>
                                 <input type="hidden" name="unit_name" id="unit_name_hidden" value="">
                                 <div class="form-text">
-                                    <a href="{{ url_for('expense_units_view') }}" target="_blank" class="text-decoration-none small">
+                                    <a href="{{ url_for('finance.expense_units_view') }}" target="_blank" class="text-decoration-none small">
                                         <i class="bi bi-plus-circle me-1"></i>Add new unit
                                     </a>
                                 </div>
