@@ -1236,3 +1236,574 @@ PermissionError: [Errno 13] Permission denied: 'c:\\Users\\Suressvar\\OneDrive\\
 2026-07-03 20:53:57,817 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project/goat_farm_app/Project_goatfarm.py:125]
 2026-07-03 20:55:05,681 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project/goat_farm_app/Project_goatfarm.py:125]
 2026-07-03 20:55:06,689 INFO: Goat Farm app starting up [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:125]
+2026-07-03 21:20:32,297 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project/goat_farm_app/Project_goatfarm.py:302]
+2026-07-03 21:20:34,570 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project/goat_farm_app/Project_goatfarm.py:302]
+2026-07-03 21:21:01,602 ERROR: Server Error: Could not build url for endpoint 'finance.vouchers'. Did you mean 'vouchers' instead? [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project/goat_farm_app/Project_goatfarm.py:391]
+Traceback (most recent call last):
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 867, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 852, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project/goat_farm_app/Project_goatfarm.py", line 2756, in stock_inventory
+    return render_template('stock_inventory.html',
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\templating.py", line 152, in render_template
+    return _render(app, template, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\templating.py", line 133, in _render
+    rv = template.render(context)
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\jinja2\environment.py", line 1295, in render
+    self.environment.handle_exception()
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\jinja2\environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\templates\stock_inventory.html", line 1, in top-level template code
+    {% extends 'layout.html' %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\templates\layout.html", line 223, in top-level template code
+    {% block content %}{% endblock %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\templates\stock_inventory.html", line 55, in block 'content'
+    <a href="{{ url_for('finance.vouchers') }}" class="btn btn-outline-success rounded-pill px-4 py-2 fw-semibold">
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1071, in url_for
+    return self.handle_url_build_error(error, endpoint, values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1060, in url_for
+    rv = url_adapter.build(  # type: ignore[union-attr]
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\werkzeug\routing\map.py", line 919, in build
+    raise BuildError(endpoint, values, method, self)
+werkzeug.routing.exceptions.BuildError: Could not build url for endpoint 'finance.vouchers'. Did you mean 'vouchers' instead?
+2026-07-03 21:21:18,117 ERROR: Server Error: invalid input syntax for type integer: "101-GT"
+ [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project/goat_farm_app/Project_goatfarm.py:391]
+Traceback (most recent call last):
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 867, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 852, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project/goat_farm_app/Project_goatfarm.py", line 1522, in goats
+    goats_summary_raw = db.execute('''
+                        ^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\extensions.py", line 373, in execute
+    cur.execute(sql, params)
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\extensions.py", line 320, in execute
+    raise e
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\extensions.py", line 305, in execute
+    self.cursor.execute(translated_sql, params)
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\psycopg2\extras.py", line 146, in execute
+    return super().execute(query, vars)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.InvalidTextRepresentation: invalid input syntax for type integer: "101-GT"
+
+2026-07-03 21:21:26,172 ERROR: Server Error: invalid input syntax for type integer: "101-GT"
+ [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project/goat_farm_app/Project_goatfarm.py:391]
+Traceback (most recent call last):
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 867, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 852, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project/goat_farm_app/Project_goatfarm.py", line 1522, in goats
+    goats_summary_raw = db.execute('''
+                        ^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\extensions.py", line 373, in execute
+    cur.execute(sql, params)
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\extensions.py", line 320, in execute
+    raise e
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\extensions.py", line 305, in execute
+    self.cursor.execute(translated_sql, params)
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\psycopg2\extras.py", line 146, in execute
+    return super().execute(query, vars)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.InvalidTextRepresentation: invalid input syntax for type integer: "101-GT"
+
+2026-07-03 21:21:38,484 ERROR: Server Error: Could not build url for endpoint 'finance.voucher_register' with values ['v_type']. Did you mean 'voucher_register' instead? [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project/goat_farm_app/Project_goatfarm.py:391]
+Traceback (most recent call last):
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 867, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 852, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project/goat_farm_app/Project_goatfarm.py", line 3887, in vouchers
+    return render_template('vouchers.html',
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\templating.py", line 152, in render_template
+    return _render(app, template, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\templating.py", line 133, in _render
+    rv = template.render(context)
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\jinja2\environment.py", line 1295, in render
+    self.environment.handle_exception()
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\jinja2\environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\templates\vouchers.html", line 1, in top-level template code
+    {% extends 'layout.html' %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\templates\layout.html", line 223, in top-level template code
+    {% block content %}{% endblock %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\templates\vouchers.html", line 18, in block 'content'
+    <a href="{{ url_for('finance.voucher_register', v_type='goat') }}" class="text-decoration-none card-hover-trigger">
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1071, in url_for
+    return self.handle_url_build_error(error, endpoint, values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1060, in url_for
+    rv = url_adapter.build(  # type: ignore[union-attr]
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\werkzeug\routing\map.py", line 919, in build
+    raise BuildError(endpoint, values, method, self)
+werkzeug.routing.exceptions.BuildError: Could not build url for endpoint 'finance.voucher_register' with values ['v_type']. Did you mean 'voucher_register' instead?
+2026-07-03 21:21:44,746 ERROR: Server Error: Could not build url for endpoint 'finance.vouchers'. Did you mean 'vouchers' instead? [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project/goat_farm_app/Project_goatfarm.py:391]
+Traceback (most recent call last):
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 867, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 852, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project/goat_farm_app/Project_goatfarm.py", line 2756, in stock_inventory
+    return render_template('stock_inventory.html',
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\templating.py", line 152, in render_template
+    return _render(app, template, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\templating.py", line 133, in _render
+    rv = template.render(context)
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\jinja2\environment.py", line 1295, in render
+    self.environment.handle_exception()
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\jinja2\environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\templates\stock_inventory.html", line 1, in top-level template code
+    {% extends 'layout.html' %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\templates\layout.html", line 223, in top-level template code
+    {% block content %}{% endblock %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\templates\stock_inventory.html", line 55, in block 'content'
+    <a href="{{ url_for('finance.vouchers') }}" class="btn btn-outline-success rounded-pill px-4 py-2 fw-semibold">
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1071, in url_for
+    return self.handle_url_build_error(error, endpoint, values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1060, in url_for
+    rv = url_adapter.build(  # type: ignore[union-attr]
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\werkzeug\routing\map.py", line 919, in build
+    raise BuildError(endpoint, values, method, self)
+werkzeug.routing.exceptions.BuildError: Could not build url for endpoint 'finance.vouchers'. Did you mean 'vouchers' instead?
+2026-07-03 21:21:57,615 ERROR: Server Error: Could not build url for endpoint 'finance.expense_ledgers'. Did you mean 'expense_ledgers' instead? [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project/goat_farm_app/Project_goatfarm.py:391]
+Traceback (most recent call last):
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 867, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 852, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project/goat_farm_app/Project_goatfarm.py", line 5509, in expenses_master
+    return render_template('expenses_master.html',
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\templating.py", line 152, in render_template
+    return _render(app, template, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\templating.py", line 133, in _render
+    rv = template.render(context)
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\jinja2\environment.py", line 1295, in render
+    self.environment.handle_exception()
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\jinja2\environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\templates\expenses_master.html", line 1, in top-level template code
+    {% extends 'layout.html' %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\templates\layout.html", line 223, in top-level template code
+    {% block content %}{% endblock %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\templates\expenses_master.html", line 49, in block 'content'
+    <a href="{{ url_for('finance.expense_ledgers') }}" class="text-decoration-none card-action-hover">
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1071, in url_for
+    return self.handle_url_build_error(error, endpoint, values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1060, in url_for
+    rv = url_adapter.build(  # type: ignore[union-attr]
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\werkzeug\routing\map.py", line 919, in build
+    raise BuildError(endpoint, values, method, self)
+werkzeug.routing.exceptions.BuildError: Could not build url for endpoint 'finance.expense_ledgers'. Did you mean 'expense_ledgers' instead?
+2026-07-03 21:22:01,149 ERROR: Server Error: Could not build url for endpoint 'finance.ledger_groups'. Did you mean 'ledger_groups' instead? [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project/goat_farm_app/Project_goatfarm.py:391]
+Traceback (most recent call last):
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 867, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 852, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project/goat_farm_app/Project_goatfarm.py", line 5547, in expense_ledgers
+    return render_template('expense_ledgers.html', ledgers=ledgers, groups=groups, unassigned_ledgers=unassigned_ledgers, particulars=particulars)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\templating.py", line 152, in render_template
+    return _render(app, template, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\templating.py", line 133, in _render
+    rv = template.render(context)
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\jinja2\environment.py", line 1295, in render
+    self.environment.handle_exception()
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\jinja2\environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\templates\expense_ledgers.html", line 1, in top-level template code
+    {% extends 'layout.html' %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\templates\layout.html", line 223, in top-level template code
+    {% block content %}{% endblock %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\templates\expense_ledgers.html", line 162, in block 'content'
+    <form method="post" action="{{ url_for('finance.ledger_groups') }}">
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1071, in url_for
+    return self.handle_url_build_error(error, endpoint, values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1060, in url_for
+    rv = url_adapter.build(  # type: ignore[union-attr]
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\werkzeug\routing\map.py", line 919, in build
+    raise BuildError(endpoint, values, method, self)
+werkzeug.routing.exceptions.BuildError: Could not build url for endpoint 'finance.ledger_groups'. Did you mean 'ledger_groups' instead?
+2026-07-03 21:22:04,320 ERROR: Server Error: Could not build url for endpoint 'finance.expense_unit_delete' with values ['uid']. Did you mean 'expense_unit_delete' instead? [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project/goat_farm_app/Project_goatfarm.py:391]
+Traceback (most recent call last):
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 867, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 852, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project/goat_farm_app/Project_goatfarm.py", line 5728, in expense_units_view
+    return render_template('expense_units.html', units=units)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\templating.py", line 152, in render_template
+    return _render(app, template, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\templating.py", line 133, in _render
+    rv = template.render(context)
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\jinja2\environment.py", line 1295, in render
+    self.environment.handle_exception()
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\jinja2\environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\templates\expense_units.html", line 1, in top-level template code
+    {% extends 'layout.html' %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\templates\layout.html", line 223, in top-level template code
+    {% block content %}{% endblock %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\templates\expense_units.html", line 65, in block 'content'
+    <form action="{{ url_for('finance.expense_unit_delete', uid=u.id) }}" method="post" class="d-inline" onsubmit="return confirm('Delete this unit?');">
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1071, in url_for
+    return self.handle_url_build_error(error, endpoint, values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1060, in url_for
+    rv = url_adapter.build(  # type: ignore[union-attr]
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\werkzeug\routing\map.py", line 919, in build
+    raise BuildError(endpoint, values, method, self)
+werkzeug.routing.exceptions.BuildError: Could not build url for endpoint 'finance.expense_unit_delete' with values ['uid']. Did you mean 'expense_unit_delete' instead?
+2026-07-03 21:22:23,793 ERROR: Server Error: Could not build url for endpoint 'finance.pnl'. Did you mean 'pnl' instead? [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project/goat_farm_app/Project_goatfarm.py:391]
+Traceback (most recent call last):
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 867, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 852, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project/goat_farm_app/Project_goatfarm.py", line 6274, in pnl
+    return render_template('pnl.html',
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\templating.py", line 152, in render_template
+    return _render(app, template, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\templating.py", line 133, in _render
+    rv = template.render(context)
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\jinja2\environment.py", line 1295, in render
+    self.environment.handle_exception()
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\jinja2\environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\templates\pnl.html", line 1, in top-level template code
+    {% extends 'layout.html' %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\templates\layout.html", line 223, in top-level template code
+    {% block content %}{% endblock %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\templates\pnl.html", line 284, in block 'content'
+    <form method="POST" action="{{ url_for('finance.pnl') }}" class="glass-card p-3 shadow-sm" style="border: 2px solid #000000; border-radius: 12px; background: #ffffff;">
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1071, in url_for
+    return self.handle_url_build_error(error, endpoint, values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1060, in url_for
+    rv = url_adapter.build(  # type: ignore[union-attr]
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\werkzeug\routing\map.py", line 919, in build
+    raise BuildError(endpoint, values, method, self)
+werkzeug.routing.exceptions.BuildError: Could not build url for endpoint 'finance.pnl'. Did you mean 'pnl' instead?
+2026-07-03 21:22:40,236 ERROR: Server Error: invalid input syntax for type integer: "101-GT"
+ [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project/goat_farm_app/Project_goatfarm.py:391]
+Traceback (most recent call last):
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 867, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 852, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project/goat_farm_app/Project_goatfarm.py", line 1522, in goats
+    goats_summary_raw = db.execute('''
+                        ^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\extensions.py", line 373, in execute
+    cur.execute(sql, params)
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\extensions.py", line 320, in execute
+    raise e
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\extensions.py", line 305, in execute
+    self.cursor.execute(translated_sql, params)
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\psycopg2\extras.py", line 146, in execute
+    return super().execute(query, vars)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.InvalidTextRepresentation: invalid input syntax for type integer: "101-GT"
+
+2026-07-03 21:23:35,133 ERROR: Server Error: Could not build url for endpoint 'finance.voucher_register' with values ['v_type']. Did you mean 'voucher_register' instead? [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project/goat_farm_app/Project_goatfarm.py:391]
+Traceback (most recent call last):
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 867, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 852, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project/goat_farm_app/Project_goatfarm.py", line 3887, in vouchers
+    return render_template('vouchers.html',
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\templating.py", line 152, in render_template
+    return _render(app, template, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\templating.py", line 133, in _render
+    rv = template.render(context)
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\jinja2\environment.py", line 1295, in render
+    self.environment.handle_exception()
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\jinja2\environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\templates\vouchers.html", line 1, in top-level template code
+    {% extends 'layout.html' %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\templates\layout.html", line 223, in top-level template code
+    {% block content %}{% endblock %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\templates\vouchers.html", line 18, in block 'content'
+    <a href="{{ url_for('finance.voucher_register', v_type='goat') }}" class="text-decoration-none card-hover-trigger">
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1071, in url_for
+    return self.handle_url_build_error(error, endpoint, values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1060, in url_for
+    rv = url_adapter.build(  # type: ignore[union-attr]
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\werkzeug\routing\map.py", line 919, in build
+    raise BuildError(endpoint, values, method, self)
+werkzeug.routing.exceptions.BuildError: Could not build url for endpoint 'finance.voucher_register' with values ['v_type']. Did you mean 'voucher_register' instead?
+2026-07-03 21:24:03,218 ERROR: Server Error: Could not build url for endpoint 'finance.vouchers'. Did you mean 'vouchers' instead? [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project/goat_farm_app/Project_goatfarm.py:391]
+Traceback (most recent call last):
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 867, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 852, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project/goat_farm_app/Project_goatfarm.py", line 2756, in stock_inventory
+    return render_template('stock_inventory.html',
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\templating.py", line 152, in render_template
+    return _render(app, template, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\templating.py", line 133, in _render
+    rv = template.render(context)
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\jinja2\environment.py", line 1295, in render
+    self.environment.handle_exception()
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\jinja2\environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\templates\stock_inventory.html", line 1, in top-level template code
+    {% extends 'layout.html' %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\templates\layout.html", line 223, in top-level template code
+    {% block content %}{% endblock %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\templates\stock_inventory.html", line 55, in block 'content'
+    <a href="{{ url_for('finance.vouchers') }}" class="btn btn-outline-success rounded-pill px-4 py-2 fw-semibold">
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1071, in url_for
+    return self.handle_url_build_error(error, endpoint, values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1060, in url_for
+    rv = url_adapter.build(  # type: ignore[union-attr]
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\werkzeug\routing\map.py", line 919, in build
+    raise BuildError(endpoint, values, method, self)
+werkzeug.routing.exceptions.BuildError: Could not build url for endpoint 'finance.vouchers'. Did you mean 'vouchers' instead?
+2026-07-03 21:24:30,484 ERROR: Server Error: Could not build url for endpoint 'finance.expense_ledgers'. Did you mean 'expense_ledgers' instead? [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project/goat_farm_app/Project_goatfarm.py:391]
+Traceback (most recent call last):
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 867, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 852, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project/goat_farm_app/Project_goatfarm.py", line 5509, in expenses_master
+    return render_template('expenses_master.html',
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\templating.py", line 152, in render_template
+    return _render(app, template, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\templating.py", line 133, in _render
+    rv = template.render(context)
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\jinja2\environment.py", line 1295, in render
+    self.environment.handle_exception()
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\jinja2\environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\templates\expenses_master.html", line 1, in top-level template code
+    {% extends 'layout.html' %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\templates\layout.html", line 223, in top-level template code
+    {% block content %}{% endblock %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\templates\expenses_master.html", line 49, in block 'content'
+    <a href="{{ url_for('finance.expense_ledgers') }}" class="text-decoration-none card-action-hover">
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1071, in url_for
+    return self.handle_url_build_error(error, endpoint, values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1060, in url_for
+    rv = url_adapter.build(  # type: ignore[union-attr]
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\werkzeug\routing\map.py", line 919, in build
+    raise BuildError(endpoint, values, method, self)
+werkzeug.routing.exceptions.BuildError: Could not build url for endpoint 'finance.expense_ledgers'. Did you mean 'expense_ledgers' instead?
+2026-07-03 21:25:00,410 ERROR: Server Error: Could not build url for endpoint 'finance.ledger_groups'. Did you mean 'ledger_groups' instead? [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project/goat_farm_app/Project_goatfarm.py:391]
+Traceback (most recent call last):
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 867, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 852, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project/goat_farm_app/Project_goatfarm.py", line 5547, in expense_ledgers
+    return render_template('expense_ledgers.html', ledgers=ledgers, groups=groups, unassigned_ledgers=unassigned_ledgers, particulars=particulars)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\templating.py", line 152, in render_template
+    return _render(app, template, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\templating.py", line 133, in _render
+    rv = template.render(context)
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\jinja2\environment.py", line 1295, in render
+    self.environment.handle_exception()
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\jinja2\environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\templates\expense_ledgers.html", line 1, in top-level template code
+    {% extends 'layout.html' %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\templates\layout.html", line 223, in top-level template code
+    {% block content %}{% endblock %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\templates\expense_ledgers.html", line 162, in block 'content'
+    <form method="post" action="{{ url_for('finance.ledger_groups') }}">
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1071, in url_for
+    return self.handle_url_build_error(error, endpoint, values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1060, in url_for
+    rv = url_adapter.build(  # type: ignore[union-attr]
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\werkzeug\routing\map.py", line 919, in build
+    raise BuildError(endpoint, values, method, self)
+werkzeug.routing.exceptions.BuildError: Could not build url for endpoint 'finance.ledger_groups'. Did you mean 'ledger_groups' instead?
+2026-07-03 21:25:27,215 ERROR: Server Error: Could not build url for endpoint 'finance.pnl'. Did you mean 'pnl' instead? [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project/goat_farm_app/Project_goatfarm.py:391]
+Traceback (most recent call last):
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 867, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 852, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project/goat_farm_app/Project_goatfarm.py", line 6274, in pnl
+    return render_template('pnl.html',
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\templating.py", line 152, in render_template
+    return _render(app, template, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\templating.py", line 133, in _render
+    rv = template.render(context)
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\jinja2\environment.py", line 1295, in render
+    self.environment.handle_exception()
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\jinja2\environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\templates\pnl.html", line 1, in top-level template code
+    {% extends 'layout.html' %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\templates\layout.html", line 223, in top-level template code
+    {% block content %}{% endblock %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\templates\pnl.html", line 284, in block 'content'
+    <form method="POST" action="{{ url_for('finance.pnl') }}" class="glass-card p-3 shadow-sm" style="border: 2px solid #000000; border-radius: 12px; background: #ffffff;">
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1071, in url_for
+    return self.handle_url_build_error(error, endpoint, values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 1060, in url_for
+    rv = url_adapter.build(  # type: ignore[union-attr]
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\werkzeug\routing\map.py", line 919, in build
+    raise BuildError(endpoint, values, method, self)
+werkzeug.routing.exceptions.BuildError: Could not build url for endpoint 'finance.pnl'. Did you mean 'pnl' instead?
+2026-07-03 21:25:55,275 ERROR: Server Error: invalid input syntax for type integer: "101-GT"
+ [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project/goat_farm_app/Project_goatfarm.py:391]
+Traceback (most recent call last):
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 867, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 852, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project/goat_farm_app/Project_goatfarm.py", line 1522, in goats
+    goats_summary_raw = db.execute('''
+                        ^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\extensions.py", line 373, in execute
+    cur.execute(sql, params)
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\extensions.py", line 320, in execute
+    raise e
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\extensions.py", line 305, in execute
+    self.cursor.execute(translated_sql, params)
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\psycopg2\extras.py", line 146, in execute
+    return super().execute(query, vars)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.InvalidTextRepresentation: invalid input syntax for type integer: "101-GT"
+
+2026-07-03 21:30:05,633 INFO: Goat Farm app starting up [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:302]
+2026-07-03 21:30:06,642 INFO: Goat Farm app starting up [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:302]
+2026-07-03 21:34:16,110 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:302]
+2026-07-03 21:34:17,125 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:302]
+2026-07-03 21:37:57,550 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project/goat_farm_app/Project_goatfarm.py:302]
+2026-07-03 21:38:04,854 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project/goat_farm_app/Project_goatfarm.py:302]
+2026-07-03 21:38:06,860 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project/goat_farm_app/Project_goatfarm.py:302]
+2026-07-03 21:44:23,273 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project/goat_farm_app/Project_goatfarm.py:302]
+2026-07-03 21:44:25,383 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project/goat_farm_app/Project_goatfarm.py:302]
