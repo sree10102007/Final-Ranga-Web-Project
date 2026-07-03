@@ -1188,3 +1188,51 @@ werkzeug.routing.exceptions.BuildError: Could not build url for endpoint 'dashbo
 2026-07-02 18:46:21,811 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:129]
 2026-07-02 18:47:42,615 INFO: Goat Farm app starting up [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:125]
 2026-07-02 18:47:43,429 INFO: Goat Farm app starting up [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:125]
+2026-07-02 20:00:42,301 INFO: Goat Farm app starting up [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:125]
+2026-07-03 20:41:41,285 INFO: Goat Farm app starting up [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:125]
+2026-07-03 20:42:32,599 INFO: Goat Farm app starting up [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:125]
+2026-07-03 20:43:14,371 INFO: Goat Farm app starting up [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:125]
+2026-07-03 20:47:59,682 ERROR: Server Error: 429 Too Many Requests: 5 per 1 hour [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:214]
+Traceback (most recent call last):
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 867, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 852, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1299, in __inner
+    self.limiter._check_request_limit(
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1160, in _check_request_limit
+    raise e
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1157, in _check_request_limit
+    self.__evaluate_limits(endpoint, all_limits)
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1141, in __evaluate_limits
+    raise RateLimitExceeded(
+flask_limiter.errors.RateLimitExceeded: 429 Too Many Requests: 5 per 1 hour
+2026-07-03 20:49:04,115 INFO: Goat Farm app starting up [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:125]
+2026-07-03 20:49:07,802 INFO: Goat Farm app starting up [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:125]
+2026-07-03 20:52:22,772 ERROR: Server Error: [Errno 13] Permission denied: 'c:\\Users\\Suressvar\\OneDrive\\Documents\\GitHub\\Final-Ranga-Web-Project\\Final-Ranga-Web-Project\\backups\\restore_temp_goatfarm_backup_20260703_204938.json' [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:214]
+Traceback (most recent call last):
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 867, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask\app.py", line 852, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\flask_limiter\extension.py", line 1303, in __inner
+    return cast(R, flask.current_app.ensure_sync(obj)(*a, **k))
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\blueprints\auth.py", line 32, in decorated_function
+    return f(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\blueprints\backup.py", line 247, in restore_backup
+    file.save(filepath)
+  File "C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\.venv\Lib\site-packages\werkzeug\datastructures\file_storage.py", line 125, in save
+    dst = open(dst, "wb")
+          ^^^^^^^^^^^^^^^
+PermissionError: [Errno 13] Permission denied: 'c:\\Users\\Suressvar\\OneDrive\\Documents\\GitHub\\Final-Ranga-Web-Project\\Final-Ranga-Web-Project\\backups\\restore_temp_goatfarm_backup_20260703_204938.json'
+2026-07-03 20:52:39,807 INFO: Goat Farm app starting up [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:125]
+2026-07-03 20:52:47,549 INFO: Goat Farm app starting up [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:125]
+2026-07-03 20:53:57,817 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project/goat_farm_app/Project_goatfarm.py:125]
+2026-07-03 20:55:05,681 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project/goat_farm_app/Project_goatfarm.py:125]
+2026-07-03 20:55:06,689 INFO: Goat Farm app starting up [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:125]
