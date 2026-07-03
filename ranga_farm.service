@@ -14,7 +14,7 @@ Environment=PATH=/root/.local/bin:/usr/bin:/usr/local/bin
 EnvironmentFile=/app/.env
 
 # 3. Startup Exec Commands
-ExecStart=/root/.local/bin/gunicorn --config gunicorn.conf.py Project_goatfarm:app
+ExecStart=/app/.venv/bin/gunicorn --config gunicorn.conf.py Project_goatfarm:app
 
 # 4. Resilience Restart Policies
 Restart=always
