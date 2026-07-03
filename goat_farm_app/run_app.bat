@@ -6,9 +6,11 @@ echo ===================================================
 cd /d "%~dp0"
 
 echo 1. Checking Python installation...
+if exist "..\.venv\Scripts\python.exe" (
+    set PY_CMD=..\.venv\Scripts\python.exe
+    goto py_found
+)
 set PY_CMD=python
-python --version >nul 2>&1
-if %errorlevel% equ 0 goto py_found
 
 set PY_CMD=python3.13
 python3.13 --version >nul 2>&1
