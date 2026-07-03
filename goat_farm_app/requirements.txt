@@ -7,4 +7,5 @@ pyotp==2.9.0
 qrcode==7.4.2
 Flask-Limiter==3.7.0
 cryptography
+redis>=5.0.0
 

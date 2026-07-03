@@ -94,8 +94,8 @@ def create_app(config_name=None):
     
     # Configure and initialize rate limiter dynamically
     storage_uri = os.environ.get('LIMITER_STORAGE_URI', 'memory://')
-    limiter.init_app(app)
     app.config["RATELIMIT_STORAGE_URI"] = storage_uri
+    limiter.init_app(app)
     
     # Register database context teardown
     from goat_farm_app.extensions import close_connection

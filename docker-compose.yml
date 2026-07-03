@@ -11,6 +11,8 @@ services:
     env_file:
       - ./goat_farm_app/.env
     restart: unless-stopped
+    depends_on:
+      - redis
     
     # 1. Resource Limits (Prevention of Denial of Service / Resource Exhaustion)
     deploy:
@@ -36,8 +38,22 @@ services:
       - app_logs:/app/logs
       - app_uploads:/app/static/uploads
 
+  redis:
+    image: redis:7-alpine
+    container_name: ranga_farm_redis
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 128M
+
 volumes:
   app_logs:
     driver: local
   app_uploads:
+    driver: local
+  redis_data:
     driver: local

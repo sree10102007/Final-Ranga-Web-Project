@@ -52,6 +52,16 @@ def validate_env():
         print("Please copy .env.example to .env and configure the actual connection and secret key settings.")
         sys.exit(1)
 
+    flask_env = os.environ.get('FLASK_ENV', '').lower()
+    limiter_uri = os.environ.get('LIMITER_STORAGE_URI', '')
+    if flask_env == 'production' and (not limiter_uri or 'memory://' in limiter_uri):
+        print("\n==========================================================================")
+        print("WARNING: FLASK_ENV is set to production, but LIMITER_STORAGE_URI")
+        print("is unset or using in-memory storage ('memory://'). Rate limit state")
+        print("will not survive worker restarts or be shared across Gunicorn workers.")
+        print("Please configure a persistent backend (e.g., Redis) in production.")
+        print("==========================================================================\n")
+
 validate_env()
 
 from cryptography.fernet import Fernet
