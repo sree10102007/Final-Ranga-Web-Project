@@ -7,7 +7,7 @@
 <div class="row">
     <div class="col-12">
         <div class="d-flex align-items-center gap-3 mb-4">
-            <a href="{{ url_for('finance.voucher_register', v_type=v_type) }}" class="btn btn-outline-secondary rounded-circle" style="width: 40px; height: 40px; padding: 0; line-height: 38px; display: inline-flex; align-items: center; justify-content: center;">
+            <a href="{{ url_for('voucher_register', v_type=v_type) }}" class="btn btn-outline-secondary rounded-circle" style="width: 40px; height: 40px; padding: 0; line-height: 38px; display: inline-flex; align-items: center; justify-content: center;">
                 <i class="bi bi-arrow-left fs-5"></i>
             </a>
             <div>
@@ -107,14 +107,14 @@
                                 <input type="hidden" name="particular_name" id="particular_name_hidden"
                                        value="{% if record %}{{ record.particular_name or '' }}{% endif %}">
                                 <div class="form-text">
-                                    <a href="{{ url_for('finance.expense_ledgers', tab='particulars') }}" target="_blank" class="text-decoration-none small">
+                                    <a href="{{ url_for('expense_ledgers', tab='particulars') }}" target="_blank" class="text-decoration-none small">
                                         <i class="bi bi-plus-circle me-1"></i>Create new particular
                                     </a>
                                 </div>
                                 {% else %}
                                 <div class="alert alert-warning small rounded-3 mb-2 border-0 py-2">
                                     <i class="bi bi-exclamation-triangle me-2"></i>No particulars.
-                                    <a href="{{ url_for('finance.expense_ledgers', tab='particulars') }}" class="fw-bold">Create first</a>
+                                    <a href="{{ url_for('expense_ledgers', tab='particulars') }}" class="fw-bold">Create first</a>
                                 </div>
                                 <input type="text" name="particular_name" class="form-control" required
                                        placeholder="Enter expense type"
@@ -220,14 +220,14 @@
                                 <input type="hidden" name="particular_name" id="particular_name_hidden"
                                        value="{% if record %}{{ record.particular_name or '' }}{% endif %}">
                                 <div class="form-text">
-                                    <a href="{{ url_for('finance.expense_ledgers', tab='particulars') }}" target="_blank" class="text-decoration-none small">
+                                    <a href="{{ url_for('expense_ledgers', tab='particulars') }}" target="_blank" class="text-decoration-none small">
                                         <i class="bi bi-plus-circle me-1"></i>Create new particular
                                     </a>
                                 </div>
                                 {% else %}
                                 <div class="alert alert-warning small rounded-3 mb-2 border-0 py-2">
                                     <i class="bi bi-exclamation-triangle me-2"></i>No particulars.
-                                    <a href="{{ url_for('finance.expense_ledgers', tab='particulars') }}" class="fw-bold">Create first</a>
+                                    <a href="{{ url_for('expense_ledgers', tab='particulars') }}" class="fw-bold">Create first</a>
                                 </div>
                                 <input type="text" name="particular_name" class="form-control" required
                                        placeholder="Enter expense type"
@@ -329,14 +329,14 @@
                                 <input type="hidden" name="particular_name" id="particular_name_hidden"
                                        value="{% if record %}{{ record.particular_name or '' }}{% endif %}">
                                 <div class="form-text">
-                                    <a href="{{ url_for('finance.expense_ledgers', tab='particulars') }}" target="_blank" class="text-decoration-none small">
+                                    <a href="{{ url_for('expense_ledgers', tab='particulars') }}" target="_blank" class="text-decoration-none small">
                                         <i class="bi bi-plus-circle me-1"></i>Create new particular
                                     </a>
                                 </div>
                                 {% else %}
                                 <div class="alert alert-warning small rounded-3 mb-2 border-0 py-2">
                                     <i class="bi bi-exclamation-triangle me-2"></i>No particulars.
-                                    <a href="{{ url_for('finance.expense_ledgers', tab='particulars') }}" class="fw-bold">Create first</a>
+                                    <a href="{{ url_for('expense_ledgers', tab='particulars') }}" class="fw-bold">Create first</a>
                                 </div>
                                 <input type="text" name="particular_name" class="form-control" required
                                        placeholder="Enter expense type"
@@ -421,14 +421,14 @@
                                 <input type="hidden" name="particular_name" id="particular_name_hidden"
                                        value="{% if record %}{{ record.particular_name or '' }}{% endif %}">
                                 <div class="form-text">
-                                    <a href="{{ url_for('finance.expense_ledgers', tab='particulars') }}" target="_blank" class="text-decoration-none small">
+                                    <a href="{{ url_for('expense_ledgers', tab='particulars') }}" target="_blank" class="text-decoration-none small">
                                         <i class="bi bi-plus-circle me-1"></i>Create new particular
                                     </a>
                                 </div>
                                 {% else %}
                                 <div class="alert alert-warning small rounded-3 mb-2 border-0 py-2">
                                     <i class="bi bi-exclamation-triangle me-2"></i>No particulars defined.
-                                    <a href="{{ url_for('finance.expense_ledgers', tab='particulars') }}" class="fw-bold">Create particulars first</a>
+                                    <a href="{{ url_for('expense_ledgers', tab='particulars') }}" class="fw-bold">Create particulars first</a>
                                 </div>
                                 <input type="text" name="particular_name" class="form-control" required
                                        placeholder="Enter expense type e.g. Consumables, Repairs"
@@ -457,7 +457,7 @@
                                 <input type="hidden" name="unit_name" id="unit_name_hidden"
                                        value="{% if record %}{{ record.unit_name or '' }}{% endif %}">
                                 <div class="form-text">
-                                    <a href="{{ url_for('finance.expense_units_view') }}" target="_blank" class="text-decoration-none small">
+                                    <a href="{{ url_for('expense_units_view') }}" target="_blank" class="text-decoration-none small">
                                         <i class="bi bi-plus-circle me-1"></i>Add new unit
                                     </a>
                                 </div>
@@ -519,7 +519,7 @@
                     
                     <!-- Submit Buttons -->
                     <div class="d-flex justify-content-end gap-3 mt-5">
-                        <a href="{{ url_for('finance.voucher_register', v_type=v_type) }}" class="btn btn-light border px-4 py-2 rounded-pill">Cancel</a>
+                        <a href="{{ url_for('voucher_register', v_type=v_type) }}" class="btn btn-light border px-4 py-2 rounded-pill">Cancel</a>
                         <button type="submit" class="btn btn-success px-5 py-2 rounded-pill shadow-sm fw-bold">
                             <i class="bi bi-check2-circle me-2"></i>Save Voucher
                         </button>

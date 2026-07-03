@@ -62,7 +62,7 @@
                                 {% endif %}
                             </div>
                         </div>
-                        <form action="{{ url_for('finance.expense_unit_delete', uid=u.id) }}" method="post" class="d-inline" onsubmit="return confirm('Delete this unit?');">
+                        <form action="{{ url_for('expense_unit_delete', uid=u.id) }}" method="post" class="d-inline" onsubmit="return confirm('Delete this unit?');">
                             <button type="submit" class="btn btn-outline-danger btn-sm rounded-circle p-1" style="width:30px;height:30px;" title="Delete">
                                 <i class="bi bi-trash" style="font-size:0.75rem;"></i>
                             </button>

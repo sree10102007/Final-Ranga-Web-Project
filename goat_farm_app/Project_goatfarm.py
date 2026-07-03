@@ -1542,7 +1542,7 @@ def goats():
         FROM master_records m
         LEFT JOIN AllRecords a ON m.tag_no = a.tag_no
         GROUP BY m.tag_no, m.status, m.dob
-        ORDER BY CAST(m.tag_no AS INTEGER) ASC
+        ORDER BY LENGTH(m.tag_no) ASC, m.tag_no ASC
     ''').fetchall()
     
     goats_summary = []

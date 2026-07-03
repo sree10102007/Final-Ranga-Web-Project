@@ -281,7 +281,7 @@
     <!-- Filter Card Row -->
     <div class="row mb-5 d-print-none">
         <div class="col-12">
-            <form method="POST" action="{{ url_for('finance.pnl') }}" class="glass-card p-3 shadow-sm" style="border: 2px solid #000000; border-radius: 12px; background: #ffffff;">
+            <form method="POST" action="{{ url_for('pnl') }}" class="glass-card p-3 shadow-sm" style="border: 2px solid #000000; border-radius: 12px; background: #ffffff;">
                 <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
                     <!-- Left Section: Month and Year Dropdowns -->
                     <div class="d-flex align-items-center gap-2 flex-wrap">
@@ -354,7 +354,7 @@
         <div class="card border-0 shadow-sm rounded-4 bg-light">
             <div class="card-body p-4">
                 <h6 class="fw-bold mb-3 text-dark"><i class="bi bi-sliders me-2 text-success"></i>Stock Valuation & Overrides</h6>
-                <form method="POST" action="{{ url_for('finance.pnl') }}" class="row g-3">
+                <form method="POST" action="{{ url_for('pnl') }}" class="row g-3">
                     <input type="hidden" name="month" value="{{ selected_month }}">
                     <input type="hidden" name="year" value="{{ selected_year }}">
                     <input type="hidden" name="include_stock" value="1">
@@ -776,13 +776,13 @@
                 </div>
             </div>
             <div class="card-footer bg-white border-top p-3 d-flex gap-3 flex-wrap">
-                <a href="{{ url_for('finance.expense_ledgers') }}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                <a href="{{ url_for('expense_ledgers') }}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
                     <i class="bi bi-journal-bookmark me-1"></i>Ledger Accounts
                 </a>
-                <a href="{{ url_for('finance.expense_ledgers', tab='particulars') }}" class="btn btn-sm btn-outline-warning rounded-pill px-3 text-dark">
+                <a href="{{ url_for('expense_ledgers', tab='particulars') }}" class="btn btn-sm btn-outline-warning rounded-pill px-3 text-dark">
                     <i class="bi bi-tags me-1"></i>Expense Particulars
                 </a>
-                <a href="{{ url_for('finance.voucher_register', v_type='other') }}" class="btn btn-sm btn-outline-dark rounded-pill px-3">
+                <a href="{{ url_for('voucher_register', v_type='other') }}" class="btn btn-sm btn-outline-dark rounded-pill px-3">
                     <i class="bi bi-receipt-cutoff me-1"></i>Other Vouchers
                 </a>
             </div>
