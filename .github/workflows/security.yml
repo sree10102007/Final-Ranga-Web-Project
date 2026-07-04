@@ -26,8 +26,25 @@ jobs:
 
       - name: Run detect-secrets scan
         run: |
+          cp .secrets.baseline .secrets.baseline.old
           detect-secrets scan --baseline .secrets.baseline .
-          git diff --exit-code .secrets.baseline
+          python -c "
+          import json, sys
+          def get_hashes(path):
+              with open(path) as f:
+                  data = json.load(f)
+              return {f.get('hashed_secret') for findings in data.get('results', {}).values() for f in findings if f.get('hashed_secret')}
+
+          old_hashes = get_hashes('.secrets.baseline.old')
+          new_hashes = get_hashes('.secrets.baseline')
+          added = new_hashes - old_hashes
+          if added:
+              print('CRITICAL: New, unaudited secrets detected!')
+              for secret_hash in added:
+                  print(f'  New secret hash: {secret_hash}')
+              sys.exit(1)
+          print('No new secrets detected.')
+          "
 
   supply-chain:
     name: Software Supply Chain Security
@@ -83,6 +100,20 @@ jobs:
     name: Dynamic Application Security Testing (DAST)
     runs-on: ubuntu-latest
     needs: sast
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -96,6 +127,17 @@ jobs:
         run: |
           pip install -r goat_farm_app/requirements.txt
 
+      - name: Run Database Migrations and Seed
+        env:
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_NAME: postgres
+          DB_USER: postgres
+          DB_PASSWORD: postgres
+        run: |
+          python goat_farm_app/db_migration.py
+          python goat_farm_app/seed_mock_data.py
+
       - name: Start Application in Background
         env:
           FLASK_ENV: testing
@@ -105,13 +147,24 @@ jobs:
           DB_NAME: postgres
           DB_USER: postgres
           DB_PASSWORD: postgres
+          LIMITER_STORAGE_URI: memory://
         run: |
-          # Start a mock or local version for dynamic baseline scans
+          export DB_ENCRYPTION_KEY=$(python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())")
           python goat_farm_app/Project_goatfarm.py &
-          sleep 5 # Wait for app startup
+          # Wait up to 30 seconds for the app to respond
+          for i in {1..30}; do
+            if curl -s http://127.0.0.1:5001/ > /dev/null; then
+              echo "App is successfully running!"
+              exit 0
+            fi
+            echo "Waiting for app to start..."
+            sleep 1
+          done
+          echo "App failed to start in time"
+          exit 1
 
       - name: Run OWASP ZAP Baseline Scan
-        uses: zaproxy/action-baseline@v0.7.0
+        uses: zaproxy/action-baseline@v0.15.0
         with:
           target: 'http://127.0.0.1:5001/'
           rules_file_name: 'zap.conf'
