@@ -126,7 +126,6 @@ jobs:
         env:
           FLASK_ENV: testing
           SECRET_KEY: test_secret_key_12345
-          DB_ENCRYPTION_KEY: ZrTHx00RLEIS8MtqdeQzH4xW-MeviPX0phLUX6s8sys=
           DB_HOST: localhost
           DB_PORT: 5432
           DB_NAME: postgres
@@ -134,6 +133,7 @@ jobs:
           DB_PASSWORD: postgres
           LIMITER_STORAGE_URI: memory://
         run: |
+          export DB_ENCRYPTION_KEY=$(python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())")
           python goat_farm_app/Project_goatfarm.py &
           # Wait up to 30 seconds for the app to respond
           for i in {1..30}; do
