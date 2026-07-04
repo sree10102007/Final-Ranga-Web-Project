@@ -146,4 +146,4 @@ This project is licensed under the MIT License — see the [LICENSE](LICENSE) fi
 
 ---
 
-> Built with ❤️ for **Ranga Farms**
+> Built for **Ranga Farms**
