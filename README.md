@@ -144,6 +144,14 @@ python goat_farm_app/seed_mock_data.py
 
 This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
 
+## 🔒 Security Baseline
+
+We use `detect-secrets` to prevent credentials from leaking into the repository. 
+
+> [!IMPORTANT]
+> **Path Separator Normalization:**
+> Always regenerate or update the `.secrets.baseline` file using a **Linux environment** (such as WSL, a Docker container, or Unix/macOS shells) so that path separators are written as forward slashes (`/`). Running `detect-secrets` on native Windows generates backslashes (`\`), which will fail the GitHub Actions CI pipeline because GitHub runner environments are Linux-based.
+
 ---
 
 > Built with ❤️ for **Ranga Farms**
