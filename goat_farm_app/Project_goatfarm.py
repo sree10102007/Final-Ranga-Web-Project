@@ -411,12 +411,33 @@ def internal_error(error):
 
 
 
+def parse_date_safely(date_val):
+    if not date_val:
+        return None
+    from datetime import date, datetime
+    if isinstance(date_val, datetime):
+        return date_val.date()
+    if isinstance(date_val, date):
+        return date_val
+    if isinstance(date_val, str):
+        date_str = date_val.strip()
+        if not date_str:
+            return None
+        for fmt in ('%Y-%m-%d', '%Y-%m-%d %H:%M:%S', '%d-%m-%Y', '%m-%d-%Y'):
+            try:
+                return datetime.strptime(date_str, fmt).date()
+            except ValueError:
+                continue
+    return None
+
 def calculate_age_str(dob_str):
     if not dob_str:
         return 'N/A'
     try:
+        dob = parse_date_safely(dob_str)
+        if not dob:
+            return 'N/A'
         from datetime import datetime
-        dob = datetime.strptime(dob_str, '%Y-%m-%d').date()
         today = datetime.now().date()
         if dob > today:
             return 'Newborn'
@@ -461,8 +482,10 @@ def parse_dob_to_age_dict(dob_str):
     if not dob_str:
         return {'years': 0, 'months': 0, 'days': 0}
     try:
+        dob = parse_date_safely(dob_str)
+        if not dob:
+            return {'years': 0, 'months': 0, 'days': 0}
         from datetime import datetime
-        dob = datetime.strptime(dob_str, '%Y-%m-%d').date()
         today = datetime.now().date()
         if dob > today:
             return {'years': 0, 'months': 0, 'days': 0}
@@ -486,8 +509,10 @@ def calculate_kid_age_months(birth_date_str):
     if not birth_date_str:
         return 0.0
     try:
+        birth_date = parse_date_safely(birth_date_str)
+        if not birth_date:
+            return 0.0
         from datetime import datetime
-        birth_date = datetime.strptime(birth_date_str, '%Y-%m-%d').date()
         today = datetime.now().date()
         if birth_date > today:
             return 0.0
@@ -1654,12 +1679,9 @@ def goat_batches():
         animal = dict(row)
         dob_str = animal.get('dob')
         days_old = 9999
-        if dob_str:
-            try:
-                dob_date = datetime.strptime(dob_str, '%Y-%m-%d').date()
-                days_old = (today - dob_date).days
-            except Exception:
-                pass
+        dob_date = parse_date_safely(dob_str)
+        if dob_date:
+            days_old = (today - dob_date).days
         animal['days_old'] = days_old
         animal['age_str'] = calculate_age_str(dob_str)
         all_animals.append(animal)
@@ -1668,12 +1690,9 @@ def goat_batches():
         animal = dict(row)
         dob_str = animal.get('dob')
         days_old = 9999
-        if dob_str:
-            try:
-                dob_date = datetime.strptime(dob_str, '%Y-%m-%d').date()
-                days_old = (today - dob_date).days
-            except Exception:
-                pass
+        dob_date = parse_date_safely(dob_str)
+        if dob_date:
+            days_old = (today - dob_date).days
         animal['days_old'] = days_old
         animal['age_str'] = calculate_age_str(dob_str)
         all_animals.append(animal)
@@ -2588,12 +2607,9 @@ def get_goats_in_batch(batch_number):
         animal = dict(row)
         dob_str = animal.get('dob')
         days_old = 9999
-        if dob_str:
-            try:
-                dob_date = datetime.strptime(dob_str, '%Y-%m-%d').date()
-                days_old = (today - dob_date).days
-            except Exception:
-                pass
+        dob_date = parse_date_safely(dob_str)
+        if dob_date:
+            days_old = (today - dob_date).days
         animal['days_old'] = days_old
         all_animals.append(animal)
         
@@ -2601,12 +2617,9 @@ def get_goats_in_batch(batch_number):
         animal = dict(row)
         dob_str = animal.get('dob')
         days_old = 9999
-        if dob_str:
-            try:
-                dob_date = datetime.strptime(dob_str, '%Y-%m-%d').date()
-                days_old = (today - dob_date).days
-            except Exception:
-                pass
+        dob_date = parse_date_safely(dob_str)
+        if dob_date:
+            days_old = (today - dob_date).days
         animal['days_old'] = days_old
         all_animals.append(animal)
         
@@ -2676,37 +2689,31 @@ def feed():
     
     for row in goats_raw:
         dob_str = row['dob']
-        if dob_str:
-            try:
-                dob_date = datetime.strptime(dob_str, '%Y-%m-%d').date()
-                days = (today - dob_date).days
-                if days <= 182:
-                    batch_counts[1] += 1
-                elif days <= 365:
-                    batch_counts[2] += 1
-                elif days <= 730:
-                    batch_counts[3] += 1
-                else:
-                    batch_counts[4] += 1
-            except Exception:
-                pass
+        dob_date = parse_date_safely(dob_str)
+        if dob_date:
+            days = (today - dob_date).days
+            if days <= 182:
+                batch_counts[1] += 1
+            elif days <= 365:
+                batch_counts[2] += 1
+            elif days <= 730:
+                batch_counts[3] += 1
+            else:
+                batch_counts[4] += 1
                 
     for row in kids_raw:
         dob_str = row['dob']
-        if dob_str:
-            try:
-                dob_date = datetime.strptime(dob_str, '%Y-%m-%d').date()
-                days = (today - dob_date).days
-                if days <= 182:
-                    batch_counts[1] += 1
-                elif days <= 365:
-                    batch_counts[2] += 1
-                elif days <= 730:
-                    batch_counts[3] += 1
-                else:
-                    batch_counts[4] += 1
-            except Exception:
-                pass
+        dob_date = parse_date_safely(dob_str)
+        if dob_date:
+            days = (today - dob_date).days
+            if days <= 182:
+                batch_counts[1] += 1
+            elif days <= 365:
+                batch_counts[2] += 1
+            elif days <= 730:
+                batch_counts[3] += 1
+            else:
+                batch_counts[4] += 1
                 
     return render_template('feed.html',
                            feed_records=feed_records,
