@@ -1,32 +1,32 @@
 # Bandit Security Scanner Configuration
 # Run using: bandit -c bandit.yml -r .
 
-# Profiles can contain list of checks to run (or exclude)
-profiles:
-  security_checks:
-    include:
-      - B101  # assert_used
-      - B102  # exec_used
-      - B103  # set_bad_file_permissions
-      - B104  # hardcoded_bind_all_interfaces
-      - B105  # hardcoded_password_string
-      - B106  # hardcoded_password_funcarg
-      - B107  # hardcoded_password_default
-      - B108  # hardcoded_tmp_directory
-      - B110  # try_except_pass
-      - B112  # try_except_continue
-      - B201  # flask_debug_true
-      - B301  # pickle
-      - B303  # md5
-      - B307  # eval
-      - B311  # random
-      - B324  # hashlib_new_with_bad_single_argument
-      - B501  # request_with_no_cert_validation
-      - B506  # yaml_load
-      - B601  # subproc_shell_by_default
-      - B602  # subprocess_popen_with_shell_equals_true
-      - B603  # subprocess_without_shell_equals_true
-      - B608  # hardcoded_sql_expressions
+# Top level tests to include or skip
+tests:
+  - B102  # exec_used
+  - B103  # set_bad_file_permissions
+  - B104  # hardcoded_bind_all_interfaces
+  - B105  # hardcoded_password_string
+  - B106  # hardcoded_password_funcarg
+  - B107  # hardcoded_password_default
+  - B108  # hardcoded_tmp_directory
+  - B110  # try_except_pass
+  - B112  # try_except_continue
+  - B201  # flask_debug_true
+  - B301  # pickle
+  - B303  # md5
+  - B307  # eval
+  - B311  # random
+  - B324  # hashlib_new_with_bad_single_argument
+  - B501  # request_with_no_cert_validation
+  - B506  # yaml_load
+  - B601  # subproc_shell_by_default
+  - B602  # subprocess_popen_with_shell_equals_true
+  - B603  # subprocess_without_shell_equals_true
+  - B608  # hardcoded_sql_expressions
+
+skips:
+  - B101  # assert_used
 
 # Exclude directories
 exclude_dirs:
@@ -35,3 +35,4 @@ exclude_dirs:
   - venv
   - .venv
   - __pycache__
+

@@ -26,13 +26,21 @@ jobs:
 
       - name: Run detect-secrets scan
         run: |
-          cp .secrets.baseline .secrets.baseline.old
+          # Ensure old baseline file behaves correctly even if it does not exist yet
+          if [ -f .secrets.baseline ]; then
+            cp .secrets.baseline .secrets.baseline.old
+          else
+            echo '{"version":"1.5.0","results":{}}' > .secrets.baseline.old
+          fi
           detect-secrets scan --baseline .secrets.baseline .
           python -c "
           import json, sys
           def get_hashes(path):
-              with open(path) as f:
-                  data = json.load(f)
+              try:
+                  with open(path) as f:
+                      data = json.load(f)
+              except Exception:
+                  return set()
               return {f.get('hashed_secret') for findings in data.get('results', {}).values() for f in findings if f.get('hashed_secret')}
 
           old_hashes = get_hashes('.secrets.baseline.old')
@@ -45,6 +53,7 @@ jobs:
               sys.exit(1)
           print('No new secrets detected.')
           "
+
 
   supply-chain:
     name: Software Supply Chain Security
@@ -165,6 +174,7 @@ jobs:
           DB_USER: postgres
           DB_PASSWORD: postgres
           DB_SSLMODE: disable
+          PYTHONPATH: .
         run: |
           python goat_farm_app/db_migration.py
           python goat_farm_app/seed_mock_data.py
@@ -180,6 +190,7 @@ jobs:
           DB_PASSWORD: postgres
           DB_SSLMODE: disable
           LIMITER_STORAGE_URI: memory://
+          PYTHONPATH: .
         run: |
           export DB_ENCRYPTION_KEY=$(python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())")
           python goat_farm_app/Project_goatfarm.py &
@@ -195,6 +206,7 @@ jobs:
           echo "App failed to start in time — dumping last 50 lines of logs:"
           # Try to capture any output written by Flask before dying
           exit 1
+
 
       # FIX 2: Set fail_action: false so the ZAP step itself never kills the
       # job.  A subsequent jq step parses the JSON report and fails the job

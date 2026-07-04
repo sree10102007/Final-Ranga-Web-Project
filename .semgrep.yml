@@ -26,9 +26,15 @@ rules:
     severity: ERROR
 
   - id: csrf-protection-missing
-    pattern: |
-      $APP = Flask(...)
-      # missing CSRFProtect($APP)
+    patterns:
+      - pattern: |
+          $APP = Flask(...)
+      - pattern-not: |
+          $APP = Flask(...)
+          ...
+          CSRFProtect($APP)
     message: CSRF protection is not globally enabled for the Flask application.
     languages: [python]
     severity: ERROR
+
+
