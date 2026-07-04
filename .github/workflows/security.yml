@@ -28,7 +28,29 @@ jobs:
         run: |
           cp .secrets.baseline .secrets.baseline.old
           detect-secrets scan --baseline .secrets.baseline .
-          diff <(jq --sort-keys 'del(.generated_at)' .secrets.baseline.old) <(jq --sort-keys 'del(.generated_at)' .secrets.baseline)
+          python -c "
+          import json, sys
+          def get_secrets(path):
+              with open(path) as f:
+                  data = json.load(f)
+              secrets = set()
+              for filepath, findings in data.get('results', {}).items():
+                  for f in findings:
+                      if f.get('is_secret') == False:
+                          continue
+                      secrets.add((filepath.replace(chr(92), '/'), f.get('hashed_secret')))
+              return secrets
+
+          old_secrets = get_secrets('.secrets.baseline.old')
+          new_secrets = get_secrets('.secrets.baseline')
+          added = new_secrets - old_secrets
+          if added:
+              print('CRITICAL: New, unaudited secrets detected!')
+              for filepath, secret_hash in added:
+                  print(f'  {filepath} : {secret_hash}')
+              sys.exit(1)
+          print('No new secrets detected.')
+          "
 
   supply-chain:
     name: Software Supply Chain Security
