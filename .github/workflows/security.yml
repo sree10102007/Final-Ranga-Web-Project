@@ -26,8 +26,9 @@ jobs:
 
       - name: Run detect-secrets scan
         run: |
+          cp .secrets.baseline .secrets.baseline.old
           detect-secrets scan --baseline .secrets.baseline .
-          git diff --exit-code .secrets.baseline
+          diff <(jq --sort-keys 'del(.generated_at)' .secrets.baseline.old) <(jq --sort-keys 'del(.generated_at)' .secrets.baseline)
 
   supply-chain:
     name: Software Supply Chain Security
