@@ -84,6 +84,20 @@ jobs:
     name: Dynamic Application Security Testing (DAST)
     runs-on: ubuntu-latest
     needs: sast
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -97,19 +111,41 @@ jobs:
         run: |
           pip install -r goat_farm_app/requirements.txt
 
-      - name: Start Application in Background
+      - name: Run Database Migrations and Seed
         env:
-          FLASK_ENV: testing
-          SECRET_KEY: test_secret_key_12345
           DB_HOST: localhost
           DB_PORT: 5432
           DB_NAME: postgres
           DB_USER: postgres
           DB_PASSWORD: postgres
         run: |
-          # Start a mock or local version for dynamic baseline scans
+          python goat_farm_app/db_migration.py
+          python goat_farm_app/seed_mock_data.py
+
+      - name: Start Application in Background
+        env:
+          FLASK_ENV: testing
+          SECRET_KEY: test_secret_key_12345
+          DB_ENCRYPTION_KEY: ZrTHx00RLEIS8MtqdeQzH4xW-MeviPX0phLUX6s8sys=
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_NAME: postgres
+          DB_USER: postgres
+          DB_PASSWORD: postgres
+          LIMITER_STORAGE_URI: memory://
+        run: |
           python goat_farm_app/Project_goatfarm.py &
-          sleep 5 # Wait for app startup
+          # Wait up to 30 seconds for the app to respond
+          for i in {1..30}; do
+            if curl -s http://127.0.0.1:5001/ > /dev/null; then
+              echo "App is successfully running!"
+              exit 0
+            fi
+            echo "Waiting for app to start..."
+            sleep 1
+          done
+          echo "App failed to start in time"
+          exit 1
 
       - name: Run OWASP ZAP Baseline Scan
         uses: zaproxy/action-baseline@v0.15.0
