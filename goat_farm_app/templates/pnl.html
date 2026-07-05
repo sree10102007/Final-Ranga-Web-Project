@@ -4,52 +4,77 @@
 {% block page_title %}Profit & Loss Statement{% endblock %}
 
 {% block content %}
-<style>
+<style nonce="{{ csp_nonce }}">
+    /* Core Variables with a curated, professional color scheme */
     :root {
-        --corp-blue: #000000;
-        --corp-blue-light: #000000;
-        --corp-green: #000000;
-        --corp-red: #000000;
-        --bg-glass: #ffffff;
-        --border-color: #000000;
+        --pnl-primary: #1b4d3e;     /* Deep forest green */
+        --pnl-primary-dark: #12352b;
+        --pnl-bg-light: #f8fafc;
+        --pnl-border: #e2e8f0;
+        --pnl-text: #334155;
+        --pnl-text-dark: #0f172a;
+        --pnl-text-muted: #64748b;
+        --pnl-green: #10b981;       /* Emerald */
+        --pnl-green-bg: #ecfdf5;
+        --pnl-red: #ef4444;         /* Red */
+        --pnl-red-bg: #fef2f2;
     }
 
-    .glass-card {
+    /* Layout & Cards */
+    .pnl-card {
         background: #ffffff;
-        border: 2px solid #000000;
-        border-radius: 12px;
-        box-shadow: none;
+        border: 1px solid var(--pnl-border);
+        border-radius: 16px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+        margin-bottom: 25px;
     }
 
     .corporate-container {
-        font-family: 'Inter', 'Outfit', sans-serif;
+        font-family: 'Inter', 'Outfit', system-ui, -apple-system, sans-serif;
         background-color: #ffffff;
-        border: 2px solid #000000;
-        border-radius: 12px;
-        box-shadow: none;
+        border: 1px solid var(--pnl-border);
+        border-radius: 16px;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
         overflow: hidden;
+        margin-bottom: 30px;
     }
 
+    /* Statement Header styling */
     .statement-header {
-        background-color: #000000;
+        background: linear-gradient(135deg, var(--pnl-primary) 0%, var(--pnl-primary-dark) 100%);
         color: #ffffff;
-        padding: 30px 40px;
-        border-bottom: 2px solid #000000;
+        padding: 24px 32px;
+        border-bottom: 3px solid var(--pnl-primary-dark);
     }
 
     .statement-title {
-        font-size: 1.6rem;
-        font-weight: 900;
-        letter-spacing: 1px;
+        font-size: 1.5rem;
+        font-weight: 800;
+        letter-spacing: -0.025em;
+        margin: 0;
         color: #ffffff;
     }
 
     .statement-subtitle {
-        font-size: 0.9rem;
-        color: #a1a1aa;
-        font-weight: 500;
+        font-size: 0.75rem;
+        color: #a7f3d0;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        margin-top: 4px;
     }
 
+    .period-badge {
+        font-size: 0.8rem;
+        font-weight: 600;
+        border: 1px solid rgba(255, 255, 255, 0.3) !important;
+        background-color: rgba(255, 255, 255, 0.1) !important;
+        color: #ffffff !important;
+        border-radius: 50px;
+        padding: 6px 16px;
+    }
+
+    /* Tables Styling */
     .table-financial {
         width: 100%;
         margin-bottom: 0;
@@ -57,113 +82,151 @@
     }
 
     .table-financial th {
-        background-color: #ffffff;
-        color: #000000;
-        font-weight: 800;
-        font-size: 0.82rem;
+        background-color: var(--pnl-bg-light);
+        color: var(--pnl-text-muted);
+        font-weight: 700;
+        font-size: 0.78rem;
         text-transform: uppercase;
-        letter-spacing: 0.8px;
-        padding: 12px 30px;
-        border-bottom: 2px solid #000000;
+        letter-spacing: 0.05em;
+        padding: 12px 24px;
+        border-bottom: 2px solid var(--pnl-border);
     }
 
     .table-financial td {
-        padding: 12px 30px;
-        font-size: 0.92rem;
-        color: #000000;
-        border-bottom: 1px solid #cbd5e1;
+        padding: 11px 24px;
+        font-size: 0.88rem;
+        color: var(--pnl-text);
+        border-bottom: 1px solid var(--pnl-border);
         vertical-align: middle;
     }
 
+    /* Table Indentations and Rows */
     .section-title-row {
-        background-color: #f1f5f9;
-        font-weight: 800;
-        color: #000000 !important;
-        font-size: 0.95rem !important;
-        letter-spacing: -0.2px;
+        background-color: var(--pnl-bg-light);
+        font-weight: 700;
+        color: var(--pnl-text-dark);
     }
 
     .sub-section-row {
         font-weight: 700;
-        color: #000000;
+        color: var(--pnl-text-dark);
         background-color: #ffffff;
     }
 
     .indent-1 {
-        padding-left: 30px !important;
+        padding-left: 24px !important;
     }
 
     .indent-2 {
-        padding-left: 50px !important;
-        font-style: normal;
+        padding-left: 44px !important;
+    }
+
+    .indent-3 {
+        padding-left: 64px !important;
     }
 
     .total-row {
-        font-weight: 800;
-        color: #000000;
+        font-weight: 700;
+        color: var(--pnl-text-dark);
         background-color: #ffffff;
-        border-top: 1.5px solid #000000;
-        border-bottom: 2px solid #000000;
+        border-top: 1.5px solid var(--pnl-text-dark);
+        border-bottom: 1.5px solid var(--pnl-text-dark);
     }
 
     .total-row-grand {
         font-weight: 800;
-        font-size: 1.05rem;
+        font-size: 1rem;
         background-color: #ffffff;
-        border-top: 2px solid #000000;
-        border-bottom: 4px double #000000;
+        border-top: 2px solid var(--pnl-text-dark);
+        border-bottom: 4px double var(--pnl-text-dark);
     }
 
     .financial-number {
         font-family: 'JetBrains Mono', monospace;
         font-weight: 700;
         text-align: right;
-        color: #000000;
+        color: var(--pnl-text-dark);
     }
 
     .number-negative {
-        color: #000000;
+        color: var(--pnl-red);
     }
 
     .drilldown-link {
         cursor: pointer;
-        transition: all 0.2s ease;
+        transition: all 0.15s ease;
     }
 
     .drilldown-link:hover {
-        color: #000000 !important;
+        color: var(--pnl-primary) !important;
         text-decoration: underline;
-        font-weight: bold;
-    }
-
-    #print-report-container {
-        display: none;
+        font-weight: 600;
     }
 
     .collapsible-header {
         cursor: pointer;
         user-select: none;
-        transition: background-color 0.15s ease;
     }
     
     .collapsible-header:hover {
-        background-color: #f1f5f9 !important;
+        background-color: var(--pnl-bg-light) !important;
     }
     
     .toggle-chevron {
         display: inline-block;
         transition: transform 0.2s ease;
-        font-size: 0.75rem;
-        width: 1.2rem;
+        font-size: 0.7rem;
+        width: 1rem;
         text-align: center;
+        margin-right: 4px;
     }
     
     .collapsible-header.expanded .toggle-chevron {
         transform: rotate(90deg);
     }
 
+    /* Print styling placeholder */
+    #print-report-container {
+        display: none;
+    }
+
+    /* Toolbar Select Widths */
+    .select-month-width {
+        min-width: 125px;
+        font-weight: 600;
+        border: 1.5px solid var(--pnl-border);
+    }
+
+    .select-year-width {
+        min-width: 95px;
+        font-weight: 600;
+        border: 1.5px solid var(--pnl-border);
+    }
+
+    .pnl-switch-input {
+        width: 2.2em;
+        height: 1.1em;
+        margin-top: 0;
+        border: 1.5px solid var(--pnl-border);
+    }
+
+    /* Modal styling */
+    .modal-border-accent-income {
+        border: 2px solid var(--pnl-green) !important;
+    }
+
+    .modal-border-accent-expense {
+        border: 2px solid var(--pnl-red) !important;
+    }
+
+    .custom-scroll-container {
+        max-height: 450px;
+        overflow-y: auto;
+    }
+
+    /* Print Mode Styles */
     @media print {
-        #sidebar, #topbar, .d-print-none, form, .btn, .collapse, footer, #notification-toast-container, #traditional-container {
+        #sidebar, #topbar, .no-print-section, .d-print-none, form, .btn, .collapse, footer, #traditional-container {
             display: none !important;
         }
         
@@ -174,98 +237,24 @@
         .report-table th, .report-table td {
             padding: 8px 12px !important;
             font-size: 0.85rem !important;
-            border: 1px solid #cbd5e1 !important;
-            color: #000000 !important;
+            border: 1px solid var(--pnl-border) !important;
+            color: var(--pnl-text-dark) !important;
         }
         
         .report-section-header td {
-            background-color: #f1f5f9 !important;
+            background-color: var(--pnl-bg-light) !important;
             font-weight: bold !important;
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
         }
         
         .print-signatures {
-            margin-top: 80px !important;
-        }
-        
-        #main-content {
-            margin-left: 0 !important;
-            padding-top: 0 !important;
-            min-height: auto !important;
-            background: #ffffff !important;
-        }
-        
-        .page-body {
-            padding: 0 !important;
-            margin: 0 !important;
-            max-width: 100% !important;
-        }
-        
-        .container {
-            max-width: 100% !important;
-            width: 100% !important;
-            padding: 0 !important;
-            margin: 0 !important;
-        }
-
-        .corporate-container {
-            border: 2px solid #000000 !important;
-            border-radius: 0 !important;
-            box-shadow: none !important;
-            margin: 0 !important;
-            width: 100% !important;
-            overflow: visible !important;
-        }
-        
-        .statement-header {
-            background-color: #15803d !important;
-            color: #ffffff !important;
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
-            padding: 20px !important;
-        }
-        
-        .statement-title {
-            color: #ffffff !important;
-        }
-        
-        .statement-subtitle {
-            color: #e2e8f0 !important;
-        }
-        
-        .table-financial th {
-            background-color: #f1f5f9 !important;
-            color: #000000 !important;
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
-            border-bottom: 2px solid #000000 !important;
-        }
-        
-        .section-title-row {
-            background-color: #f1f5f9 !important;
-            color: #000000 !important;
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
-        }
-        
-        .table-financial td {
-            border-bottom: 1px solid #cbd5e1 !important;
-        }
-
-        .total-row, .total-row-grand {
-            background-color: #ffffff !important;
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
+            margin-top: 60px !important;
         }
         
         body {
-            background-color: #ffffff !important;
+            background: #ffffff !important;
             color: #000000 !important;
-        }
-        
-        tr {
-            page-break-inside: avoid;
         }
     }
 </style>
@@ -279,14 +268,14 @@
     </div>
 
     <!-- Filter Card Row -->
-    <div class="row mb-5 d-print-none">
+    <div class="row mb-4 d-print-none">
         <div class="col-12">
-            <form method="POST" action="{{ url_for('pnl') }}" class="glass-card p-3 shadow-sm" data-style="border: 2px solid #000000; border-radius: 12px; background: #ffffff;">
+            <form method="POST" action="{{ url_for('pnl') }}" class="pnl-card p-3 bg-white">
                 <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
                     <!-- Left Section: Month and Year Dropdowns -->
                     <div class="d-flex align-items-center gap-2 flex-wrap">
                         <span class="small fw-bold text-dark text-uppercase">Month:</span>
-                        <select name="month" class="form-select form-select-sm rounded-pill text-dark border-dark" data-style="min-width: 125px; font-weight: 600; border: 1.5px solid #000;">
+                        <select name="month" id="monthFilter" class="form-select form-select-sm rounded-pill text-dark select-month-width">
                             <option value="All" {% if selected_month == 'All' %}selected{% endif %}>All Months</option>
                             <option value="01" {% if selected_month == '01' %}selected{% endif %}>January</option>
                             <option value="02" {% if selected_month == '02' %}selected{% endif %}>February</option>
@@ -303,44 +292,41 @@
                         </select>
                         
                         <span class="small fw-bold text-dark text-uppercase ms-2">Year:</span>
-                        <select name="year" class="form-select form-select-sm rounded-pill text-dark border-dark" data-style="min-width: 95px; font-weight: 600; border: 1.5px solid #000;">
+                        <select name="year" id="yearFilter" class="form-select form-select-sm rounded-pill text-dark select-year-width">
                             {% for y in range(2024, 2061) %}
                                 <option value="{{ y }}" {% if selected_year == y|string %}selected{% endif %}>{{ y }}</option>
                             {% endfor %}
                         </select>
                     </div>
 
-                    <!-- Right Section: Switch and Action Buttons (Flat structure) -->
+                    <!-- Right Section: Switch and Action Buttons -->
                     <div class="d-flex flex-wrap align-items-center gap-3">
-                        <!-- Include Stock Valuation Toggle -->
                         <div class="form-check form-switch mb-0 d-flex align-items-center gap-2">
-                            <input class="form-check-input border-dark cursor-pointer" type="checkbox" name="include_stock" id="includeStock" {% if include_stock %}checked{% endif %} data-onchange="this.form.submit()" data-style="width: 2.2em; height: 1.1em; margin-top: 0; border: 1.5px solid #000;">
-                            <label class="form-check-label small fw-bold text-muted cursor-pointer mb-0" for="includeStock" data-style="user-select: none; white-space: nowrap; font-size: 0.8rem;">Include Stock Valuation</label>
+                            <input class="form-check-input cursor-pointer pnl-switch-input" type="checkbox" name="include_stock" id="includeStock" {% if include_stock %}checked{% endif %}>
+                            <label class="form-check-label small fw-bold text-muted cursor-pointer mb-0" for="includeStock">Stock Valuation</label>
                         </div>
 
-                        <!-- Hide Browser Header/Footer Toggle -->
                         <div class="form-check form-switch mb-0 d-flex align-items-center gap-2">
-                            <input class="form-check-input border-dark cursor-pointer" type="checkbox" id="toggleHeaders" data-onchange="toggleBrowserHeadersFooters(this.checked)" data-style="width: 2.2em; height: 1.1em; margin-top: 0; border: 1.5px solid #000;">
-                            <label class="form-check-label small fw-bold text-muted cursor-pointer mb-0" for="toggleHeaders" data-style="user-select: none; white-space: nowrap; font-size: 0.8rem;">Hide Browser Header/Footer</label>
+                            <input class="form-check-input cursor-pointer pnl-switch-input" type="checkbox" id="toggleHeaders">
+                            <label class="form-check-label small fw-bold text-muted cursor-pointer mb-0" for="toggleHeaders">Hide Header/Footer</label>
                         </div>
 
-                        <!-- Buttons -->
-                        <button class="btn btn-sm btn-outline-secondary rounded-pill px-3 fw-bold text-dark border-dark" type="button" data-bs-toggle="collapse" data-bs-target="#stockOverrides" title="Manual Stock Valuation" data-style="border-width: 1.5px;">
+                        <button class="btn btn-sm btn-outline-secondary rounded-pill px-3 fw-bold text-dark" type="button" data-bs-toggle="collapse" data-bs-target="#stockOverrides" title="Manual Stock Valuation">
                             <i class="bi bi-sliders me-1"></i> Stock Valuation
                         </button>
-                        <button class="btn btn-sm btn-info rounded-pill px-3 fw-bold text-white shadow-sm border-dark" type="button" data-onclick="viewDrilldown('All')" title="View Detailed General Ledger" data-style="border-width: 1.5px;">
+                        <button id="detailedLedgerBtn" class="btn btn-sm btn-info rounded-pill px-3 fw-bold text-white shadow-sm" type="button" title="View Detailed General Ledger">
                             <i class="bi bi-list-task me-1"></i> Detailed Ledger
                         </button>
-                        <button class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold text-dark border-dark" type="button" id="btnToggleExpandAll" title="Expand or Collapse All Groups" data-style="border-width: 1.5px;">
+                        <button class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold text-dark" type="button" id="btnToggleExpandAll" title="Expand or Collapse All Groups">
                             <i class="bi bi-arrows-expand me-1"></i> Expand All
                         </button>
-                        <button class="btn btn-sm btn-success rounded-pill px-3 fw-bold shadow-sm border-dark" type="submit" data-style="border-width: 1.5px;">
+                        <button class="btn btn-sm btn-success rounded-pill px-3 fw-bold shadow-sm" type="submit">
                             <i class="bi bi-funnel me-1"></i> Apply Filter
                         </button>
-                        <button class="btn btn-sm btn-primary rounded-pill px-3 fw-bold shadow-sm border-dark" type="button" data-onclick="window.print()" data-style="border-width: 1.5px;">
+                        <button id="printBtn" class="btn btn-sm btn-primary rounded-pill px-3 fw-bold shadow-sm" type="button">
                             <i class="bi bi-printer me-1"></i> Print
                         </button>
-                        <a href="{{ url_for('expenses_master') }}" class="btn btn-sm btn-outline-dark rounded-pill px-3 fw-bold border-dark" data-style="border-width: 1.5px;" title="Go to Expenses Master">
+                        <a href="{{ url_for('expenses_master') }}" class="btn btn-sm btn-outline-dark rounded-pill px-3 fw-bold" title="Go to Expenses Master">
                             <i class="bi bi-currency-rupee me-1"></i> Expenses Master
                         </a>
                     </div>
@@ -351,7 +337,7 @@
 
     <!-- Manual Stock Overrides Collapse -->
     <div class="collapse mb-4" id="stockOverrides">
-        <div class="card border-0 shadow-sm rounded-4 bg-light">
+        <div class="pnl-card bg-light border-0">
             <div class="card-body p-4">
                 <h6 class="fw-bold mb-3 text-dark"><i class="bi bi-sliders me-2 text-success"></i>Stock Valuation & Overrides</h6>
                 <form method="POST" action="{{ url_for('pnl') }}" class="row g-3">
@@ -386,41 +372,40 @@
     <div class="corporate-container" id="traditional-container">
         {% set total_debits = opening_stock + total_purchases + total_direct_expenses %}
         {% set total_credits = total_sales + total_direct_income + closing_stock %}
+        
         <!-- Brand Header -->
-        <div class="statement-header" data-style="background-color: #15803d; color: white; padding: 30px 40px; border-bottom: 3px solid #166534;">
+        <div class="statement-header">
             <div class="row align-items-center">
                 <div class="col-md-6">
-                    <div class="statement-title" data-style="font-size: 1.6rem; font-weight: 800; letter-spacing: -0.5px;">RANGA FARMS</div>
-                    <div class="statement-subtitle text-uppercase mt-1" data-style="font-size: 0.75rem; letter-spacing: 1.5px; color: #a1a1aa;">Profit & Loss A/c</div>
+                    <div class="statement-title">RANGA FARMS</div>
+                    <div class="statement-subtitle">Profit & Loss A/c</div>
                 </div>
                 <div class="col-md-6 text-md-end mt-2 mt-md-0">
-                    <span class="badge px-3 py-2 fw-bold rounded-pill font-monospace" data-style="font-size: 0.85rem; border: 1.5px solid #ffffff !important; color: #ffffff !important; background-color: transparent;">
+                    <span class="badge period-badge font-monospace">
                         Period: {% if selected_month == 'All' %}Full Year{% else %}{{ from_date }} to {{ to_date }}{% endif %}
                     </span>
                 </div>
             </div>
         </div>
 
-
-        
         <div class="row g-0 border-bottom">
             <!-- Left Side (Debit - Opening Stock, Purchases, Direct Expenses, Gross Profit c/o) -->
             <div class="col-md-6 border-end">
-                <table class="table table-financial mb-0">
+                <table class="table-financial">
                     <thead>
                         <tr class="section-title-row">
-                            <th data-style="width: 70%; padding: 12px 30px; font-size: 0.8rem; text-transform: uppercase; background-color: #f8fafc; color: #475569;">Particulars (Debit Side)</th>
-                            <th data-style="width: 30%; text-align: right; padding: 12px 30px; font-size: 0.8rem; text-transform: uppercase; background-color: #f8fafc; color: #475569;">Amount (₹)</th>
+                            <th style="width: 70%;">Particulars (Debit Side)</th>
+                            <th style="width: 30%; text-align: right;">Amount (₹)</th>
                         </tr>
                     </thead>
                     <tbody>
                         <!-- Opening Stock -->
                         {% if include_stock %}
                         <tr class="collapsible-header" data-target="opening-stock">
-                            <td class="indent-1"><i class="bi bi-chevron-right me-1 text-muted toggle-chevron"></i><i class="bi bi-box-seam me-2 text-success"></i>Opening Stock</td>
+                            <td class="indent-1"><i class="bi bi-chevron-right toggle-chevron"></i><i class="bi bi-box-seam me-2 text-success"></i>Opening Stock</td>
                             <td class="financial-number">₹{{ "%.2f"|format(opening_stock) }}</td>
                         </tr>
-                        <tr class="opening-stock-child drilldown-link" data-style="display: none;" data-onclick="viewDrilldown('Opening Stock')">
+                        <tr class="opening-stock-child drilldown-link" style="display: none;" data-category="Opening Stock">
                             <td class="indent-2 text-muted">Stock</td>
                             <td class="financial-number text-muted">₹{{ "%.2f"|format(opening_stock) }}</td>
                         </tr>
@@ -431,7 +416,7 @@
                         {% set grp_loop = loop %}
                         <tr class="sub-section-row collapsible-header" data-target="direct-exp-grp-{{ grp_loop.index }}">
                             <td class="indent-1 fw-bold">
-                                <i class="bi bi-chevron-right me-1 text-muted toggle-chevron"></i>
+                                <i class="bi bi-chevron-right toggle-chevron"></i>
                                 <i class="bi bi-arrow-right-circle me-2 text-warning"></i>{{ grp_name }}
                             </td>
                             <td class="financial-number fw-bold">₹{{ "%.2f"|format(grp_data.ledger_group_total) }}</td>
@@ -439,17 +424,17 @@
                         
                         {% for ldr_name, ldr_data in grp_data.accounts.items() %}
                         {% set ldr_loop = loop %}
-                        <tr class="direct-exp-grp-{{ grp_loop.index }}-child collapsible-header" data-target="direct-exp-ldr-{{ grp_loop.index }}-{{ ldr_loop.index }}" data-style="display: none; background-color: #f8fafc;">
-                            <td class="indent-2 fw-semibold" data-style="padding-left: 40px !important;">
-                                <i class="bi bi-chevron-right me-1 text-muted toggle-chevron"></i>
+                        <tr class="direct-exp-grp-{{ grp_loop.index }}-child collapsible-header" data-target="direct-exp-ldr-{{ grp_loop.index }}-{{ ldr_loop.index }}" style="display: none; background-color: #f8fafc;">
+                            <td class="indent-2 fw-semibold">
+                                <i class="bi bi-chevron-right toggle-chevron"></i>
                                 <i class="bi bi-folder2 me-2 text-primary"></i>{{ ldr_name }}
                             </td>
                             <td class="financial-number fw-semibold">₹{{ "%.2f"|format(ldr_data.ledger_account_total) }}</td>
                         </tr>
                         
                         {% for part_name, part_data in ldr_data.particulars.items() %}
-                        <tr class="direct-exp-ldr-{{ grp_loop.index }}-{{ ldr_loop.index }}-child drilldown-link" data-style="display: none;" data-onclick="viewDrilldown('{{ part_name }}')">
-                            <td class="indent-3 text-muted" data-style="padding-left: 65px !important;">
+                        <tr class="direct-exp-ldr-{{ grp_loop.index }}-{{ ldr_loop.index }}-child drilldown-link" style="display: none;" data-category="{{ part_name }}">
+                            <td class="indent-3 text-muted">
                                 <i class="bi bi-tag me-2 text-secondary"></i>{{ part_name }}
                             </td>
                             <td class="financial-number text-muted">₹{{ "%.2f"|format(part_data.amount) }}</td>
@@ -460,8 +445,8 @@
                         
                         <!-- Gross Profit c/o -->
                         {% if gross_profit >= 0 %}
-                        <tr class="fw-bold" data-style="background-color: #fafafa; border-top: 1px solid #000000; border-bottom: 1.5px solid #000000; color: #000000;">
-                            <td class="indent-1"><i class="bi bi-plus-circle me-2"></i>Gross Profit c/o (to P&L A/c)</td>
+                        <tr class="fw-bold bg-light">
+                            <td class="indent-1"><i class="bi bi-plus-circle me-2 text-success"></i>Gross Profit c/o (to P&L A/c)</td>
                             <td class="financial-number">₹{{ "%.2f"|format(gross_profit) }}</td>
                         </tr>
                         {% endif %}
@@ -471,11 +456,11 @@
 
             <!-- Right Side (Credit - Sales, Direct Incomes, Closing Stock, Gross Loss c/o) -->
             <div class="col-md-6">
-                <table class="table table-financial mb-0">
+                <table class="table-financial">
                     <thead>
                         <tr class="section-title-row">
-                            <th data-style="width: 70%; padding: 12px 30px; font-size: 0.8rem; text-transform: uppercase; background-color: #f8fafc; color: #475569;">Particulars (Credit Side)</th>
-                            <th data-style="width: 30%; text-align: right; padding: 12px 30px; font-size: 0.8rem; text-transform: uppercase; background-color: #f8fafc; color: #475569;">Amount (₹)</th>
+                            <th style="width: 70%;">Particulars (Credit Side)</th>
+                            <th style="width: 30%; text-align: right;">Amount (₹)</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -484,7 +469,7 @@
                         {% set grp_loop = loop %}
                         <tr class="sub-section-row collapsible-header" data-target="sales-grp-{{ grp_loop.index }}">
                             <td class="indent-1 fw-bold">
-                                <i class="bi bi-chevron-right me-1 text-muted toggle-chevron"></i>
+                                <i class="bi bi-chevron-right toggle-chevron"></i>
                                 <i class="bi bi-graph-up me-2 text-success"></i>{{ grp_name }}
                             </td>
                             <td class="financial-number fw-bold">₹{{ "%.2f"|format(grp_data.ledger_group_total) }}</td>
@@ -492,17 +477,17 @@
                         
                         {% for ldr_name, ldr_data in grp_data.accounts.items() %}
                         {% set ldr_loop = loop %}
-                        <tr class="sales-grp-{{ grp_loop.index }}-child collapsible-header" data-target="sales-ldr-{{ grp_loop.index }}-{{ ldr_loop.index }}" data-style="display: none; background-color: #f8fafc;">
-                            <td class="indent-2 fw-semibold" data-style="padding-left: 40px !important;">
-                                <i class="bi bi-chevron-right me-1 text-muted toggle-chevron"></i>
+                        <tr class="sales-grp-{{ grp_loop.index }}-child collapsible-header" data-target="sales-ldr-{{ grp_loop.index }}-{{ ldr_loop.index }}" style="display: none; background-color: #f8fafc;">
+                            <td class="indent-2 fw-semibold">
+                                <i class="bi bi-chevron-right toggle-chevron"></i>
                                 <i class="bi bi-folder2 me-2 text-primary"></i>{{ ldr_name }}
                             </td>
                             <td class="financial-number fw-semibold">₹{{ "%.2f"|format(ldr_data.ledger_account_total) }}</td>
                         </tr>
                         
                         {% for part_name, part_data in ldr_data.particulars.items() %}
-                        <tr class="sales-ldr-{{ grp_loop.index }}-{{ ldr_loop.index }}-child drilldown-link" data-style="display: none;" data-onclick="viewDrilldown('{{ part_name }}')">
-                            <td class="indent-3 text-muted" data-style="padding-left: 65px !important;">
+                        <tr class="sales-ldr-{{ grp_loop.index }}-{{ ldr_loop.index }}-child drilldown-link" style="display: none;" data-category="{{ part_name }}">
+                            <td class="indent-3 text-muted">
                                 <i class="bi bi-tag me-2 text-secondary"></i>{{ part_name }}
                             </td>
                             <td class="financial-number text-muted">₹{{ "%.2f"|format(part_data.amount) }}</td>
@@ -516,25 +501,25 @@
                         {% set grp_loop = loop %}
                         <tr class="sub-section-row collapsible-header" data-target="direct-inc-grp-{{ grp_loop.index }}">
                             <td class="indent-1 fw-bold">
-                                <i class="bi bi-chevron-right me-1 text-muted toggle-chevron"></i>
-                                <i class="bi bi-wallet2 me-2"></i>{{ grp_name }}
+                                <i class="bi bi-chevron-right toggle-chevron"></i>
+                                <i class="bi bi-wallet2 me-2 text-success"></i>{{ grp_name }}
                             </td>
                             <td class="financial-number fw-bold">₹{{ "%.2f"|format(grp_data.ledger_group_total) }}</td>
                         </tr>
                         
                         {% for ldr_name, ldr_data in grp_data.accounts.items() %}
                         {% set ldr_loop = loop %}
-                        <tr class="direct-inc-grp-{{ grp_loop.index }}-child collapsible-header" data-target="direct-inc-ldr-{{ grp_loop.index }}-{{ ldr_loop.index }}" data-style="display: none; background-color: #f8fafc;">
-                            <td class="indent-2 fw-semibold" data-style="padding-left: 40px !important;">
-                                <i class="bi bi-chevron-right me-1 text-muted toggle-chevron"></i>
+                        <tr class="direct-inc-grp-{{ grp_loop.index }}-child collapsible-header" data-target="direct-inc-ldr-{{ grp_loop.index }}-{{ ldr_loop.index }}" style="display: none; background-color: #f8fafc;">
+                            <td class="indent-2 fw-semibold">
+                                <i class="bi bi-chevron-right toggle-chevron"></i>
                                 <i class="bi bi-folder2 me-2 text-primary"></i>{{ ldr_name }}
                             </td>
                             <td class="financial-number fw-semibold">₹{{ "%.2f"|format(ldr_data.ledger_account_total) }}</td>
                         </tr>
                         
                         {% for part_name, part_data in ldr_data.particulars.items() %}
-                        <tr class="direct-inc-ldr-{{ grp_loop.index }}-{{ ldr_loop.index }}-child drilldown-link" data-style="display: none;" data-onclick="viewDrilldown('{{ part_name }}')">
-                            <td class="indent-3 text-muted" data-style="padding-left: 65px !important;">
+                        <tr class="direct-inc-ldr-{{ grp_loop.index }}-{{ ldr_loop.index }}-child drilldown-link" style="display: none;" data-category="{{ part_name }}">
+                            <td class="indent-3 text-muted">
                                 <i class="bi bi-tag me-2 text-secondary"></i>{{ part_name }}
                             </td>
                             <td class="financial-number text-muted">₹{{ "%.2f"|format(part_data.amount) }}</td>
@@ -546,10 +531,10 @@
                         <!-- Closing Stock -->
                         {% if include_stock %}
                         <tr class="collapsible-header" data-target="closing-stock">
-                            <td class="indent-1"><i class="bi bi-chevron-right me-1 text-muted toggle-chevron"></i><i class="bi bi-archive me-2 text-info"></i>Closing Stock</td>
+                            <td class="indent-1"><i class="bi bi-chevron-right toggle-chevron"></i><i class="bi bi-archive me-2 text-info"></i>Closing Stock</td>
                             <td class="financial-number">₹{{ "%.2f"|format(closing_stock) }}</td>
                         </tr>
-                        <tr class="closing-stock-child drilldown-link" data-style="display: none;" data-onclick="viewDrilldown('Closing Stock')">
+                        <tr class="closing-stock-child drilldown-link" style="display: none;" data-category="Closing Stock">
                             <td class="indent-2 text-muted">Stock</td>
                             <td class="financial-number text-muted">₹{{ "%.2f"|format(closing_stock) }}</td>
                         </tr>
@@ -557,9 +542,9 @@
                         
                         <!-- Gross Loss c/o -->
                         {% if gross_profit < 0 %}
-                        <tr class="fw-bold" data-style="background-color: #fafafa; border-top: 1px solid #000000; border-bottom: 1.5px solid #000000; color: #000000;">
-                            <td class="indent-1"><i class="bi bi-dash-circle me-2"></i>Gross Loss c/o (to P&L A/c)</td>
-                            <td class="financial-number">₹{{ "%.2f"|format(gross_profit|abs) }}</td>
+                        <tr class="fw-bold bg-light">
+                            <td class="indent-1"><i class="bi bi-dash-circle me-2 text-danger"></i>Gross Loss c/o (to P&L A/c)</td>
+                            <td class="financial-number text-danger">₹{{ "%.2f"|format(gross_profit|abs) }}</td>
                         </tr>
                         {% endif %}
                     </tbody>
@@ -570,37 +555,36 @@
         <!-- Trading Totals Row -->
         {% set trading_left_total = total_debits + (gross_profit if gross_profit >= 0 else 0) %}
         {% set trading_right_total = total_credits + (gross_profit|abs if gross_profit < 0 else 0) %}
-        <div class="row g-0 border-bottom bg-white fw-bold" data-style="font-size: 0.92rem; border-top: 2px solid #000000; border-bottom: 2px solid #000000;">
-            <div class="col-md-6 border-end py-3 px-4 d-flex justify-content-between align-items-center" data-style="background-color: #ffffff; color: #000000;">
-                <span class="text-uppercase" data-style="letter-spacing: 0.5px;">Total</span>
+        <div class="row g-0 border-bottom bg-white fw-bold">
+            <div class="col-md-6 border-end py-3 px-4 d-flex justify-content-between align-items-center">
+                <span class="text-uppercase text-muted small">Total</span>
                 <span class="font-monospace">₹{{ "%.2f"|format(trading_left_total) }}</span>
             </div>
-            <div class="col-md-6 py-3 px-4 d-flex justify-content-between align-items-center" data-style="background-color: #ffffff; color: #000000;">
-                <span class="text-uppercase" data-style="letter-spacing: 0.5px;">Total</span>
+            <div class="col-md-6 py-3 px-4 d-flex justify-content-between align-items-center">
+                <span class="text-uppercase text-muted small">Total</span>
                 <span class="font-monospace">₹{{ "%.2f"|format(trading_right_total) }}</span>
             </div>
         </div>
 
-
-        
         <div class="row g-0 border-bottom">
-            <!-- Left Side (Debit - Gross Loss b/d, Indirect Expenses, Nett Profit) -->
+            <!-- Left Side (Debit - Gross Loss b/d, Indirect Expenses, Net Profit) -->
             <div class="col-md-6 border-end">
-                <table class="table table-financial mb-0">
+                <table class="table-financial">
                     <tbody>
                         <!-- Gross Loss b/d -->
                         {% if gross_profit < 0 %}
-                        <tr class="fw-semibold" data-style="background-color: #ffffff; color: #000000;">
-                            <td class="indent-1"><i class="bi bi-dash-circle-fill me-2 text-dark"></i>Gross Loss b/d</td>
+                        <tr class="fw-semibold">
+                            <td class="indent-1"><i class="bi bi-dash-circle-fill me-2 text-danger"></i>Gross Loss b/d</td>
                             <td class="financial-number">₹{{ "%.2f"|format(gross_profit|abs) }}</td>
                         </tr>
                         {% endif %}
-                                         <!-- Indirect Expenses -->
+                        
+                        <!-- Indirect Expenses -->
                         {% for grp_name, grp_data in indirect_expenses_tree.items() %}
                         {% set grp_loop = loop %}
                         <tr class="sub-section-row collapsible-header" data-target="indirect-exp-grp-{{ grp_loop.index }}">
                             <td class="indent-1 fw-bold">
-                                <i class="bi bi-chevron-right me-1 text-muted toggle-chevron"></i>
+                                <i class="bi bi-chevron-right toggle-chevron"></i>
                                 <i class="bi bi-lightbulb me-2 text-secondary"></i>{{ grp_name }}
                             </td>
                             <td class="financial-number fw-bold">₹{{ "%.2f"|format(grp_data.ledger_group_total) }}</td>
@@ -608,17 +592,17 @@
                         
                         {% for ldr_name, ldr_data in grp_data.accounts.items() %}
                         {% set ldr_loop = loop %}
-                        <tr class="indirect-exp-grp-{{ grp_loop.index }}-child collapsible-header" data-target="indirect-exp-ldr-{{ grp_loop.index }}-{{ ldr_loop.index }}" data-style="display: none; background-color: #f8fafc;">
-                            <td class="indent-2 fw-semibold" data-style="padding-left: 40px !important;">
-                                <i class="bi bi-chevron-right me-1 text-muted toggle-chevron"></i>
+                        <tr class="indirect-exp-grp-{{ grp_loop.index }}-child collapsible-header" data-target="indirect-exp-ldr-{{ grp_loop.index }}-{{ ldr_loop.index }}" style="display: none; background-color: #f8fafc;">
+                            <td class="indent-2 fw-semibold">
+                                <i class="bi bi-chevron-right toggle-chevron"></i>
                                 <i class="bi bi-folder2 me-2 text-primary"></i>{{ ldr_name }}
                             </td>
                             <td class="financial-number fw-semibold">₹{{ "%.2f"|format(ldr_data.ledger_account_total) }}</td>
                         </tr>
                         
                         {% for part_name, part_data in ldr_data.particulars.items() %}
-                        <tr class="indirect-exp-ldr-{{ grp_loop.index }}-{{ ldr_loop.index }}-child drilldown-link" data-style="display: none;" data-onclick="viewDrilldown('{{ part_name }}')">
-                            <td class="indent-3 text-muted" data-style="padding-left: 65px !important;">
+                        <tr class="indirect-exp-ldr-{{ grp_loop.index }}-{{ ldr_loop.index }}-child drilldown-link" style="display: none;" data-category="{{ part_name }}">
+                            <td class="indent-3 text-muted">
                                 <i class="bi bi-tag me-2 text-secondary"></i>{{ part_name }}
                             </td>
                             <td class="financial-number text-muted">₹{{ "%.2f"|format(part_data.amount) }}</td>
@@ -629,23 +613,23 @@
                         
                         <!-- Net Profit -->
                         {% if is_profit %}
-                        <tr class="fw-bold" data-style="background-color: #ffffff; color: #16a34a; border-top: 2px solid #000000; border-bottom: 2px solid #000000;">
-                            <td class="indent-1"><i class="bi bi-check-circle me-2 text-success"></i>Net Profit</td>
-                            <td class="financial-number text-success" data-style="color: #16a34a !important;">₹{{ "%.2f"|format(net_profit) }}</td>
+                        <tr class="fw-bold bg-success-subtle">
+                            <td class="indent-1 text-success"><i class="bi bi-check-circle me-2"></i>Net Profit</td>
+                            <td class="financial-number text-success">₹{{ "%.2f"|format(net_profit) }}</td>
                         </tr>
                         {% endif %}
                     </tbody>
                 </table>
             </div>
  
-            <!-- Right Side (Credit - Gross Profit b/d, Indirect Incomes, Nett Loss) -->
+            <!-- Right Side (Credit - Gross Profit b/d, Indirect Incomes, Net Loss) -->
             <div class="col-md-6">
-                <table class="table table-financial mb-0">
+                <table class="table-financial">
                     <tbody>
                         <!-- Gross Profit b/d -->
                         {% if gross_profit >= 0 %}
-                        <tr class="fw-semibold" data-style="background-color: #ffffff; color: #000000;">
-                            <td class="indent-1"><i class="bi bi-plus-circle-fill me-2 text-dark"></i>Gross Profit b/d</td>
+                        <tr class="fw-semibold">
+                            <td class="indent-1"><i class="bi bi-plus-circle-fill me-2 text-success"></i>Gross Profit b/d</td>
                             <td class="financial-number">₹{{ "%.2f"|format(gross_profit) }}</td>
                         </tr>
                         {% endif %}
@@ -655,7 +639,7 @@
                         {% set grp_loop = loop %}
                         <tr class="sub-section-row collapsible-header" data-target="indirect-inc-grp-{{ grp_loop.index }}">
                             <td class="indent-1 fw-bold">
-                                <i class="bi bi-chevron-right me-1 text-muted toggle-chevron"></i>
+                                <i class="bi bi-chevron-right toggle-chevron"></i>
                                 <i class="bi bi-percent me-2 text-info"></i>{{ grp_name }}
                             </td>
                             <td class="financial-number fw-bold">₹{{ "%.2f"|format(grp_data.ledger_group_total) }}</td>
@@ -663,17 +647,17 @@
                         
                         {% for ldr_name, ldr_data in grp_data.accounts.items() %}
                         {% set ldr_loop = loop %}
-                        <tr class="indirect-inc-grp-{{ grp_loop.index }}-child collapsible-header" data-target="indirect-inc-ldr-{{ grp_loop.index }}-{{ ldr_loop.index }}" data-style="display: none; background-color: #f8fafc;">
-                            <td class="indent-2 fw-semibold" data-style="padding-left: 40px !important;">
-                                <i class="bi bi-chevron-right me-1 text-muted toggle-chevron"></i>
+                        <tr class="indirect-inc-grp-{{ grp_loop.index }}-child collapsible-header" data-target="indirect-inc-ldr-{{ grp_loop.index }}-{{ ldr_loop.index }}" style="display: none; background-color: #f8fafc;">
+                            <td class="indent-2 fw-semibold">
+                                <i class="bi bi-chevron-right toggle-chevron"></i>
                                 <i class="bi bi-folder2 me-2 text-primary"></i>{{ ldr_name }}
                             </td>
                             <td class="financial-number fw-semibold">₹{{ "%.2f"|format(ldr_data.ledger_account_total) }}</td>
                         </tr>
                         
                         {% for part_name, part_data in ldr_data.particulars.items() %}
-                        <tr class="indirect-inc-ldr-{{ grp_loop.index }}-{{ ldr_loop.index }}-child drilldown-link" data-style="display: none;" data-onclick="viewDrilldown('{{ part_name }}')">
-                            <td class="indent-3 text-muted" data-style="padding-left: 65px !important;">
+                        <tr class="indirect-inc-ldr-{{ grp_loop.index }}-{{ ldr_loop.index }}-child drilldown-link" style="display: none;" data-category="{{ part_name }}">
+                            <td class="indent-3 text-muted">
                                 <i class="bi bi-tag me-2 text-secondary"></i>{{ part_name }}
                             </td>
                             <td class="financial-number text-muted">₹{{ "%.2f"|format(part_data.amount) }}</td>
@@ -684,9 +668,9 @@
                         
                         <!-- Net Loss -->
                         {% if not is_profit %}
-                        <tr class="fw-bold" data-style="background-color: #ffffff; color: #dc2626; border-top: 2px solid #000000; border-bottom: 2px solid #000000;">
-                            <td class="indent-1"><i class="bi bi-x-circle me-2 text-danger"></i>Net Loss</td>
-                            <td class="financial-number text-danger" data-style="color: #dc2626 !important;">₹{{ "%.2f"|format(net_profit) }}</td>
+                        <tr class="fw-bold bg-danger-subtle">
+                            <td class="indent-1 text-danger"><i class="bi bi-x-circle me-2"></i>Net Loss</td>
+                            <td class="financial-number text-danger">₹{{ "%.2f"|format(net_profit) }}</td>
                         </tr>
                         {% endif %}
                     </tbody>
@@ -696,25 +680,25 @@
         
         <!-- P&L Totals Row -->
         {% set pnl_grand_total = (gross_profit|abs if gross_profit < 0 else 0) + total_indirect_expenses + (net_profit if is_profit else 0) %}
-        <div class="row g-0 bg-white fw-bold" data-style="font-size: 0.95rem; border-top: 2px solid #000000; border-bottom: 4px double #000000;">
-            <div class="col-md-6 border-end py-3 px-4 d-flex justify-content-between align-items-center" data-style="background-color: #ffffff; color: #000000;">
-                <span class="text-uppercase" data-style="letter-spacing: 0.5px;">Total</span>
+        <div class="row g-0 bg-white fw-bold total-row-grand">
+            <div class="col-md-6 border-end py-3 px-4 d-flex justify-content-between align-items-center">
+                <span class="text-uppercase text-muted small">Total</span>
                 <span class="font-monospace">₹{{ "%.2f"|format(pnl_grand_total) }}</span>
             </div>
-            <div class="col-md-6 py-3 px-4 d-flex justify-content-between align-items-center" data-style="background-color: #ffffff; color: #000000;">
-                <span class="text-uppercase" data-style="letter-spacing: 0.5px;">Total</span>
+            <div class="col-md-6 py-3 px-4 d-flex justify-content-between align-items-center">
+                <span class="text-uppercase text-muted small">Total</span>
                 <span class="font-monospace">₹{{ "%.2f"|format(pnl_grand_total) }}</span>
             </div>
         </div>
     </div>
 
-    <!-- ── EXPENSES MASTER LEDGER BREAKDOWN PANEL ─────────────────────────── -->
+    <!-- EXPENSES MASTER LEDGER BREAKDOWN PANEL -->
     {% if ledger_pnl_summary %}
     <div class="d-print-none mt-5">
         <div class="card border-0 rounded-4 shadow-sm overflow-hidden">
-            <div class="card-header border-0 p-4 d-flex align-items-center justify-content-between" data-style="background: linear-gradient(135deg,#2d1b69,#7c3aed);">
-                <div class="text-white">
-                    <h6 class="fw-800 mb-1"><i class="bi bi-currency-rupee me-2"></i>Expenses Master — Ledger Breakdown</h6>
+            <div class="card-header border-0 p-4 d-flex align-items-center justify-content-between bg-dark text-white">
+                <div>
+                    <h6 class="fw-800 mb-1 text-white"><i class="bi bi-currency-rupee me-2"></i>Expenses Master — Ledger Breakdown</h6>
                     <p class="mb-0 small opacity-75">Other Voucher expenses grouped by Expense Particulars & Ledger Group for this period</p>
                 </div>
                 <a href="{{ url_for('expenses_master') }}" class="btn btn-light btn-sm rounded-pill px-3 fw-bold text-dark shadow-sm">
@@ -724,13 +708,13 @@
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0">
-                        <thead data-style="background:#f8f7ff;">
+                        <thead class="table-light">
                             <tr>
-                                <th class="py-3 px-4 text-muted small fw-bold text-uppercase" data-style="letter-spacing:.05em;">#</th>
-                                <th class="py-3 px-3 text-muted small fw-bold text-uppercase" data-style="letter-spacing:.05em;">Particular (Expense Category)</th>
-                                <th class="py-3 px-3 text-muted small fw-bold text-uppercase" data-style="letter-spacing:.05em;">Ledger Group</th>
-                                <th class="py-3 px-3 text-muted small fw-bold text-uppercase text-end" data-style="letter-spacing:.05em;">Amount (₹)</th>
-                                <th class="py-3 px-3 text-muted small fw-bold text-uppercase text-center" data-style="letter-spacing:.05em;">P&L Impact</th>
+                                <th class="py-3 px-4 text-muted small fw-bold text-uppercase">#</th>
+                                <th class="py-3 px-3 text-muted small fw-bold text-uppercase">Particular (Expense Category)</th>
+                                <th class="py-3 px-3 text-muted small fw-bold text-uppercase">Ledger Group</th>
+                                <th class="py-3 px-3 text-muted small fw-bold text-uppercase text-end">Amount (₹)</th>
+                                <th class="py-3 px-3 text-muted small fw-bold text-uppercase text-center">P&L Impact</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -765,55 +749,45 @@
                             </tr>
                             {% endfor %}
                         </tbody>
-                        <tfoot data-style="background:#f8f7ff; border-top: 2px solid #e5e7eb;">
+                        <tfoot class="table-light">
                             <tr class="fw-bold">
                                 <td colspan="3" class="py-3 px-4 text-dark">Total — Other Vouchers (Period)</td>
-                                <td class="py-3 px-3 text-end font-monospace" data-style="color:#7c3aed;">₹{{ "%.2f"|format(ns.total) }}</td>
+                                <td class="py-3 px-3 text-end font-monospace text-success">₹{{ "%.2f"|format(ns.total) }}</td>
                                 <td></td>
                             </tr>
                         </tfoot>
                     </table>
                 </div>
             </div>
-            <div class="card-footer bg-white border-top p-3 d-flex gap-3 flex-wrap">
-                <a href="{{ url_for('expense_ledgers') }}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
-                    <i class="bi bi-journal-bookmark me-1"></i>Ledger Accounts
-                </a>
-                <a href="{{ url_for('expense_ledgers', tab='particulars') }}" class="btn btn-sm btn-outline-warning rounded-pill px-3 text-dark">
-                    <i class="bi bi-tags me-1"></i>Expense Particulars
-                </a>
-                <a href="{{ url_for('voucher_register', v_type='other') }}" class="btn btn-sm btn-outline-dark rounded-pill px-3">
-                    <i class="bi bi-receipt-cutoff me-1"></i>Other Vouchers
-                </a>
-            </div>
         </div>
     </div>
     {% endif %}
 
-    <!-- PRINT ONLY VERTICAL FINANCIAL REPORT STATEMENT -->
-    <div class="print-only-report mt-4" id="print-report-container">
-        <div class="report-header text-center mb-5">
-            <h3 class="fw-bold text-uppercase" data-style="letter-spacing: 1px; color: #15803d; margin-bottom: 5px;">Ranga Farms</h3>
-            <h5 class="text-secondary text-uppercase mb-3" data-style="font-size: 0.85rem; letter-spacing: 2px;">Profit & Loss Statement</h5>
-            <div class="font-monospace small text-muted" data-style="border-top: 1px solid #ddd; border-bottom: 1px solid #ddd; display: inline-block; padding: 5px 20px;">
-                Period: {% if selected_month == 'All' %}Full Year {{ selected_year }}{% else %}{{ from_date }} to {{ to_date }}{% endif %}
+    <!-- PRINT REPORT CONTAINER -->
+    <div id="print-report-container">
+        <div class="row align-items-center mb-4">
+            <div class="col-8">
+                <h3 class="fw-bold text-success m-0">RANGA FARMS</h3>
+                <p class="text-muted small m-0">Aandigounder Street, Pachapalayam, Perur, Coimbatore 641010</p>
+            </div>
+            <div class="col-4 text-end">
+                <h4 class="fw-bold text-dark m-0">PROFIT & LOSS ACCOUNT</h4>
+                <p class="text-muted small m-0">Period: {% if selected_month == 'All' %}Full Year{% else %}{{ from_date }} to {{ to_date }}{% endif %}</p>
             </div>
         </div>
         
         <table class="table table-bordered report-table">
             <thead>
-                <tr data-style="background-color: #f1f5f9;">
-                    <th data-style="width: 50%; font-weight: 800; color: #000000;">Particulars</th>
-                    <th data-style="width: 25%; text-align: right; font-weight: 800; color: #000000;">Amount (₹)</th>
-                    <th data-style="width: 25%; text-align: right; font-weight: 800; color: #000000;">Total (₹)</th>
+                <tr class="table-light">
+                    <th style="width: 50%;">Particulars</th>
+                    <th style="width: 25%; text-align: right;">Amount (₹)</th>
+                    <th style="width: 25%; text-align: right;">Total (₹)</th>
                 </tr>
             </thead>
             <tbody>
                 <!-- A. Revenue -->
                 <tr class="report-section-header">
-                    <td>A. REVENUE & DIRECT INCOMES</td>
-                    <td></td>
-                    <td></td>
+                    <td colspan="3">A. REVENUE & DIRECT INCOMES</td>
                 </tr>
                 <!-- Sales Accounts Tree -->
                 {% for grp_name, grp_data in sales_accounts_tree.items() %}
@@ -860,7 +834,7 @@
                 {% endfor %}
                 {% endfor %}
                 {% endfor %}
-                <tr class="fw-bold" data-style="background-color: #f8fafc;">
+                <tr class="fw-bold table-light">
                     <td class="ps-3">Total Revenue & Direct Income (A)</td>
                     <td></td>
                     <td class="text-end font-monospace">₹{{ "%.2f"|format(total_sales + total_direct_income) }}</td>
@@ -868,9 +842,7 @@
                 
                 <!-- B. Cost of Sales -->
                 <tr class="report-section-header">
-                    <td>B. COST OF SALES & DIRECT COSTS</td>
-                    <td></td>
-                    <td></td>
+                    <td colspan="3">B. COST OF SALES & DIRECT COSTS</td>
                 </tr>
                 {% if include_stock %}
                 <tr>
@@ -912,14 +884,14 @@
                 </tr>
                 {% endif %}
                 {% set cost_of_sales = opening_stock + total_purchases + total_direct_expenses - closing_stock %}
-                <tr class="fw-bold" data-style="background-color: #f8fafc;">
+                <tr class="fw-bold table-light">
                     <td class="ps-3">Total Cost of Sales & Direct Costs (B)</td>
                     <td></td>
                     <td class="text-end font-monospace">₹{{ "%.2f"|format(cost_of_sales) }}</td>
                 </tr>
                 
                 <!-- C. Gross Profit -->
-                <tr class="fw-bold" data-style="background-color: #e2e8f0; font-size: 0.95rem; border-top: 1.5px solid #000; border-bottom: 1.5px solid #000;">
+                <tr class="fw-bold bg-body-secondary">
                     <td><strong>C. GROSS PROFIT (A - B)</strong></td>
                     <td></td>
                     <td class="text-end font-monospace">₹{{ "%.2f"|format(gross_profit) }}</td>
@@ -928,9 +900,7 @@
                 <!-- D. Indirect Expenses -->
                 {% if total_indirect_expenses > 0 %}
                 <tr class="report-section-header">
-                    <td>D. LESS: INDIRECT EXPENSES</td>
-                    <td></td>
-                    <td></td>
+                    <td colspan="3">D. LESS: INDIRECT EXPENSES</td>
                 </tr>
                 <!-- Indirect Expenses Tree -->
                 {% for grp_name, grp_data in indirect_expenses_tree.items() %}
@@ -954,7 +924,7 @@
                 {% endfor %}
                 {% endfor %}
                 {% endfor %}
-                <tr class="fw-bold" data-style="background-color: #f8fafc;">
+                <tr class="fw-bold table-light">
                     <td class="ps-3">Total Indirect Expenses (D)</td>
                     <td></td>
                     <td class="text-end font-monospace">(₹{{ "%.2f"|format(total_indirect_expenses) }})</td>
@@ -964,9 +934,7 @@
                 <!-- E. Indirect Incomes -->
                 {% if total_indirect_income > 0 %}
                 <tr class="report-section-header">
-                    <td>E. ADD: INDIRECT INCOMES</td>
-                    <td></td>
-                    <td></td>
+                    <td colspan="3">E. ADD: INDIRECT INCOMES</td>
                 </tr>
                 <!-- Indirect Incomes Tree -->
                 {% for grp_name, grp_data in indirect_incomes_tree.items() %}
@@ -990,7 +958,7 @@
                 {% endfor %}
                 {% endfor %}
                 {% endfor %}
-                <tr class="fw-bold" data-style="background-color: #f8fafc;">
+                <tr class="fw-bold table-light">
                     <td class="ps-3">Total Indirect Incomes (E)</td>
                     <td></td>
                     <td class="text-end font-monospace">₹{{ "%.2f"|format(total_indirect_income) }}</td>
@@ -999,28 +967,28 @@
                 
                 <!-- F. Net Profit / Loss -->
                 {% if is_profit %}
-                <tr class="fw-bold" data-style="background-color: #d1fae5 !important; color: #16a34a !important; border-top: 2px solid #000000; border-bottom: 4px double #000000; font-size: 1.05rem; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
+                <tr class="fw-bold table-success">
                     <td>F. NET PROFIT (C - D + E)</td>
                     <td></td>
-                    <td class="text-end font-monospace" data-style="color: #16a34a !important;">₹{{ "%.2f"|format(net_profit) }}</td>
+                    <td class="text-end font-monospace text-success">₹{{ "%.2f"|format(net_profit) }}</td>
                 </tr>
                 {% else %}
-                <tr class="fw-bold" data-style="background-color: #fee2e2 !important; color: #dc2626 !important; border-top: 2px solid #000000; border-bottom: 4px double #000000; font-size: 1.05rem; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
+                <tr class="fw-bold table-danger">
                     <td>F. NET LOSS (C - D + E)</td>
                     <td></td>
-                    <td class="text-end font-monospace" data-style="color: #dc2626 !important;">(₹{{ "%.2f"|format(net_profit) }})</td>
+                    <td class="text-end font-monospace text-danger">(₹{{ "%.2f"|format(net_profit) }})</td>
                 </tr>
                 {% endif %}
             </tbody>
         </table>
         
         <!-- Signature Section -->
-        <div class="row print-signatures" data-style="margin-top: 80px;">
-            <div class="col-6 text-center" data-style="width: 50%; float: left; display: inline-block;">
-                <div data-style="width: 200px; margin: 0 auto; border-top: 1px solid #000000; padding-top: 5px; font-weight: bold; font-size: 0.9rem;">Prepared By</div>
+        <div class="row print-signatures">
+            <div class="col-6 text-center">
+                <div class="border-top border-dark pt-2 fw-bold small">Prepared By</div>
             </div>
-            <div class="col-6 text-center" data-style="width: 50%; float: right; display: inline-block;">
-                <div data-style="width: 200px; margin: 0 auto; border-top: 1px solid #000000; padding-top: 5px; font-weight: bold; font-size: 0.9rem;">Authorized Signatory</div>
+            <div class="col-6 text-center">
+                <div class="border-top border-dark pt-2 fw-bold small">Authorized Signatory</div>
             </div>
         </div>
     </div>
@@ -1029,7 +997,7 @@
 <!-- Glassmorphic Transaction Drilldown Modal -->
 <div class="modal fade" id="drilldownModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden" data-style="background: #ffffff; border: 2px solid #000000;">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
             <div class="modal-header bg-dark text-white border-0 py-3">
                 <h5 class="modal-title fw-bold" id="drilldownTitle"><i class="bi bi-zoom-in me-2"></i>Ledger Statement</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -1038,7 +1006,7 @@
                 <!-- Action Controls at the top of the modal -->
                 <div id="modalActionControls" class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
                     <h6 class="text-muted mb-0 small"><i class="bi bi-info-circle me-1"></i> Showing all transactions for the selected period.</h6>
-                    <button class="btn btn-sm btn-primary rounded-pill px-3 fw-bold shadow-sm" type="button" data-onclick="printDetailedLedger()">
+                    <button id="modalPrintLedgerBtn" class="btn btn-sm btn-primary rounded-pill px-3 fw-bold shadow-sm" type="button">
                         <i class="bi bi-printer me-1"></i> Print Detailed Ledger
                     </button>
                 </div>
@@ -1047,7 +1015,7 @@
                 <div id="drilldownAllContainer" class="row">
                     <!-- Left Column: Income Details -->
                     <div class="col-xl-6 col-12 mb-4">
-                        <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden" data-style="border: 2px solid #15803d !important;">
+                        <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden modal-border-accent-income">
                             <div class="card-header bg-success text-white border-0 py-3 d-flex justify-content-between align-items-center">
                                 <h6 class="fw-bold mb-0 text-white"><i class="bi bi-arrow-down-left-circle-fill me-2"></i>Income Details</h6>
                                 <div class="d-flex gap-2">
@@ -1056,13 +1024,13 @@
                                 </div>
                             </div>
                             <div class="card-body p-0">
-                                <div class="table-responsive" data-style="max-height: 450px; overflow-y: auto;">
+                                <div class="table-responsive custom-scroll-container">
                                     <table class="table table-hover align-middle mb-0">
                                         <thead class="table-light">
                                             <tr>
-                                                <th data-style="width: 22%;">Date</th>
-                                                <th data-style="width: 53%;">Reference & Details</th>
-                                                <th data-style="width: 25%; text-align: right;">Amount</th>
+                                                <th style="width: 22%;">Date</th>
+                                                <th style="width: 53%;">Reference & Details</th>
+                                                <th style="width: 25%; text-align: right;">Amount</th>
                                             </tr>
                                         </thead>
                                         <tbody id="incomeContent">
@@ -1070,7 +1038,7 @@
                                         </tbody>
                                     </table>
                                 </div>
-                                <div id="incomeEmptyState" class="text-center py-5 text-muted small" data-style="display:none;">
+                                <div id="incomeEmptyState" class="text-center py-5 text-muted small" style="display:none;">
                                     <i class="bi bi-inbox fs-3 d-block mb-2 opacity-50"></i>
                                     No income transactions found in this date range.
                                 </div>
@@ -1080,7 +1048,7 @@
 
                     <!-- Right Column: Expense Details -->
                     <div class="col-xl-6 col-12 mb-4">
-                        <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden" data-style="border: 2px solid #b91c1c !important;">
+                        <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden modal-border-accent-expense">
                             <div class="card-header bg-danger text-white border-0 py-3 d-flex justify-content-between align-items-center">
                                 <h6 class="fw-bold mb-0 text-white"><i class="bi bi-arrow-up-right-circle-fill me-2"></i>Expense Details</h6>
                                 <div class="d-flex gap-2">
@@ -1089,13 +1057,13 @@
                                 </div>
                             </div>
                             <div class="card-body p-0">
-                                <div class="table-responsive" data-style="max-height: 450px; overflow-y: auto;">
+                                <div class="table-responsive custom-scroll-container">
                                     <table class="table table-hover align-middle mb-0">
                                         <thead class="table-light">
                                             <tr>
-                                                <th data-style="width: 22%;">Date</th>
-                                                <th data-style="width: 53%;">Reference & Details</th>
-                                                <th data-style="width: 25%; text-align: right;">Amount</th>
+                                                <th style="width: 22%;">Date</th>
+                                                <th style="width: 53%;">Reference & Details</th>
+                                                <th style="width: 25%; text-align: right;">Amount</th>
                                             </tr>
                                         </thead>
                                         <tbody id="expenseContent">
@@ -1103,7 +1071,7 @@
                                         </tbody>
                                     </table>
                                 </div>
-                                <div id="expenseEmptyState" class="text-center py-5 text-muted small" data-style="display:none;">
+                                <div id="expenseEmptyState" class="text-center py-5 text-muted small" style="display:none;">
                                     <i class="bi bi-inbox fs-3 d-block mb-2 opacity-50"></i>
                                     No expense transactions found in this date range.
                                 </div>
@@ -1113,8 +1081,8 @@
                 </div>
 
                 <!-- Single Table View for standard categories -->
-                <div id="drilldownSingleContainer" data-style="display: none;">
-                    <div class="table-responsive" data-style="max-height: 500px; overflow-y: auto;">
+                <div id="drilldownSingleContainer" style="display: none;">
+                    <div class="table-responsive custom-scroll-container">
                         <table class="table table-hover align-middle mb-0" id="drilldownTable">
                             <thead class="table-light">
                                 <tr>
@@ -1131,7 +1099,7 @@
                     </div>
                 </div>
 
-                <div id="drilldownEmptyState" class="text-center py-5 text-muted" data-style="display:none;">
+                <div id="drilldownEmptyState" class="text-center py-5 text-muted" style="display:none;">
                     <i class="bi bi-inbox fs-1 d-block mb-2 opacity-50"></i>
                     No transactions recorded for this ledger in this date range.
                 </div>
@@ -1149,6 +1117,56 @@ let detailedLedgerData = null;
 document.addEventListener("DOMContentLoaded", function() {
     // Pre-fetch all transaction details on load in background
     fetchDetailedLedgerData();
+
+    // Toggle manual stock valuation change
+    const includeStock = document.getElementById('includeStock');
+    if (includeStock) {
+        includeStock.addEventListener('change', function() {
+            this.form.submit();
+        });
+    }
+
+    // Toggle Header/Footer checkbox
+    const toggleHeaders = document.getElementById('toggleHeaders');
+    if (toggleHeaders) {
+        toggleHeaders.addEventListener('change', function() {
+            toggleBrowserHeadersFooters(this.checked);
+        });
+    }
+
+    // Print Button
+    const printBtn = document.getElementById('printBtn');
+    if (printBtn) {
+        printBtn.addEventListener('click', function() {
+            window.print();
+        });
+    }
+
+    // Modal print button
+    const modalPrintLedgerBtn = document.getElementById('modalPrintLedgerBtn');
+    if (modalPrintLedgerBtn) {
+        modalPrintLedgerBtn.addEventListener('click', function() {
+            printDetailedLedger();
+        });
+    }
+
+    // Detailed Ledger toggle button
+    const detailedLedgerBtn = document.getElementById('detailedLedgerBtn');
+    if (detailedLedgerBtn) {
+        detailedLedgerBtn.addEventListener('click', function() {
+            viewDrilldown('All');
+        });
+    }
+
+    // Drilldown event bindings for table rows
+    document.querySelectorAll('.drilldown-link').forEach(el => {
+        el.addEventListener('click', function() {
+            const category = this.getAttribute('data-category');
+            if (category) {
+                viewDrilldown(category);
+            }
+        });
+    });
 
     // Recursive collapse function to collapse descendants
     function collapseRow(header) {
@@ -1241,25 +1259,31 @@ function populateDetailedLedgerUI(transactions) {
     expenseTx.forEach(t => expenseTotal += parseFloat(t.amount || 0));
     
     // Update badges
-    document.getElementById('incomeCount').textContent = `${incomeTx.length} transaction${incomeTx.length !== 1 ? 's' : ''}`;
-    document.getElementById('incomeTotalBadge').textContent = `₹${incomeTotal.toFixed(2)}`;
+    const incCountEl = document.getElementById('incomeCount');
+    if (incCountEl) incCountEl.textContent = `${incomeTx.length} transaction${incomeTx.length !== 1 ? 's' : ''}`;
     
-    document.getElementById('expenseCount').textContent = `${expenseTx.length} transaction${expenseTx.length !== 1 ? 's' : ''}`;
-    document.getElementById('expenseTotalBadge').textContent = `₹${expenseTotal.toFixed(2)}`;
+    const incTotalEl = document.getElementById('incomeTotalBadge');
+    if (incTotalEl) incTotalEl.textContent = `₹${incomeTotal.toFixed(2)}`;
+    
+    const expCountEl = document.getElementById('expenseCount');
+    if (expCountEl) expCountEl.textContent = `${expenseTx.length} transaction${expenseTx.length !== 1 ? 's' : ''}`;
+    
+    const expTotalEl = document.getElementById('expenseTotalBadge');
+    if (expTotalEl) expTotalEl.textContent = `₹${expenseTotal.toFixed(2)}`;
     
     // Populate Modal Income Content
     let incomeHtml = '';
     incomeTx.forEach(t => {
         incomeHtml += `
             <tr>
-                <td><span class="badge bg-light text-dark font-monospace border" data-style="font-size: 0.75rem;">${t.date}</span></td>
+                <td><span class="badge bg-light text-dark font-monospace border" style="font-size: 0.75rem;">${t.date}</span></td>
                 <td>
-                    <div class="fw-bold text-dark" data-style="font-size: 0.85rem;">
-                        <span class="badge bg-success-subtle text-success border me-2" data-style="font-size: 0.65rem;">${t.category || 'Income'}</span>${t.reference}
+                    <div class="fw-bold text-dark" style="font-size: 0.85rem;">
+                        <span class="badge bg-success-subtle text-success border me-2" style="font-size: 0.65rem;">${t.category || 'Income'}</span>${t.reference}
                     </div>
-                    <div class="text-muted small" data-style="font-size: 0.75rem; margin-top: 2px;">${t.detail || ''}</div>
+                    <div class="text-muted small" style="font-size: 0.75rem; margin-top: 2px;">${t.detail || ''}</div>
                 </td>
-                <td class="text-end font-monospace fw-bold text-success" data-style="font-size: 0.85rem;">₹${parseFloat(t.amount).toFixed(2)}</td>
+                <td class="text-end font-monospace fw-bold text-success" style="font-size: 0.85rem;">₹${parseFloat(t.amount).toFixed(2)}</td>
             </tr>
         `;
     });
@@ -1269,14 +1293,14 @@ function populateDetailedLedgerUI(transactions) {
     expenseTx.forEach(t => {
         expenseHtml += `
             <tr>
-                <td><span class="badge bg-light text-dark font-monospace border" data-style="font-size: 0.75rem;">${t.date}</span></td>
+                <td><span class="badge bg-light text-dark font-monospace border" style="font-size: 0.75rem;">${t.date}</span></td>
                 <td>
-                    <div class="fw-bold text-dark" data-style="font-size: 0.85rem;">
-                        <span class="badge bg-danger-subtle text-danger border me-2" data-style="font-size: 0.65rem;">${t.category || 'Expense'}</span>${t.reference}
+                    <div class="fw-bold text-dark" style="font-size: 0.85rem;">
+                        <span class="badge bg-danger-subtle text-danger border me-2" style="font-size: 0.65rem;">${t.category || 'Expense'}</span>${t.reference}
                     </div>
-                    <div class="text-muted small" data-style="font-size: 0.75rem; margin-top: 2px;">${t.detail || ''}</div>
+                    <div class="text-muted small" style="font-size: 0.75rem; margin-top: 2px;">${t.detail || ''}</div>
                 </td>
-                <td class="text-end font-monospace fw-bold text-danger" data-style="font-size: 0.85rem;">₹${parseFloat(t.amount).toFixed(2)}</td>
+                <td class="text-end font-monospace fw-bold text-danger" style="font-size: 0.85rem;">₹${parseFloat(t.amount).toFixed(2)}</td>
             </tr>
         `;
     });
@@ -1286,20 +1310,24 @@ function populateDetailedLedgerUI(transactions) {
     const incomeEmpty = document.getElementById('incomeEmptyState');
     const expenseEmpty = document.getElementById('expenseEmptyState');
     
-    if (incomeTx.length > 0) {
-        incomeContent.innerHTML = incomeHtml;
-        incomeEmpty.style.display = 'none';
-    } else {
-        incomeContent.innerHTML = '';
-        incomeEmpty.style.display = 'block';
+    if (incomeContent) {
+        if (incomeTx.length > 0) {
+            incomeContent.innerHTML = incomeHtml;
+            if (incomeEmpty) incomeEmpty.style.display = 'none';
+        } else {
+            incomeContent.innerHTML = '';
+            if (incomeEmpty) incomeEmpty.style.display = 'block';
+        }
     }
     
-    if (expenseTx.length > 0) {
-        expenseContent.innerHTML = expenseHtml;
-        expenseEmpty.style.display = 'none';
-    } else {
-        expenseContent.innerHTML = '';
-        expenseEmpty.style.display = 'block';
+    if (expenseContent) {
+        if (expenseTx.length > 0) {
+            expenseContent.innerHTML = expenseHtml;
+            if (expenseEmpty) expenseEmpty.style.display = 'none';
+        } else {
+            expenseContent.innerHTML = '';
+            if (expenseEmpty) expenseEmpty.style.display = 'block';
+        }
     }
 }
 
@@ -1313,13 +1341,13 @@ function viewDrilldown(categoryName) {
     const drilldownSingleContainer = document.getElementById('drilldownSingleContainer');
     const modalActionControls = document.getElementById('modalActionControls');
     
-    title.innerHTML = `<i class="bi bi-zoom-in me-2"></i>Ledger Statement: ${categoryName === 'All' ? 'All Transactions / Detailed Ledger' : categoryName}`;
+    if (title) title.innerHTML = `<i class="bi bi-zoom-in me-2"></i>Ledger Statement: ${categoryName === 'All' ? 'All Transactions / Detailed Ledger' : categoryName}`;
     
     if (categoryName === 'All') {
-        drilldownAllContainer.style.display = 'flex';
-        drilldownSingleContainer.style.display = 'none';
-        modalActionControls.style.display = 'flex';
-        emptyState.style.display = 'none';
+        if (drilldownAllContainer) drilldownAllContainer.style.display = 'flex';
+        if (drilldownSingleContainer) drilldownSingleContainer.style.display = 'none';
+        if (modalActionControls) modalActionControls.style.display = 'flex';
+        if (emptyState) emptyState.style.display = 'none';
         
         const myModal = new bootstrap.Modal(document.getElementById('drilldownModal'));
         myModal.show();
@@ -1328,13 +1356,13 @@ function viewDrilldown(categoryName) {
             fetchDetailedLedgerData();
         }
     } else {
-        content.innerHTML = `<tr><td colspan="4" class="text-center py-4"><span class="spinner-border spinner-border-sm me-2" role="status"></span>Loading transactions...</td></tr>`;
+        if (content) content.innerHTML = `<tr><td colspan="4" class="text-center py-4"><span class="spinner-border spinner-border-sm me-2" role="status"></span>Loading transactions...</td></tr>`;
         
-        drilldownAllContainer.style.display = 'none';
-        drilldownSingleContainer.style.display = 'block';
-        modalActionControls.style.display = 'none';
-        table.style.display = 'table';
-        emptyState.style.display = 'none';
+        if (drilldownAllContainer) drilldownAllContainer.style.display = 'none';
+        if (drilldownSingleContainer) drilldownSingleContainer.style.display = 'block';
+        if (modalActionControls) modalActionControls.style.display = 'none';
+        if (table) table.style.display = 'table';
+        if (emptyState) emptyState.style.display = 'none';
         
         const myModal = new bootstrap.Modal(document.getElementById('drilldownModal'));
         myModal.show();
@@ -1350,21 +1378,21 @@ function viewDrilldown(categoryName) {
                     data.transactions.forEach(t => {
                         html += `
                             <tr>
-                                <td><span class="badge bg-light text-dark font-monospace border" data-style="font-size: 0.75rem;">${t.date}</span></td>
-                                <td class="fw-bold text-dark" data-style="font-size: 0.85rem;">${t.reference}</td>
-                                <td class="text-muted small" data-style="font-size: 0.75rem;">${t.detail || ''}</td>
-                                <td class="text-end font-monospace fw-bold text-dark" data-style="font-size: 0.85rem;">₹${parseFloat(t.amount).toFixed(2)}</td>
+                                <td><span class="badge bg-light text-dark font-monospace border" style="font-size: 0.75rem;">${t.date}</span></td>
+                                <td class="fw-bold text-dark" style="font-size: 0.85rem;">${t.reference}</td>
+                                <td class="text-muted small" style="font-size: 0.75rem;">${t.detail || ''}</td>
+                                <td class="text-end font-monospace fw-bold text-dark" style="font-size: 0.85rem;">₹${parseFloat(t.amount).toFixed(2)}</td>
                             </tr>
                         `;
                     });
-                    content.innerHTML = html;
+                    if (content) content.innerHTML = html;
                 } else {
-                    table.style.display = 'none';
-                    emptyState.style.display = 'block';
+                    if (table) table.style.display = 'none';
+                    if (emptyState) emptyState.style.display = 'block';
                 }
             })
             .catch(err => {
-                content.innerHTML = `<tr><td colspan="4" class="text-center text-danger py-4"><i class="bi bi-exclamation-triangle-fill me-2"></i>Failed to retrieve details.</td></tr>`;
+                if (content) content.innerHTML = `<tr><td colspan="4" class="text-center text-danger py-4"><i class="bi bi-exclamation-triangle-fill me-2"></i>Failed to retrieve details.</td></tr>`;
             });
     }
 }
@@ -1395,11 +1423,11 @@ function printDetailedLedger() {
           integrity="sha384-l4UPAMHGzl7zwogLW4nOwaU2XTk6oiM1jhCRQstZEndoIiA2I5bg6fST3wzBSRBD"
           crossorigin="anonymous">
             <style>
-                body { font-family: 'Inter', sans-serif; padding: 40px; background-color: #ffffff; color: #000000; }
-                .report-header { text-align: center; margin-bottom: 40px; border-bottom: 2px solid #000000; padding-bottom: 20px; }
-                .section-header { font-weight: bold; padding: 10px 15px; margin-top: 30px; margin-bottom: 15px; font-size: 1.1rem; border-bottom: 2px solid #000; }
-                .table th { background-color: #f8fafc !important; color: #000000 !important; font-weight: 800; border: 1px solid #cbd5e1 !important; }
-                .table td { border: 1px solid #cbd5e1 !important; font-size: 0.85rem !important; }
+                body { font-family: 'Inter', sans-serif; padding: 40px; background-color: #ffffff; color: #334155; }
+                .report-header { text-align: center; margin-bottom: 40px; border-bottom: 2px solid #1b4d3e; padding-bottom: 20px; }
+                .section-header { font-weight: bold; padding: 10px 15px; margin-top: 30px; margin-bottom: 15px; font-size: 1.1rem; border-bottom: 2px solid #e2e8f0; }
+                .table th { background-color: #f8fafc !important; color: #64748b !important; font-weight: 700; border: 1px solid #e2e8f0 !important; }
+                .table td { border: 1px solid #e2e8f0 !important; font-size: 0.85rem !important; }
                 .font-monospace { font-family: 'JetBrains Mono', monospace; }
                 .no-print { display: none; }
                 @media print {
@@ -1410,14 +1438,14 @@ function printDetailedLedger() {
         </head>
         <body>
             <div class="no-print mb-4 text-end">
-                <button class="btn btn-primary rounded-pill px-4" data-onclick="window.print()"><i class="bi bi-printer me-2"></i>Print Ledger</button>
-                <button class="btn btn-secondary rounded-pill px-4" data-onclick="window.close()">Close</button>
+                <button id="printBtnInner" class="btn btn-primary rounded-pill px-4"><i class="bi bi-printer me-2"></i>Print Ledger</button>
+                <button id="closeBtnInner" class="btn btn-secondary rounded-pill px-4">Close</button>
             </div>
             
             <div class="report-header">
-                <h2 class="fw-bold text-uppercase m-0" data-style="color: #15803d; letter-spacing: 1px;">RANGA FARMS</h2>
-                <h5 class="text-secondary text-uppercase mt-1 mb-3" data-style="font-size: 0.85rem; letter-spacing: 2px;">Detailed General Ledger Statement</h5>
-                <div class="font-monospace small text-muted" data-style="border-top: 1px solid #ddd; border-bottom: 1px solid #ddd; display: inline-block; padding: 5px 20px;">
+                <h2 class="fw-bold text-uppercase m-0" style="color: #1b4d3e; letter-spacing: 1px;">RANGA FARMS</h2>
+                <h5 class="text-secondary text-uppercase mt-1 mb-3" style="font-size: 0.85rem; letter-spacing: 2px;">Detailed General Ledger Statement</h5>
+                <div class="font-monospace small text-muted" style="border-top: 1px solid #ddd; border-bottom: 1px solid #ddd; display: inline-block; padding: 5px 20px;">
                     Period: ${selectedMonth === 'All' ? 'Full Year ' + selectedYear : fromDate + ' to ' + toDate}
                 </div>
             </div>
@@ -1428,11 +1456,11 @@ function printDetailedLedger() {
             </div>
             <table class="table table-striped align-middle table-bordered">
                 <thead>
-                    <tr data-style="background-color: #f1f5f9;">
-                        <th data-style="width: 15%;">Date</th>
-                        <th data-style="width: 30%;">Reference</th>
-                        <th data-style="width: 40%;">Particulars / Details</th>
-                        <th data-style="width: 15%; text-align: right;">Amount</th>
+                    <tr style="background-color: #f1f5f9;">
+                        <th style="width: 15%;">Date</th>
+                        <th style="width: 30%;">Reference</th>
+                        <th style="width: 40%;">Particulars / Details</th>
+                        <th style="width: 15%; text-align: right;">Amount</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -1440,17 +1468,17 @@ function printDetailedLedger() {
                 </tbody>
             </table>
             
-            <div class="section-header text-danger d-flex justify-content-between align-items-center" data-style="page-break-before: always;">
+            <div class="section-header text-danger d-flex justify-content-between align-items-center" style="page-break-before: always;">
                 <span><i class="bi bi-arrow-up-right-circle-fill me-2"></i>EXPENSE TRANSACTIONS (${expenseCount})</span>
                 <span class="font-monospace">Total: ${expenseTotalBadge}</span>
             </div>
             <table class="table table-striped align-middle table-bordered">
                 <thead>
-                    <tr data-style="background-color: #f1f5f9;">
-                        <th data-style="width: 15%;">Date</th>
-                        <th data-style="width: 30%;">Reference</th>
-                        <th data-style="width: 40%;">Particulars / Details</th>
-                        <th data-style="width: 15%; text-align: right;">Amount</th>
+                    <tr style="background-color: #f1f5f9;">
+                        <th style="width: 15%;">Date</th>
+                        <th style="width: 30%;">Reference</th>
+                        <th style="width: 40%;">Particulars / Details</th>
+                        <th style="width: 15%; text-align: right;">Amount</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -1459,15 +1487,17 @@ function printDetailedLedger() {
             </table>
             
             <div class="row mt-5 print-signatures">
-                <div class="col-6 text-center" data-style="width: 50%; float: left; display: inline-block;">
-                    <div data-style="width: 200px; margin: 0 auto; border-top: 1px solid #000000; padding-top: 5px; font-weight: bold; font-size: 0.9rem;">Prepared By</div>
+                <div class="col-6 text-center" style="width: 50%; float: left; display: inline-block;">
+                    <div style="width: 200px; margin: 0 auto; border-top: 1px solid #334155; padding-top: 5px; font-weight: bold; font-size: 0.9rem;">Prepared By</div>
                 </div>
-                <div class="col-6 text-center" data-style="width: 50%; float: right; display: inline-block;">
-                    <div data-style="width: 200px; margin: 0 auto; border-top: 1px solid #000000; padding-top: 5px; font-weight: bold; font-size: 0.9rem;">Authorized Signatory</div>
+                <div class="col-6 text-center" style="width: 50%; float: right; display: inline-block;">
+                    <div style="width: 200px; margin: 0 auto; border-top: 1px solid #334155; padding-top: 5px; font-weight: bold; font-size: 0.9rem;">Authorized Signatory</div>
                 </div>
             </div>
             
-            <script nonce="{{ csp_nonce }}">
+            <script>
+                document.getElementById('printBtnInner').onclick = function() { window.print(); };
+                document.getElementById('closeBtnInner').onclick = function() { window.close(); };
                 window.onload = function() {
                     setTimeout(function() {
                         window.print();
@@ -1479,6 +1509,5 @@ function printDetailedLedger() {
     `);
     printWindow.document.close();
 }
-
 </script>
 {% endblock %}
