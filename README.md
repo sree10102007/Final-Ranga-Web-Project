@@ -155,3 +155,38 @@ We use `detect-secrets` to prevent credentials from leaking into the repository.
 ---
 
 > Built for **Ranga Farms**
+
+## 🐳 Docker & Dockploy Deployment on Hostinger
+
+This project is fully dockerized and optimized for deployment on Hostinger VPS using Dockploy or standard Docker Compose.
+
+### Dockploy Configuration Details
+- **Repository URL**: `https://github.com/sree10102007/Final-Ranga-Web-Project`
+- **Branch**: `main`
+- **Dockerfile Path**: `Dockerfile`
+- **Exposed App Port**: `5001`
+
+### Required Environment Variables
+Configure these variables in your Hostinger / Dockploy dashboard (or a local `.env` file for local runs):
+- `SECRET_KEY` — A secure, random secret key for Flask session signing.
+- `DB_ENCRYPTION_KEY` — A Fernet key for column-level database encryption.
+- `DB_PASSWORD` — Password for the PostgreSQL database user.
+- `ADMIN_PASSWORD` — Password for the initial administrator user.
+
+To generate a secure `DB_ENCRYPTION_KEY`, run this in your terminal:
+```bash
+python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+```
+
+### Local Testing with Docker Compose
+To build and run the entire stack (Flask app, PostgreSQL, Redis) locally using Docker:
+```bash
+# 1. Create a .env file from the example
+cp goat_farm_app/.env.example .env
+
+# 2. Edit .env to set your secrets/passwords
+
+# 3. Build and launch the services
+docker compose build --no-cache
+docker compose up
+```
