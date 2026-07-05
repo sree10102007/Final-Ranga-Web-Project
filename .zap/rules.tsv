@@ -1,4 +1,4 @@
 10038	IGNORE	(CSP: Wildcard Directive)
 10055	IGNORE	(CSP: Failure to Define Directive with No Fallback)
-10096	IGNORE	(Sub Resource Integrity Attribute Missing)
+90003	IGNORE	(Sub Resource Integrity Attribute Missing)
 10098	IGNORE	(Cross-Domain Misconfiguration)

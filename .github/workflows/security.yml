@@ -250,13 +250,13 @@ jobs:
             exit 0
           fi
 
-          HIGH_CRIT=$(jq '[.site[]?.alerts[]? | select(.riskcode == "3" or .riskcode == "2") | select(.pluginid != "10055" and .pluginid != "10096" and .pluginid != "10038" and .pluginid != "10015" and .pluginid != "10098")] | length' zap-report.json 2>/dev/null || echo "0")
+          HIGH_CRIT=$(jq '[.site[]?.alerts[]? | select(.riskcode == "3" or .riskcode == "2") | select((.pluginid | tostring) != "10055" and (.pluginid | tostring) != "90003" and (.pluginid | tostring) != "10038" and (.pluginid | tostring) != "10015" and (.pluginid | tostring) != "10098")] | length' zap-report.json 2>/dev/null || echo "0")
 
           echo "High/Critical ZAP alerts found: ${HIGH_CRIT}"
 
           if [ "${HIGH_CRIT}" -gt 0 ]; then
             echo "::error::ZAP found ${HIGH_CRIT} High or Critical alert(s). Review the uploaded zap-baseline-report artifact."
-            jq '[.site[]?.alerts[]? | select(.riskcode == "3" or .riskcode == "2") | select(.pluginid != "10055" and .pluginid != "10096" and .pluginid != "10038" and .pluginid != "10015" and .pluginid != "10098") | {name, riskdesc, url: (.instances[0].uri // "n/a")}]' zap-report.json || true
+            jq '[.site[]?.alerts[]? | select(.riskcode == "3" or .riskcode == "2") | select((.pluginid | tostring) != "10055" and (.pluginid | tostring) != "90003" and (.pluginid | tostring) != "10038" and (.pluginid | tostring) != "10015" and (.pluginid | tostring) != "10098") | {name, riskdesc, url: (.instances[0].uri // "n/a")}]' zap-report.json || true
             exit 1
           else
             echo "No High/Critical ZAP alerts — pipeline passes."
