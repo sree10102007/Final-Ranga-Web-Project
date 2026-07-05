@@ -95,7 +95,7 @@ To customize these connection credentials (both locally and when deploying onlin
 - `DB_SSLMODE` (defaults to `prefer`)
 
 Or set a single connection URI:
-- `DATABASE_URL` (e.g. `postgresql://user:password@host:port/database_name`)
+- `DATABASE_URL` (e.g. `postgresql://<username>:<password>@<host>:<port>/<database_name>`)
 
 Create a new PostgreSQL database matching your configuration name (defaults to `goat_farm`).
 
