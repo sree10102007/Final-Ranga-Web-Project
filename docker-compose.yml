@@ -8,6 +8,7 @@ services:
       - "5001:5001"
     environment:
       FLASK_ENV: production
+      PYTHONUNBUFFERED: "1"
       SECRET_KEY: ${SECRET_KEY}
       DB_ENCRYPTION_KEY: ${DB_ENCRYPTION_KEY}
       DB_HOST: db
@@ -19,8 +20,10 @@ services:
       LIMITER_STORAGE_URI: redis://redis:6379/0
       ADMIN_PASSWORD: ${ADMIN_PASSWORD}
     depends_on:
-      - db
-      - redis
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
     restart: unless-stopped
     volumes:
       - app_logs:/app/goat_farm_app/logs
@@ -36,6 +39,11 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d goat_farm"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   redis:
     image: redis:7-alpine
