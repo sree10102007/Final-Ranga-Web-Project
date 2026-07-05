@@ -114,9 +114,9 @@ def create_app(config_name=None):
             "https://cdn.datatables.net https://code.jquery.com; "
             "style-src 'self' 'unsafe-inline' "
             "https://cdn.jsdelivr.net https://cdnjs.cloudflare.com "
-            "https://cdn.datatables.net; "
+            "https://cdn.datatables.net https://fonts.googleapis.com; "
             "img-src 'self' data:; "
-            "font-src 'self' https://cdnjs.cloudflare.com; "
+            "font-src 'self' https://cdnjs.cloudflare.com https://fonts.gstatic.com https://cdn.jsdelivr.net; "
             "connect-src 'self';"
         )
         response.headers['X-Content-Type-Options'] = 'nosniff'
