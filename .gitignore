@@ -32,3 +32,4 @@ build/
 .env
 
 testsprite_tests\tmp\config.json
+goat_farm_app/logs/
