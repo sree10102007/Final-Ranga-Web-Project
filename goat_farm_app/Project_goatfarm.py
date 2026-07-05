@@ -18,6 +18,7 @@ import pyotp
 import qrcode
 import base64
 import io
+import mimetypes
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 
