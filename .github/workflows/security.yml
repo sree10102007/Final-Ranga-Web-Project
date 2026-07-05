@@ -35,24 +35,32 @@ jobs:
           detect-secrets scan --baseline .secrets.baseline .
           python -c "
           import json, sys
-          def get_hashes(path):
+          def get_findings(path):
               try:
                   with open(path) as f:
                       data = json.load(f)
               except Exception:
-                  return set()
-              return {f.get('hashed_secret') for findings in data.get('results', {}).values() for f in findings if f.get('hashed_secret')}
+                  return {}
+              res = {}
+              for file_path, secrets in data.get('results', {}).items():
+                  for secret in secrets:
+                      h = secret.get('hashed_secret')
+                      if h:
+                          res[h] = (file_path, secret.get('line_number'), secret.get('type'))
+              return res
 
-          old_hashes = get_hashes('.secrets.baseline.old')
-          new_hashes = get_hashes('.secrets.baseline')
-          added = new_hashes - old_hashes
-          if added:
+          old_findings = get_findings('.secrets.baseline.old')
+          new_findings = get_findings('.secrets.baseline')
+          added_hashes = set(new_findings.keys()) - set(old_findings.keys())
+          if added_hashes:
               print('CRITICAL: New, unaudited secrets detected!')
-              for secret_hash in added:
-                  print(f'  New secret hash: {secret_hash}')
+              for h in sorted(added_hashes):
+                  file_path, line_number, s_type = new_findings[h]
+                  print(f'  New secret hash: {h} | File: {file_path} | Line: {line_number} | Type: {s_type}')
               sys.exit(1)
           print('No new secrets detected.')
           "
+
 
 
   supply-chain:
