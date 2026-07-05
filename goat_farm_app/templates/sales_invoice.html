@@ -11,7 +11,7 @@
                 <a href="{{ url_for('sales_register', s_type=s_type) }}" class="btn btn-outline-secondary rounded-pill px-3 me-2">
                     <i class="bi bi-arrow-left me-1"></i> Back to Register
                 </a>
-                <button onclick="window.print()" class="btn btn-success rounded-pill px-4 shadow-sm">
+                <button id="printBtn" class="btn btn-success rounded-pill px-4 shadow-sm">
                     <i class="bi bi-printer me-2"></i> Print Invoice / Save PDF
                 </button>
             </div>
@@ -35,7 +35,7 @@
                 <div class="d-flex flex-wrap align-items-center gap-3">
                     <div class="d-flex align-items-center gap-2">
                         <label for="spacingSelect" class="small fw-semibold text-muted mb-0">Row Spacing:</label>
-                        <select id="spacingSelect" class="form-select form-select-sm rounded-3" style="width: 150px;" onchange="adjustSpacing(this.value)">
+                        <select id="spacingSelect" class="form-select form-select-sm rounded-3" style="width: 150px;">
                             <option value="compact">Compact ({% if s_type == 'goat' %}Many Goats{% else %}Many Items{% endif %})</option>
                             <option value="normal" selected>Normal</option>
                             <option value="spacious">Spacious ({% if s_type == 'goat' %}1 Goat{% else %}1 Item{% endif %})</option>
@@ -43,14 +43,14 @@
                     </div>
                     <div class="d-flex align-items-center gap-2">
                         <label for="sigHeight" class="small fw-semibold text-muted mb-0">Signature Height:</label>
-                        <select id="sigHeight" class="form-select form-select-sm rounded-3" style="width: 130px;" onchange="adjustSigHeight(this.value)">
+                        <select id="sigHeight" class="form-select form-select-sm rounded-3" style="width: 130px;">
                             <option value="small">Small Space</option>
                             <option value="medium" selected>Medium Space</option>
                             <option value="large">Large Space</option>
                         </select>
                     </div>
                     <div class="form-check form-switch mb-0">
-                        <input class="form-check-input" type="checkbox" id="toggleBank" checked onchange="toggleBankSection(this.checked)">
+                        <input class="form-check-input" type="checkbox" id="toggleBank" checked>
                         <label class="form-check-label small fw-semibold text-muted" for="toggleBank">Show Bank Details</label>
                     </div>
                 </div>
@@ -357,5 +357,39 @@ function toggleBankSection(show) {
         }
     }
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Print Button click event
+    const printBtn = document.getElementById('printBtn');
+    if (printBtn) {
+        printBtn.addEventListener('click', function() {
+            window.print();
+        });
+    }
+
+    // Row Spacing selector change event
+    const spacingSelect = document.getElementById('spacingSelect');
+    if (spacingSelect) {
+        spacingSelect.addEventListener('change', function() {
+            adjustSpacing(this.value);
+        });
+    }
+
+    // Signature Height selector change event
+    const sigHeight = document.getElementById('sigHeight');
+    if (sigHeight) {
+        sigHeight.addEventListener('change', function() {
+            adjustSigHeight(this.value);
+        });
+    }
+
+    // Show/Hide Bank Details switch change event
+    const toggleBank = document.getElementById('toggleBank');
+    if (toggleBank) {
+        toggleBank.addEventListener('change', function() {
+            toggleBankSection(this.checked);
+        });
+    }
+});
 </script>
 {% endblock %}
