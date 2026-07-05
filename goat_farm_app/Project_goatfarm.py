@@ -4793,11 +4793,19 @@ def init_employee_tables():
             status TEXT DEFAULT 'Active', notes TEXT,
             aadhar_no TEXT, pan_no TEXT, bank_name TEXT, account_no TEXT, ifsc_code TEXT)''')
         
+        conn.execute('''CREATE TABLE IF NOT EXISTS expenses (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            category TEXT, amount REAL, date DATE,
+            description TEXT, vendor_name TEXT, payment_mode TEXT,
+            receipt_no TEXT, notes TEXT, status TEXT DEFAULT 'Pending',
+            pnl_category TEXT DEFAULT 'Direct Expenses')''')
+        
         # Use add_column to update existing tables
         def add_col(table, col, typ):
             try:
-                conn.execute(f"ALTER TABLE {table} ADD COLUMN {col} {typ}")
-            except sqlite3.OperationalError: pass
+                conn.execute(f"ALTER TABLE {table} ADD COLUMN IF NOT EXISTS {col} {typ}")
+            except Exception:
+                pass
 
         add_col("employees", "sr_no", "INTEGER")
         add_col("employees", "aadhar_no", "TEXT")
@@ -4807,10 +4815,15 @@ def init_employee_tables():
         add_col("employees", "ifsc_code", "TEXT")
         
         # Populate sr_no if empty/null
-        conn.execute('UPDATE employees SET sr_no = id WHERE sr_no IS NULL OR sr_no = 0')
+        try:
+            conn.execute('UPDATE employees SET sr_no = id WHERE sr_no IS NULL OR sr_no = 0')
+        except Exception:
+            pass
+            
         add_col("expenses", "bill_file", "TEXT")
         add_col("expenses", "status", "TEXT DEFAULT 'Pending'")
         add_col("expenses", "pnl_category", "TEXT DEFAULT 'Direct Expenses'")
+        
         conn.execute('''CREATE TABLE IF NOT EXISTS employee_wages (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             employee_id INTEGER UNIQUE, daily_wage REAL DEFAULT 0,
@@ -4838,12 +4851,6 @@ def init_employee_tables():
             end_date DATE, reason TEXT, status TEXT DEFAULT 'Pending')''')
         conn.execute('''CREATE TABLE IF NOT EXISTS expense_categories (
             id INTEGER PRIMARY KEY AUTOINCREMENT, category_name TEXT UNIQUE)''')
-        conn.execute('''CREATE TABLE IF NOT EXISTS expenses (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            category TEXT, amount REAL, date DATE,
-            description TEXT, vendor_name TEXT, payment_mode TEXT,
-            receipt_no TEXT, notes TEXT, status TEXT DEFAULT 'Pending',
-            pnl_category TEXT DEFAULT 'Direct Expenses')''')
         conn.execute('''CREATE TABLE IF NOT EXISTS equipment (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL, type TEXT, purchase_date DATE, purchase_cost REAL,
