@@ -1,4 +1,5 @@
 import os
+import secrets
 import random
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Tuple, Union
@@ -88,6 +89,19 @@ from flask_wtf.csrf import CSRFProtect, CSRFError
 
 # Initialize application using the Application Factory pattern
 app = create_app()
+
+
+# ── CSP NONCE: generate a fresh cryptographic nonce for every request ────────
+# This allows us to whitelist our own inline scripts/styles without using
+# 'unsafe-inline', which is flagged by OWASP ZAP and other scanners.
+@app.before_request
+def set_csp_nonce():
+    g.csp_nonce = secrets.token_hex(16)
+
+# Expose g.csp_nonce in every Jinja2 template automatically
+@app.context_processor
+def inject_csp_nonce():
+    return dict(csp_nonce=getattr(g, 'csp_nonce', ''))
 
 
 
@@ -258,13 +272,18 @@ def add_security_headers(response):
     response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains; preload'
     response.headers['Referrer-Policy'] = 'no-referrer-when-downgrade'
     response.headers['Permissions-Policy'] = 'geolocation=(), microphone=(), camera=()'
-    # Content-Security-Policy: Allow Bootstrap, Icons, FontAwesome, Google fonts, inline script tags from our forms.
+    # Content-Security-Policy: strict nonce-based policy — no unsafe-inline.
+    # A unique nonce is generated per request (set_csp_nonce above) and injected
+    # into every <script> and <style> tag via the Jinja2 {{ csp_nonce }} variable.
+    nonce = getattr(g, 'csp_nonce', '')
+    nonce_src = f"'nonce-{nonce}'" if nonce else ''
     response.headers['Content-Security-Policy'] = (
         "default-src 'self'; "
-        "script-src 'self' 'unsafe-inline' cdn.jsdelivr.net cdnjs.cloudflare.com; "
-        "style-src 'self' 'unsafe-inline' cdn.jsdelivr.net cdnjs.cloudflare.com fonts.googleapis.com; "
+        f"script-src 'self' {nonce_src} cdn.jsdelivr.net; "
+        f"style-src 'self' {nonce_src} cdn.jsdelivr.net cdnjs.cloudflare.com fonts.googleapis.com; "
         "font-src 'self' cdn.jsdelivr.net cdnjs.cloudflare.com fonts.gstatic.com; "
         "img-src 'self' data:; "
+        "connect-src 'self'; "
         "frame-ancestors 'none';"
     )
     # Return correlation ID in headers
