@@ -107,9 +107,10 @@ def create_app(config_name=None):
     
     @app.after_request
     def set_security_headers(response):
+        # TODO: 'unsafe-inline' is still pending a full template refactoring to utilize nonces/SRI
         response.headers['Content-Security-Policy'] = (
             "default-src 'self'; "
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval' "
+            "script-src 'self' 'unsafe-inline' "
             "https://cdn.jsdelivr.net https://cdnjs.cloudflare.com "
             "https://cdn.datatables.net https://code.jquery.com; "
             "style-src 'self' 'unsafe-inline' "

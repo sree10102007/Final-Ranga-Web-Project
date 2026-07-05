@@ -1,0 +1,26 @@
+# Exclude Git files
+.git/
+.gitignore
+
+# Exclude application secrets and environment variables
+.env
+**/local_settings.py
+**/.env
+
+# Exclude python build/cache artifacts
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.tox/
+.coverage
+htmlcov/
+
+# Exclude logs
+goat_farm_app/logs/
+*.log
+
+# Exclude test files/folders not required for execution
+testsprite_tests/
+tests/

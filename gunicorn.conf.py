@@ -4,8 +4,9 @@
 import multiprocessing
 
 # 1. Server Socket Binding
-bind = "127.0.0.1:5001"
+bind = "0.0.0.0:5001"
 backlog = 2048
+
 
 # 2. Worker & Thread Management (Prevent DoS, match server capacity)
 workers = multiprocessing.cpu_count() * 2 + 1

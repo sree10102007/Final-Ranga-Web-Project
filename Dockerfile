@@ -30,6 +30,7 @@ RUN groupadd -g 10001 appgroup && \
 
 # Copy application files
 COPY goat_farm_app/ /app/
+COPY gunicorn.conf.py /app/gunicorn.conf.py
 
 # Set ownership of app files to non-root user
 RUN chown -R appuser:appgroup /app && \
@@ -45,4 +46,5 @@ EXPOSE 5001
 ENV FLASK_ENV=production
 ENV PYTHONUNBUFFERED=1
 
-CMD ["python", "Project_goatfarm.py"]
+CMD ["gunicorn", "-c", "gunicorn.conf.py", "Project_goatfarm:app"]
+
