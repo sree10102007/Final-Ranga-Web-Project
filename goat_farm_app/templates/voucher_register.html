@@ -189,7 +189,7 @@
     </div>
 {% endif %}
 
-<style nonce="{{ csp_nonce() }}">
+<style>
     .voucher-slip {
         background-color: #ffffff !important;
         transform: none !important;
@@ -208,7 +208,7 @@
     }
 </style>
 
-<script nonce="{{ csp_nonce() }}">
+<script>
 function applyCalendarFilter() {
     const selectedMonth = document.getElementById('filter-month-select').value; // 'all' or '01'-'12'
     const selectedYear = document.getElementById('filter-year-select').value;   // 'all' or '2020'-'2060'

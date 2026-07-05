@@ -3,7 +3,7 @@
 {% block page_title %}Feed & Medical Stock Control{% endblock %}
 
 {% block content %}
-<style nonce="{{ csp_nonce() }}">
+<style>
     .dashboard-card {
         border: none;
         border-radius: 20px;
@@ -280,7 +280,7 @@
     </div>
 </div>
 
-<script nonce="{{ csp_nonce() }}">
+<script>
     function getTodayString() {
         const d = new Date();
         const year = d.getFullYear();

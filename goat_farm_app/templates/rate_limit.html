@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rate Limit Exceeded - Ranga Farms</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <style nonce="{{ csp_nonce() }}">
+    <style>
         body {
             background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
             color: #f8fafc;
@@ -117,7 +117,7 @@
             <button class="btn" onclick="location.reload()">Refresh Page</button>
         </div>
     </div>
-    <script nonce="{{ csp_nonce() }}">
+    <script>
         let seconds = {{ retry_after }};
         const countdownEl = document.getElementById('countdown');
         const interval = setInterval(() => {
