@@ -287,7 +287,10 @@
   }
 
   document.addEventListener('click', function(e) {
-    let confirmEl = e.target.closest('[data-confirm]');
+    let element = e.target.nodeType === Node.ELEMENT_NODE ? e.target : e.target.parentElement;
+    if (!element) return;
+    
+    let confirmEl = element.closest ? element.closest('[data-confirm]') : null;
     if (confirmEl) {
       let msg = confirmEl.getAttribute('data-confirm');
       if (!confirm(msg)) {
@@ -297,14 +300,17 @@
       }
     }
     
-    let clickEl = e.target.closest('[data-onclick]');
+    let clickEl = element.closest ? element.closest('[data-onclick]') : null;
     if (clickEl) {
       handleDelegatedEvent(e, clickEl, 'click');
     }
   }, true);
 
   document.addEventListener('submit', function(e) {
-    let formEl = e.target.closest('form');
+    let element = e.target.nodeType === Node.ELEMENT_NODE ? e.target : e.target.parentElement;
+    if (!element) return;
+    
+    let formEl = element.closest ? element.closest('form') : null;
     if (formEl) {
       let confirmMsg = formEl.getAttribute('data-confirm');
       if (confirmMsg && !confirm(confirmMsg)) {
@@ -321,14 +327,16 @@
   }, true);
 
   document.addEventListener('change', function(e) {
-    if (e.target.hasAttribute('data-onchange')) {
-      handleDelegatedEvent(e, e.target, 'change');
+    let element = e.target.nodeType === Node.ELEMENT_NODE ? e.target : e.target.parentElement;
+    if (element && element.hasAttribute && element.hasAttribute('data-onchange')) {
+      handleDelegatedEvent(e, element, 'change');
     }
   }, true);
 
   document.addEventListener('input', function(e) {
-    if (e.target.hasAttribute('data-oninput')) {
-      handleDelegatedEvent(e, e.target, 'input');
+    let element = e.target.nodeType === Node.ELEMENT_NODE ? e.target : e.target.parentElement;
+    if (element && element.hasAttribute && element.hasAttribute('data-oninput')) {
+      handleDelegatedEvent(e, element, 'input');
     }
   }, true);
 
@@ -527,99 +535,100 @@
 
 <script nonce="{{ csp_nonce }}">
 document.addEventListener('DOMContentLoaded', function() {
-  {% if session.user_id %}
-  // Query notifications from API
-  fetch('/api/notifications')
-    .then(response => response.json())
-    .then(data => {
-      const container = document.getElementById('notification-toast-container');
-      if (!container) return;
+  const hasUser = "{{ 'true' if session.user_id else 'false' }}" === "true";
+  if (hasUser) {
+    // Query notifications from API
+    fetch('/api/notifications')
+      .then(response => response.json())
+      .then(data => {
+        const container = document.getElementById('notification-toast-container');
+        if (!container) return;
 
-      // 1. Render Target Weight Met Alerts (>= 25 kg)
-      if (data.weight_alerts && data.weight_alerts.length > 0) {
-        data.weight_alerts.forEach(goat => {
-          const toastEl = document.createElement('div');
-          toastEl.className = 'toast show farm-toast weight-alert';
-          toastEl.setAttribute('role', 'alert');
-          toastEl.setAttribute('aria-live', 'assertive');
-          toastEl.setAttribute('aria-atomic', 'true');
-          toastEl.setAttribute('data-bs-autohide', 'false');
+        // 1. Render Target Weight Met Alerts (>= 25 kg)
+        if (data.weight_alerts && data.weight_alerts.length > 0) {
+          data.weight_alerts.forEach(goat => {
+            const toastEl = document.createElement('div');
+            toastEl.className = 'toast show farm-toast weight-alert';
+            toastEl.setAttribute('role', 'alert');
+            toastEl.setAttribute('aria-live', 'assertive');
+            toastEl.setAttribute('aria-atomic', 'true');
+            toastEl.setAttribute('data-bs-autohide', 'false');
 
-          toastEl.innerHTML = `
-            <div class="toast-header d-flex align-items-center justify-content-between">
-              <strong class="me-auto text-success d-flex align-items-center gap-2"><i class="bi bi-award-fill fs-5"></i>Goat Reached 25 kg!</strong>
-              <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
-            <div class="toast-body">
-              <div class="mb-2">Goat <strong>${goat.tag_no}</strong> (${goat.color}) weighs <strong>${goat.weight_kg} kg</strong>. It is eligible to sell!</div>
-              <div class="d-flex gap-2 mt-3">
-                ${goat.already_eligible ? 
-                  `<span class="badge bg-success-subtle text-success py-2 px-3 rounded-pill w-100 text-center fs-7"><i class="bi bi-check-circle-fill me-1"></i>Already Listed for Sale</span>` :
-                  `<button class="btn btn-sm btn-success rounded-pill px-3 py-1.5 w-100 fw-bold shadow-sm" data-onclick="markEligible('${goat.tag_no}', this)">
-                     <i class="bi bi-cart-plus me-1"></i>Add to Sell List
-                   </button>`
-                }
+            toastEl.innerHTML = `
+              <div class="toast-header d-flex align-items-center justify-content-between">
+                <strong class="me-auto text-success d-flex align-items-center gap-2"><i class="bi bi-award-fill fs-5"></i>Goat Reached 25 kg!</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
               </div>
-            </div>
-          `;
-          container.appendChild(toastEl);
-        });
-      }
-
-      // 2. Render Low Stock Alerts
-      if (data.low_stock_alerts && data.low_stock_alerts.length > 0) {
-        data.low_stock_alerts.forEach(stock => {
-          const toastEl = document.createElement('div');
-          toastEl.className = 'toast show farm-toast stock-alert';
-          toastEl.setAttribute('role', 'alert');
-          toastEl.setAttribute('aria-live', 'polite');
-          toastEl.setAttribute('aria-atomic', 'true');
-          toastEl.setAttribute('data-bs-autohide', 'false');
-
-          toastEl.innerHTML = `
-            <div class="toast-header d-flex align-items-center justify-content-between">
-              <strong class="me-auto text-warning d-flex align-items-center gap-2"><i class="bi bi-exclamation-triangle-fill fs-5"></i>Low Stock Alert</strong>
-              <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
-            <div class="toast-body">
-              <div>Stock for ${stock.item_type} <strong>${stock.item_name}</strong> is running low!</div>
-              <div class="mt-2 text-dark fw-bold">Remaining: <span class="text-danger">${stock.closing_stock.toFixed(2)} ${stock.unit}</span> <span class="text-muted font-normal">(Limit: ${stock.alert_level.toFixed(2)} ${stock.unit})</span></div>
-            </div>
-          `;
-          container.appendChild(toastEl);
-        });
-      }
-
-      // 3. Render Batch Treatment Reminders
-      if (data.batch_alerts && data.batch_alerts.length > 0) {
-        data.batch_alerts.forEach(rem => {
-          const toastEl = document.createElement('div');
-          toastEl.className = 'toast show farm-toast batch-alert';
-          toastEl.setAttribute('role', 'alert');
-          toastEl.setAttribute('aria-live', 'assertive');
-          toastEl.setAttribute('aria-atomic', 'true');
-          toastEl.setAttribute('data-bs-autohide', 'false');
-
-          toastEl.innerHTML = `
-            <div class="toast-header d-flex align-items-center justify-content-between">
-              <strong class="me-auto text-primary d-flex align-items-center gap-2"><i class="bi bi-calendar-event-fill fs-5"></i>Batch Reminder</strong>
-              <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
-            <div class="toast-body">
-              <div class="mb-2"><strong>${rem.reminder_type}</strong> (<strong>${rem.item_name}</strong>) is scheduled for <strong>${rem.batch_name}</strong> today!</div>
-              <div class="mt-3">
-                <button class="btn btn-sm btn-primary rounded-pill px-3 py-1.5 w-100 fw-bold shadow-sm" data-onclick="completeReminder(${rem.id}, this)">
-                  <i class="bi bi-check2-circle me-1"></i>Mark Done
-                </button>
+              <div class="toast-body">
+                <div class="mb-2">Goat <strong>${goat.tag_no}</strong> (${goat.color}) weighs <strong>${goat.weight_kg} kg</strong>. It is eligible to sell!</div>
+                <div class="d-flex gap-2 mt-3">
+                  ${goat.already_eligible ? 
+                    `<span class="badge bg-success-subtle text-success py-2 px-3 rounded-pill w-100 text-center fs-7"><i class="bi bi-check-circle-fill me-1"></i>Already Listed for Sale</span>` :
+                    `<button class="btn btn-sm btn-success rounded-pill px-3 py-1.5 w-100 fw-bold shadow-sm" data-onclick="markEligible('${goat.tag_no}', this)">
+                       <i class="bi bi-cart-plus me-1"></i>Add to Sell List
+                     </button>`
+                  }
+                </div>
               </div>
-            </div>
-          `;
-          container.appendChild(toastEl);
-        });
-      }
-    })
-    .catch(err => console.error('Error fetching notifications:', err));
-  {% endif %}
+            `;
+            container.appendChild(toastEl);
+          });
+        }
+
+        // 2. Render Low Stock Alerts
+        if (data.low_stock_alerts && data.low_stock_alerts.length > 0) {
+          data.low_stock_alerts.forEach(stock => {
+            const toastEl = document.createElement('div');
+            toastEl.className = 'toast show farm-toast stock-alert';
+            toastEl.setAttribute('role', 'alert');
+            toastEl.setAttribute('aria-live', 'polite');
+            toastEl.setAttribute('aria-atomic', 'true');
+            toastEl.setAttribute('data-bs-autohide', 'false');
+
+            toastEl.innerHTML = `
+              <div class="toast-header d-flex align-items-center justify-content-between">
+                <strong class="me-auto text-warning d-flex align-items-center gap-2"><i class="bi bi-exclamation-triangle-fill fs-5"></i>Low Stock Alert</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+              </div>
+              <div class="toast-body">
+                <div>Stock for ${stock.item_type} <strong>${stock.item_name}</strong> is running low!</div>
+                <div class="mt-2 text-dark fw-bold">Remaining: <span class="text-danger">${stock.closing_stock.toFixed(2)} ${stock.unit}</span> <span class="text-muted font-normal">(Limit: ${stock.alert_level.toFixed(2)} ${stock.unit})</span></div>
+              </div>
+            `;
+            container.appendChild(toastEl);
+          });
+        }
+
+        // 3. Render Batch Treatment Reminders
+        if (data.batch_alerts && data.batch_alerts.length > 0) {
+          data.batch_alerts.forEach(rem => {
+            const toastEl = document.createElement('div');
+            toastEl.className = 'toast show farm-toast batch-alert';
+            toastEl.setAttribute('role', 'alert');
+            toastEl.setAttribute('aria-live', 'assertive');
+            toastEl.setAttribute('aria-atomic', 'true');
+            toastEl.setAttribute('data-bs-autohide', 'false');
+
+            toastEl.innerHTML = `
+              <div class="toast-header d-flex align-items-center justify-content-between">
+                <strong class="me-auto text-primary d-flex align-items-center gap-2"><i class="bi bi-calendar-event-fill fs-5"></i>Batch Reminder</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+              </div>
+              <div class="toast-body">
+                <div class="mb-2"><strong>${rem.reminder_type}</strong> (<strong>${rem.item_name}</strong>) is scheduled for <strong>${rem.batch_name}</strong> today!</div>
+                <div class="mt-3">
+                  <button class="btn btn-sm btn-primary rounded-pill px-3 py-1.5 w-100 fw-bold shadow-sm" data-onclick="completeReminder(${rem.id}, this)">
+                    <i class="bi bi-check2-circle me-1"></i>Mark Done
+                  </button>
+                </div>
+              </div>
+            `;
+            container.appendChild(toastEl);
+          });
+        }
+      })
+      .catch(err => console.error('Error fetching notifications:', err));
+  }
 });
 
 function markEligible(tagNo, btn) {
