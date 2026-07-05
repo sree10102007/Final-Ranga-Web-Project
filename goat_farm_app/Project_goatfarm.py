@@ -1078,17 +1078,18 @@ def init_db():
                     conn.execute('INSERT INTO expense_ledgers (ledger_name, ledger_group, description) VALUES (?, ?, ?)', (lname, lgrp, ldesc))
                 except Exception:
                     pass
-        # Check if admin user exists
-        admin_password = os.environ.get('ADMIN_PASSWORD', 'admin123')
-        user = conn.execute('SELECT * FROM users WHERE username = ?', ('admin',)).fetchone()
-        if not user:
-            conn.execute('INSERT INTO users (username, password, is_admin) VALUES (?, ?, 1)',
-                         ('admin', generate_password_hash(admin_password)))
-        else:
-            conn.execute('UPDATE users SET is_admin = 1 WHERE username = ?', ('admin',))
-            if not check_password_hash(user['password'], admin_password):
-                conn.execute('UPDATE users SET password = ? WHERE username = ?',
-                             (generate_password_hash(admin_password), 'admin'))
+        # Check if admin user exists (robust against parallel worker race conditions)
+        try:
+            admin_password = os.environ.get('ADMIN_PASSWORD', 'admin123')
+            hashed_password = generate_password_hash(admin_password)
+            conn.execute(
+                'INSERT INTO users (username, password, is_admin) VALUES (?, ?, 1) '
+                'ON CONFLICT (username) DO UPDATE SET is_admin = 1, password = ?',
+                ('admin', hashed_password, hashed_password)
+            )
+        except Exception:
+            pass
+
 
 
                          
