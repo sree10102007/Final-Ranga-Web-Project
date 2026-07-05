@@ -4,9 +4,8 @@
 {% block page_title %}SALES INVOICE{% endblock %}
 
 {% block content %}
-<!-- Options bar (visible on screen, hidden on print) -->
-<div class="container-fluid py-3 d-print-none">
-    <div class="row mb-3">
+<div class="container-fluid py-4 no-print-section">
+    <div class="row mb-4">
         <div class="col-12 d-flex justify-content-between align-items-center flex-wrap gap-2">
             <div>
                 <a href="{{ url_for('sales_register', s_type=s_type) }}" class="btn btn-outline-secondary rounded-pill px-3 me-2">
@@ -23,36 +22,36 @@
     </div>
     
     <!-- Spacing & Layout Toolbar (No Print) -->
-    <div class="card border-0 shadow-sm rounded-4 mb-3 bg-light">
+    <div class="card border-0 shadow-sm rounded-4 mb-4 bg-light d-print-none">
         <div class="card-body p-3">
             <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
                 <div class="d-flex align-items-center gap-2">
                     <i class="bi bi-sliders text-success fs-5"></i>
                     <div>
-                        <span class="fw-bold text-dark d-block" style="font-size: 0.9rem;">Print Layout Spacing Options</span>
-                        <span class="text-muted small" style="font-size: 0.75rem;">Modify row height, signature spacing, or toggle sections to fit perfectly on a single page.</span>
+                        <span class="fw-bold text-dark d-block" style="font-size: 0.9rem;">Invoice Layout & Spacing Options</span>
+                        <span class="text-muted small" style="font-size: 0.75rem;">Adjust table size, margins, and bank details dynamically to fit perfectly in 1 A4 page.</span>
                     </div>
                 </div>
                 <div class="d-flex flex-wrap align-items-center gap-3">
                     <div class="d-flex align-items-center gap-2">
                         <label for="spacingSelect" class="small fw-semibold text-muted mb-0">Row Spacing:</label>
-                        <select id="spacingSelect" class="form-select form-select-sm rounded-3" style="width: 140px;" onchange="adjustSpacing(this.value)">
-                            <option value="compact">Compact</option>
+                        <select id="spacingSelect" class="form-select form-select-sm rounded-3" style="width: 150px;" onchange="adjustSpacing(this.value)">
+                            <option value="compact">Compact ({% if s_type == 'goat' %}Many Goats{% else %}Many Items{% endif %})</option>
                             <option value="normal" selected>Normal</option>
-                            <option value="spacious">Spacious</option>
+                            <option value="spacious">Spacious ({% if s_type == 'goat' %}1 Goat{% else %}1 Item{% endif %})</option>
                         </select>
                     </div>
                     <div class="d-flex align-items-center gap-2">
                         <label for="sigHeight" class="small fw-semibold text-muted mb-0">Signature Height:</label>
-                        <select id="sigHeight" class="form-select form-select-sm rounded-3" style="width: 120px;" onchange="adjustSigHeight(this.value)">
-                            <option value="small">Small</option>
-                            <option value="medium" selected>Medium</option>
-                            <option value="large">Large</option>
+                        <select id="sigHeight" class="form-select form-select-sm rounded-3" style="width: 130px;" onchange="adjustSigHeight(this.value)">
+                            <option value="small">Small Space</option>
+                            <option value="medium" selected>Medium Space</option>
+                            <option value="large">Large Space</option>
                         </select>
                     </div>
                     <div class="form-check form-switch mb-0">
                         <input class="form-check-input" type="checkbox" id="toggleBank" checked onchange="toggleBankSection(this.checked)">
-                        <label class="form-check-label small fw-semibold text-muted" for="toggleBank">Bank Info</label>
+                        <label class="form-check-label small fw-semibold text-muted" for="toggleBank">Show Bank Details</label>
                     </div>
                 </div>
             </div>
@@ -60,91 +59,84 @@
     </div>
 </div>
 
-<div class="row justify-content-center pb-5">
-    <div class="col-lg-9 col-xl-8">
-        <!-- Printable Invoice Container -->
-        <div class="printable-invoice-sheet" id="invoiceSheet">
-            
+<div class="row justify-content-center">
+    <div class="col-lg-10 col-xl-9">
+        <!-- Printable Invoice Sheet -->
+        <div class="card border-0 shadow-sm rounded-4 p-5 printable-invoice-sheet">
             <!-- Invoice Header -->
-            <div class="invoice-header">
-                <div class="brand-section">
-                    <div class="brand-logo">
-                        <i class="bi bi-tree-fill"></i>
+            <div class="row mb-4 pb-4 border-bottom align-items-center">
+                <div class="col-sm-8">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="bg-success text-white p-3 rounded-3 d-inline-flex shadow-sm no-print">
+                            <i class="bi bi-currency-exchange fs-3"></i>
+                        </div>
+                        <div>
+                            <h3 class="fw-800 text-success mb-1">
+                                {% if farm_info and farm_info['farm_name'] %}{{ farm_info['farm_name'] }}{% else %}Ranga Farms{% endif %}
+                            </h3>
+                            <p class="text-muted mb-0 small">
+                                {% if farm_info and farm_info['farm_address'] %}
+                                    {{ farm_info['farm_address'] }}{% if farm_info['farm_city'] %}, {{ farm_info['farm_city'] }}{% endif %}<br>
+                                    Phone: {{ farm_info['farm_phone'] }}
+                                {% else %}
+                                    Aandigounder Street, Pachapalayam, Perur, Coimbatore 641010
+                                {% endif %}
+                            </p>
+                        </div>
                     </div>
-                    <div>
-                        <h2 class="brand-name">{% if farm_info %}{{ farm_info['farm_name'] }}{% else %}Ranga Farms{% endif %}</h2>
-                        <p class="brand-address">
-                            {% if farm_info %}
-                                {{ farm_info['farm_address'] }}, {{ farm_info['farm_city'] }}<br>
-                                Phone: {{ farm_info['farm_phone'] }}
-                            {% else %}
-                                Aandigounder Street, Pachapalayam, Perur<br>
-                                Phone: +91 98765 43210
-                            {% endif %}
+                </div>
+                <div class="col-sm-4 text-sm-end mt-3 mt-sm-0">
+                    <h4 class="fw-800 text-dark mb-2 tracking-tight">INVOICE</h4>
+                    <p class="mb-1 text-muted small"><strong>Invoice #:</strong> INV-{{ s_type[:3]|upper }}-{{ "%04d"|format(sale.id) }}</p>
+                    <p class="mb-0 text-muted small"><strong>Date:</strong> {{ sale.date_of_sale }}</p>
+                    <p class="mb-0 text-muted small"><strong>Type:</strong> <span class="text-capitalize">{{ s_type }} Sale</span></p>
+                </div>
+            </div>
+
+            <!-- Bill To & Financial info -->
+            <div class="row mb-4">
+                <div class="col-sm-6 mb-3 mb-sm-0" id="billToSection">
+                    <div class="bg-light rounded-3 p-3 h-100">
+                        <h6 class="fw-bold text-dark mb-2 text-uppercase uppercase-hdr">BILL TO BUYER:</h6>
+                        <h5 class="fw-bold text-success mb-2">{{ sale.buyer_name or 'Walk-in Customer' }}</h5>
+                        <p class="mb-0 text-muted small">
+                            <strong>City:</strong> {{ sale.buyer_city or 'N/A' }}<br>
+                            <strong>Contact:</strong> {{ sale.buyer_contact or 'N/A' }}
                         </p>
                     </div>
                 </div>
-                <div class="meta-section">
-                    <h1 class="invoice-title">INVOICE</h1>
-                    <div class="meta-grid">
-                        <div class="meta-label">Invoice #</div>
-                        <div class="meta-val fw-bold">INV-{{ s_type[:3]|upper }}-{{ "%04d"|format(sale.id) }}</div>
-                        
-                        <div class="meta-label">Date</div>
-                        <div class="meta-val">{{ sale.date_of_sale }}</div>
-                        
-                        <div class="meta-label">Type</div>
-                        <div class="meta-val text-capitalize">{{ s_type }} Sale</div>
+                <div class="col-sm-6" id="bankSection">
+                    <div class="bg-light rounded-3 p-3 h-100">
+                        <h6 class="fw-bold text-dark mb-2 text-uppercase uppercase-hdr">BANK PAYMENTS:</h6>
+                        <p class="mb-0 text-muted small">
+                            <strong>Bank Name:</strong> {{ farm_info['bank_name'] if farm_info and farm_info['bank_name'] else 'State Bank of India' }}<br>
+                            <strong>Account No:</strong> {{ farm_info['account_no'] if farm_info and farm_info['account_no'] else '39820129381' }}<br>
+                            <strong>IFSC Code:</strong> {{ farm_info['ifsc_code'] if farm_info and farm_info['ifsc_code'] else 'SBIN0001234' }}
+                        </p>
                     </div>
                 </div>
             </div>
 
-            <!-- Billing and Payments Details -->
-            <div class="details-section">
-                <div class="details-box" id="billToSection">
-                    <h3 class="details-heading">BILL TO BUYER</h3>
-                    <h4 class="buyer-name">{{ sale.buyer_name or 'Walk-in Customer' }}</h4>
-                    <div class="details-item">
-                        <span>City:</span> {{ sale.buyer_city or 'N/A' }}
-                    </div>
-                    <div class="details-item">
-                        <span>Contact:</span> {{ sale.buyer_contact or 'N/A' }}
-                    </div>
-                </div>
-                <div class="details-box" id="bankSection">
-                    <h3 class="details-heading">PAYMENT & BANK DETAILS</h3>
-                    <div class="details-item">
-                        <span>Bank Name:</span> {{ farm_info['bank_name'] if farm_info and farm_info['bank_name'] else 'State Bank of India' }}
-                    </div>
-                    <div class="details-item">
-                        <span>Account No:</span> {{ farm_info['account_no'] if farm_info and farm_info['account_no'] else '39820129381' }}
-                    </div>
-                    <div class="details-item">
-                        <span>IFSC Code:</span> {{ farm_info['ifsc_code'] if farm_info and farm_info['ifsc_code'] else 'SBIN0001234' }}
-                    </div>
-                </div>
-            </div>
-
-            <!-- Invoice Items Table -->
-            <div class="table-container">
-                <table class="invoice-table" id="itemsTable">
-                    <thead>
+            <!-- Particulars Description Table -->
+            <div class="table-responsive mb-4">
+                <table class="table table-bordered align-middle">
+                    <thead class="bg-success text-white">
                         {% if s_type == 'goat' %}
                         <tr>
-                            <th style="width: 8%;">S.No</th>
-                            <th style="width: 32%; text-align: left;">Description / Tag ID</th>
-                            <th style="width: 20%;">Breed</th>
-                            <th style="width: 15%;">Gender</th>
-                            <th style="width: 12%;">Weight</th>
-                            <th style="width: 13%; text-align: right;">Amount</th>
+                            <th class="py-3 px-3 text-center col-sno">S.No</th>
+                            <th class="py-3 px-3 col-desc">Description / Tag ID</th>
+                            <th class="py-3 px-3 text-center col-breed">Breed</th>
+                            <th class="py-3 px-3 text-center col-gender">Gender</th>
+                            <th class="py-3 px-3 text-center col-weight">Weight</th>
+                            <th class="py-3 px-3 text-end col-amount">Amount</th>
                         </tr>
                         {% else %}
                         <tr>
-                            <th style="width: 8%;">S.No</th>
-                            <th style="width: 47%; text-align: left;">Item / Description</th>
-                            <th style="width: 15%;">Quantity</th>
-                            <th style="width: 15%; text-align: right;">Price / Unit</th>
-                            <th style="width: 15%; text-align: right;">Amount</th>
+                            <th class="py-3 px-3 text-center col-sno">S.No</th>
+                            <th class="py-3 px-3 col-desc">Item / Description</th>
+                            <th class="py-3 px-3 text-center col-breed">Quantity</th>
+                            <th class="py-3 px-3 text-end col-weight">Price per Unit</th>
+                            <th class="py-3 px-3 text-end col-amount">Amount</th>
                         </tr>
                         {% endif %}
                     </thead>
@@ -152,22 +144,22 @@
                         {% if s_type == 'goat' %}
                         {% for item in sales_list %}
                         <tr>
-                            <td class="text-center">{{ loop.index }}</td>
-                            <td class="fw-bold" style="text-align: left;">Goat Sale (Tag: {{ item.tag_id }})</td>
-                            <td class="text-center">{{ item.breed or 'N/A' }} ({% if item.breed_percent %}{{ item.breed_percent }}{% else %}100%{% endif %})</td>
-                            <td class="text-center">{% if item.gender|lower == 'm' or item.gender|lower == 'male' %}Male{% elif item.gender|lower == 'f' or item.gender|lower == 'female' %}Female{% else %}{{ item.gender or 'N/A' }}{% endif %}</td>
-                            <td class="text-center">{% if item.weight %}{{ item.weight }} kg{% else %}N/A{% endif %}</td>
-                            <td class="fw-bold text-end">₹{{ "%.2f"|format(item.sold_price) }}</td>
+                            <td class="py-3 px-3 text-center text-muted">{{ loop.index }}</td>
+                            <td class="py-3 px-3 fw-bold text-dark">Goat Sale (Tag: {{ item.tag_id }})</td>
+                            <td class="py-3 px-3 text-center text-muted">{{ item.breed or 'N/A' }} ({% if item.breed_percent %}{{ item.breed_percent }}{% else %}100%{% endif %})</td>
+                            <td class="py-3 px-3 text-center text-muted">{% if item.gender|lower == 'm' or item.gender|lower == 'male' %}Male{% elif item.gender|lower == 'f' or item.gender|lower == 'female' %}Female{% else %}{{ item.gender or 'N/A' }}{% endif %}</td>
+                            <td class="py-3 px-3 text-center text-muted">{% if item.weight %}{{ item.weight }} kg{% else %}N/A{% endif %}</td>
+                            <td class="py-3 px-3 text-end fw-bold text-dark">₹{{ "%.2f"|format(item.sold_price) }}</td>
                         </tr>
                         {% endfor %}
                         {% else %}
                         {% for item in sales_list %}
                         <tr>
-                            <td class="text-center">{{ loop.index }}</td>
-                            <td class="fw-bold" style="text-align: left;">{{ item.item_name }}</td>
-                            <td class="text-center">{{ item.quantity }} {{ item.unit }}</td>
-                            <td class="text-end">₹{{ "%.2f"|format(item.price_per_unit) }}</td>
-                            <td class="fw-bold text-end">₹{{ "%.2f"|format(item.total_amount) }}</td>
+                            <td class="py-3 px-3 text-center text-muted">{{ loop.index }}</td>
+                            <td class="py-3 px-3 fw-bold text-dark">{{ item.item_name }}</td>
+                            <td class="py-3 px-3 text-center text-muted">{{ item.quantity }} {{ item.unit }}</td>
+                            <td class="py-3 px-3 text-end text-muted">₹{{ "%.2f"|format(item.price_per_unit) }}</td>
+                            <td class="py-3 px-3 text-end fw-bold text-dark">₹{{ "%.2f"|format(item.total_amount) }}</td>
                         </tr>
                         {% endfor %}
                         {% endif %}
@@ -175,502 +167,195 @@
                 </table>
             </div>
 
-            <!-- Financial Breakdown and Summary -->
-            <div class="summary-section">
-                <div class="notes-block">
-                    {% if sale.notes %}
-                    <span class="notes-title">Notes / Remarks:</span>
-                    <p class="notes-text">{{ sale.notes }}</p>
-                    {% endif %}
-                </div>
-                <div class="breakdown-block">
-                    <div class="breakdown-row">
-                        <span class="breakdown-lbl">Subtotal</span>
-                        <span class="breakdown-val">₹{{ "%.2f"|format(sale.total_amount) }}</span>
-                    </div>
-                    <div class="breakdown-row">
-                        <span class="breakdown-lbl">Tax / GST (0%)</span>
-                        <span class="breakdown-val">₹0.00</span>
-                    </div>
-                    <div class="breakdown-row total-row">
-                        <span class="breakdown-lbl fs-5">Grand Total</span>
-                        <span class="breakdown-val grand-price">₹{{ "%.2f"|format(sale.total_amount) }}</span>
+            <!-- Price Breakdown Summary -->
+            <div class="row mb-5">
+                <div class="col-sm-6 offset-sm-6">
+                    <div class="card border-0 bg-light rounded-3">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-muted small">Subtotal:</span>
+                                <span class="fw-bold text-dark">₹{{ "%.2f"|format(sale.total_amount) }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-muted small">Tax / GST (0%):</span>
+                                <span class="fw-bold text-muted">₹0.00</span>
+                            </div>
+                            <hr class="my-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="fw-bold text-dark fs-5">Grand Total:</span>
+                                <span class="fw-800 text-success fs-4">₹{{ "%.2f"|format(sale.total_amount) }}</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- Signature block -->
-            <div class="signatures-section">
-                <div class="signature-block">
-                    <div class="signature-line" id="sigCustomer"></div>
-                    <div class="signature-title">Customer Signature</div>
+            <div class="row mt-5 pt-4">
+                <div class="col-6 mt-4">
+                    <div class="d-inline-block text-center signature-width">
+                        <div class="mb-4 signature-space sig-space-height"></div>
+                        <div class="pt-2 small fw-bold text-dark">Customer Signature</div>
+                    </div>
                 </div>
-                <div class="signature-block">
-                    <div class="signature-line" id="sigManager"></div>
-                    <div class="signature-title">Authorized Signatory</div>
-                    <div class="signature-subtitle">Ranga Farms Management</div>
+                <div class="col-6 text-end mt-4">
+                    <div class="d-inline-block text-center signature-width">
+                        <div class="mb-4 signature-space sig-space-height"></div>
+                        <div class="pt-2 small fw-bold text-dark">Authorized Signatory</div>
+                        <div class="text-muted small">Ranga Farms Management</div>
+                    </div>
                 </div>
             </div>
             
-            <!-- Invoice Footer Notice -->
-            <div class="invoice-footer-notice">
-                Thank you for your business! Please visit us again.
+            <!-- Footer Notice -->
+            <div class="row mt-4 pt-3 border-top no-print-notice">
+                <div class="col-12 text-center text-muted small">
+                    Thank you for your business! Please visit us again.
+                </div>
             </div>
-
         </div>
     </div>
 </div>
 
-<style>
-    /* Premium Styling and variables */
-    :root {
-        --invoice-primary: #1b4d3e; /* Curated deep forest green */
-        --invoice-dark: #0f172a;
-        --invoice-light: #f8fafc;
-        --invoice-border: #e2e8f0;
-        --invoice-text: #334155;
-        --invoice-muted: #64748b;
+<style nonce="{{ csp_nonce }}">
+    .tracking-tight {
+        letter-spacing: -0.025em;
     }
-
-    /* Outer Container Style (Screen only) */
     .printable-invoice-sheet {
-        background: #ffffff;
-        border: 1px solid var(--invoice-border);
-        border-radius: 16px;
-        padding: 35px;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
-        color: var(--invoice-text);
-        font-family: 'Inter', 'Outfit', system-ui, -apple-system, sans-serif;
-        line-height: 1.5;
-        position: relative;
+        border: 1px solid #edf2f7 !important;
+        page-break-inside: avoid;
+        background: #ffffff !important;
     }
-
-    /* Header styling */
-    .invoice-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        border-bottom: 2px solid var(--invoice-primary);
-        padding-bottom: 20px;
-        margin-bottom: 25px;
-    }
-
-    .brand-section {
-        display: flex;
-        align-items: center;
-        gap: 15px;
-    }
-
-    .brand-logo {
-        background: var(--invoice-primary);
-        color: #ffffff;
-        width: 48px;
-        height: 48px;
-        border-radius: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.5rem;
-    }
-
-    .brand-name {
-        color: var(--invoice-primary);
-        font-weight: 800;
-        font-size: 1.5rem;
-        margin: 0;
-    }
-
-    .brand-address {
-        color: var(--invoice-muted);
-        font-size: 0.8rem;
-        margin: 3px 0 0 0;
-        line-height: 1.4;
-    }
-
-    .meta-section {
-        text-align: right;
-    }
-
-    .invoice-title {
-        color: var(--invoice-primary);
-        font-weight: 800;
-        font-size: 1.8rem;
-        letter-spacing: -0.02em;
-        margin: 0 0 10px 0;
-    }
-
-    .meta-grid {
-        display: grid;
-        grid-template-columns: repeat(2, auto);
-        gap: 4px 15px;
-        font-size: 0.85rem;
-        justify-content: right;
-    }
-
-    .meta-label {
-        color: var(--invoice-muted);
-        text-align: right;
-    }
-
-    .meta-val {
-        color: var(--invoice-dark);
-        text-align: left;
-    }
-
-    /* Billing info styling */
-    .details-section {
-        display: flex;
-        gap: 20px;
-        margin-bottom: 25px;
-    }
-
-    .details-box {
-        flex: 1;
-        background: var(--invoice-light);
-        border-radius: 12px;
-        padding: 16px;
-        border: 1px solid var(--invoice-border);
-    }
-
-    .details-heading {
-        font-size: 0.72rem;
-        font-weight: 800;
-        color: var(--invoice-muted);
+    .uppercase-hdr {
         letter-spacing: 0.05em;
-        margin: 0 0 8px 0;
-        text-transform: uppercase;
-        border-bottom: 1px solid var(--invoice-border);
-        padding-bottom: 4px;
-    }
-
-    .buyer-name {
-        font-size: 1rem;
-        font-weight: 700;
-        color: var(--invoice-primary);
-        margin: 0 0 8px 0;
-    }
-
-    .details-item {
-        font-size: 0.82rem;
-        color: var(--invoice-text);
-        margin-bottom: 4px;
-    }
-
-    .details-item span {
-        color: var(--invoice-muted);
-        font-weight: 600;
-    }
-
-    /* Table styling */
-    .table-container {
-        margin-bottom: 25px;
-        border: 1px solid var(--invoice-border);
-        border-radius: 12px;
-        overflow: hidden;
-    }
-
-    .invoice-table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 0.875rem;
-    }
-
-    .invoice-table th {
-        background: var(--invoice-primary);
-        color: #ffffff;
-        font-weight: 600;
-        padding: 10px 12px;
-        text-transform: uppercase;
         font-size: 0.75rem;
-        letter-spacing: 0.02em;
-        text-align: center;
-        border: none;
     }
-
-    .invoice-table td {
-        padding: 10px 12px;
-        border-bottom: 1px solid var(--invoice-border);
-        color: var(--invoice-text);
-        text-align: center;
+    .col-sno {
+        width: 80px;
+        border: none !important;
     }
-
-    .invoice-table tr:last-child td {
-        border-bottom: none;
+    .col-desc {
+        border: none !important;
     }
-
-    .text-end {
-        text-align: right !important;
+    .col-breed {
+        border: none !important;
     }
-
-    .text-center {
-        text-align: center !important;
+    .col-gender {
+        border: none !important;
     }
-
-    /* Breakdown summary styling */
-    .summary-section {
-        display: flex;
-        justify-content: space-between;
-        gap: 40px;
-        margin-bottom: 30px;
+    .col-weight {
+        border: none !important;
     }
-
-    .notes-block {
-        flex: 1.2;
-    }
-
-    .notes-title {
-        font-weight: 700;
-        font-size: 0.8rem;
-        color: var(--invoice-dark);
-        display: block;
-        margin-bottom: 5px;
-    }
-
-    .notes-text {
-        font-size: 0.78rem;
-        color: var(--invoice-muted);
-        background: var(--invoice-light);
-        border-radius: 8px;
-        padding: 10px;
-        margin: 0;
-        border-left: 3px solid var(--invoice-primary);
-    }
-
-    .breakdown-block {
-        flex: 1;
-        background: var(--invoice-light);
-        border-radius: 12px;
-        padding: 16px;
-        border: 1px solid var(--invoice-border);
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-        align-self: flex-start;
-    }
-
-    .breakdown-row {
-        display: flex;
-        justify-content: space-between;
-        font-size: 0.82rem;
-    }
-
-    .breakdown-lbl {
-        color: var(--invoice-muted);
-    }
-
-    .breakdown-val {
-        font-weight: 600;
-        color: var(--invoice-dark);
-    }
-
-    .total-row {
-        border-top: 1px solid var(--invoice-border);
-        padding-top: 8px;
-        margin-top: 4px;
-    }
-
-    .total-row .breakdown-lbl {
-        font-weight: 700;
-        color: var(--invoice-dark);
-    }
-
-    .grand-price {
-        font-weight: 800;
-        color: var(--invoice-primary);
-        font-size: 1.25rem !important;
-    }
-
-    /* Signatures styling */
-    .signatures-section {
-        display: flex;
-        justify-content: space-between;
-        margin-top: 25px;
-        padding-top: 15px;
-    }
-
-    .signature-block {
+    .col-amount {
         width: 180px;
-        text-align: center;
+        border: none !important;
     }
-
-    .signature-line {
-        border-bottom: 1.5px solid var(--invoice-muted);
-        height: 35px;
-        margin-bottom: 8px;
+    .signature-width {
+        width: 200px;
     }
-
-    .signature-title {
-        font-size: 0.8rem;
-        font-weight: 700;
-        color: var(--invoice-dark);
-    }
-
-    .signature-subtitle {
-        font-size: 0.68rem;
-        color: var(--invoice-muted);
-        margin-top: 2px;
+    .sig-space-height {
+        height: 40px;
     }
     
-    .invoice-footer-notice {
-        text-align: center;
-        color: var(--invoice-muted);
-        font-size: 0.72rem;
-        margin-top: 35px;
-        border-top: 1px dashed var(--invoice-border);
-        padding-top: 15px;
-    }
-
-    /* Print Stylesheets - Optimized to guarantee 1 single A4 Page */
     @media print {
         @page {
             size: A4 portrait;
-            margin: 6mm 10mm 6mm 10mm !important;
+            margin: 10mm 12mm 10mm 12mm !important;
         }
-
-        /* Hide all UI layout chrome */
-        header, .sidebar-wrapper, .navbar, footer, .sidebar, .btn, .d-print-none, .card.d-print-none, .no-print-section {
+        
+        /* Hide navbar, sidebar, header controls, toolbar, footer */
+        header, .sidebar-wrapper, .no-print-section, .navbar, footer, .sidebar, .btn, .d-print-none, .card.d-print-none {
             display: none !important;
         }
         
-        #topbar, #sidebar, .no-print {
+        #topbar, #sidebar {
             display: none !important;
         }
-
+        
         body, .page-wrapper, .content-wrapper, .container-fluid {
             background: #ffffff !important;
             margin: 0 !important;
             padding: 0 !important;
             width: 100% !important;
-            font-size: 12px !important;
+            font-size: 13px !important;
         }
-
+        
         .printable-invoice-sheet {
             border: none !important;
             box-shadow: none !important;
             padding: 0 !important;
             margin: 0 !important;
             width: 100% !important;
-            border-radius: 0 !important;
-        }
-
-        /* Optimize spacing dynamically to guarantee single page */
-        .invoice-header {
-            margin-bottom: 15px;
-            padding-bottom: 12px;
         }
         
-        .brand-logo {
-            display: none !important; /* Hide background-color block to avoid bad printer compatibility */
-        }
-
-        .details-section {
-            margin-bottom: 15px;
-            gap: 12px;
-        }
-
-        .details-box {
-            padding: 10px;
-        }
-
-        .table-container {
-            margin-bottom: 15px;
-        }
-
-        .invoice-table th {
-            background-color: var(--invoice-primary) !important;
-            color: #ffffff !important;
+        .bg-light {
+            background-color: #f8fafc !important;
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
-            padding: 6px 8px;
-            font-size: 0.7rem;
-        }
-
-        .invoice-table td {
-            padding: 6px 8px;
-            font-size: 0.78rem;
-        }
-
-        .summary-section {
-            margin-bottom: 15px;
-        }
-
-        .breakdown-block {
-            padding: 10px;
-        }
-
-        .signatures-section {
-            margin-top: 15px;
-            padding-top: 10px;
-        }
-
-        .signature-line {
-            height: 25px;
-        }
-
-        .invoice-footer-notice {
-            margin-top: 15px;
-            padding-top: 8px;
         }
         
-        /* Enforce absolute single page fit */
-        html, body, .printable-invoice-sheet {
+        .bg-success {
+            background-color: #198754 !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        /* Enforce A4 Single Page Fit */
+        .printable-invoice-sheet, table, .row, .card {
             page-break-inside: avoid !important;
-            page-break-before: avoid !important;
-            page-break-after: avoid !important;
-            overflow: hidden !important;
         }
     }
 </style>
 
 <script nonce="{{ csp_nonce }}">
-    function adjustSpacing(value) {
-        const tableCells = document.querySelectorAll('.invoice-table th, .invoice-table td');
-        tableCells.forEach(cell => {
-            if (value === 'compact') {
-                cell.style.setProperty('padding-top', '4px', 'important');
-                cell.style.setProperty('padding-bottom', '4px', 'important');
-                cell.style.setProperty('font-size', '0.75rem', 'important');
-            } else if (value === 'spacious') {
-                cell.style.setProperty('padding-top', '14px', 'important');
-                cell.style.setProperty('padding-bottom', '14px', 'important');
-                cell.style.setProperty('font-size', '0.92rem', 'important');
-            } else {
-                cell.style.setProperty('padding-top', '10px', 'important');
-                cell.style.setProperty('padding-bottom', '10px', 'important');
-                cell.style.setProperty('font-size', '0.85rem', 'important');
-            }
-        });
-    }
+function adjustSpacing(value) {
+    const tableCells = document.querySelectorAll('.printable-invoice-sheet table th, .printable-invoice-sheet table td');
+    tableCells.forEach(cell => {
+        if (value === 'compact') {
+            cell.style.setProperty('padding-top', '6px', 'important');
+            cell.style.setProperty('padding-bottom', '6px', 'important');
+            cell.style.setProperty('font-size', '0.8rem', 'important');
+        } else if (value === 'spacious') {
+            cell.style.setProperty('padding-top', '16px', 'important');
+            cell.style.setProperty('padding-bottom', '16px', 'important');
+            cell.style.setProperty('font-size', '0.95rem', 'important');
+        } else {
+            cell.style.setProperty('padding-top', '10px', 'important');
+            cell.style.setProperty('padding-bottom', '10px', 'important');
+            cell.style.setProperty('font-size', '0.875rem', 'important');
+        }
+    });
+}
 
-    function adjustSigHeight(value) {
-        const signatureLines = document.querySelectorAll('.signature-line');
-        signatureLines.forEach(line => {
-            if (value === 'small') {
-                line.style.setProperty('height', '15px', 'important');
-            } else if (value === 'large') {
-                line.style.setProperty('height', '55px', 'important');
-            } else {
-                line.style.setProperty('height', '35px', 'important');
-            }
-        });
-    }
+function adjustSigHeight(value) {
+    const sigBoxes = document.querySelectorAll('.printable-invoice-sheet .signature-space');
+    sigBoxes.forEach(box => {
+        if (value === 'small') {
+            box.style.setProperty('height', '20px', 'important');
+        } else if (value === 'large') {
+            box.style.setProperty('height', '70px', 'important');
+        } else {
+            box.style.setProperty('height', '40px', 'important');
+        }
+    });
+}
 
-    function toggleBankSection(show) {
-        const bankSection = document.getElementById('bankSection');
-        const billSection = document.getElementById('billToSection');
-        if (bankSection) {
-            if (show) {
-                bankSection.style.setProperty('display', 'block', 'important');
-                if (billSection) {
-                    billSection.style.setProperty('flex', '1', 'important');
-                }
-            } else {
-                bankSection.style.setProperty('display', 'none', 'important');
-                if (billSection) {
-                    billSection.style.setProperty('flex', '2', 'important');
-                }
+function toggleBankSection(show) {
+    const bankSection = document.getElementById('bankSection');
+    const billSection = document.getElementById('billToSection');
+    if (bankSection) {
+        if (show) {
+            bankSection.style.setProperty('display', 'block', 'important');
+            if (billSection) {
+                billSection.className = 'col-sm-6 mb-3 mb-sm-0';
+            }
+        } else {
+            bankSection.style.setProperty('display', 'none', 'important');
+            if (billSection) {
+                billSection.className = 'col-12';
             }
         }
     }
+}
 </script>
 {% endblock %}
