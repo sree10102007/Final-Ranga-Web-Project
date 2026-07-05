@@ -95,7 +95,17 @@ def create_app(config_name=None):
     # Configure and initialize rate limiter dynamically
     storage_uri = os.environ.get('LIMITER_STORAGE_URI', 'memory://')
     app.config["RATELIMIT_STORAGE_URI"] = storage_uri
+    app.config["RATELIMIT_ENABLED"] = os.environ.get("RATELIMIT_ENABLED", "true").lower() in ("true", "1", "yes")
     limiter.init_app(app)
+    
+    # Exempt static endpoint from rate limits
+    if 'static' in app.view_functions:
+        limiter.exempt(app.view_functions['static'])
+
+    # Support reverse proxy headers in production to prevent IP rate-limit sharing
+    if config_name == 'production' or os.environ.get('FLASK_ENV', 'production').lower() == 'production':
+        from werkzeug.middleware.proxy_fix import ProxyFix
+        app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
     
     # Register database context teardown
     from goat_farm_app.extensions import close_connection
