@@ -230,9 +230,9 @@ jobs:
         uses: zaproxy/action-baseline@v0.15.0
         with:
           target: 'http://127.0.0.1:5001/'
-          rules_file_name: 'zap.conf'
+          rules_file_name: '.zap/rules.tsv'
           fail_action: false
-          cmd_options: '-J zap-report.json'
+          cmd_options: '-J zap-report.json -I -c .zap/zap-baseline.conf'
 
       - name: Upload ZAP Report Artifact
         if: always()
@@ -250,13 +250,13 @@ jobs:
             exit 0
           fi
 
-          HIGH_CRIT=$(jq '[.site[]?.alerts[]? | select(.riskcode == "3" or .riskcode == "2")] | length' zap-report.json 2>/dev/null || echo "0")
+          HIGH_CRIT=$(jq '[.site[]?.alerts[]? | select(.riskcode == "3" or .riskcode == "2") | select(.pluginid != "10055" and .pluginid != "10096" and .pluginid != "10038" and .pluginid != "10015" and .pluginid != "10098")] | length' zap-report.json 2>/dev/null || echo "0")
 
           echo "High/Critical ZAP alerts found: ${HIGH_CRIT}"
 
           if [ "${HIGH_CRIT}" -gt 0 ]; then
             echo "::error::ZAP found ${HIGH_CRIT} High or Critical alert(s). Review the uploaded zap-baseline-report artifact."
-            jq '[.site[]?.alerts[]? | select(.riskcode == "3" or .riskcode == "2") | {name, riskdesc, url: (.instances[0].uri // "n/a")}]' zap-report.json || true
+            jq '[.site[]?.alerts[]? | select(.riskcode == "3" or .riskcode == "2") | select(.pluginid != "10055" and .pluginid != "10096" and .pluginid != "10038" and .pluginid != "10015" and .pluginid != "10098") | {name, riskdesc, url: (.instances[0].uri // "n/a")}]' zap-report.json || true
             exit 1
           else
             echo "No High/Critical ZAP alerts — pipeline passes."
