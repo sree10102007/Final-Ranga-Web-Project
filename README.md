@@ -156,18 +156,18 @@ We use `detect-secrets` to prevent credentials from leaking into the repository.
 
 > Built for **Ranga Farms**
 
-## 🐳 Docker & Dockploy Deployment on Hostinger
+## 🐳 Docker & Dokploy/Dockploy Deployment on Hostinger
 
-This project is fully dockerized and optimized for deployment on Hostinger VPS using Dockploy or standard Docker Compose.
+This project is fully dockerized and optimized for deployment on Hostinger VPS using Dokploy (Dockploy) or standard Docker Compose.
 
-### Dockploy Configuration Details
+### Dokploy Configuration Details
 - **Repository URL**: `https://github.com/sree10102007/Final-Ranga-Web-Project`
 - **Branch**: `main`
 - **Dockerfile Path**: `Dockerfile`
 - **Exposed App Port**: `5001`
 
 ### Required Environment Variables
-Configure these variables in your Hostinger / Dockploy dashboard (or a local `.env` file for local runs):
+Configure these variables in your Hostinger / Dokploy dashboard (or a local `.env` file for local runs):
 - `SECRET_KEY` — A secure, random secret key for Flask session signing.
 - `DB_ENCRYPTION_KEY` — A Fernet key for column-level database encryption.
 - `DB_PASSWORD` — Password for the PostgreSQL database user.
