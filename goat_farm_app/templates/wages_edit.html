@@ -117,7 +117,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="{{ g.csp_nonce }}">
 // Update summary on input change
 document.getElementById('monthly_salary').addEventListener('change', function() {
     document.getElementById('summary_monthly').textContent = this.value;

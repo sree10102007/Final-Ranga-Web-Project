@@ -65,7 +65,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="{{ g.csp_nonce }}">
 document.getElementById('todayDate').valueAsDate = new Date();
 </script>
 {% endblock %}

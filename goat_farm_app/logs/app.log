@@ -1827,3 +1827,5 @@ psycopg2.errors.InvalidTextRepresentation: invalid input syntax for type integer
 2026-07-04 23:24:40,396 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:312]
 2026-07-04 23:34:16,329 INFO: Goat Farm app starting up [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:312]
 2026-07-04 23:34:17,130 INFO: Goat Farm app starting up [in c:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:312]
+2026-07-05 10:50:35,791 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:312]
+2026-07-05 10:50:36,570 INFO: Goat Farm app starting up [in C:\Users\Suressvar\OneDrive\Documents\GitHub\Final-Ranga-Web-Project\Final-Ranga-Web-Project\goat_farm_app\Project_goatfarm.py:312]

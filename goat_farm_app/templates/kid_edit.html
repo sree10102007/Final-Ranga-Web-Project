@@ -103,7 +103,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="{{ g.csp_nonce }}">
 function updateAgeFromBirthDate() {
     var birthDateInput = document.querySelector('input[name="birth_date"]');
     if (!birthDateInput) return;

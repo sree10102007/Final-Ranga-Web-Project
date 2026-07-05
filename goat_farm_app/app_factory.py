@@ -5,6 +5,8 @@ import logging
 from logging.handlers import RotatingFileHandler
 from flask import Flask, g
 from goat_farm_app.extensions import csrf, limiter
+from flask_talisman import Talisman
+import secrets
 
 # Resolve root path to handle Windows folder redirection (e.g. OneDrive)
 base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -104,5 +106,19 @@ def create_app(config_name=None):
     # Register blueprints (to be imported and added)
     from goat_farm_app.blueprints.auth import auth_bp
     app.register_blueprint(auth_bp)
+    
+    @app.before_request
+    def set_csp_nonce():
+        g.csp_nonce = secrets.token_hex(16)
+
+    csp = {
+        'default-src': ["'self'"],
+        'script-src': ["'self'", "https://cdn.jsdelivr.net", lambda: f"'nonce-{g.csp_nonce}'"],
+        'style-src': ["'self'", "https://cdn.jsdelivr.net", "https://fonts.googleapis.com", "https://cdnjs.cloudflare.com", lambda: f"'nonce-{g.csp_nonce}'"],
+        'img-src': ["'self'", 'data:'],
+        'font-src': ["'self'", "https://fonts.gstatic.com", "https://cdn.jsdelivr.net", "https://cdnjs.cloudflare.com"],
+        'connect-src': ["'self'"],
+    }
+    Talisman(app, content_security_policy=csp, force_https=False)
     
     return app

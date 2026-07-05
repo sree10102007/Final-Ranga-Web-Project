@@ -85,10 +85,10 @@
 </div>
 
 {% block scripts %}
-<script id="report-data" type="application/json">
+<script nonce="{{ g.csp_nonce }}" id="report-data" type="application/json">
     {{ monthly_report | tojson | safe }}
 </script>
-<script>
+<script nonce="{{ g.csp_nonce }}">
 document.addEventListener("DOMContentLoaded", function() {
     const rawData = JSON.parse(document.getElementById('report-data').textContent);
     

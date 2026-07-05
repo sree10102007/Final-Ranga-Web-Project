@@ -3,7 +3,7 @@
 {% block page_title %}Goat Batches{% endblock %}
 
 {% block content %}
-<style>
+<style nonce="{{ g.csp_nonce }}">
     .batch-tab {
         border-radius: 12px;
         font-weight: 700;
@@ -266,7 +266,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="{{ g.csp_nonce }}">
     document.addEventListener("DOMContentLoaded", function() {
         const today = new Date();
         const yyyy = today.getFullYear();

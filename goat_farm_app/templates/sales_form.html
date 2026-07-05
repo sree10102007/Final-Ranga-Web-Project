@@ -270,7 +270,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="{{ g.csp_nonce }}">
 // ── Row HTML Templates ────────────────────────────────────────────────────────
 const sType = "{{ s_type }}";
 const excludeSrNo = "{% if record %}{{ record.sr_no }}{% else %}{% endif %}";
