@@ -1758,6 +1758,16 @@ def master_add():
         f = request.form
         db = get_db()
         
+        tag_no = f.get('tag_no')
+        if not tag_no:
+            flash('Tag number is required.', 'danger')
+            return redirect(url_for('master_add'))
+            
+        existing = db.execute('SELECT 1 FROM master_records WHERE tag_no = ?', (tag_no.strip(),)).fetchone()
+        if existing:
+            flash(f'Error: A record with tag number "{tag_no}" already exists in master records.', 'danger')
+            return redirect(url_for('master_add'))
+            
         # Calculate DOB from entered Age
         try:
             from datetime import timedelta
@@ -3236,6 +3246,16 @@ def master_edit(id):
     if request.method == 'POST':
         f = request.form
         
+        tag_no = f.get('tag_no')
+        if not tag_no:
+            flash('Tag number is required.', 'danger')
+            return redirect(url_for('master_edit', id=id))
+            
+        existing = db.execute('SELECT 1 FROM master_records WHERE tag_no = ? AND id != ?', (tag_no.strip(), id)).fetchone()
+        if existing:
+            flash(f'Error: A record with tag number "{tag_no}" already exists in master records.', 'danger')
+            return redirect(url_for('master_edit', id=id))
+            
         # Calculate DOB from entered Age
         try:
             from datetime import timedelta
