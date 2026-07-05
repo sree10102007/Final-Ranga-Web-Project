@@ -1082,13 +1082,31 @@ def init_db():
         try:
             admin_password = os.environ.get('ADMIN_PASSWORD', 'admin123')
             hashed_password = generate_password_hash(admin_password)
-            conn.execute(
-                'INSERT INTO users (username, password, is_admin) VALUES (?, ?, 1) '
-                'ON CONFLICT (username) DO UPDATE SET is_admin = 1, password = ?',
-                ('admin', hashed_password, hashed_password)
-            )
-        except Exception:
-            pass
+            existing_admin = conn.execute(
+                "SELECT id FROM users WHERE username = ?",
+                ("admin",)
+            ).fetchone()
+            
+            if not existing_admin:
+                try:
+                    conn.execute(
+                        "INSERT INTO users (username, password, is_admin) VALUES (?, ?, 1)",
+                        ("admin", hashed_password)
+                    )
+                    app.logger.info("Admin user created successfully.")
+                except Exception as e:
+                    if "unique constraint" in str(e).lower() or "duplicate key" in str(e).lower():
+                        app.logger.info("Admin user already exists (created by parallel worker), skipping seed.")
+                    else:
+                        raise e
+            else:
+                conn.execute(
+                    "UPDATE users SET is_admin = 1, password = ? WHERE username = ?",
+                    (hashed_password, 'admin')
+                )
+                app.logger.info("Admin user already exists, password updated.")
+        except Exception as e:
+            app.logger.error(f"Error seeding admin user: {str(e)}")
 
 
 
@@ -4800,12 +4818,44 @@ def init_employee_tables():
             receipt_no TEXT, notes TEXT, status TEXT DEFAULT 'Pending',
             pnl_category TEXT DEFAULT 'Direct Expenses')''')
         
-        # Use add_column to update existing tables
-        def add_col(table, col, typ):
-            try:
-                conn.execute(f"ALTER TABLE {table} ADD COLUMN IF NOT EXISTS {col} {typ}")
-            except Exception:
-                pass
+        def table_exists(table_name):
+            row = conn.execute(
+                """
+                SELECT 1
+                FROM information_schema.tables
+                WHERE table_schema = 'public'
+                AND table_name = ?
+                """,
+                (table_name,)
+            ).fetchone()
+            return row is not None
+
+        def column_exists(table_name, column_name):
+            row = conn.execute(
+                """
+                SELECT 1
+                FROM information_schema.columns
+                WHERE table_schema = 'public'
+                AND table_name = ?
+                AND column_name = ?
+                """,
+                (table_name, column_name)
+            ).fetchone()
+            return row is not None
+
+        def add_col(table_name, column_name, column_definition):
+            if not table_exists(table_name):
+                app.logger.info(f"Table {table_name} does not exist yet, skipping column {column_name}")
+                return
+
+            if not column_exists(table_name, column_name):
+                try:
+                    conn.execute(f"ALTER TABLE {table_name} ADD COLUMN {column_name} {column_definition}")
+                    app.logger.info(f"Added column {table_name}.{column_name}")
+                except Exception as e:
+                    app.logger.error(f"Failed to add column {table_name}.{column_name}: {str(e)}")
+            else:
+                app.logger.info(f"Column {table_name}.{column_name} already exists, skipping")
 
         add_col("employees", "sr_no", "INTEGER")
         add_col("employees", "aadhar_no", "TEXT")
