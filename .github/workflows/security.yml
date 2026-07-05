@@ -81,7 +81,7 @@ jobs:
       - name: Generate SBOM
         uses: anchore/sbom-action@v0.18.0
         with:
-          path: ./goat_farm_app/
+          path: ./goat_farm_app/requirements.txt
           format: 'spdx-json'
           output-file: 'sbom.spdx.json'
           token: ${{ secrets.GITHUB_TOKEN }}
