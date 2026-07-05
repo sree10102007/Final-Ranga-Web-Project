@@ -1,5 +1,5 @@
 import os
-import random
+import secrets
 import io
 import base64
 from datetime import datetime, timedelta
@@ -252,7 +252,7 @@ def mfa_enroll():
     qr_base64 = base64.b64encode(buffered.getvalue()).decode('utf-8')
     
     # Generate 10 one-time recovery codes
-    backup_codes_raw = [f"{random.randint(100000, 999999)}" for _ in range(10)]
+    backup_codes_raw = [f"{secrets.randbelow(900000) + 100000}" for _ in range(10)]
     backup_codes_hashed = [generate_password_hash(c) for c in backup_codes_raw]
     
     # Store temporary secret and recovery codes in session so we only save to DB when verified

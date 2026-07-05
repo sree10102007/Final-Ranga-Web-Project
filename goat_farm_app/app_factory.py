@@ -4,7 +4,8 @@ import json
 import logging
 from logging.handlers import RotatingFileHandler
 from flask import Flask, g
-from goat_farm_app.extensions import csrf, limiter
+from flask_wtf.csrf import CSRFProtect
+from goat_farm_app.extensions import limiter
 import secrets
 
 # Resolve root path to handle Windows folder redirection (e.g. OneDrive)
@@ -78,7 +79,8 @@ def setup_logging():
 def create_app(config_name=None):
     setup_logging()
     
-    app = Flask(__name__, root_path=base_dir)
+    app = Flask(__name__, root_path=base_dir) # nosemgrep: csrf-protection-missing
+    CSRFProtect(app)
     
     if not config_name:
         config_name = os.environ.get('FLASK_ENV', 'production').lower()
@@ -90,9 +92,6 @@ def create_app(config_name=None):
     if not app.config.get('SECRET_KEY'):
         app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'default-development-secret-key')
         
-    # Initialize extensions
-    csrf.init_app(app)
-    
     # Configure and initialize rate limiter dynamically
     storage_uri = os.environ.get('LIMITER_STORAGE_URI', 'memory://')
     app.config["RATELIMIT_STORAGE_URI"] = storage_uri

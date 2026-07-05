@@ -1,6 +1,21 @@
 import psycopg2
 import os
-import random
+import secrets
+
+class SecureRandom:
+    @staticmethod
+    def randint(a, b):
+        return a + secrets.randbelow(b - a + 1)
+
+    @staticmethod
+    def uniform(a, b):
+        return a + (b - a) * (secrets.randbelow(1000000) / 1000000.0)
+
+    @staticmethod
+    def random():
+        return secrets.randbelow(1000000) / 1000000.0
+
+random = SecureRandom()
 from datetime import datetime, timedelta
 
 # Resolve root path

@@ -2,7 +2,7 @@ import os
 import sys
 import json
 import base64
-import random
+import secrets
 import logging
 from logging.handlers import RotatingFileHandler
 from typing import Any, Dict, List, Optional, Tuple, Union
@@ -297,7 +297,7 @@ class PostgresCursorWrapper:
         
         savepoint_name = None
         if in_transaction:
-            savepoint_name = f"sp_{random.randint(1000000, 9999999)}"
+            savepoint_name = f"sp_{secrets.randbelow(9000000) + 1000000}"
             with self.conn_wrapper.conn.cursor() as sp_cur:
                 sp_cur.execute(f"SAVEPOINT {savepoint_name}")
             

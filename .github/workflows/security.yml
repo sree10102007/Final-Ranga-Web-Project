@@ -88,8 +88,8 @@ jobs:
       - name: Install Syft and Generate SBOM
         run: |
           ls -la ./goat_farm_app/requirements.txt
-          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
-          syft scan file:./goat_farm_app/requirements.txt \
+          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b .
+          ./syft scan file:./goat_farm_app/requirements.txt \
             -o spdx-json=sbom.spdx.json
           echo "SBOM generated successfully"
 
