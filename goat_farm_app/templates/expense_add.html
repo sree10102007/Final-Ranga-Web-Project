@@ -152,7 +152,7 @@
     </div>
 </div>
 
-<script nonce="{{ g.csp_nonce }}">
+<script nonce="{{ csp_nonce() }}">
 function updateParticularName(sel) {
     const opt = sel.options[sel.selectedIndex];
     const hidden = document.getElementById('particular_name_hidden');

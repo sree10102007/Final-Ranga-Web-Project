@@ -213,7 +213,7 @@
     </div>
 </div>
 
-<style nonce="{{ g.csp_nonce }}">
+<style nonce="{{ csp_nonce() }}">
     .tracking-tight {
         letter-spacing: -0.025em;
     }
@@ -272,7 +272,7 @@
     }
 </style>
 
-<script nonce="{{ g.csp_nonce }}">
+<script nonce="{{ csp_nonce() }}">
 function adjustSpacing(value) {
     const tableCells = document.querySelectorAll('.printable-invoice-sheet table th, .printable-invoice-sheet table td');
     tableCells.forEach(cell => {

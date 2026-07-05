@@ -120,7 +120,7 @@
 </div>
 {% endif %}
 
-<style nonce="{{ g.csp_nonce }}">
+<style nonce="{{ csp_nonce() }}">
 .table-hover tbody tr:hover {
     background-color: #f8fafc;
     transition: background-color 0.15s ease-in-out;

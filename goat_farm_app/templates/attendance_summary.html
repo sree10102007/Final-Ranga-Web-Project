@@ -3,7 +3,7 @@
 {% block page_title %}Attendance Summary{% endblock %}
 
 {% block content %}
-<style nonce="{{ g.csp_nonce }}">
+<style nonce="{{ csp_nonce() }}">
 @media print {
     /* Hide layout chrome, form elements, normal header, and filters during printing */
     .sidebar, .navbar, .d-print-none, form, .btn, .alert, i, .fas, .bi, .btn-group {
@@ -358,7 +358,7 @@
     </div>
 </div>
 
-<script nonce="{{ g.csp_nonce }}">
+<script nonce="{{ csp_nonce() }}">
 document.addEventListener("DOMContentLoaded", function() {
     var today = new Date();
     var dd = String(today.getDate()).padStart(2, '0');
@@ -385,7 +385,7 @@ function downloadWord() {
     var docContent = 
         '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">' +
         '<head><title>Attendance Summary Report</title>' +
-        '<style nonce="{{ g.csp_nonce }}">' +
+        '<style nonce="{{ csp_nonce() }}">' +
         'body { font-family: "Arial", sans-serif; margin: 1in; }' +
         'table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 11px; }' +
         'th, td { border: 1px solid #000000; padding: 8px 6px; text-align: center; }' +

@@ -107,18 +107,17 @@ def create_app(config_name=None):
     from goat_farm_app.blueprints.auth import auth_bp
     app.register_blueprint(auth_bp)
     
-    @app.before_request
-    def set_csp_nonce():
-        g.csp_nonce = secrets.token_hex(16)
-
     csp = {
         'default-src': ["'self'"],
-        'script-src': ["'self'", "https://cdn.jsdelivr.net", lambda: f"'nonce-{g.csp_nonce}'"],
-        'style-src': ["'self'", "https://cdn.jsdelivr.net", "https://fonts.googleapis.com", "https://cdnjs.cloudflare.com", lambda: f"'nonce-{g.csp_nonce}'"],
+        'script-src': ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net"],
+        'style-src': ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net", "https://fonts.googleapis.com", "https://cdnjs.cloudflare.com"],
         'img-src': ["'self'", 'data:'],
         'font-src': ["'self'", "https://fonts.gstatic.com", "https://cdn.jsdelivr.net", "https://cdnjs.cloudflare.com"],
         'connect-src': ["'self'"],
     }
-    Talisman(app, content_security_policy=csp, force_https=False)
+    Talisman(app, 
+        content_security_policy=csp, 
+        force_https=False
+    )
     
     return app

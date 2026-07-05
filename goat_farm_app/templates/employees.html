@@ -104,7 +104,7 @@
     </div>
 </div>
 
-<script nonce="{{ g.csp_nonce }}">
+<script nonce="{{ csp_nonce() }}">
 function confirmDeleteEmp(empId, empName) {
     document.getElementById('delEmpName').textContent = empName;
     document.getElementById('deleteEmpForm').action = '/employee_delete/' + empId;
