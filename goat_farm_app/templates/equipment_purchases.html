@@ -48,7 +48,7 @@
                                 <a href="{{ url_for('equipment_edit', id=record.id) }}" class="btn btn-sm btn-light border shadow-sm" title="Edit">
                                     <i class="bi bi-pencil text-primary"></i>
                                 </a>
-                                <form action="{{ url_for('equipment_delete', id=record.id) }}" method="POST" class="m-0" onsubmit="return confirm('Are you sure you want to delete this equipment record?');">
+                                <form action="{{ url_for('equipment_delete', id=record.id) }}" method="POST" class="m-0" data-confirm="Are you sure you want to delete this equipment record?">
                                     <button type="submit" class="btn btn-sm btn-light border shadow-sm" title="Delete">
                                         <i class="bi bi-trash text-danger"></i>
                                     </button>

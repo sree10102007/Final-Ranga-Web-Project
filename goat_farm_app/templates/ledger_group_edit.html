@@ -5,7 +5,7 @@
 <div class="row justify-content-center">
     <div class="col-lg-6">
         <div class="d-flex align-items-center gap-3 mb-4">
-            <a href="{{ url_for('expense_ledgers', tab='groups') }}" class="btn btn-outline-secondary rounded-circle d-flex align-items-center justify-content-center" style="width:40px;height:40px;padding:0;">
+            <a href="{{ url_for('expense_ledgers', tab='groups') }}" class="btn btn-outline-secondary rounded-circle d-flex align-items-center justify-content-center" data-style="width:40px;height:40px;padding:0;">
                 <i class="bi bi-arrow-left fs-5"></i>
             </a>
             <div>
@@ -15,7 +15,7 @@
         </div>
 
         {% if is_default %}
-        <div class="alert alert-warning border-0 rounded-4 d-flex align-items-start gap-2 mb-4 py-3 px-4" style="background: #fefce8; border-left: 4px solid #f59e0b !important;">
+        <div class="alert alert-warning border-0 rounded-4 d-flex align-items-start gap-2 mb-4 py-3 px-4" data-style="background: #fefce8; border-left: 4px solid #f59e0b !important;">
             <i class="bi bi-shield-check text-warning mt-1 fs-5"></i>
             <div>
                 <div class="fw-bold text-dark small">System Default Group</div>

@@ -57,7 +57,7 @@
                                 <a href="{{ url_for('employee_detail', emp_id=emp.id) }}" class="btn btn-sm btn-info" title="View"><i class="fas fa-eye"></i></a>
                                 <a href="{{ url_for('employee_edit', emp_id=emp.id) }}" class="btn btn-sm btn-warning" title="Edit"><i class="fas fa-edit"></i></a>
                                 <button type="button" class="btn btn-sm btn-danger" title="Delete"
-                                    onclick="confirmDeleteEmp({{ emp.id }}, '{{ emp.name|e }}')">
+                                    data-onclick="confirmDeleteEmp({{ emp.id }}, '{{ emp.name|e }}')">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </td>
@@ -104,7 +104,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="{{ csp_nonce }}">
 function confirmDeleteEmp(empId, empName) {
     document.getElementById('delEmpName').textContent = empName;
     document.getElementById('deleteEmpForm').action = '/employee_delete/' + empId;

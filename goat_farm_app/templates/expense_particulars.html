@@ -4,7 +4,7 @@
 {% block content %}
 <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
     <div class="d-flex align-items-center gap-3">
-        <a href="{{ url_for('expenses_master') }}" class="btn btn-outline-secondary rounded-circle d-flex align-items-center justify-content-center" style="width:40px;height:40px;padding:0;">
+        <a href="{{ url_for('expenses_master') }}" class="btn btn-outline-secondary rounded-circle d-flex align-items-center justify-content-center" data-style="width:40px;height:40px;padding:0;">
             <i class="bi bi-arrow-left fs-5"></i>
         </a>
         <div>
@@ -18,7 +18,7 @@
     <!-- Add Particular Form -->
     <div class="col-lg-4">
         <div class="card border-0 shadow-sm rounded-4">
-            <div class="card-header border-0 rounded-top-4 p-4" style="background:linear-gradient(135deg,#d97706,#f59e0b);">
+            <div class="card-header border-0 rounded-top-4 p-4" data-style="background:linear-gradient(135deg,#d97706,#f59e0b);">
                 <h6 class="fw-bold mb-0 text-white"><i class="bi bi-plus-circle me-2"></i>Add New Particular</h6>
             </div>
             <div class="card-body p-4">
@@ -102,7 +102,7 @@
                                     <a href="{{ url_for('expense_particular_edit', pid=p.id) }}" class="btn btn-outline-warning btn-sm rounded-pill px-3">
                                         <i class="bi bi-pencil"></i>
                                     </a>
-                                    <form action="{{ url_for('expense_particular_delete', pid=p.id) }}" method="post" class="d-inline" onsubmit="return confirm('Delete this particular?');">
+                                    <form action="{{ url_for('expense_particular_delete', pid=p.id) }}" method="post" class="d-inline" data-confirm="Delete this particular?">
                                         <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3">
                                             <i class="bi bi-trash"></i>
                                         </button>

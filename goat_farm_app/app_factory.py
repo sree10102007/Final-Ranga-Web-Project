@@ -105,15 +105,23 @@ def create_app(config_name=None):
     from goat_farm_app.blueprints.auth import auth_bp
     app.register_blueprint(auth_bp)
     
+    @app.before_request
+    def generate_csp_nonce():
+        g.csp_nonce = secrets.token_urlsafe(16)
+
+    @app.context_processor
+    def inject_csp_nonce():
+        return dict(csp_nonce=getattr(g, 'csp_nonce', ''))
+
     @app.after_request
     def set_security_headers(response):
-        # TODO: 'unsafe-inline' is still pending a full template refactoring to utilize nonces/SRI
+        nonce = getattr(g, 'csp_nonce', '')
         response.headers['Content-Security-Policy'] = (
             "default-src 'self'; "
-            "script-src 'self' 'unsafe-inline' "
+            f"script-src 'self' 'nonce-{nonce}' "
             "https://cdn.jsdelivr.net https://cdnjs.cloudflare.com "
             "https://cdn.datatables.net https://code.jquery.com; "
-            "style-src 'self' 'unsafe-inline' "
+            f"style-src 'self' 'nonce-{nonce}' "
             "https://cdn.jsdelivr.net https://cdnjs.cloudflare.com "
             "https://cdn.datatables.net https://fonts.googleapis.com; "
             "img-src 'self' data:; "

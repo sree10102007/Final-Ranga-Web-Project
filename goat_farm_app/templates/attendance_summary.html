@@ -297,12 +297,12 @@
                 </div>
                 <div class="col-md-6 d-flex align-items-center justify-content-end gap-3 text-end">
                     <div class="form-check form-switch mb-0">
-                        <input class="form-check-input" type="checkbox" id="toggleHeaders" onchange="toggleBrowserHeadersFooters(this.checked)">
+                        <input class="form-check-input" type="checkbox" id="toggleHeaders" data-onchange="toggleBrowserHeadersFooters(this.checked)">
                         <label class="form-check-label small fw-semibold text-muted" for="toggleHeaders">Hide Browser Header/Footer</label>
                     </div>
                     <div class="btn-group shadow-sm rounded-3 overflow-hidden">
-                        <button type="button" class="btn btn-primary fw-bold py-2" onclick="window.print()"><i class="bi bi-printer me-2"></i>Print / PDF</button>
-                        <button type="button" class="btn btn-success fw-bold py-2" onclick="downloadWord()"><i class="bi bi-file-earmark-word me-2"></i>Word Document</button>
+                        <button type="button" class="btn btn-primary fw-bold py-2" data-onclick="window.print()"><i class="bi bi-printer me-2"></i>Print / PDF</button>
+                        <button type="button" class="btn btn-success fw-bold py-2" data-onclick="downloadWord()"><i class="bi bi-file-earmark-word me-2"></i>Word Document</button>
                     </div>
                 </div>
             </form>
@@ -334,7 +334,7 @@
                     {% else %}
                     <tr>
                         <td colspan="8" class="text-center py-5 text-muted">
-                            <i class="bi bi-calendar-x d-block mb-3" style="font-size: 2.5rem; opacity: 0.5;"></i>
+                            <i class="bi bi-calendar-x d-block mb-3" data-style="font-size: 2.5rem; opacity: 0.5;"></i>
                             No employees found to generate a summary.
                         </td>
                     </tr>
@@ -358,7 +358,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="{{ csp_nonce }}">
 document.addEventListener("DOMContentLoaded", function() {
     var today = new Date();
     var dd = String(today.getDate()).padStart(2, '0');
@@ -396,11 +396,11 @@ function downloadWord() {
         '</style>' +
         '</head>' +
         '<body>' +
-        '<div style="text-align: center; margin-bottom: 20px;">' +
+        '<div data-style="text-align: center; margin-bottom: 20px;">' +
         '<h2>' + '{{ farm.farm_name }}' + '</h2>' +
         '<h6>' + '{{ farm.address }}' + '</h6>' +
-        '<h3 style="margin-top: 15px;">MONTHLY ATTENDANCE SUMMARY</h3>' +
-        '<p style="color: #666;">Period: <b>' + '{{ month }}/{{ year }}' + '</b></p>' +
+        '<h3 data-style="margin-top: 15px;">MONTHLY ATTENDANCE SUMMARY</h3>' +
+        '<p data-style="color: #666;">Period: <b>' + '{{ month }}/{{ year }}' + '</b></p>' +
         '</div>' +
         '<table>' +
         tableHtml +

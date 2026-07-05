@@ -75,7 +75,7 @@
                     </td>
                     <td class="text-end">
                         <a href="{{ url_for('kid_edit', id=record.id) }}" class="btn btn-sm btn-warning text-dark me-2" title="Edit"><i class="bi bi-pencil"></i></a>
-                        <form action="{{ url_for('kid_delete', id=record.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Delete this kid record?');">
+                        <form action="{{ url_for('kid_delete', id=record.id) }}" method="POST" class="d-inline" data-confirm="Delete this kid record?">
                             <button type="submit" class="btn btn-sm btn-danger" title="Delete"><i class="bi bi-trash"></i></button>
                         </form>
                     </td>
@@ -83,7 +83,7 @@
                 {% else %}
                 <tr>
                     <td colspan="8" class="text-center py-5 text-muted">
-                        <i class="bi bi-bug d-block mb-2" style="font-size: 2rem; opacity: 0.3;"></i>
+                        <i class="bi bi-bug d-block mb-2" data-style="font-size: 2rem; opacity: 0.3;"></i>
                         No kid records found.
                     </td>
                 </tr>

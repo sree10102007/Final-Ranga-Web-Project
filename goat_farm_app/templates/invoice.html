@@ -3,11 +3,11 @@
 <div class="container-fluid py-4">
     <div class="row mb-4 align-items-center d-print-none">
         <div class="col-12 d-flex align-items-center gap-3 flex-wrap">
-            <button onclick="window.print()" class="btn btn-primary"><i class="bi bi-printer"></i> Print Invoice</button>
+            <button data-onclick="window.print()" class="btn btn-primary"><i class="bi bi-printer"></i> Print Invoice</button>
             <a href="{{ url_for('generate_invoice_txt', sales_id=sale['id']) }}" class="btn btn-success"><i class="bi bi-file-earmark-text"></i> Download as TXT</a>
             <a href="{{ url_for('generate_invoice') }}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Back to Generator</a>
             <div class="form-check form-switch mb-0 ms-2">
-                <input class="form-check-input" type="checkbox" id="toggleHeaders" onchange="toggleBrowserHeadersFooters(this.checked)">
+                <input class="form-check-input" type="checkbox" id="toggleHeaders" data-onchange="toggleBrowserHeadersFooters(this.checked)">
                 <label class="form-check-label small fw-semibold text-muted" for="toggleHeaders">Hide Browser Header/Footer</label>
             </div>
         </div>

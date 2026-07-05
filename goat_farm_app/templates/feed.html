@@ -59,7 +59,7 @@
     
     <!-- BATCH 1 CARD (GREEN) -->
     <div class="col">
-        <div class="card h-100 batch-card p-4 border-0" style="border-left: 8px solid #198754 !important; background-color: #e8f5e9;">
+        <div class="card h-100 batch-card p-4 border-0" data-style="border-left: 8px solid #198754 !important; background-color: #e8f5e9;">
             <div class="d-flex justify-content-between align-items-start mb-3">
                 <div>
                     <span class="badge bg-success text-white rounded-pill px-2 py-1 fs-8 mb-2">Batch 1</span>
@@ -68,20 +68,20 @@
                 </div>
                 <div class="text-end">
                     <span class="fs-2 fw-bold text-success d-block lh-1">{{ batch_counts[1] }}</span>
-                    <small class="text-muted text-uppercase fw-semibold" style="font-size: 0.75rem;">Active Goats</small>
+                    <small class="text-muted text-uppercase fw-semibold" data-style="font-size: 0.75rem;">Active Goats</small>
                 </div>
             </div>
             <div class="d-flex flex-wrap gap-2 mt-auto pt-3 border-top border-success border-opacity-10">
-                <button class="btn btn-success rounded-pill px-3 py-2 btn-sm flex-grow-1" data-bs-toggle="modal" data-bs-target="#giveFeedModal" onclick="setBatchFeed(1)"><i class="bi bi-basket3 me-1"></i>Give Feed</button>
-                <button class="btn btn-primary rounded-pill px-3 py-2 btn-sm flex-grow-1" data-bs-toggle="modal" data-bs-target="#giveMedModal" onclick="setBatchMed(1)"><i class="bi bi-capsule me-1"></i>Give Meds</button>
-                <button class="btn btn-info text-white rounded-pill px-3 py-2 btn-sm flex-grow-1" data-bs-toggle="modal" data-bs-target="#giveVacModal" onclick="setBatchVac(1)"><i class="bi bi-patch-check me-1"></i>Vaccinate</button>
+                <button class="btn btn-success rounded-pill px-3 py-2 btn-sm flex-grow-1" data-bs-toggle="modal" data-bs-target="#giveFeedModal" data-onclick="setBatchFeed(1)"><i class="bi bi-basket3 me-1"></i>Give Feed</button>
+                <button class="btn btn-primary rounded-pill px-3 py-2 btn-sm flex-grow-1" data-bs-toggle="modal" data-bs-target="#giveMedModal" data-onclick="setBatchMed(1)"><i class="bi bi-capsule me-1"></i>Give Meds</button>
+                <button class="btn btn-info text-white rounded-pill px-3 py-2 btn-sm flex-grow-1" data-bs-toggle="modal" data-bs-target="#giveVacModal" data-onclick="setBatchVac(1)"><i class="bi bi-patch-check me-1"></i>Vaccinate</button>
             </div>
         </div>
     </div>
 
     <!-- BATCH 2 CARD (BLUE) -->
     <div class="col">
-        <div class="card h-100 batch-card p-4 border-0" style="border-left: 8px solid #0d6efd !important; background-color: #e3f2fd;">
+        <div class="card h-100 batch-card p-4 border-0" data-style="border-left: 8px solid #0d6efd !important; background-color: #e3f2fd;">
             <div class="d-flex justify-content-between align-items-start mb-3">
                 <div>
                     <span class="badge bg-primary text-white rounded-pill px-2 py-1 fs-8 mb-2">Batch 2</span>
@@ -90,57 +90,57 @@
                 </div>
                 <div class="text-end">
                     <span class="fs-2 fw-bold text-primary d-block lh-1">{{ batch_counts[2] }}</span>
-                    <small class="text-muted text-uppercase fw-semibold" style="font-size: 0.75rem;">Active Goats</small>
+                    <small class="text-muted text-uppercase fw-semibold" data-style="font-size: 0.75rem;">Active Goats</small>
                 </div>
             </div>
             <div class="d-flex flex-wrap gap-2 mt-auto pt-3 border-top border-primary border-opacity-10">
-                <button class="btn btn-success rounded-pill px-3 py-2 btn-sm flex-grow-1" data-bs-toggle="modal" data-bs-target="#giveFeedModal" onclick="setBatchFeed(2)"><i class="bi bi-basket3 me-1"></i>Give Feed</button>
-                <button class="btn btn-primary rounded-pill px-3 py-2 btn-sm flex-grow-1" data-bs-toggle="modal" data-bs-target="#giveMedModal" onclick="setBatchMed(2)"><i class="bi bi-capsule me-1"></i>Give Meds</button>
-                <button class="btn btn-info text-white rounded-pill px-3 py-2 btn-sm flex-grow-1" data-bs-toggle="modal" data-bs-target="#giveVacModal" onclick="setBatchVac(2)"><i class="bi bi-patch-check me-1"></i>Vaccinate</button>
+                <button class="btn btn-success rounded-pill px-3 py-2 btn-sm flex-grow-1" data-bs-toggle="modal" data-bs-target="#giveFeedModal" data-onclick="setBatchFeed(2)"><i class="bi bi-basket3 me-1"></i>Give Feed</button>
+                <button class="btn btn-primary rounded-pill px-3 py-2 btn-sm flex-grow-1" data-bs-toggle="modal" data-bs-target="#giveMedModal" data-onclick="setBatchMed(2)"><i class="bi bi-capsule me-1"></i>Give Meds</button>
+                <button class="btn btn-info text-white rounded-pill px-3 py-2 btn-sm flex-grow-1" data-bs-toggle="modal" data-bs-target="#giveVacModal" data-onclick="setBatchVac(2)"><i class="bi bi-patch-check me-1"></i>Vaccinate</button>
             </div>
         </div>
     </div>
 
     <!-- BATCH 3 CARD (YELLOW) -->
     <div class="col">
-        <div class="card h-100 batch-card p-4 border-0" style="border-left: 8px solid #ffc107 !important; background-color: #fffde7;">
+        <div class="card h-100 batch-card p-4 border-0" data-style="border-left: 8px solid #ffc107 !important; background-color: #fffde7;">
             <div class="d-flex justify-content-between align-items-start mb-3">
                 <div>
                     <span class="badge bg-warning text-dark rounded-pill px-2 py-1 fs-8 mb-2">Batch 3</span>
-                    <h5 class="fw-extrabold text-warning mb-1" style="color: #856404 !important;">Adult Breeders</h5>
+                    <h5 class="fw-extrabold text-warning mb-1" data-style="color: #856404 !important;">Adult Breeders</h5>
                     <span class="text-muted small">1 Year - 2 Years of Age</span>
                 </div>
                 <div class="text-end">
-                    <span class="fs-2 fw-bold text-warning d-block lh-1" style="color: #856404 !important;">{{ batch_counts[3] }}</span>
-                    <small class="text-muted text-uppercase fw-semibold" style="font-size: 0.75rem;">Active Goats</small>
+                    <span class="fs-2 fw-bold text-warning d-block lh-1" data-style="color: #856404 !important;">{{ batch_counts[3] }}</span>
+                    <small class="text-muted text-uppercase fw-semibold" data-style="font-size: 0.75rem;">Active Goats</small>
                 </div>
             </div>
             <div class="d-flex flex-wrap gap-2 mt-auto pt-3 border-top border-warning border-opacity-10">
-                <button class="btn btn-success rounded-pill px-3 py-2 btn-sm flex-grow-1" data-bs-toggle="modal" data-bs-target="#giveFeedModal" onclick="setBatchFeed(3)"><i class="bi bi-basket3 me-1"></i>Give Feed</button>
-                <button class="btn btn-primary rounded-pill px-3 py-2 btn-sm flex-grow-1" data-bs-toggle="modal" data-bs-target="#giveMedModal" onclick="setBatchMed(3)"><i class="bi bi-capsule me-1"></i>Give Meds</button>
-                <button class="btn btn-info text-white rounded-pill px-3 py-2 btn-sm flex-grow-1" data-bs-toggle="modal" data-bs-target="#giveVacModal" onclick="setBatchVac(3)"><i class="bi bi-patch-check me-1"></i>Vaccinate</button>
+                <button class="btn btn-success rounded-pill px-3 py-2 btn-sm flex-grow-1" data-bs-toggle="modal" data-bs-target="#giveFeedModal" data-onclick="setBatchFeed(3)"><i class="bi bi-basket3 me-1"></i>Give Feed</button>
+                <button class="btn btn-primary rounded-pill px-3 py-2 btn-sm flex-grow-1" data-bs-toggle="modal" data-bs-target="#giveMedModal" data-onclick="setBatchMed(3)"><i class="bi bi-capsule me-1"></i>Give Meds</button>
+                <button class="btn btn-info text-white rounded-pill px-3 py-2 btn-sm flex-grow-1" data-bs-toggle="modal" data-bs-target="#giveVacModal" data-onclick="setBatchVac(3)"><i class="bi bi-patch-check me-1"></i>Vaccinate</button>
             </div>
         </div>
     </div>
 
     <!-- BATCH 4 CARD (PURPLE) -->
     <div class="col">
-        <div class="card h-100 batch-card p-4 border-0" style="border-left: 8px solid #6a1b9a !important; background-color: #f3e5f5;">
+        <div class="card h-100 batch-card p-4 border-0" data-style="border-left: 8px solid #6a1b9a !important; background-color: #f3e5f5;">
             <div class="d-flex justify-content-between align-items-start mb-3">
                 <div>
-                    <span class="badge text-white rounded-pill px-2 py-1 fs-8 mb-2" style="background-color: #6a1b9a;">Batch 4</span>
-                    <h5 class="fw-extrabold mb-1" style="color: #6a1b9a;">Senior Breeders</h5>
+                    <span class="badge text-white rounded-pill px-2 py-1 fs-8 mb-2" data-style="background-color: #6a1b9a;">Batch 4</span>
+                    <h5 class="fw-extrabold mb-1" data-style="color: #6a1b9a;">Senior Breeders</h5>
                     <span class="text-muted small">Above 2 Years of Age</span>
                 </div>
                 <div class="text-end">
-                    <span class="fs-2 fw-bold d-block lh-1" style="color: #6a1b9a;">{{ batch_counts[4] }}</span>
-                    <small class="text-muted text-uppercase fw-semibold" style="font-size: 0.75rem;">Active Goats</small>
+                    <span class="fs-2 fw-bold d-block lh-1" data-style="color: #6a1b9a;">{{ batch_counts[4] }}</span>
+                    <small class="text-muted text-uppercase fw-semibold" data-style="font-size: 0.75rem;">Active Goats</small>
                 </div>
             </div>
             <div class="d-flex flex-wrap gap-2 mt-auto pt-3 border-top border-purple border-opacity-10">
-                <button class="btn btn-success rounded-pill px-3 py-2 btn-sm flex-grow-1" data-bs-toggle="modal" data-bs-target="#giveFeedModal" onclick="setBatchFeed(4)"><i class="bi bi-basket3 me-1"></i>Give Feed</button>
-                <button class="btn btn-primary rounded-pill px-3 py-2 btn-sm flex-grow-1" data-bs-toggle="modal" data-bs-target="#giveMedModal" onclick="setBatchMed(4)"><i class="bi bi-capsule me-1"></i>Give Meds</button>
-                <button class="btn btn-info text-white rounded-pill px-3 py-2 btn-sm flex-grow-1" data-bs-toggle="modal" data-bs-target="#giveVacModal" onclick="setBatchVac(4)"><i class="bi bi-patch-check me-1"></i>Vaccinate</button>
+                <button class="btn btn-success rounded-pill px-3 py-2 btn-sm flex-grow-1" data-bs-toggle="modal" data-bs-target="#giveFeedModal" data-onclick="setBatchFeed(4)"><i class="bi bi-basket3 me-1"></i>Give Feed</button>
+                <button class="btn btn-primary rounded-pill px-3 py-2 btn-sm flex-grow-1" data-bs-toggle="modal" data-bs-target="#giveMedModal" data-onclick="setBatchMed(4)"><i class="bi bi-capsule me-1"></i>Give Meds</button>
+                <button class="btn btn-info text-white rounded-pill px-3 py-2 btn-sm flex-grow-1" data-bs-toggle="modal" data-bs-target="#giveVacModal" data-onclick="setBatchVac(4)"><i class="bi bi-patch-check me-1"></i>Vaccinate</button>
             </div>
         </div>
     </div>
@@ -153,7 +153,7 @@
         <h5 class="fw-bold text-success-dark mb-0"><i class="bi bi-clock-history me-2"></i>Inventory Allocation Ledgers</h5>
         
         <!-- Tab Selectors for Ledger -->
-        <ul class="nav nav-pills gap-2 bg-light p-1 rounded-pill" id="ledgerTabs" role="tablist" style="width: max-content;">
+        <ul class="nav nav-pills gap-2 bg-light p-1 rounded-pill" id="ledgerTabs" role="tablist" data-style="width: max-content;">
             <li class="nav-item" role="presentation">
                 <button class="nav-link active ledger-tab-btn" id="feed-ledger-tab" data-bs-toggle="pill" data-bs-target="#feed-ledger" type="button" role="tab">
                     Feed Logs
@@ -173,7 +173,7 @@
     </div>
 
     <!-- Calendar Month & Year Filters Bar (Up to 2060) -->
-    <div class="card border-0 shadow-sm rounded-4 mb-4" style="background: #f8fafc; border: 1px solid #edf2f7 !important;">
+    <div class="card border-0 shadow-sm rounded-4 mb-4" data-style="background: #f8fafc; border: 1px solid #edf2f7 !important;">
         <div class="card-body p-3">
             <div class="row g-3 align-items-center">
                 <div class="col-md-3 d-flex align-items-center gap-2">
@@ -185,7 +185,7 @@
                 
                 <!-- Calendar Months Dropdown -->
                 <div class="col-sm-6 col-md-3">
-                    <select id="filter-month-select" class="form-select rounded-pill" onchange="applyLogFilter()">
+                    <select id="filter-month-select" class="form-select rounded-pill" data-onchange="applyLogFilter()">
                         <option value="all">Show All Months</option>
                         <option value="01">January</option>
                         <option value="02">February</option>
@@ -204,7 +204,7 @@
                 
                 <!-- Calendar Years Dropdown (up to 2060) -->
                 <div class="col-sm-6 col-md-3">
-                    <select id="filter-year-select" class="form-select rounded-pill" onchange="applyLogFilter()">
+                    <select id="filter-year-select" class="form-select rounded-pill" data-onchange="applyLogFilter()">
                         <option value="all">Show All Years</option>
                         {% for y in range(2020, 2061) %}
                         <option value="{{ y }}">{{ y }}</option>
@@ -214,7 +214,7 @@
 
                 <!-- Clear button -->
                 <div class="col-md-3 text-md-end">
-                    <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3" onclick="resetLogFilters()">
+                    <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3" data-onclick="resetLogFilters()">
                         Reset Filters
                     </button>
                 </div>
@@ -256,7 +256,7 @@
                             <td class="text-muted">{{ record.supplier or '' }}</td>
                             <td class="text-end">
                                 <a href="{{ url_for('feed_edit', id=record.id) }}" class="btn btn-sm btn-warning text-dark me-1" title="Edit"><i class="bi bi-pencil"></i></a>
-                                <form action="{{ url_for('feed_delete', id=record.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this feed log?');">
+                                <form action="{{ url_for('feed_delete', id=record.id) }}" method="POST" class="d-inline" data-confirm="Are you sure you want to delete this feed log?">
                                     <button type="submit" class="btn btn-sm btn-danger" title="Delete"><i class="bi bi-trash"></i></button>
                                 </form>
                             </td>
@@ -264,14 +264,14 @@
                         {% else %}
                         <tr class="ledger-empty-row">
                             <td colspan="10" class="text-center py-5 text-muted">
-                                <i class="bi bi-box-seam d-block mb-2" style="font-size: 2rem; opacity: 0.3;"></i>
+                                <i class="bi bi-box-seam d-block mb-2" data-style="font-size: 2rem; opacity: 0.3;"></i>
                                 No feed records found.
                             </td>
                         </tr>
                         {% endfor %}
-                        <tr class="ledger-no-results-row" style="display: none;">
+                        <tr class="ledger-no-results-row" data-style="display: none;">
                             <td colspan="10" class="text-center py-5 text-muted">
-                                <i class="bi bi-calendar-x d-block mb-2 fs-3" style="opacity: 0.3;"></i>
+                                <i class="bi bi-calendar-x d-block mb-2 fs-3" data-style="opacity: 0.3;"></i>
                                 No logs match the selected month and year filters.
                             </td>
                         </tr>
@@ -310,7 +310,7 @@
                             <td class="text-muted">{{ record.supplier or '' }}</td>
                             <td class="text-end">
                                 <a href="{{ url_for('medicine_inventory_edit', id=record.id) }}" class="btn btn-sm btn-warning text-dark me-1" title="Edit"><i class="bi bi-pencil"></i></a>
-                                <form action="{{ url_for('medicine_inventory_delete', id=record.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this medicine log?');">
+                                <form action="{{ url_for('medicine_inventory_delete', id=record.id) }}" method="POST" class="d-inline" data-confirm="Are you sure you want to delete this medicine log?">
                                     <button type="submit" class="btn btn-sm btn-danger" title="Delete"><i class="bi bi-trash"></i></button>
                                 </form>
                             </td>
@@ -318,14 +318,14 @@
                         {% else %}
                         <tr class="ledger-empty-row">
                             <td colspan="9" class="text-center py-5 text-muted">
-                                <i class="bi bi-box-seam d-block mb-2" style="font-size: 2rem; opacity: 0.3;"></i>
+                                <i class="bi bi-box-seam d-block mb-2" data-style="font-size: 2rem; opacity: 0.3;"></i>
                                 No medicine records found.
                             </td>
                         </tr>
                         {% endfor %}
-                        <tr class="ledger-no-results-row" style="display: none;">
+                        <tr class="ledger-no-results-row" data-style="display: none;">
                             <td colspan="9" class="text-center py-5 text-muted">
-                                <i class="bi bi-calendar-x d-block mb-2 fs-3" style="opacity: 0.3;"></i>
+                                <i class="bi bi-calendar-x d-block mb-2 fs-3" data-style="opacity: 0.3;"></i>
                                 No logs match the selected month and year filters.
                             </td>
                         </tr>
@@ -364,7 +364,7 @@
                             <td class="text-muted">{{ record.supplier or '' }}</td>
                             <td class="text-end">
                                 <a href="{{ url_for('vaccine_inventory_edit', id=record.id) }}" class="btn btn-sm btn-warning text-dark me-1" title="Edit"><i class="bi bi-pencil"></i></a>
-                                <form action="{{ url_for('vaccine_inventory_delete', id=record.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this vaccine log?');">
+                                <form action="{{ url_for('vaccine_inventory_delete', id=record.id) }}" method="POST" class="d-inline" data-confirm="Are you sure you want to delete this vaccine log?">
                                     <button type="submit" class="btn btn-sm btn-danger" title="Delete"><i class="bi bi-trash"></i></button>
                                 </form>
                             </td>
@@ -372,14 +372,14 @@
                         {% else %}
                         <tr class="ledger-empty-row">
                             <td colspan="9" class="text-center py-5 text-muted">
-                                <i class="bi bi-box-seam d-block mb-2" style="font-size: 2rem; opacity: 0.3;"></i>
+                                <i class="bi bi-box-seam d-block mb-2" data-style="font-size: 2rem; opacity: 0.3;"></i>
                                 No vaccine records found.
                             </td>
                         </tr>
                         {% endfor %}
-                        <tr class="ledger-no-results-row" style="display: none;">
+                        <tr class="ledger-no-results-row" data-style="display: none;">
                             <td colspan="9" class="text-center py-5 text-muted">
-                                <i class="bi bi-calendar-x d-block mb-2 fs-3" style="opacity: 0.3;"></i>
+                                <i class="bi bi-calendar-x d-block mb-2 fs-3" data-style="opacity: 0.3;"></i>
                                 No logs match the selected month and year filters.
                             </td>
                         </tr>
@@ -544,7 +544,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="{{ csp_nonce }}">
     function getTodayString() {
         const d = new Date();
         const year = d.getFullYear();

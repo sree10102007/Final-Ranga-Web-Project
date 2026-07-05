@@ -69,7 +69,7 @@
     <!-- Header Section -->
     <div class="p-4 border-bottom border-success border-opacity-10 d-flex justify-content-between align-items-center flex-wrap gap-3">
         <div class="d-flex align-items-center gap-4">
-            <div class="bg-success text-white rounded-circle d-flex justify-content-center align-items-center shadow-sm" style="width: 70px; height: 70px;">
+            <div class="bg-success text-white rounded-circle d-flex justify-content-center align-items-center shadow-sm" data-style="width: 70px; height: 70px;">
                 <i class="bi bi-heptagon-half fs-1"></i>
             </div>
             <div>
@@ -93,7 +93,7 @@
                         {% endif %}
                     </span>
                     <span><i class="bi bi-palette me-1"></i>{{ goat.color or 'N/A' }}</span>
-                    <span class="badge bg-success bg-opacity-10 text-success fw-bold border border-success border-opacity-10" style="font-size: 0.85rem;"><i class="bi bi-calendar-event me-1"></i>Age: {{ goat.age_str or 'N/A' }}</span>
+                    <span class="badge bg-success bg-opacity-10 text-success fw-bold border border-success border-opacity-10" data-style="font-size: 0.85rem;"><i class="bi bi-calendar-event me-1"></i>Age: {{ goat.age_str or 'N/A' }}</span>
                 </div>
             </div>
         </div>

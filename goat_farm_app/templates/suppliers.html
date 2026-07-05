@@ -70,7 +70,7 @@
                                 <div class="small text-muted">{{ record.phone }}</div>
                             </td>
                             <td class="text-end">
-                                <form action="{{ url_for('supplier_delete', id=record.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Delete this supplier?');">
+                                <form action="{{ url_for('supplier_delete', id=record.id) }}" method="POST" class="d-inline" data-confirm="Delete this supplier?">
                                     <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
                                 </form>
                             </td>

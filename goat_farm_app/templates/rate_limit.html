@@ -114,10 +114,10 @@
         <p>You have made too many requests in a short period. To protect our system against automated scraping and abuse, your access has been temporarily limited.</p>
         <div class="timer">Please try again in <span id="countdown">{{ retry_after }}</span> seconds.</div>
         <div>
-            <button class="btn" onclick="location.reload()">Refresh Page</button>
+            <button class="btn" data-onclick="location.reload()">Refresh Page</button>
         </div>
     </div>
-    <script>
+    <script nonce="{{ csp_nonce }}">
         let seconds = {{ retry_after }};
         const countdownEl = document.getElementById('countdown');
         const interval = setInterval(() => {

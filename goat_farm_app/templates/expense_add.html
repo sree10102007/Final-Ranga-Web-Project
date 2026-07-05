@@ -37,7 +37,7 @@
                         <div class="mb-3">
                             <label class="form-label text-muted small fw-bold">PARTICULARS <span class="text-danger">*</span></label>
                             {% if particulars %}
-                            <select name="particular_id" class="form-select" required id="particular_select" onchange="updateParticularName(this)">
+                            <select name="particular_id" class="form-select" required id="particular_select" data-onchange="updateParticularName(this)">
                                 <option value="">— Select Particular —</option>
                                 {% for p in particulars %}
                                 <option value="{{ p.id }}">
@@ -85,7 +85,7 @@
                             <div class="col-md-6">
                                 <label class="form-label text-muted small fw-bold">UNIT OF MEASURE</label>
                                 {% if expense_units %}
-                                <select name="unit_id" class="form-select" id="unit_select" onchange="updateUnitName(this)">
+                                <select name="unit_id" class="form-select" id="unit_select" data-onchange="updateUnitName(this)">
                                     <option value="">— Select Unit —</option>
                                     {% for u in expense_units %}
                                     <option value="{{ u.id }}">
@@ -152,7 +152,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="{{ csp_nonce }}">
 function updateParticularName(sel) {
     const opt = sel.options[sel.selectedIndex];
     const hidden = document.getElementById('particular_name_hidden');

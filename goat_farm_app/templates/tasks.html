@@ -117,15 +117,15 @@
                                 <span class="badge bg-secondary">{{ rec.status }}</span>
                             </td>
                             <td>
-                                <div class="progress" style="height: 20px;">
-                                    <div class="progress-bar" style="width: {{ rec.completion_percentage }}%">
+                                <div class="progress" data-style="height: 20px;">
+                                    <div class="progress-bar" data-style="width: {{ rec.completion_percentage }}%">
                                         {{ rec.completion_percentage }}%
                                     </div>
                                 </div>
                             </td>
                             <td>
-                                <form action="{{ url_for('task_update', task_id=rec.id) }}" method="POST" style="display:inline;">
-                                    <select class="form-select form-select-sm mb-1" name="status" style="width: auto;" onchange="this.form.submit()">
+                                <form action="{{ url_for('task_update', task_id=rec.id) }}" method="POST" data-style="display:inline;">
+                                    <select class="form-select form-select-sm mb-1" name="status" data-style="width: auto;" data-onchange="this.form.submit()">
                                         <option value="">Change</option>
                                         <option value="Pending" {% if rec.status == 'Pending' %}selected{% endif %}>Pending</option>
                                         <option value="In Progress" {% if rec.status == 'In Progress' %}selected{% endif %}>In Progress</option>

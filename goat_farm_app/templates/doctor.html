@@ -61,8 +61,8 @@
                             <a href="{{ url_for('doctor_edit', id=r.id) }}" class="btn btn-sm btn-outline-primary me-1" title="Edit">
                                 <i class="bi bi-pencil"></i> Edit
                             </a>
-                            <form method="POST" action="{{ url_for('doctor_delete', id=r.id) }}" style="display:inline;">
-                                <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure?')" title="Delete">
+                            <form method="POST" action="{{ url_for('doctor_delete', id=r.id) }}" data-style="display:inline;">
+                                <button type="submit" class="btn btn-sm btn-outline-danger" data-confirm="Are you sure?" title="Delete">
                                     <i class="bi bi-trash"></i> Delete
                                 </button>
                             </form>

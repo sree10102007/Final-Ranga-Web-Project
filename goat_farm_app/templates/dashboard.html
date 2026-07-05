@@ -20,11 +20,11 @@
             <h2 class="fw-800 text-dark mb-1">Farm Overview</h2>
             <p class="text-muted mb-0">At-a-glance summary of your farm's performance and inventory.</p>
         </div>
-        <div style="max-width: 350px; width: 100%;">
+        <div data-style="max-width: 350px; width: 100%;">
             <form action="{{ url_for('dashboard') }}" method="GET" class="shadow-sm rounded-3 overflow-hidden d-flex">
                 <div class="input-group">
                     <span class="input-group-text bg-white border-0"><i class="bi bi-search text-muted"></i></span>
-                    <input type="text" name="search" class="form-control border-0 px-2" placeholder="Search Tag ID, Breed..." value="{{ search_q or '' }}" style="outline: none; box-shadow: none;">
+                    <input type="text" name="search" class="form-control border-0 px-2" placeholder="Search Tag ID, Breed..." value="{{ search_q or '' }}" data-style="outline: none; box-shadow: none;">
                     <button class="btn btn-success border-0 px-4 fw-bold" type="submit">Search</button>
                 </div>
             </form>
@@ -34,21 +34,21 @@
 
 <div class="row g-4 mb-4">
     <div class="col-md-4">
-        <div class="stat-card" style="background: linear-gradient(135deg, #2e7d32, #1b5e20);">
+        <div class="stat-card" data-style="background: linear-gradient(135deg, #2e7d32, #1b5e20);">
             <i class="bi bi-heptagon-half stat-icon text-white-50"></i>
             <div class="stat-label text-white-50">Total Active Goats</div>
             <div class="stat-value text-white">{{ total_goats }}</div>
         </div>
     </div>
     <div class="col-md-4">
-        <div class="stat-card" style="background: linear-gradient(135deg, #0288d1, #01579b);">
+        <div class="stat-card" data-style="background: linear-gradient(135deg, #0288d1, #01579b);">
             <i class="bi bi-bug stat-icon text-white-50"></i>
             <div class="stat-label text-white-50">Total Kids</div>
             <div class="stat-value text-white">{{ total_kids }}</div>
         </div>
     </div>
     <div class="col-md-4">
-        <div class="stat-card" style="background: linear-gradient(135deg, #f57f17, #fbc02d);">
+        <div class="stat-card" data-style="background: linear-gradient(135deg, #f57f17, #fbc02d);">
             <i class="bi bi-people stat-icon text-white-50"></i>
             <div class="stat-label text-white-50">Active Employees</div>
             <div class="stat-value text-white">{{ total_employees }}</div>
@@ -58,7 +58,7 @@
 
 <div class="row g-4 mb-5">
     <div class="col-md-4">
-        <div class="stat-card clickable-stat-card" onclick="window.location.href='{{ url_for('pnl') }}'" title="Click to view P&L Breakdown" style="background: linear-gradient(135deg, #43a047, #1b5e20);">
+        <div class="stat-card clickable-stat-card" data-onclick="window.location.href='{{ url_for('pnl') }}'" title="Click to view P&L Breakdown" data-style="background: linear-gradient(135deg, #43a047, #1b5e20);">
             <i class="bi bi-cash-stack stat-icon text-white-50"></i>
             <div class="stat-label text-white-50">Total Income</div>
             <div class="stat-value text-white">₹{{ "%.2f"|format(income) }}</div>
@@ -66,7 +66,7 @@
         </div>
     </div>
     <div class="col-md-4">
-        <div class="stat-card clickable-stat-card" onclick="window.location.href='{{ url_for('pnl') }}'" title="Click to view P&L Breakdown" style="background: linear-gradient(135deg, #e53935, #b71c1c);">
+        <div class="stat-card clickable-stat-card" data-onclick="window.location.href='{{ url_for('pnl') }}'" title="Click to view P&L Breakdown" data-style="background: linear-gradient(135deg, #e53935, #b71c1c);">
             <i class="bi bi-wallet2 stat-icon text-white-50"></i>
             <div class="stat-label text-white-50">Total Expenses</div>
             <div class="stat-value text-white">₹{{ "%.2f"|format(expense) }}</div>
@@ -74,7 +74,7 @@
         </div>
     </div>
     <div class="col-md-4">
-        <div class="stat-card clickable-stat-card" onclick="window.location.href='{{ url_for('pnl') }}'" title="Click to view P&L Breakdown" style="background: linear-gradient(135deg, {% if profit >= 0 %}#1e88e5, #0d47a1{% else %}#fb8c00, #e65100{% endif %});">
+        <div class="stat-card clickable-stat-card" data-onclick="window.location.href='{{ url_for('pnl') }}'" title="Click to view P&L Breakdown" data-style="background: linear-gradient(135deg, {% if profit >= 0 %}#1e88e5, #0d47a1{% else %}#fb8c00, #e65100{% endif %});">
             <i class="bi bi-graph-{% if profit >= 0 %}up{% else %}down{% endif %} stat-icon text-white-50"></i>
             <div class="stat-label text-white-50">Net Profit / Loss</div>
             <div class="stat-value text-white">₹{{ "%.2f"|format(profit) }}</div>
@@ -128,7 +128,7 @@
                                 <td><span class="badge bg-success-subtle text-success border border-success border-opacity-10">{{ g.tag_no }}</span></td>
                                 <td>
                                     <div>{{ g.breed or 'N/A' }}</div>
-                                    <div class="small text-muted" style="font-size: 0.75rem;">{{ g.age_str or 'N/A' }}</div>
+                                    <div class="small text-muted" data-style="font-size: 0.75rem;">{{ g.age_str or 'N/A' }}</div>
                                 </td>
                                 <td>
                                     {% if g.gender|lower in ['male', 'm'] %}
@@ -155,7 +155,7 @@
                             {% else %}
                             <tr>
                                 <td colspan="7" class="text-center py-5 text-muted">
-                                    <i class="bi bi-search d-block mb-2" style="font-size: 2rem; opacity: 0.3;"></i>
+                                    <i class="bi bi-search d-block mb-2" data-style="font-size: 2rem; opacity: 0.3;"></i>
                                     No goats found matching your search.
                                 </td>
                             </tr>

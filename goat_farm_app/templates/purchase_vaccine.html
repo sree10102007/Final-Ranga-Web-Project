@@ -38,14 +38,14 @@
             </div>
             
             <div class="col-12 mt-4">
-                <button type="submit" class="btn text-white px-5 py-2 fw-bold" style="background-color: #7b1fa2;">Record Vaccine Purchase</button>
+                <button type="submit" class="btn text-white px-5 py-2 fw-bold" data-style="background-color: #7b1fa2;">Record Vaccine Purchase</button>
                 <a href="{{ url_for('purchases') }}" class="btn btn-light px-4 py-2 ms-2">Cancel</a>
             </div>
         </form>
     </div>
 </div>
 
-<script>
+<script nonce="{{ csp_nonce }}">
 document.getElementById('todayDate').valueAsDate = new Date();
 </script>
 {% endblock %}

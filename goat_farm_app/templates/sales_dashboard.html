@@ -17,32 +17,32 @@
     <div class="col-md-6">
         <a href="{{ url_for('sales_register', s_type='goat') }}" class="text-decoration-none card-hover-trigger">
             <div class="card border-0 rounded-4 shadow h-100 overflow-hidden position-relative transition-all" 
-                 style="background: linear-gradient(135deg, #059669 0%, #047857 100%); min-height: 220px;">
-                <div class="card-body p-4 d-flex flex-column justify-content-between position-relative" style="z-index: 2;">
+                 data-style="background: linear-gradient(135deg, #059669 0%, #047857 100%); min-height: 220px;">
+                <div class="card-body p-4 d-flex flex-column justify-content-between position-relative" data-style="z-index: 2;">
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
-                            <span class="badge rounded-pill px-3 py-2 small fw-bold mb-3" style="background: rgba(255, 255, 255, 0.15); color: #ffffff;">Livestock Revenue</span>
+                            <span class="badge rounded-pill px-3 py-2 small fw-bold mb-3" data-style="background: rgba(255, 255, 255, 0.15); color: #ffffff;">Livestock Revenue</span>
                             <h3 class="fw-800 text-white mb-1 tracking-tight">GOAT SALES</h3>
                             <p class="text-white text-opacity-80 small mb-0">Record and track income generated from selling goats with tag lookups.</p>
                         </div>
-                        <div class="icon-box rounded-4 p-3 d-inline-flex shadow-sm" style="background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.25);">
+                        <div class="icon-box rounded-4 p-3 d-inline-flex shadow-sm" data-style="background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.25);">
                             <i class="bi bi-currency-exchange fs-2 text-white"></i>
                         </div>
                     </div>
                     
-                    <div class="mt-4 pt-3 d-flex justify-content-between align-items-end" style="border-top: 1px solid rgba(255, 255, 255, 0.15);">
+                    <div class="mt-4 pt-3 d-flex justify-content-between align-items-end" data-style="border-top: 1px solid rgba(255, 255, 255, 0.15);">
                         <div>
-                            <div class="text-white text-opacity-75 small mb-1" style="font-size: 0.75rem; letter-spacing: 0.05em; fw-bold">TOTAL TRANSACTIONS</div>
+                            <div class="text-white text-opacity-75 small mb-1" data-style="font-size: 0.75rem; letter-spacing: 0.05em; fw-bold">TOTAL TRANSACTIONS</div>
                             <div class="fw-800 text-white fs-4">{{ count_goat }}</div>
                         </div>
                         <div class="text-end">
-                            <div class="text-white text-opacity-75 small mb-1" style="font-size: 0.75rem; letter-spacing: 0.05em; fw-bold">TOTAL REVENUE</div>
+                            <div class="text-white text-opacity-75 small mb-1" data-style="font-size: 0.75rem; letter-spacing: 0.05em; fw-bold">TOTAL REVENUE</div>
                             <div class="fw-800 text-white fs-3">₹{{ "%.2f"|format(sum_goat) }}</div>
                         </div>
                     </div>
                 </div>
                 <!-- Glowing background accent -->
-                <div class="position-absolute rounded-circle pointer-events-none" style="background: rgba(255, 255, 255, 0.05); width: 200px; height: 200px; bottom: -80px; right: -80px; filter: blur(45px);"></div>
+                <div class="position-absolute rounded-circle pointer-events-none" data-style="background: rgba(255, 255, 255, 0.05); width: 200px; height: 200px; bottom: -80px; right: -80px; filter: blur(45px);"></div>
             </div>
         </a>
     </div>
@@ -51,32 +51,32 @@
     <div class="col-md-6">
         <a href="{{ url_for('sales_register', s_type='other') }}" class="text-decoration-none card-hover-trigger">
             <div class="card border-0 rounded-4 shadow h-100 overflow-hidden position-relative transition-all" 
-                 style="background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%); min-height: 220px;">
-                <div class="card-body p-4 d-flex flex-column justify-content-between position-relative" style="z-index: 2;">
+                 data-style="background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%); min-height: 220px;">
+                <div class="card-body p-4 d-flex flex-column justify-content-between position-relative" data-style="z-index: 2;">
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
-                            <span class="badge rounded-pill px-3 py-2 small fw-bold mb-3" style="background: rgba(255, 255, 255, 0.15); color: #ffffff;">Miscellaneous Income</span>
+                            <span class="badge rounded-pill px-3 py-2 small fw-bold mb-3" data-style="background: rgba(255, 255, 255, 0.15); color: #ffffff;">Miscellaneous Income</span>
                             <h3 class="fw-800 text-white mb-1 tracking-tight">OTHER SALES</h3>
                             <p class="text-white text-opacity-80 small mb-0">Record income from other farm outputs such as manure, litter, milk, etc.</p>
                         </div>
-                        <div class="icon-box rounded-4 p-3 d-inline-flex shadow-sm" style="background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.25);">
+                        <div class="icon-box rounded-4 p-3 d-inline-flex shadow-sm" data-style="background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.25);">
                             <i class="bi bi-cart-check-fill fs-2 text-white"></i>
                         </div>
                     </div>
                     
-                    <div class="mt-4 pt-3 d-flex justify-content-between align-items-end" style="border-top: 1px solid rgba(255, 255, 255, 0.15);">
+                    <div class="mt-4 pt-3 d-flex justify-content-between align-items-end" data-style="border-top: 1px solid rgba(255, 255, 255, 0.15);">
                         <div>
-                            <div class="text-white text-opacity-75 small mb-1" style="font-size: 0.75rem; letter-spacing: 0.05em; fw-bold">TOTAL TRANSACTIONS</div>
+                            <div class="text-white text-opacity-75 small mb-1" data-style="font-size: 0.75rem; letter-spacing: 0.05em; fw-bold">TOTAL TRANSACTIONS</div>
                             <div class="fw-800 text-white fs-4">{{ count_other }}</div>
                         </div>
                         <div class="text-end">
-                            <div class="text-white text-opacity-75 small mb-1" style="font-size: 0.75rem; letter-spacing: 0.05em; fw-bold">TOTAL REVENUE</div>
+                            <div class="text-white text-opacity-75 small mb-1" data-style="font-size: 0.75rem; letter-spacing: 0.05em; fw-bold">TOTAL REVENUE</div>
                             <div class="fw-800 text-white fs-3">₹{{ "%.2f"|format(sum_other) }}</div>
                         </div>
                     </div>
                 </div>
                 <!-- Glowing background accent -->
-                <div class="position-absolute rounded-circle pointer-events-none" style="background: rgba(255, 255, 255, 0.05); width: 200px; height: 200px; bottom: -80px; right: -80px; filter: blur(45px);"></div>
+                <div class="position-absolute rounded-circle pointer-events-none" data-style="background: rgba(255, 255, 255, 0.05); width: 200px; height: 200px; bottom: -80px; right: -80px; filter: blur(45px);"></div>
             </div>
         </a>
     </div>

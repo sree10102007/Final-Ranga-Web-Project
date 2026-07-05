@@ -274,14 +274,14 @@
         </div>
         <div class="col-md-5 d-flex align-items-center justify-content-md-end gap-3 mt-3 mt-md-0">
             <div class="form-check form-switch mb-0">
-                <input class="form-check-input" type="checkbox" id="toggleHeaders" onchange="toggleBrowserHeadersFooters(this.checked)">
+                <input class="form-check-input" type="checkbox" id="toggleHeaders" data-onchange="toggleBrowserHeadersFooters(this.checked)">
                 <label class="form-check-label small fw-semibold text-muted" for="toggleHeaders">Hide Browser Header/Footer</label>
             </div>
             <div class="btn-group shadow-sm rounded-3 overflow-hidden">
-                <button onclick="window.print()" class="btn btn-primary fw-bold px-3 py-2">
+                <button data-onclick="window.print()" class="btn btn-primary fw-bold px-3 py-2">
                     <i class="fas fa-print me-2"></i>Print / PDF
                 </button>
-                <button onclick="downloadWord()" class="btn btn-success fw-bold px-3 py-2">
+                <button data-onclick="downloadWord()" class="btn btn-success fw-bold px-3 py-2">
                     <i class="fas fa-file-word me-2"></i>Word Document
                 </button>
             </div>
@@ -395,7 +395,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="{{ csp_nonce }}">
 document.addEventListener("DOMContentLoaded", function() {
     var today = new Date();
     var dd = String(today.getDate()).padStart(2, '0');
@@ -435,11 +435,11 @@ function downloadWord() {
         '</style>' +
         '</head>' +
         '<body>' +
-        '<div style="text-align: center; margin-bottom: 20px;">' +
+        '<div data-style="text-align: center; margin-bottom: 20px;">' +
         '<h2>' + '{{ farm.farm_name }}' + '</h2>' +
         '<h6>' + '{{ farm.address }}' + '</h6>' +
-        '<h3 style="margin-top: 15px;">MONTHLY SALARY REPORT</h3>' +
-        '<p style="color: #666;">Month: <b>' + '{{ month }}' + '</b></p>' +
+        '<h3 data-style="margin-top: 15px;">MONTHLY SALARY REPORT</h3>' +
+        '<p data-style="color: #666;">Month: <b>' + '{{ month }}' + '</b></p>' +
         '</div>' +
         '<table>' +
         tableHtml +

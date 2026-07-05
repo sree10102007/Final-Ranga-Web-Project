@@ -7,7 +7,7 @@
 <div class="row">
     <div class="col-12">
         <div class="d-flex align-items-center gap-3 mb-4">
-            <a href="{{ url_for('voucher_register', v_type=v_type) }}" class="btn btn-outline-secondary rounded-circle" style="width: 40px; height: 40px; padding: 0; line-height: 38px; display: inline-flex; align-items: center; justify-content: center;">
+            <a href="{{ url_for('voucher_register', v_type=v_type) }}" class="btn btn-outline-secondary rounded-circle" data-style="width: 40px; height: 40px; padding: 0; line-height: 38px; display: inline-flex; align-items: center; justify-content: center;">
                 <i class="bi bi-arrow-left fs-5"></i>
             </a>
             <div>
@@ -96,7 +96,7 @@
                             <div class="col-md-3">
                                 <label class="form-label text-muted small fw-bold">PARTICULARS <span class="text-danger">*</span></label>
                                 {% if particulars %}
-                                <select name="particular_id" class="form-select" required id="particular_select" onchange="updateParticularName(this)">
+                                <select name="particular_id" class="form-select" required id="particular_select" data-onchange="updateParticularName(this)">
                                     <option value="">— Select Particular —</option>
                                     {% for p in particulars %}
                                     <option value="{{ p.id }}" {% if record and record.particular_id == p.id %}selected{% endif %}>
@@ -209,7 +209,7 @@
                             <div class="col-md-3">
                                 <label class="form-label text-muted small fw-bold">PARTICULARS <span class="text-danger">*</span></label>
                                 {% if particulars %}
-                                <select name="particular_id" class="form-select" required id="particular_select" onchange="updateParticularName(this)">
+                                <select name="particular_id" class="form-select" required id="particular_select" data-onchange="updateParticularName(this)">
                                     <option value="">— Select Particular —</option>
                                     {% for p in particulars %}
                                     <option value="{{ p.id }}" {% if record and record.particular_id == p.id %}selected{% endif %}>
@@ -310,7 +310,7 @@
                         <div class="row g-3 mb-3">
                             <div class="col-md-3">
                                 <label class="form-label text-muted small fw-bold">HEALTH VOUCHER SUB-TYPE</label>
-                                <select name="sub_type" id="sub_type" class="form-select" onchange="toggleHealthFields()">
+                                <select name="sub_type" id="sub_type" class="form-select" data-onchange="toggleHealthFields()">
                                     <option value="medicine" {% if record and record.sub_type == 'medicine' %}selected{% endif %}>Medicine Voucher</option>
                                     <option value="vaccine" {% if record and record.sub_type == 'vaccine' %}selected{% endif %}>Vaccine Voucher</option>
                                 </select>
@@ -318,7 +318,7 @@
                             <div class="col-md-3">
                                 <label class="form-label text-muted small fw-bold">PARTICULARS <span class="text-danger">*</span></label>
                                 {% if particulars %}
-                                <select name="particular_id" class="form-select" required id="particular_select" onchange="updateParticularName(this)">
+                                <select name="particular_id" class="form-select" required id="particular_select" data-onchange="updateParticularName(this)">
                                     <option value="">— Select Particular —</option>
                                     {% for p in particulars %}
                                     <option value="{{ p.id }}" {% if record and record.particular_id == p.id %}selected{% endif %}>
@@ -359,7 +359,7 @@
                             </div>
                         </div>
                         
-                        <script>
+                        <script nonce="{{ csp_nonce }}">
                             function toggleHealthFields() {
                                 var subType = document.getElementById('sub_type').value;
                                 var doseField = document.getElementById('field-dose-unit');
@@ -410,7 +410,7 @@
                             <div class="col-md-3">
                                 <label class="form-label text-muted small fw-bold">PARTICULARS <span class="text-danger">*</span></label>
                                 {% if particulars %}
-                                <select name="particular_id" class="form-select" required id="particular_select" onchange="updateParticularName(this)">
+                                <select name="particular_id" class="form-select" required id="particular_select" data-onchange="updateParticularName(this)">
                                     <option value="">— Select Particular —</option>
                                     {% for p in particulars %}
                                     <option value="{{ p.id }}" {% if record and record.particular_id == p.id %}selected{% endif %}>
@@ -446,7 +446,7 @@
                             <div class="col-md-3">
                                 <label class="form-label text-muted small fw-bold">UNIT OF MEASURE</label>
                                 {% if expense_units %}
-                                <select name="unit_id" class="form-select" id="unit_select" onchange="updateUnitName(this)">
+                                <select name="unit_id" class="form-select" id="unit_select" data-onchange="updateUnitName(this)">
                                     <option value="">— Select Unit —</option>
                                     {% for u in expense_units %}
                                     <option value="{{ u.id }}" {% if record and record.unit_id == u.id %}selected{% endif %}>
@@ -497,7 +497,7 @@
                         </div>
                     {% endif %}
 
-                    <script>
+                    <script nonce="{{ csp_nonce }}">
                     function updateParticularName(sel) {
                         const opt = sel.options[sel.selectedIndex];
                         const hidden = document.getElementById('particular_name_hidden');

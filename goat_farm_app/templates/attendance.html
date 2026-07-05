@@ -13,8 +13,8 @@
         <div class="col-md-5 mt-3 mt-md-0">
             <form method="GET" action="{{ url_for('attendance_view') }}" class="d-flex align-items-center justify-content-md-end gap-2">
                 <label class="form-label text-nowrap fw-bold text-muted mb-0 me-2"><i class="bi bi-calendar-event-fill me-1"></i>Select Date:</label>
-                <div class="input-group" style="max-width: 250px;">
-                    <input type="date" name="date" class="form-control fw-bold border-0 bg-light shadow-sm py-2" value="{{ date_filter }}" onchange="this.form.submit()">
+                <div class="input-group" data-style="max-width: 250px;">
+                    <input type="date" name="date" class="form-control fw-bold border-0 bg-light shadow-sm py-2" value="{{ date_filter }}" data-onchange="this.form.submit()">
                 </div>
             </form>
         </div>
@@ -30,11 +30,11 @@
                 <table class="table table-hover mb-0 align-middle">
                     <thead class="bg-light text-muted small fw-bold text-uppercase">
                         <tr>
-                            <th class="ps-4 py-2" style="width: 80px; font-size: 0.75rem;">Sr#</th>
-                            <th class="py-2" style="font-size: 0.75rem;">Employee Name</th>
-                            <th class="py-2" style="font-size: 0.75rem;">Role</th>
-                            <th class="py-2 text-center" style="min-width: 400px; font-size: 0.75rem;">Mark Attendance Status</th>
-                            <th class="py-2" style="min-width: 200px; font-size: 0.75rem;">Notes / Remarks</th>
+                            <th class="ps-4 py-2" data-style="width: 80px; font-size: 0.75rem;">Sr#</th>
+                            <th class="py-2" data-style="font-size: 0.75rem;">Employee Name</th>
+                            <th class="py-2" data-style="font-size: 0.75rem;">Role</th>
+                            <th class="py-2 text-center" data-style="min-width: 400px; font-size: 0.75rem;">Mark Attendance Status</th>
+                            <th class="py-2" data-style="min-width: 200px; font-size: 0.75rem;">Notes / Remarks</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -43,41 +43,41 @@
                             <tr>
                                 <!-- Serial No -->
                                 <td class="ps-4 py-1">
-                                    <span class="badge bg-secondary-subtle text-secondary fw-bold px-2 py-1 rounded-pill" style="font-size: 0.75rem;">
+                                    <span class="badge bg-secondary-subtle text-secondary fw-bold px-2 py-1 rounded-pill" data-style="font-size: 0.75rem;">
                                         {{ emp.sr_no or emp.id }}
                                     </span>
                                 </td>
                                 
                                 <!-- Employee Name -->
                                 <td class="py-1">
-                                    <div class="fw-bold text-dark" style="font-size: 0.9rem;">{{ emp.name }}</div>
+                                    <div class="fw-bold text-dark" data-style="font-size: 0.9rem;">{{ emp.name }}</div>
                                 </td>
                                 
                                 <!-- Role -->
                                 <td class="py-1">
-                                    <span class="badge bg-light text-dark border px-2 py-1 fw-600 rounded-pill" style="font-size: 0.7rem;">
+                                    <span class="badge bg-light text-dark border px-2 py-1 fw-600 rounded-pill" data-style="font-size: 0.7rem;">
                                         {{ emp.role }}
                                     </span>
                                 </td>
                                 
                                 <!-- Attendance Selector Button Group -->
                                 <td class="text-center py-1">
-                                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; max-width: 240px; margin: 0 auto; padding: 2px 0;">
+                                    <div data-style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; max-width: 240px; margin: 0 auto; padding: 2px 0;">
                                         {% set cur_status = existing_map[emp.id].status if emp.id in existing_map else 'Present' %}
                                         
                                         <!-- Present -->
                                         <div>
                                             <input type="radio" class="btn-check" name="status_{{ emp.id }}" id="present_{{ emp.id }}" value="Present" {% if cur_status != 'Leave' %}checked{% endif %}>
-                                            <label class="btn btn-outline-success btn-sm w-100 fw-600 rounded-pill shadow-sm" style="font-size: 12px; padding: 4px 0;" for="present_{{ emp.id }}">
-                                                <i class="bi bi-check-circle-fill me-1" style="font-size: 11px;"></i>Present
+                                            <label class="btn btn-outline-success btn-sm w-100 fw-600 rounded-pill shadow-sm" data-style="font-size: 12px; padding: 4px 0;" for="present_{{ emp.id }}">
+                                                <i class="bi bi-check-circle-fill me-1" data-style="font-size: 11px;"></i>Present
                                             </label>
                                         </div>
                                         
                                         <!-- Leave -->
                                         <div>
                                             <input type="radio" class="btn-check" name="status_{{ emp.id }}" id="leave_{{ emp.id }}" value="Leave" {% if cur_status == 'Leave' %}checked{% endif %}>
-                                            <label class="btn btn-outline-info btn-sm w-100 fw-600 rounded-pill shadow-sm text-dark" style="font-size: 12px; padding: 4px 0;" for="leave_{{ emp.id }}">
-                                                <i class="bi bi-question-circle-fill me-1" style="font-size: 11px;"></i>Leave
+                                            <label class="btn btn-outline-info btn-sm w-100 fw-600 rounded-pill shadow-sm text-dark" data-style="font-size: 12px; padding: 4px 0;" for="leave_{{ emp.id }}">
+                                                <i class="bi bi-question-circle-fill me-1" data-style="font-size: 11px;"></i>Leave
                                             </label>
                                         </div>
                                     </div>
@@ -86,8 +86,8 @@
                                 <!-- Notes / Remarks -->
                                 <td class="py-1">
                                     <div class="input-group input-group-sm">
-                                        <span class="input-group-text bg-light text-muted border-0 py-0.5"><i class="bi bi-pencil" style="font-size: 0.75rem;"></i></span>
-                                        <input type="text" class="form-control form-control-sm border-0 bg-light py-0.5" style="font-size: 0.8rem;" name="notes_{{ emp.id }}" value="{{ existing_map[emp.id].notes if emp.id in existing_map and existing_map[emp.id].notes else '' }}" placeholder="Reason/remarks...">
+                                        <span class="input-group-text bg-light text-muted border-0 py-0.5"><i class="bi bi-pencil" data-style="font-size: 0.75rem;"></i></span>
+                                        <input type="text" class="form-control form-control-sm border-0 bg-light py-0.5" data-style="font-size: 0.8rem;" name="notes_{{ emp.id }}" value="{{ existing_map[emp.id].notes if emp.id in existing_map and existing_map[emp.id].notes else '' }}" placeholder="Reason/remarks...">
                                     </div>
                                 </td>
                             </tr>
@@ -95,7 +95,7 @@
                         {% else %}
                             <tr>
                                 <td colspan="5" class="text-center py-5 text-muted">
-                                    <i class="bi bi-people d-block mb-3" style="font-size: 3rem; opacity: 0.5;"></i>
+                                    <i class="bi bi-people d-block mb-3" data-style="font-size: 3rem; opacity: 0.5;"></i>
                                     No active employees found. Add employees in <a href="{{ url_for('employees') }}" class="fw-bold">Employee Directory</a> first.
                                 </td>
                             </tr>
@@ -109,7 +109,7 @@
         {% if employees %}
         <div class="row mt-4 mb-5">
             <div class="col-12 text-center">
-                <button type="submit" class="btn btn-success px-5 py-3 fw-bold rounded-pill shadow-lg" style="font-size: 1.1rem; letter-spacing: 0.5px;">
+                <button type="submit" class="btn btn-success px-5 py-3 fw-bold rounded-pill shadow-lg" data-style="font-size: 1.1rem; letter-spacing: 0.5px;">
                     <i class="bi bi-cloud-check-fill me-2 fs-5"></i>Save Daily Attendance Sheet
                 </button>
             </div>

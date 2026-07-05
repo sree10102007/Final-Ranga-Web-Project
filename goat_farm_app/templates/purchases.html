@@ -18,11 +18,11 @@
 <div class="row g-4 mb-5">
     <div class="col-md-3">
         <a href="{{ url_for('purchase_goat') }}" class="text-decoration-none">
-            <div class="card stat-card h-100 border-0" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;">
+            <div class="card stat-card h-100 border-0" data-style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;">
                 <div class="card-body text-center p-4">
                     <div class="mb-3">
-                        <i class="bi bi-plus-circle-fill text-white-50" style="font-size: 1.2rem; float: right;"></i>
-                        <i class="bi bi-heptagon-half d-block" style="font-size: 3rem;"></i>
+                        <i class="bi bi-plus-circle-fill text-white-50" data-style="font-size: 1.2rem; float: right;"></i>
+                        <i class="bi bi-heptagon-half d-block" data-style="font-size: 3rem;"></i>
                     </div>
                     <h5 class="fw-800 mb-1">GOAT</h5>
                     <p class="small mb-0 text-white-50">Add to Master Records</p>
@@ -33,11 +33,11 @@
     </div>
     <div class="col-md-3">
         <a href="{{ url_for('purchase_feed') }}" class="text-decoration-none">
-            <div class="card stat-card h-100 border-0" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white;">
+            <div class="card stat-card h-100 border-0" data-style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white;">
                 <div class="card-body text-center p-4">
                     <div class="mb-3">
-                        <i class="bi bi-plus-circle-fill text-white-50" style="font-size: 1.2rem; float: right;"></i>
-                        <i class="bi bi-box-seam d-block" style="font-size: 3rem;"></i>
+                        <i class="bi bi-plus-circle-fill text-white-50" data-style="font-size: 1.2rem; float: right;"></i>
+                        <i class="bi bi-box-seam d-block" data-style="font-size: 3rem;"></i>
                     </div>
                     <h5 class="fw-800 mb-1">FEED</h5>
                     <p class="small mb-0 text-white-50">Restock Inventory</p>
@@ -48,11 +48,11 @@
     </div>
     <div class="col-md-3">
         <a href="{{ url_for('purchase_medicine') }}" class="text-decoration-none">
-            <div class="card stat-card h-100 border-0" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white;">
+            <div class="card stat-card h-100 border-0" data-style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white;">
                 <div class="card-body text-center p-4">
                     <div class="mb-3">
-                        <i class="bi bi-plus-circle-fill text-white-50" style="font-size: 1.2rem; float: right;"></i>
-                        <i class="bi bi-capsule d-block" style="font-size: 3rem;"></i>
+                        <i class="bi bi-plus-circle-fill text-white-50" data-style="font-size: 1.2rem; float: right;"></i>
+                        <i class="bi bi-capsule d-block" data-style="font-size: 3rem;"></i>
                     </div>
                     <h5 class="fw-800 mb-1">MEDICINE</h5>
                     <p class="small mb-0 text-white-50">Log Health Supplies</p>
@@ -63,11 +63,11 @@
     </div>
     <div class="col-md-3">
         <a href="{{ url_for('purchase_vaccine') }}" class="text-decoration-none">
-            <div class="card stat-card h-100 border-0" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white;">
+            <div class="card stat-card h-100 border-0" data-style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white;">
                 <div class="card-body text-center p-4">
                     <div class="mb-3">
-                        <i class="bi bi-plus-circle-fill text-white-50" style="font-size: 1.2rem; float: right;"></i>
-                        <i class="bi bi-shield-plus d-block" style="font-size: 3rem;"></i>
+                        <i class="bi bi-plus-circle-fill text-white-50" data-style="font-size: 1.2rem; float: right;"></i>
+                        <i class="bi bi-shield-plus d-block" data-style="font-size: 3rem;"></i>
                     </div>
                     <h5 class="fw-800 mb-1">VACCINE</h5>
                     <p class="small mb-0 text-white-50">Prevention Tracking</p>
@@ -99,7 +99,7 @@
                         <div class="d-flex align-items-center gap-2">
                             <span class="badge bg-success-subtle text-success me-2">₹{{ g.price }}</span>
                             <a href="{{ url_for('purchase_edit', id=g.id) }}" class="btn btn-sm btn-light border" title="Edit"><i class="bi bi-pencil"></i></a>
-                            <form action="{{ url_for('purchase_delete', id=g.id) }}" method="POST" class="d-inline m-0" onsubmit="return confirm('Delete this purchase?');">
+                            <form action="{{ url_for('purchase_delete', id=g.id) }}" method="POST" class="d-inline m-0" data-confirm="Delete this purchase?">
                                 <button type="submit" class="btn btn-sm btn-light border text-danger" title="Delete"><i class="bi bi-trash"></i></button>
                             </form>
                         </div>
@@ -131,7 +131,7 @@
                         <div class="d-flex align-items-center gap-2">
                             <span class="badge bg-warning-subtle text-warning me-2">₹{{ f.cost }}</span>
                             <a href="{{ url_for('feed_purchase_edit', id=f.id) }}" class="btn btn-sm btn-light border" title="Edit"><i class="bi bi-pencil"></i></a>
-                            <form action="{{ url_for('feed_purchase_delete', id=f.id) }}" method="POST" class="d-inline m-0" onsubmit="return confirm('Delete this feed purchase?');">
+                            <form action="{{ url_for('feed_purchase_delete', id=f.id) }}" method="POST" class="d-inline m-0" data-confirm="Delete this feed purchase?">
                                 <button type="submit" class="btn btn-sm btn-light border text-danger" title="Delete"><i class="bi bi-trash"></i></button>
                             </form>
                         </div>
@@ -163,7 +163,7 @@
                         <div class="d-flex align-items-center gap-2">
                             <span class="badge bg-info-subtle text-info me-2">₹{{ m.cost }}</span>
                             <a href="{{ url_for('med_purchase_edit', id=m.id) }}" class="btn btn-sm btn-light border" title="Edit"><i class="bi bi-pencil"></i></a>
-                            <form action="{{ url_for('med_purchase_delete', id=m.id) }}" method="POST" class="d-inline m-0" onsubmit="return confirm('Delete this medicine purchase?');">
+                            <form action="{{ url_for('med_purchase_delete', id=m.id) }}" method="POST" class="d-inline m-0" data-confirm="Delete this medicine purchase?">
                                 <button type="submit" class="btn btn-sm btn-light border text-danger" title="Delete"><i class="bi bi-trash"></i></button>
                             </form>
                         </div>
@@ -181,7 +181,7 @@
     <div class="col-md-6">
         <div class="card border-0 h-100">
             <div class="card-header bg-white border-0 pt-4 pb-0">
-                <h6 class="fw-bold" style="color: #7b1fa2;">Recent Vaccine Purchases</h6>
+                <h6 class="fw-bold" data-style="color: #7b1fa2;">Recent Vaccine Purchases</h6>
             </div>
             <div class="card-body">
                 {% if vacs %}
@@ -193,9 +193,9 @@
                             <div class="small text-muted">{{ v.purchase_date }} | Qty: {{ v.quantity }}</div>
                         </div>
                         <div class="d-flex align-items-center gap-2">
-                            <span class="badge me-2" style="background: #f3e5f5; color: #7b1fa2;">₹{{ v.cost }}</span>
+                            <span class="badge me-2" data-style="background: #f3e5f5; color: #7b1fa2;">₹{{ v.cost }}</span>
                             <a href="{{ url_for('vac_purchase_edit', id=v.id) }}" class="btn btn-sm btn-light border" title="Edit"><i class="bi bi-pencil"></i></a>
-                            <form action="{{ url_for('vac_purchase_delete', id=v.id) }}" method="POST" class="d-inline m-0" onsubmit="return confirm('Delete this vaccine purchase?');">
+                            <form action="{{ url_for('vac_purchase_delete', id=v.id) }}" method="POST" class="d-inline m-0" data-confirm="Delete this vaccine purchase?">
                                 <button type="submit" class="btn btn-sm btn-light border text-danger" title="Delete"><i class="bi bi-trash"></i></button>
                             </form>
                         </div>

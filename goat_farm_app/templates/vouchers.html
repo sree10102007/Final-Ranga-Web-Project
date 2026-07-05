@@ -17,32 +17,32 @@
     <div class="col-md-6">
         <a href="{{ url_for('voucher_register', v_type='goat') }}" class="text-decoration-none card-hover-trigger">
             <div class="card border-0 rounded-4 shadow h-100 overflow-hidden position-relative transition-all" 
-                 style="background: linear-gradient(135deg, #059669 0%, #047857 100%); min-height: 220px;">
-                <div class="card-body p-4 d-flex flex-column justify-content-between position-relative" style="z-index: 2;">
+                 data-style="background: linear-gradient(135deg, #059669 0%, #047857 100%); min-height: 220px;">
+                <div class="card-body p-4 d-flex flex-column justify-content-between position-relative" data-style="z-index: 2;">
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
-                            <span class="badge rounded-pill px-3 py-2 small fw-bold mb-3" style="background: rgba(255, 255, 255, 0.15); color: #ffffff;">Live Stock Voucher</span>
+                            <span class="badge rounded-pill px-3 py-2 small fw-bold mb-3" data-style="background: rgba(255, 255, 255, 0.15); color: #ffffff;">Live Stock Voucher</span>
                             <h3 class="fw-800 text-white mb-1 tracking-tight">GOATS</h3>
                             <p class="text-white text-opacity-80 small mb-0">Record and manage purchased livestock and capital asset tags.</p>
                         </div>
-                        <div class="icon-box rounded-4 p-3 d-inline-flex shadow-sm" style="background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.25);">
+                        <div class="icon-box rounded-4 p-3 d-inline-flex shadow-sm" data-style="background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.25);">
                             <i class="bi bi-tag-fill fs-2 text-white"></i>
                         </div>
                     </div>
                     
-                    <div class="mt-4 pt-3 d-flex justify-content-between align-items-end" style="border-top: 1px solid rgba(255, 255, 255, 0.15);">
+                    <div class="mt-4 pt-3 d-flex justify-content-between align-items-end" data-style="border-top: 1px solid rgba(255, 255, 255, 0.15);">
                         <div>
-                            <div class="text-white text-opacity-75 small mb-1" style="font-size: 0.75rem; letter-spacing: 0.05em; fw-bold">TOTAL VOUCHERS</div>
+                            <div class="text-white text-opacity-75 small mb-1" data-style="font-size: 0.75rem; letter-spacing: 0.05em; fw-bold">TOTAL VOUCHERS</div>
                             <div class="fw-800 text-white fs-4">{{ count_goat }}</div>
                         </div>
                         <div class="text-end">
-                            <div class="text-white text-opacity-75 small mb-1" style="font-size: 0.75rem; letter-spacing: 0.05em; fw-bold">TOTAL VALUE</div>
+                            <div class="text-white text-opacity-75 small mb-1" data-style="font-size: 0.75rem; letter-spacing: 0.05em; fw-bold">TOTAL VALUE</div>
                             <div class="fw-800 text-white fs-3">₹{{ "%.2f"|format(sum_goat) }}</div>
                         </div>
                     </div>
                 </div>
                 <!-- Glowing background accent -->
-                <div class="position-absolute rounded-circle pointer-events-none" style="background: rgba(255, 255, 255, 0.05); width: 200px; height: 200px; bottom: -80px; right: -80px; filter: blur(45px);"></div>
+                <div class="position-absolute rounded-circle pointer-events-none" data-style="background: rgba(255, 255, 255, 0.05); width: 200px; height: 200px; bottom: -80px; right: -80px; filter: blur(45px);"></div>
             </div>
         </a>
     </div>
@@ -51,32 +51,32 @@
     <div class="col-md-6">
         <a href="{{ url_for('voucher_register', v_type='feed') }}" class="text-decoration-none card-hover-trigger">
             <div class="card border-0 rounded-4 shadow h-100 overflow-hidden position-relative transition-all" 
-                 style="background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%); min-height: 220px;">
-                <div class="card-body p-4 d-flex flex-column justify-content-between position-relative" style="z-index: 2;">
+                 data-style="background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%); min-height: 220px;">
+                <div class="card-body p-4 d-flex flex-column justify-content-between position-relative" data-style="z-index: 2;">
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
-                            <span class="badge rounded-pill px-3 py-2 small fw-bold mb-3" style="background: rgba(255, 255, 255, 0.15); color: #ffffff;">Inventory Voucher</span>
+                            <span class="badge rounded-pill px-3 py-2 small fw-bold mb-3" data-style="background: rgba(255, 255, 255, 0.15); color: #ffffff;">Inventory Voucher</span>
                             <h3 class="fw-800 text-white mb-1 tracking-tight">FEED</h3>
                             <p class="text-white text-opacity-80 small mb-0">Record bulk feed & medical inventory purchases and stock replenishments.</p>
                         </div>
-                        <div class="icon-box rounded-4 p-3 d-inline-flex shadow-sm" style="background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.25);">
+                        <div class="icon-box rounded-4 p-3 d-inline-flex shadow-sm" data-style="background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.25);">
                             <i class="bi bi-box-seam-fill fs-2 text-white"></i>
                         </div>
                     </div>
                     
-                    <div class="mt-4 pt-3 d-flex justify-content-between align-items-end" style="border-top: 1px solid rgba(255, 255, 255, 0.15);">
+                    <div class="mt-4 pt-3 d-flex justify-content-between align-items-end" data-style="border-top: 1px solid rgba(255, 255, 255, 0.15);">
                         <div>
-                            <div class="text-white text-opacity-75 small mb-1" style="font-size: 0.75rem; letter-spacing: 0.05em; fw-bold">TOTAL VOUCHERS</div>
+                            <div class="text-white text-opacity-75 small mb-1" data-style="font-size: 0.75rem; letter-spacing: 0.05em; fw-bold">TOTAL VOUCHERS</div>
                             <div class="fw-800 text-white fs-4">{{ count_feed }}</div>
                         </div>
                         <div class="text-end">
-                            <div class="text-white text-opacity-75 small mb-1" style="font-size: 0.75rem; letter-spacing: 0.05em; fw-bold">TOTAL VALUE</div>
+                            <div class="text-white text-opacity-75 small mb-1" data-style="font-size: 0.75rem; letter-spacing: 0.05em; fw-bold">TOTAL VALUE</div>
                             <div class="fw-800 text-white fs-3">₹{{ "%.2f"|format(sum_feed) }}</div>
                         </div>
                     </div>
                 </div>
                 <!-- Glowing background accent -->
-                <div class="position-absolute rounded-circle pointer-events-none" style="background: rgba(255, 255, 255, 0.05); width: 200px; height: 200px; bottom: -80px; right: -80px; filter: blur(45px);"></div>
+                <div class="position-absolute rounded-circle pointer-events-none" data-style="background: rgba(255, 255, 255, 0.05); width: 200px; height: 200px; bottom: -80px; right: -80px; filter: blur(45px);"></div>
             </div>
         </a>
     </div>
@@ -85,32 +85,32 @@
     <div class="col-md-6">
         <a href="{{ url_for('voucher_register', v_type='health') }}" class="text-decoration-none card-hover-trigger">
             <div class="card border-0 rounded-4 shadow h-100 overflow-hidden position-relative transition-all" 
-                 style="background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); min-height: 220px;">
-                <div class="card-body p-4 d-flex flex-column justify-content-between position-relative" style="z-index: 2;">
+                 data-style="background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); min-height: 220px;">
+                <div class="card-body p-4 d-flex flex-column justify-content-between position-relative" data-style="z-index: 2;">
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
-                            <span class="badge rounded-pill px-3 py-2 small fw-bold mb-3" style="background: rgba(255, 255, 255, 0.15); color: #ffffff;">Medical Supplies Voucher</span>
+                            <span class="badge rounded-pill px-3 py-2 small fw-bold mb-3" data-style="background: rgba(255, 255, 255, 0.15); color: #ffffff;">Medical Supplies Voucher</span>
                             <h3 class="fw-800 text-white mb-1 tracking-tight">HEALTH</h3>
                             <p class="text-white text-opacity-80 small mb-0">Record all medicine stock and vaccine batch acquisition vouchers.</p>
                         </div>
-                        <div class="icon-box rounded-4 p-3 d-inline-flex shadow-sm" style="background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.25);">
+                        <div class="icon-box rounded-4 p-3 d-inline-flex shadow-sm" data-style="background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.25);">
                             <i class="bi bi-capsule fs-2 text-white"></i>
                         </div>
                     </div>
                     
-                    <div class="mt-4 pt-3 d-flex justify-content-between align-items-end" style="border-top: 1px solid rgba(255, 255, 255, 0.15);">
+                    <div class="mt-4 pt-3 d-flex justify-content-between align-items-end" data-style="border-top: 1px solid rgba(255, 255, 255, 0.15);">
                         <div>
-                            <div class="text-white text-opacity-75 small mb-1" style="font-size: 0.75rem; letter-spacing: 0.05em; fw-bold">TOTAL VOUCHERS</div>
+                            <div class="text-white text-opacity-75 small mb-1" data-style="font-size: 0.75rem; letter-spacing: 0.05em; fw-bold">TOTAL VOUCHERS</div>
                             <div class="fw-800 text-white fs-4">{{ count_health }}</div>
                         </div>
                         <div class="text-end">
-                            <div class="text-white text-opacity-75 small mb-1" style="font-size: 0.75rem; letter-spacing: 0.05em; fw-bold">TOTAL VALUE</div>
+                            <div class="text-white text-opacity-75 small mb-1" data-style="font-size: 0.75rem; letter-spacing: 0.05em; fw-bold">TOTAL VALUE</div>
                             <div class="fw-800 text-white fs-3">₹{{ "%.2f"|format(sum_health) }}</div>
                         </div>
                     </div>
                 </div>
                 <!-- Glowing background accent -->
-                <div class="position-absolute rounded-circle pointer-events-none" style="background: rgba(255, 255, 255, 0.05); width: 200px; height: 200px; bottom: -80px; right: -80px; filter: blur(45px);"></div>
+                <div class="position-absolute rounded-circle pointer-events-none" data-style="background: rgba(255, 255, 255, 0.05); width: 200px; height: 200px; bottom: -80px; right: -80px; filter: blur(45px);"></div>
             </div>
         </a>
     </div>
@@ -119,32 +119,32 @@
     <div class="col-md-6">
         <a href="{{ url_for('voucher_register', v_type='other') }}" class="text-decoration-none card-hover-trigger">
             <div class="card border-0 rounded-4 shadow h-100 overflow-hidden position-relative transition-all" 
-                 style="background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); min-height: 220px;">
-                <div class="card-body p-4 d-flex flex-column justify-content-between position-relative" style="z-index: 2;">
+                 data-style="background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); min-height: 220px;">
+                <div class="card-body p-4 d-flex flex-column justify-content-between position-relative" data-style="z-index: 2;">
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
-                            <span class="badge rounded-pill px-3 py-2 small fw-bold mb-3" style="background: rgba(255, 255, 255, 0.15); color: #ffffff;">Capital Asset Voucher</span>
+                            <span class="badge rounded-pill px-3 py-2 small fw-bold mb-3" data-style="background: rgba(255, 255, 255, 0.15); color: #ffffff;">Capital Asset Voucher</span>
                             <h3 class="fw-800 text-white mb-1 tracking-tight">OTHER VOUCHERS</h3>
                             <p class="text-white text-opacity-80 small mb-0">Record all farm machinery, equipment, tools, and infrastructural assets.</p>
                         </div>
-                        <div class="icon-box rounded-4 p-3 d-inline-flex shadow-sm" style="background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.25);">
+                        <div class="icon-box rounded-4 p-3 d-inline-flex shadow-sm" data-style="background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.25);">
                             <i class="bi bi-cpu-fill fs-2 text-white"></i>
                         </div>
                     </div>
                     
-                    <div class="mt-4 pt-3 d-flex justify-content-between align-items-end" style="border-top: 1px solid rgba(255, 255, 255, 0.15);">
+                    <div class="mt-4 pt-3 d-flex justify-content-between align-items-end" data-style="border-top: 1px solid rgba(255, 255, 255, 0.15);">
                         <div>
-                            <div class="text-white text-opacity-75 small mb-1" style="font-size: 0.75rem; letter-spacing: 0.05em; fw-bold">TOTAL VOUCHERS</div>
+                            <div class="text-white text-opacity-75 small mb-1" data-style="font-size: 0.75rem; letter-spacing: 0.05em; fw-bold">TOTAL VOUCHERS</div>
                             <div class="fw-800 text-white fs-4">{{ count_other }}</div>
                         </div>
                         <div class="text-end">
-                            <div class="text-white text-opacity-75 small mb-1" style="font-size: 0.75rem; letter-spacing: 0.05em; fw-bold">TOTAL VALUE</div>
+                            <div class="text-white text-opacity-75 small mb-1" data-style="font-size: 0.75rem; letter-spacing: 0.05em; fw-bold">TOTAL VALUE</div>
                             <div class="fw-800 text-white fs-3">₹{{ "%.2f"|format(sum_other) }}</div>
                         </div>
                     </div>
                 </div>
                 <!-- Glowing background accent -->
-                <div class="position-absolute rounded-circle pointer-events-none" style="background: rgba(255, 255, 255, 0.05); width: 200px; height: 200px; bottom: -80px; right: -80px; filter: blur(45px);"></div>
+                <div class="position-absolute rounded-circle pointer-events-none" data-style="background: rgba(255, 255, 255, 0.05); width: 200px; height: 200px; bottom: -80px; right: -80px; filter: blur(45px);"></div>
             </div>
         </a>
     </div>

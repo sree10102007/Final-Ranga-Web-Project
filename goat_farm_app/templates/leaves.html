@@ -119,12 +119,12 @@
                             </td>
                             <td>
                                 {% if rec.status == 'Pending' %}
-                                <form action="{{ url_for('leave_status', leave_id=rec.id, status='Approved') }}" method="POST" style="display:inline;">
+                                <form action="{{ url_for('leave_status', leave_id=rec.id, status='Approved') }}" method="POST" data-style="display:inline;">
                                     <button type="submit" class="btn btn-sm btn-success" title="Approve">
                                         <i class="fas fa-check"></i>
                                     </button>
                                 </form>
-                                <form action="{{ url_for('leave_status', leave_id=rec.id, status='Rejected') }}" method="POST" style="display:inline;">
+                                <form action="{{ url_for('leave_status', leave_id=rec.id, status='Rejected') }}" method="POST" data-style="display:inline;">
                                     <button type="submit" class="btn btn-sm btn-danger" title="Reject">
                                         <i class="fas fa-times"></i>
                                     </button>

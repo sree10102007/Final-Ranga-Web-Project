@@ -53,7 +53,7 @@
                             <a href="{{ url_for('generate_invoice', sales_id=r.id) }}" class="btn btn-sm btn-outline-primary me-1" title="View Invoice">
                                 <i class="bi bi-file-earmark-pdf"></i> Invoice
                             </a>
-                            <form method="POST" action="{{ url_for('sales_delete', id=r['id']) }}" style="display:inline;" onclick="return confirm('Delete this sale record?');">
+                            <form method="POST" action="{{ url_for('sales_delete', id=r['id']) }}" data-style="display:inline;" data-confirm="Delete this sale record?">
                                 <button type="submit" class="btn btn-sm btn-danger" title="Delete"><i class="bi bi-trash"></i></button>
                             </form>
                         </td>

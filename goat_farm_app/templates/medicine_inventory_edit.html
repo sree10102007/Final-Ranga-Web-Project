@@ -34,21 +34,21 @@
                         <div class="col-md-4">
                             <label class="form-label small text-muted fw-bold">Opening Stock</label>
                             <div class="input-group">
-                                <input type="number" step="0.01" class="form-control bg-light" name="opening_stock" id="opening_stock" value="{{ record['opening_stock'] }}" oninput="calculateClosing()">
+                                <input type="number" step="0.01" class="form-control bg-light" name="opening_stock" id="opening_stock" value="{{ record['opening_stock'] }}" data-oninput="calculateClosing()">
                                 <span class="input-group-text bg-light border text-muted">{{ record['unit'] or 'Doses' }}</span>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label small text-danger fw-bold">Consumed Quantity (-)</label>
                             <div class="input-group">
-                                <input type="number" step="0.01" class="form-control border-danger" name="used_qty" id="used_qty" value="{{ record['used_qty'] }}" oninput="calculateClosing()">
+                                <input type="number" step="0.01" class="form-control border-danger" name="used_qty" id="used_qty" value="{{ record['used_qty'] }}" data-oninput="calculateClosing()">
                                 <span class="input-group-text bg-light border text-muted">{{ record['unit'] or 'Doses' }}</span>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label small text-warning fw-bold">Wastage Quantity (-)</label>
                             <div class="input-group">
-                                <input type="number" step="0.01" class="form-control border-warning" name="wastage_qty" id="wastage_qty" value="{{ record['wastage_qty'] }}" oninput="calculateClosing()">
+                                <input type="number" step="0.01" class="form-control border-warning" name="wastage_qty" id="wastage_qty" value="{{ record['wastage_qty'] }}" data-oninput="calculateClosing()">
                                 <span class="input-group-text bg-light border text-muted">{{ record['unit'] or 'Doses' }}</span>
                             </div>
                         </div>
@@ -103,7 +103,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <form method="POST" action="{{ url_for('medicine_inventory_delete', id=record['id']) }}" style="display:inline;">
+                <form method="POST" action="{{ url_for('medicine_inventory_delete', id=record['id']) }}" data-style="display:inline;">
                     <button type="submit" class="btn btn-danger">Delete Record</button>
                 </form>
             </div>
@@ -111,7 +111,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="{{ csp_nonce }}">
     function calculateClosing() {
         const opening = parseFloat(document.getElementById('opening_stock').value || 0);
         const used = parseFloat(document.getElementById('used_qty').value || 0);

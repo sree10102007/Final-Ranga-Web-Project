@@ -21,7 +21,7 @@
                     <div class="mb-3"><label>Password</label><input type="password" name="password" id="password" class="form-control" required></div>
                     <div class="mb-3"><label>Confirm Password</label><input type="password" name="confirm_password" id="confirm_password" class="form-control" required></div>
                     <div class="mb-3 form-check">
-                        <input type="checkbox" class="form-check-input" id="show_password" onclick="togglePasswordVisibility()">
+                        <input type="checkbox" class="form-check-input" id="show_password" data-onclick="togglePasswordVisibility()">
                         <label class="form-check-label" for="show_password">Show Password</label>
                     </div>
                     {% if is_admin %}
@@ -33,7 +33,7 @@
                     <button class="btn btn-primary w-100 mb-3" type="submit">Register</button>
                     <div class="text-center"><a href="{{ url_for('auth.login') }}">Back to Login</a></div>
                 </form>
-                <script>
+                <script nonce="{{ csp_nonce }}">
                 function togglePasswordVisibility() {
                     var p = document.getElementById("password");
                     var cp = document.getElementById("confirm_password");

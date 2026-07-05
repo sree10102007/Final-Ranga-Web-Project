@@ -21,7 +21,7 @@
             <div class="card border-0 shadow-sm rounded-4 bg-success text-white p-3">
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
-                        <span class="text-white-50 small d-block text-uppercase fw-semibold" style="letter-spacing: 0.05em;">Total Spent (Filtered)</span>
+                        <span class="text-white-50 small d-block text-uppercase fw-semibold" data-style="letter-spacing: 0.05em;">Total Spent (Filtered)</span>
                         {% set total_amt = namespace(value=0.0) %}
                         {% for r in records %}
                             {% set total_amt.value = total_amt.value + r['amount'] %}
@@ -38,7 +38,7 @@
             <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
-                        <span class="text-muted small d-block text-uppercase fw-semibold" style="letter-spacing: 0.05em;">Total Transactions</span>
+                        <span class="text-muted small d-block text-uppercase fw-semibold" data-style="letter-spacing: 0.05em;">Total Transactions</span>
                         <h2 class="fw-800 text-dark mb-0 mt-1">{{ records|length }}</h2>
                     </div>
                     <div class="bg-success-subtle text-success p-3 rounded-3">
@@ -96,17 +96,17 @@
             <table class="table table-hover align-middle mb-0">
                 <thead class="bg-success text-white">
                     <tr>
-                        <th class="py-3 px-3 text-center" style="width: 60px;">S.No</th>
-                        <th class="py-3 px-3" style="min-width: 100px;">Date</th>
-                        <th class="py-3 px-3" style="min-width: 150px;">Particulars</th>
-                        <th class="py-3 px-3" style="min-width: 120px;">Supplier</th>
-                        <th class="py-3 px-3" style="min-width: 120px;">Bill Details</th>
-                        <th class="py-3 px-3 text-center" style="min-width: 80px;">Qty & Unit</th>
-                        <th class="py-3 px-3" style="min-width: 120px;">Ledger Group</th>
-                        <th class="py-3 px-3" style="min-width: 180px;">Notes / Description</th>
-                        <th class="py-3 px-3 text-center" style="min-width: 120px;">Attachment</th>
-                        <th class="py-3 px-3 text-end" style="min-width: 120px; width: 130px;">Amount Spent</th>
-                        <th class="py-3 px-3 text-center" style="width: 110px;">Actions</th>
+                        <th class="py-3 px-3 text-center" data-style="width: 60px;">S.No</th>
+                        <th class="py-3 px-3" data-style="min-width: 100px;">Date</th>
+                        <th class="py-3 px-3" data-style="min-width: 150px;">Particulars</th>
+                        <th class="py-3 px-3" data-style="min-width: 120px;">Supplier</th>
+                        <th class="py-3 px-3" data-style="min-width: 120px;">Bill Details</th>
+                        <th class="py-3 px-3 text-center" data-style="min-width: 80px;">Qty & Unit</th>
+                        <th class="py-3 px-3" data-style="min-width: 120px;">Ledger Group</th>
+                        <th class="py-3 px-3" data-style="min-width: 180px;">Notes / Description</th>
+                        <th class="py-3 px-3 text-center" data-style="min-width: 120px;">Attachment</th>
+                        <th class="py-3 px-3 text-end" data-style="min-width: 120px; width: 130px;">Amount Spent</th>
+                        <th class="py-3 px-3 text-center" data-style="width: 110px;">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -134,16 +134,16 @@
                             {% endif %}
                         </td>
                         <td class="py-3 px-3">
-                            <span class="badge bg-secondary-subtle text-secondary px-2 py-1 rounded small fw-bold" style="font-size: 0.75rem;">
+                            <span class="badge bg-secondary-subtle text-secondary px-2 py-1 rounded small fw-bold" data-style="font-size: 0.75rem;">
                                 {{ r['pnl_category'] or 'Direct Expenses' }}
                             </span>
                         </td>
-                        <td class="py-3 px-3 text-muted small" style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ r['notes'] or r['description'] or '' }}">
+                        <td class="py-3 px-3 text-muted small" data-style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ r['notes'] or r['description'] or '' }}">
                             {{ r['notes'] or r['description'] or 'N/A' }}
                         </td>
                         <td class="py-3 px-3 text-center">
                             {% if r['bill_file'] %}
-                            <a href="{{ r['bill_file'] }}" target="_blank" class="btn btn-outline-success btn-sm rounded-pill px-3 py-1 text-nowrap" style="font-size: 0.75rem;">
+                            <a href="{{ r['bill_file'] }}" target="_blank" class="btn btn-outline-success btn-sm rounded-pill px-3 py-1 text-nowrap" data-style="font-size: 0.75rem;">
                                 <i class="bi bi-file-earmark-pdf me-1"></i> View Bill
                             </a>
                             {% else %}
@@ -153,12 +153,12 @@
                         <td class="py-3 px-3 text-end fw-bold text-dark small">₹{{ "%.2f"|format(r['amount']) }}</td>
                         <td class="py-3 px-3 text-center">
                             <div class="d-inline-flex gap-1">
-                                <a href="{{ url_for('expense_edit', expense_id=r['id']) }}" class="btn btn-outline-success btn-sm rounded-circle p-1" style="width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center;" title="Alter/Edit Record">
-                                    <i class="bi bi-pencil" style="font-size: 0.8rem;"></i>
+                                <a href="{{ url_for('expense_edit', expense_id=r['id']) }}" class="btn btn-outline-success btn-sm rounded-circle p-1" data-style="width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center;" title="Alter/Edit Record">
+                                    <i class="bi bi-pencil" data-style="font-size: 0.8rem;"></i>
                                 </a>
-                                <form action="{{ url_for('expense_delete', expense_id=r['id']) }}" method="post" class="d-inline m-0" onsubmit="return confirm('Are you sure you want to delete this expense record?');">
-                                    <button type="submit" class="btn btn-outline-danger btn-sm rounded-circle p-1" style="width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center;" title="Delete Record">
-                                        <i class="bi bi-trash" style="font-size: 0.8rem;"></i>
+                                <form action="{{ url_for('expense_delete', expense_id=r['id']) }}" method="post" class="d-inline m-0" data-confirm="Are you sure you want to delete this expense record?">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm rounded-circle p-1" data-style="width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center;" title="Delete Record">
+                                        <i class="bi bi-trash" data-style="font-size: 0.8rem;"></i>
                                     </button>
                                 </form>
                             </div>

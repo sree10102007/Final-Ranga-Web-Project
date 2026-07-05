@@ -76,7 +76,7 @@
                         <span class="fw-bold text-dark d-block mb-1">
                             {{ feed_name }}
                             {% if stock.alert_level > 0 %}
-                                <span class="badge bg-danger bg-opacity-10 text-danger ms-1 small fw-bold font-monospace" style="font-size: 0.7rem;"><i class="bi bi-bell-fill me-1"></i>Min: {{ "%.1f"|format(stock.alert_level) }}</span>
+                                <span class="badge bg-danger bg-opacity-10 text-danger ms-1 small fw-bold font-monospace" data-style="font-size: 0.7rem;"><i class="bi bi-bell-fill me-1"></i>Min: {{ "%.1f"|format(stock.alert_level) }}</span>
                             {% endif %}
                         </span>
                         <span class="fs-4 fw-bold text-success">{{ "%.2f"|format(stock.closing_stock) }} <small class="fs-6 text-muted">{{ stock.unit }}</small></span>
@@ -85,9 +85,9 @@
                         {% if stock.closing_stock <= 0 %}
                             <span class="badge-no-stock">No Stock</span>
                         {% elif stock.alert_level > 0 and stock.closing_stock <= stock.alert_level %}
-                            <span class="badge bg-warning text-dark px-2.5 py-1.5 rounded-pill small fw-bold" style="font-size: 0.75rem;"><i class="bi bi-exclamation-triangle-fill me-1"></i>Low</span>
+                            <span class="badge bg-warning text-dark px-2.5 py-1.5 rounded-pill small fw-bold" data-style="font-size: 0.75rem;"><i class="bi bi-exclamation-triangle-fill me-1"></i>Low</span>
                         {% endif %}
-                        <button class="btn btn-sm btn-outline-secondary rounded-pill px-2.5" title="Set Reminder Threshold" onclick="openLimitModal('feed', '{{ feed_name }}', '{{ stock.alert_level }}', '{{ stock.unit }}')"><i class="bi bi-bell"></i></button>
+                        <button class="btn btn-sm btn-outline-secondary rounded-pill px-2.5" title="Set Reminder Threshold" data-onclick="openLimitModal('feed', '{{ feed_name }}', '{{ stock.alert_level }}', '{{ stock.unit }}')"><i class="bi bi-bell"></i></button>
                         <a href="{{ url_for('voucher_add', v_type='feed', feed_name=feed_name, unit=stock.unit) }}" class="btn btn-sm btn-success rounded-pill px-3">Buy</a>
                     </div>
                 </div>
@@ -113,7 +113,7 @@
                         <span class="fw-bold text-dark d-block mb-1">
                             {{ med_name }}
                             {% if stock.alert_level > 0 %}
-                                <span class="badge bg-danger bg-opacity-10 text-danger ms-1 small fw-bold font-monospace" style="font-size: 0.7rem;"><i class="bi bi-bell-fill me-1"></i>Min: {{ "%.1f"|format(stock.alert_level) }}</span>
+                                <span class="badge bg-danger bg-opacity-10 text-danger ms-1 small fw-bold font-monospace" data-style="font-size: 0.7rem;"><i class="bi bi-bell-fill me-1"></i>Min: {{ "%.1f"|format(stock.alert_level) }}</span>
                             {% endif %}
                         </span>
                         <span class="fs-4 fw-bold text-primary">{{ "%.2f"|format(stock.closing_stock) }} <small class="fs-6 text-muted">{{ stock.unit }}</small></span>
@@ -122,9 +122,9 @@
                         {% if stock.closing_stock <= 0 %}
                             <span class="badge-no-stock">No Stock</span>
                         {% elif stock.alert_level > 0 and stock.closing_stock <= stock.alert_level %}
-                            <span class="badge bg-warning text-dark px-2.5 py-1.5 rounded-pill small fw-bold" style="font-size: 0.75rem;"><i class="bi bi-exclamation-triangle-fill me-1"></i>Low</span>
+                            <span class="badge bg-warning text-dark px-2.5 py-1.5 rounded-pill small fw-bold" data-style="font-size: 0.75rem;"><i class="bi bi-exclamation-triangle-fill me-1"></i>Low</span>
                         {% endif %}
-                        <button class="btn btn-sm btn-outline-secondary rounded-pill px-2.5" title="Set Reminder Threshold" onclick="openLimitModal('medicine', '{{ med_name }}', '{{ stock.alert_level }}', '{{ stock.unit }}')"><i class="bi bi-bell"></i></button>
+                        <button class="btn btn-sm btn-outline-secondary rounded-pill px-2.5" title="Set Reminder Threshold" data-onclick="openLimitModal('medicine', '{{ med_name }}', '{{ stock.alert_level }}', '{{ stock.unit }}')"><i class="bi bi-bell"></i></button>
                         <a href="{{ url_for('voucher_add', v_type='health', sub_type='medicine', health_name=med_name, dose_unit=stock.unit) }}" class="btn btn-sm btn-primary rounded-pill px-3">Buy</a>
                     </div>
                 </div>
@@ -150,7 +150,7 @@
                         <span class="fw-bold text-dark d-block mb-1">
                             {{ vac_name }}
                             {% if stock.alert_level > 0 %}
-                                <span class="badge bg-danger bg-opacity-10 text-danger ms-1 small fw-bold font-monospace" style="font-size: 0.7rem;"><i class="bi bi-bell-fill me-1"></i>Min: {{ "%.1f"|format(stock.alert_level) }}</span>
+                                <span class="badge bg-danger bg-opacity-10 text-danger ms-1 small fw-bold font-monospace" data-style="font-size: 0.7rem;"><i class="bi bi-bell-fill me-1"></i>Min: {{ "%.1f"|format(stock.alert_level) }}</span>
                             {% endif %}
                         </span>
                         <span class="fs-4 fw-bold text-info">{{ "%.2f"|format(stock.closing_stock) }} <small class="fs-6 text-muted">{{ stock.unit }}</small></span>
@@ -159,9 +159,9 @@
                         {% if stock.closing_stock <= 0 %}
                             <span class="badge-no-stock">No Stock</span>
                         {% elif stock.alert_level > 0 and stock.closing_stock <= stock.alert_level %}
-                            <span class="badge bg-warning text-dark px-2.5 py-1.5 rounded-pill small fw-bold" style="font-size: 0.75rem;"><i class="bi bi-exclamation-triangle-fill me-1"></i>Low</span>
+                            <span class="badge bg-warning text-dark px-2.5 py-1.5 rounded-pill small fw-bold" data-style="font-size: 0.75rem;"><i class="bi bi-exclamation-triangle-fill me-1"></i>Low</span>
                         {% endif %}
-                        <button class="btn btn-sm btn-outline-secondary rounded-pill px-2.5" title="Set Reminder Threshold" onclick="openLimitModal('vaccine', '{{ vac_name }}', '{{ stock.alert_level }}', '{{ stock.unit }}')"><i class="bi bi-bell"></i></button>
+                        <button class="btn btn-sm btn-outline-secondary rounded-pill px-2.5" title="Set Reminder Threshold" data-onclick="openLimitModal('vaccine', '{{ vac_name }}', '{{ stock.alert_level }}', '{{ stock.unit }}')"><i class="bi bi-bell"></i></button>
                         <a href="{{ url_for('voucher_add', v_type='health', sub_type='vaccine', health_name=vac_name, unit=stock.unit) }}" class="btn btn-sm btn-info text-white rounded-pill px-3">Buy</a>
                     </div>
                 </div>
@@ -187,7 +187,7 @@
                     
                     <div class="mb-3">
                         <label class="form-label small text-muted fw-bold">Stock Item Type</label>
-                        <select name="item_type" id="buy_item_type" class="form-select" onchange="updateBuyUnit()" required>
+                        <select name="item_type" id="buy_item_type" class="form-select" data-onchange="updateBuyUnit()" required>
                             <option value="feed">Feed Stock (KG)</option>
                             <option value="medicine">Medicine Stock (Doses)</option>
                             <option value="vaccine">Vaccine Stock (Doses)</option>
@@ -203,16 +203,16 @@
                         <label class="form-label small text-muted fw-bold">Quantity & Unit</label>
                         <div class="input-group">
                             <input type="number" step="0.01" name="quantity" class="form-control" placeholder="0.00" required>
-                            <select class="form-select bg-light border" id="buy_unit_select" style="max-width: 140px;" onchange="handleUnitChange()">
+                            <select class="form-select bg-light border" id="buy_unit_select" data-style="max-width: 140px;" data-onchange="handleUnitChange()">
                                 <!-- Dynamic options loaded by populateUnits() -->
                             </select>
                             <input type="hidden" name="unit" id="buy_unit_hidden" value="KG">
                         </div>
                     </div>
                     
-                    <div class="mb-3" id="custom_unit_div" style="display: none;">
+                    <div class="mb-3" id="custom_unit_div" data-style="display: none;">
                         <label class="form-label small text-muted fw-bold">Specify Custom Unit</label>
-                        <input type="text" id="custom_unit_input" class="form-control" placeholder="e.g. Boxes, Bottles, ml" oninput="handleCustomUnitInput()">
+                        <input type="text" id="custom_unit_input" class="form-control" placeholder="e.g. Boxes, Bottles, ml" data-oninput="handleCustomUnitInput()">
                     </div>
                     
                     <div class="mb-3">
@@ -235,7 +235,7 @@
 
                     <div class="mb-3 border-top pt-2">
                         <label class="form-label small text-muted fw-bold"><i class="bi bi-bell-fill text-warning me-1"></i>Reminder Threshold Limit (Optional)</label>
-                        <p class="text-muted small" style="font-size: 0.8rem;">Pop up an alert when stock reaches or falls below this level.</p>
+                        <p class="text-muted small" data-style="font-size: 0.8rem;">Pop up an alert when stock reaches or falls below this level.</p>
                         <input type="number" step="0.01" name="alert_limit" class="form-control" placeholder="Leave empty to keep current threshold">
                     </div>
 
@@ -280,7 +280,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="{{ csp_nonce }}">
     function getTodayString() {
         const d = new Date();
         const year = d.getFullYear();

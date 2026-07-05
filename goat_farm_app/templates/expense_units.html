@@ -4,11 +4,11 @@
 {% block content %}
 <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
     <div class="d-flex align-items-center gap-3">
-        <a href="{{ url_for('expenses_master') }}" class="btn btn-outline-secondary rounded-circle d-flex align-items-center justify-content-center" style="width:40px;height:40px;padding:0;">
+        <a href="{{ url_for('expenses_master') }}" class="btn btn-outline-secondary rounded-circle d-flex align-items-center justify-content-center" data-style="width:40px;height:40px;padding:0;">
             <i class="bi bi-arrow-left fs-5"></i>
         </a>
         <div>
-            <h2 class="fw-bold mb-0" style="color:#0f766e;">Units of Measure</h2>
+            <h2 class="fw-bold mb-0" data-style="color:#0f766e;">Units of Measure</h2>
             <p class="text-muted small mb-0">Configure measurement units used in voucher quantity fields</p>
         </div>
     </div>
@@ -18,7 +18,7 @@
     <!-- Add Unit Form -->
     <div class="col-lg-4">
         <div class="card border-0 shadow-sm rounded-4">
-            <div class="card-header border-0 rounded-top-4 p-4" style="background:linear-gradient(135deg,#0f766e,#2dd4bf);">
+            <div class="card-header border-0 rounded-top-4 p-4" data-style="background:linear-gradient(135deg,#0f766e,#2dd4bf);">
                 <h6 class="fw-bold mb-0 text-white"><i class="bi bi-plus-circle me-2"></i>Add New Unit</h6>
             </div>
             <div class="card-body p-4">
@@ -32,7 +32,7 @@
                         <label class="form-label small fw-bold text-dark">Symbol / Abbreviation</label>
                         <input type="text" name="unit_symbol" class="form-control rounded-3" placeholder="e.g. KG, Nos, L">
                     </div>
-                    <button type="submit" class="btn w-100 rounded-pill fw-bold shadow-sm text-white" style="background:#0f766e;">
+                    <button type="submit" class="btn w-100 rounded-pill fw-bold shadow-sm text-white" data-style="background:#0f766e;">
                         <i class="bi bi-plus-circle me-2"></i>Add Unit
                     </button>
                 </form>
@@ -44,7 +44,7 @@
     <div class="col-lg-8">
         <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
             <div class="card-header bg-white border-bottom p-4">
-                <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-rulers me-2" style="color:#0f766e;"></i>All Units ({{ units|length }})</h6>
+                <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-rulers me-2" data-style="color:#0f766e;"></i>All Units ({{ units|length }})</h6>
             </div>
             <div class="row g-0">
                 {% for u in units %}
@@ -52,19 +52,19 @@
                     <div class="d-flex align-items-center justify-content-between p-3">
                         <div class="d-flex align-items-center gap-3">
                             <div class="rounded-3 fw-800 text-center d-flex align-items-center justify-content-center"
-                                 style="width:44px;height:44px;background:#f0fdfa;color:#0f766e;font-size:0.85rem;font-weight:800;">
+                                 data-style="width:44px;height:44px;background:#f0fdfa;color:#0f766e;font-size:0.85rem;font-weight:800;">
                                 {{ u.unit_symbol or u.unit_name[:3] }}
                             </div>
                             <div>
                                 <div class="fw-semibold text-dark small">{{ u.unit_name }}</div>
                                 {% if u.unit_symbol and u.unit_symbol != u.unit_name %}
-                                <div class="text-muted" style="font-size:0.78rem;">{{ u.unit_symbol }}</div>
+                                <div class="text-muted" data-style="font-size:0.78rem;">{{ u.unit_symbol }}</div>
                                 {% endif %}
                             </div>
                         </div>
-                        <form action="{{ url_for('expense_unit_delete', uid=u.id) }}" method="post" class="d-inline" onsubmit="return confirm('Delete this unit?');">
-                            <button type="submit" class="btn btn-outline-danger btn-sm rounded-circle p-1" style="width:30px;height:30px;" title="Delete">
-                                <i class="bi bi-trash" style="font-size:0.75rem;"></i>
+                        <form action="{{ url_for('expense_unit_delete', uid=u.id) }}" method="post" class="d-inline" data-confirm="Delete this unit?">
+                            <button type="submit" class="btn btn-outline-danger btn-sm rounded-circle p-1" data-style="width:30px;height:30px;" title="Delete">
+                                <i class="bi bi-trash" data-style="font-size:0.75rem;"></i>
                             </button>
                         </form>
                     </div>

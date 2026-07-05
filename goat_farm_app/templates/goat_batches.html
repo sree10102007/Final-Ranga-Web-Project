@@ -68,7 +68,7 @@
     <!-- Summary Stats Row -->
     <div class="row g-4 mb-4">
         <div class="col-md-3">
-            <div class="card border-0 shadow-sm rounded-4" style="background: linear-gradient(135deg, #e8f5e9, #c8e6c9);">
+            <div class="card border-0 shadow-sm rounded-4" data-style="background: linear-gradient(135deg, #e8f5e9, #c8e6c9);">
                 <div class="card-body p-4 text-center">
                     <h6 class="text-success fw-bold text-uppercase mb-2">Batch 1 (0 - 6 Months)</h6>
                     <h2 class="fw-800 text-success-dark mb-0">{{ batch_0_6m|length }}</h2>
@@ -76,7 +76,7 @@
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card border-0 shadow-sm rounded-4" style="background: linear-gradient(135deg, #e3f2fd, #bbdefb);">
+            <div class="card border-0 shadow-sm rounded-4" data-style="background: linear-gradient(135deg, #e3f2fd, #bbdefb);">
                 <div class="card-body p-4 text-center">
                     <h6 class="text-primary fw-bold text-uppercase mb-2">Batch 2 (6 Months - 1 Year)</h6>
                     <h2 class="fw-800 text-primary-dark mb-0">{{ batch_6m_1y|length }}</h2>
@@ -84,7 +84,7 @@
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card border-0 shadow-sm rounded-4" style="background: linear-gradient(135deg, #fff3e0, #ffe0b2);">
+            <div class="card border-0 shadow-sm rounded-4" data-style="background: linear-gradient(135deg, #fff3e0, #ffe0b2);">
                 <div class="card-body p-4 text-center">
                     <h6 class="text-warning fw-bold text-uppercase mb-2">Batch 3 (1 Year - 2 Years)</h6>
                     <h2 class="fw-800 text-warning-dark mb-0">{{ batch_1y_2y|length }}</h2>
@@ -92,10 +92,10 @@
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card border-0 shadow-sm rounded-4" style="background: linear-gradient(135deg, #f3e5f5, #e1bee7);">
+            <div class="card border-0 shadow-sm rounded-4" data-style="background: linear-gradient(135deg, #f3e5f5, #e1bee7);">
                 <div class="card-body p-4 text-center">
-                    <h6 class="text-purple fw-bold text-uppercase mb-2" style="color: #6a1b9a;">Batch 4 (Above 2 Years)</h6>
-                    <h2 class="fw-800 mb-0" style="color: #4a148c;">{{ batch_above_2y|length }}</h2>
+                    <h6 class="text-purple fw-bold text-uppercase mb-2" data-style="color: #6a1b9a;">Batch 4 (Above 2 Years)</h6>
+                    <h2 class="fw-800 mb-0" data-style="color: #4a148c;">{{ batch_above_2y|length }}</h2>
                 </div>
             </div>
         </div>
@@ -194,10 +194,10 @@
                         <td><span class="fw-bold text-muted"><i class="bi bi-calendar-event me-1"></i>{{ rem.reminder_date }}</span></td>
                         <td class="text-end">
                             <div class="d-flex justify-content-end gap-2">
-                                <button class="btn btn-sm btn-primary rounded-pill px-3 shadow-sm" onclick="completeReminder({{ rem.id }}, this)">
+                                <button class="btn btn-sm btn-primary rounded-pill px-3 shadow-sm" data-onclick="completeReminder({{ rem.id }}, this)">
                                     <i class="bi bi-check2-circle me-1"></i>Mark Done
                                 </button>
-                                <form action="{{ url_for('delete_batch_reminder', id=rem.id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this reminder?');" class="d-inline">
+                                <form action="{{ url_for('delete_batch_reminder', id=rem.id) }}" method="POST" data-confirm="Are you sure you want to delete this reminder?" class="d-inline">
                                     <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3">
                                         <i class="bi bi-trash me-1"></i>Delete
                                     </button>
@@ -208,7 +208,7 @@
                     {% else %}
                     <tr>
                         <td colspan="5" class="text-center py-5 text-muted">
-                            <i class="bi bi-calendar-check d-block mb-2" style="font-size: 2.5rem; opacity: 0.3;"></i>
+                            <i class="bi bi-calendar-check d-block mb-2" data-style="font-size: 2.5rem; opacity: 0.3;"></i>
                             No active reminders scheduled for any age batch.
                         </td>
                     </tr>
@@ -266,7 +266,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="{{ csp_nonce }}">
     document.addEventListener("DOMContentLoaded", function() {
         const today = new Date();
         const yyyy = today.getFullYear();
