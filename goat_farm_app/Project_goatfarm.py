@@ -1095,7 +1095,7 @@ def init_db():
             if not existing_admin:
                 try:
                     conn.execute(
-                        "INSERT INTO users (username, password, is_admin) VALUES (?, ?, 1)",
+                        "INSERT INTO users (username, password, is_admin, login_attempts, locked_until) VALUES (?, ?, 1, 0, NULL)",
                         ("admin", hashed_password)
                     )
                     app.logger.info("Admin user created successfully.")

@@ -69,7 +69,7 @@
                             {% endif %}
                         </td>
                         <td class="py-3">
-                            {% if u.locked_until %}
+                            {% if u.is_locked %}
                             <span class="badge bg-warning-subtle text-warning rounded-pill px-3 py-1.5 fw-semibold fs-7 d-inline-flex align-items-center gap-1">
                                 <i class="bi bi-lock-fill"></i> Locked
                             </span>
@@ -81,7 +81,7 @@
                         </td>
                         <td class="px-4 py-3 text-end">
                             <div class="d-flex justify-content-end gap-2">
-                                {% if u.locked_until or u.login_attempts > 0 %}
+                                {% if u.is_locked or u.login_attempts > 0 %}
                                 <form action="{{ url_for('auth.unlock_user', user_id=u.id) }}" method="POST" class="d-inline">
                                     <button type="submit" class="btn btn-outline-warning btn-sm rounded-pill px-3">
                                         <i class="bi bi-unlock-fill me-1"></i> Unlock

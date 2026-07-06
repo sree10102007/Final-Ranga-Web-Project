@@ -31,12 +31,21 @@ def login():
             # Check lockout
             now = datetime.now()
             if user['locked_until']:
-                locked_until = datetime.fromisoformat(user['locked_until']) if isinstance(user['locked_until'], str) else user['locked_until']
+                locked_until = user['locked_until']
+                if isinstance(locked_until, str):
+                    locked_until = datetime.fromisoformat(locked_until)
+                # Strip timezone info for comparison if present
+                if hasattr(locked_until, 'tzinfo') and locked_until.tzinfo is not None:
+                    locked_until = locked_until.replace(tzinfo=None)
                 if locked_until > now:
                     remaining = int((locked_until - now).total_seconds())
                     log_security_event('LOGIN_LOCKED', f"Locked user {username} attempted login", username=username)
                     flash(f'Account is locked due to too many failed attempts. Try again in {remaining} seconds.', 'danger')
                     return render_template('login.html')
+                else:
+                    # Lock has expired — auto-clear it so the account is no longer blocked
+                    db.execute('UPDATE users SET login_attempts = 0, locked_until = NULL WHERE id = ?', (user['id'],))
+                    db.commit()
             
             if check_password_hash(user['password'], password):
                 # Reset login attempts
@@ -149,8 +158,13 @@ def register():
             return redirect(url_for('auth.register'))
             
         password_hash = generate_password_hash(password)
-        db.execute('INSERT INTO users (username, password, password_history, is_admin) VALUES (?, ?, ?, ?)',
-                   (username, password_hash, password_hash, is_admin_flag))
+        # Explicitly set login_attempts=0 and locked_until=NULL so newly created
+        # accounts are never accidentally locked from the start.
+        db.execute(
+            'INSERT INTO users (username, password, password_history, is_admin, login_attempts, locked_until) '
+            'VALUES (?, ?, ?, ?, 0, NULL)',
+            (username, password_hash, password_hash, is_admin_flag)
+        )
         db.commit()
         
         log_security_event('USER_REGISTRATION', f"New user {username} (admin={is_admin_flag}) successfully registered by admin {session.get('username')}", username=username)
@@ -170,8 +184,37 @@ def manage_users():
         flash('Administrator privileges required.', 'danger')
         return redirect(url_for('dashboard'))
         
-    users = db.execute('SELECT id, username, is_admin, mfa_enabled, login_attempts, locked_until FROM users ORDER BY id').fetchall()
-    return render_template('manage_users.html', users=users)
+    raw_users = db.execute('SELECT id, username, is_admin, mfa_enabled, login_attempts, locked_until FROM users ORDER BY id').fetchall()
+    
+    # Compute a server-side is_locked flag so the template never mistakes an
+    # expired lock timestamp for an active lock.
+    now = datetime.now()
+    users_with_status = []
+    for u in raw_users:
+        locked_until = u['locked_until']
+        is_locked = False
+        if locked_until:
+            if isinstance(locked_until, str):
+                locked_until = datetime.fromisoformat(locked_until)
+            if hasattr(locked_until, 'tzinfo') and locked_until.tzinfo is not None:
+                locked_until = locked_until.replace(tzinfo=None)
+            if locked_until > now:
+                is_locked = True
+            else:
+                # Expired lock — silently clear it in the background
+                db.execute('UPDATE users SET login_attempts = 0, locked_until = NULL WHERE id = ?', (u['id'],))
+        users_with_status.append({
+            'id': u['id'],
+            'username': u['username'],
+            'is_admin': u['is_admin'],
+            'mfa_enabled': u['mfa_enabled'],
+            'login_attempts': u['login_attempts'],
+            'locked_until': u['locked_until'],
+            'is_locked': is_locked,
+        })
+    db.commit()
+    
+    return render_template('manage_users.html', users=users_with_status)
 
 @auth_bp.route('/delete_user/<int:user_id>', methods=['POST'])
 def delete_user(user_id):
