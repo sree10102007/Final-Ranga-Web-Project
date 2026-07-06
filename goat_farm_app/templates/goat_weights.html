@@ -4,77 +4,83 @@
 
 {% block content %}
 <style>
-  /* Page Container Animation */
+  /* Page Body Overrides to Match Screenshot Background */
+  body {
+    background-color: #f8fafd !important;
+  }
+
   .gw-container {
     animation: fadeIn 0.4s ease-out;
+    padding-top: 1.5rem;
   }
 
   /* Filter bar matching clean aesthetic */
   .gw-filter-bar {
     background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 16px;
+    border: 1px solid #eef2f6;
+    border-radius: 20px;
     padding: 1.25rem 1.5rem;
     margin-bottom: 2.5rem;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.015);
   }
 
-  /* Exact Card Design from Uploaded Image */
+  /* EXACT replication of the card container, shadows, padding, and borders from image */
   .gw-card {
     background: #ffffff;
-    border: 1px solid #f1f5f9;
+    border: 1px solid #eef2f6;
     border-radius: 28px;
     padding: 2.5rem 2rem;
     text-align: center;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.03);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     height: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
   }
   .gw-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+    transform: translateY(-4px);
+    box-shadow: 0 16px 45px rgba(0, 0, 0, 0.06);
   }
 
-  /* Card Top Icon Container */
+  /* Centered Tag Icon Container in rounded-square */
   .gw-icon-container {
-    width: 80px;
-    height: 80px;
-    background-color: #eef7f2;
-    border-radius: 20px;
+    width: 72px;
+    height: 72px;
+    background-color: #ecf3ed;
+    border-radius: 18px;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1.25rem;
   }
   .gw-icon-container i {
-    font-size: 2.2rem;
-    color: #3d8c5c;
-    transform: rotate(-45deg);
+    font-size: 1.95rem;
+    color: #40825c;
+    transform: rotate(45deg);
   }
 
-  /* Text Elements */
+  /* Title Name Typography */
   .gw-title {
-    font-size: 1.75rem;
-    font-weight: 700;
+    font-size: 1.65rem;
+    font-weight: 600;
     color: #1e293b;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.6rem;
+    letter-spacing: -0.3px;
   }
 
-  /* Status Badge */
+  /* Yellow Status Badge matching the exact image color */
   .gw-status-badge {
-    background-color: #f5b73d;
+    background-color: #efa834;
     color: #ffffff;
-    font-size: 0.78rem;
+    font-size: 0.76rem;
     font-weight: 700;
-    padding: 0.25rem 1rem;
-    border-radius: 8px;
+    padding: 0.25rem 0.95rem;
+    border-radius: 6px;
     text-transform: capitalize;
     display: inline-block;
-    margin-bottom: 0.9rem;
+    margin-bottom: 0.75rem;
   }
   .gw-status-active {
     background-color: #4caf50;
@@ -83,40 +89,41 @@
     background-color: #ef5350;
   }
 
-  /* Activity Count */
+  /* Activity Text Count Label */
   .gw-activity-text {
-    font-size: 0.95rem;
+    font-size: 0.92rem;
     color: #5d7185;
-    margin-bottom: 0.9rem;
+    margin-bottom: 0.75rem;
   }
 
-  /* Age Badge */
+  /* Age Pill Badge */
   .gw-age-badge {
     background-color: #f1f8f5;
     border: 1px solid #d4ebd9;
     color: #3b7a57;
     font-weight: 700;
-    font-size: 0.85rem;
-    padding: 0.35rem 1.25rem;
+    font-size: 0.8rem;
+    padding: 0.3rem 1.15rem;
     border-radius: 8px;
     display: inline-block;
-    margin-bottom: 1.75rem;
+    margin-bottom: 1.5rem;
   }
 
-  /* Action Button */
+  /* Flat green action button matching the exact styling in image */
   .gw-btn {
-    background-color: #40825c;
+    background-color: #45825c;
     color: #ffffff;
-    font-weight: 600;
-    font-size: 1.05rem;
+    font-weight: 500;
+    font-size: 0.98rem;
     border: none;
-    border-radius: 12px;
-    padding: 0.8rem 2rem;
+    border-radius: 10px;
+    padding: 0.65rem 2rem;
     width: 100%;
+    max-width: 200px;
     transition: all 0.2s;
   }
   .gw-btn:hover {
-    background-color: #316648;
+    background-color: #386b4b;
     color: #ffffff;
   }
 
@@ -148,7 +155,7 @@
   }
 </style>
 
-<div class="gw-container container mt-4">
+<div class="gw-container container">
   <!-- Dynamic Filter Bar -->
   <div class="gw-filter-bar">
     <form method="GET" action="{{ url_for('goat_weights') }}" class="row g-3 align-items-end">
@@ -171,7 +178,7 @@
         </select>
       </div>
       <div class="col-md-3 d-flex gap-2">
-        <button type="submit" class="btn btn-teal text-white w-100 fw-bold" style="background-color: #40825c; border-radius: 10px; height: 38px; border: none;">
+        <button type="submit" class="btn btn-teal text-white w-100 fw-bold" style="background-color: #45825c; border-radius: 10px; height: 38px; border: none;">
           <i class="bi bi-funnel"></i> Apply Filter
         </button>
         {% if filter_year or filter_month %}
@@ -260,7 +267,7 @@
               <div class="list-group-item d-flex justify-content-between align-items-center py-3 border-0 bg-light rounded-3 mb-2">
                 <div>
                   <span class="fw-bold text-dark fs-5">{{ "%.1f"|format(entry.weight_kg) }} kg</span>
-                  <span class="ms-2 badge bg-teal text-white" style="background-color: #40825c;">{{ entry.recorded_date }}</span>
+                  <span class="ms-2 badge bg-teal text-white" style="background-color: #45825c;">{{ entry.recorded_date }}</span>
                 </div>
                 <div class="text-end">
                   <small class="text-secondary d-block"><i class="bi bi-person me-1"></i>{{ entry.recorded_by }}</small>
