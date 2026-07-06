@@ -3870,15 +3870,16 @@ def populate_eligible():
     count_added = 0
     
     for goat in goats:
-        try:
-            db.execute('''
-                INSERT INTO eligible_to_sell (tag_id, tag_no, breed, gender, weight_kg, date_added)
-                VALUES (?, ?, ?, ?, ?, ?)
-            ''', (goat['tag_no'], goat['tag_no'], goat['breed'], goat['gender'], goat['weight_kg'], today))
-            count_added += 1
-        except sqlite3.IntegrityError:
-            # Already exists, skip
-            pass
+        exists = db.execute('SELECT 1 FROM eligible_to_sell WHERE tag_id = ?', (goat['tag_no'],)).fetchone()
+        if not exists:
+            try:
+                db.execute('''
+                    INSERT INTO eligible_to_sell (tag_id, tag_no, breed, gender, weight_kg, date_added)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                ''', (goat['tag_no'], goat['tag_no'], goat['breed'], goat['gender'], goat['weight_kg'], today))
+                count_added += 1
+            except Exception:
+                pass
     
     db.commit()
     flash(f'{count_added} eligible goat(s) added to the list!', 'success')
@@ -3901,15 +3902,19 @@ def add_to_eligible(tag_id):
         return redirect(url_for('master'))
     
     today = datetime.now().strftime('%Y-%m-%d')
-    try:
-        db.execute('''
-            INSERT INTO eligible_to_sell (tag_id, tag_no, breed, gender, weight_kg, date_added)
-            VALUES (?, ?, ?, ?, ?, ?)
-        ''', (goat['tag_no'], goat['tag_no'], goat['breed'], goat['gender'], goat['weight_kg'], today))
-        db.commit()
-        flash(f'Goat {tag_id} added to eligible for sale list!', 'success')
-    except sqlite3.IntegrityError:
+    exists = db.execute('SELECT 1 FROM eligible_to_sell WHERE tag_id = ?', (tag_id,)).fetchone()
+    if exists:
         flash(f'Goat {tag_id} is already in the eligible list!', 'info')
+    else:
+        try:
+            db.execute('''
+                INSERT INTO eligible_to_sell (tag_id, tag_no, breed, gender, weight_kg, date_added)
+                VALUES (?, ?, ?, ?, ?, ?)
+            ''', (goat['tag_no'], goat['tag_no'], goat['breed'], goat['gender'], goat['weight_kg'], today))
+            db.commit()
+            flash(f'Goat {tag_id} added to eligible for sale list!', 'success')
+        except Exception:
+            flash(f'Goat {tag_id} is already in the eligible list!', 'info')
     
     return redirect(url_for('eligible_to_sell'))
 
@@ -6888,6 +6893,10 @@ def api_add_to_eligible(tag_id):
         return jsonify({'success': False, 'error': 'Goat not found'}), 444
     
     today = datetime.now().strftime('%Y-%m-%d')
+    exists = db.execute('SELECT 1 FROM eligible_to_sell WHERE tag_id = ?', (tag_id,)).fetchone()
+    if exists:
+        return jsonify({'success': True, 'message': 'Already in eligible list'})
+        
     try:
         db.execute('''
             INSERT INTO eligible_to_sell (tag_id, tag_no, breed, gender, weight_kg, date_added)
@@ -6895,8 +6904,6 @@ def api_add_to_eligible(tag_id):
         ''', (goat['tag_no'], goat['tag_no'], goat['breed'], goat['gender'], goat['weight_kg'], today))
         db.commit()
         return jsonify({'success': True, 'message': f'Goat {tag_id} added to eligible list'})
-    except sqlite3.IntegrityError:
-        return jsonify({'success': True, 'message': 'Already in eligible list'})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
