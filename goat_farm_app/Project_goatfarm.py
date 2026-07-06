@@ -6425,7 +6425,7 @@ def pnl():
     right_total = total_credits + (abs(net_profit) if net_profit < 0 else 0) + (total_indirect_income if net_profit >= 0 else 0)
     
     is_profit = net_profit >= 0
-    net_val = abs(net_profit)
+    net_val = net_profit  # signed: positive = profit, negative = loss (financial balance)
     
     return render_template('pnl.html',
                            from_date=from_date,

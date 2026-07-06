@@ -633,7 +633,7 @@
                         {% endfor %}
                         {% endfor %}
                         
-                        <!-- Net Profit -->
+                        <!-- Net Profit (shown on debit side when profit) -->
                         {% if is_profit %}
                         <tr class="fw-bold bg-success-subtle">
                             <td class="indent-1 text-success"><i class="bi bi-check-circle me-2"></i>Net Profit</td>
@@ -688,11 +688,11 @@
                         {% endfor %}
                         {% endfor %}
                         
-                        <!-- Net Loss -->
+                        <!-- Net Loss (shown on credit side when loss) -->
                         {% if not is_profit %}
                         <tr class="fw-bold bg-danger-subtle">
                             <td class="indent-1 text-danger"><i class="bi bi-x-circle me-2"></i>Net Loss</td>
-                            <td class="financial-number text-danger">₹{{ "%.2f"|format(net_profit) }}</td>
+                            <td class="financial-number text-danger">₹{{ "%.2f"|format(net_profit|abs) }}</td>
                         </tr>
                         {% endif %}
                     </tbody>
@@ -712,7 +712,21 @@
                 <span class="font-monospace">₹{{ "%.2f"|format(pnl_grand_total) }}</span>
             </div>
         </div>
+        <!-- Financial Balance Banner -->
+        <div class="px-4 py-3 d-flex align-items-center justify-content-between {% if is_profit %}bg-success-subtle{% else %}bg-danger-subtle{% endif %}">
+            <div class="d-flex align-items-center gap-2">
+                <i class="bi {% if is_profit %}bi-arrow-up-circle-fill text-success{% else %}bi-arrow-down-circle-fill text-danger{% endif %} fs-5"></i>
+                <span class="fw-bold {% if is_profit %}text-success{% else %}text-danger{% endif %}">
+                    Financial Balance &mdash; Net {{ 'Profit' if is_profit else 'Loss' }}
+                </span>
+                <small class="text-muted fw-normal ms-1">(Total Income &minus; Total Expenditure)</small>
+            </div>
+            <span class="font-monospace fw-bold fs-5 {% if is_profit %}text-success{% else %}text-danger{% endif %}">
+                {% if is_profit %}+{% else %}&minus;{% endif %}₹{{ "%.2f"|format(net_profit|abs) }}
+            </span>
+        </div>
     </div>
+
 
     <!-- EXPENSES MASTER LEDGER BREAKDOWN PANEL -->
     {% if ledger_pnl_summary %}
@@ -987,20 +1001,18 @@
                 </tr>
                 {% endif %}
                 
-                <!-- F. Net Profit / Loss -->
-                {% if is_profit %}
-                <tr class="fw-bold table-success">
-                    <td>F. NET PROFIT (C - D + E)</td>
+                <!-- F. Net Profit / Loss — shown as signed financial balance -->
+                <tr class="fw-bold {% if is_profit %}table-success{% else %}table-danger{% endif %}">
+                    <td>F. NET {{ 'PROFIT' if is_profit else 'LOSS' }} (C - D + E) &nbsp;<small class="fw-normal text-muted">Financial Balance</small></td>
                     <td></td>
-                    <td class="text-end font-monospace text-success">₹{{ "%.2f"|format(net_profit) }}</td>
+                    <td class="text-end font-monospace {% if is_profit %}text-success{% else %}text-danger{% endif %}">
+                        {% if is_profit %}
+                        +₹{{ "%.2f"|format(net_profit) }}
+                        {% else %}
+                        −₹{{ "%.2f"|format(net_profit|abs) }}
+                        {% endif %}
+                    </td>
                 </tr>
-                {% else %}
-                <tr class="fw-bold table-danger">
-                    <td>F. NET LOSS (C - D + E)</td>
-                    <td></td>
-                    <td class="text-end font-monospace text-danger">(₹{{ "%.2f"|format(net_profit) }})</td>
-                </tr>
-                {% endif %}
             </tbody>
         </table>
         
