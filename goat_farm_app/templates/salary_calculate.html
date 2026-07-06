@@ -14,7 +14,7 @@
     <div class="card-body p-4">
         <h5 class="fw-bold mb-3 text-dark"><i class="bi bi-funnel text-success me-2"></i>Select Salary Period</h5>
         <form method="GET" action="{{ url_for('salary_calculate') }}" class="row g-3 align-items-end">
-            <div class="col-md-3">
+            <div class="col-md-2 col-sm-6">
                 <label class="form-label small fw-bold text-muted">Month</label>
                 <select name="month" class="form-select border-0 bg-light py-2">
                     {% for m in range(1, 13) %}
@@ -22,11 +22,11 @@
                     {% endfor %}
                 </select>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2 col-sm-6">
                 <label class="form-label small fw-bold text-muted">Year</label>
                 <input type="number" name="year" class="form-control border-0 bg-light py-2" value="{{ year }}">
             </div>
-            <div class="col-md-2">
+            <div class="col-md-2 col-sm-6">
                 <label class="form-label small fw-bold text-muted">Start Day</label>
                 <select name="start_day" class="form-select border-0 bg-light py-2">
                     {% for d in range(1, 32) %}
@@ -34,7 +34,7 @@
                     {% endfor %}
                 </select>
             </div>
-            <div class="col-md-2">
+            <div class="col-md-2 col-sm-6">
                 <label class="form-label small fw-bold text-muted">End Day</label>
                 <select name="end_day" class="form-select border-0 bg-light py-2">
                     {% for d in range(1, 32) %}
@@ -42,10 +42,10 @@
                     {% endfor %}
                 </select>
             </div>
-            <div class="col-md-2">
+            <div class="col-md-4 col-12">
                 <div class="d-flex gap-2">
                     <a href="{{ url_for('salary_calculate') }}" class="btn btn-light w-50 py-2 fw-600">Reset</a>
-                    <button type="submit" class="btn btn-success w-50 py-2 fw-bold">Calculate</button>
+                    <button type="submit" class="btn btn-success w-50 py-2 fw-bold text-nowrap">Calculate</button>
                 </div>
             </div>
         </form>
