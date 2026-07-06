@@ -569,7 +569,7 @@ document.addEventListener('DOMContentLoaded', function() {
             bodyContent = `
               <div class="mb-2"><strong>${data.weight_alerts.length} goats</strong> have reached 25 kg and are eligible to sell: ${tags}.</div>
               <div class="mt-3">
-                <button class="btn btn-sm btn-success rounded-pill px-3 py-1.5 w-100 fw-bold shadow-sm" data-onclick="markMultipleEligible(${JSON.stringify(data.weight_alerts.map(g => g.tag_no)).replace(/"/g, '&quot;')}, this)">
+                <button class="btn btn-sm btn-success rounded-pill px-3 py-1.5 w-100 fw-bold shadow-sm" data-onclick="markMultipleEligible(this)" data-tags="${data.weight_alerts.map(g => g.tag_no).join(',')}">
                   <i class="bi bi-cart-plus me-1"></i>Add All to Sell List
                 </button>
               </div>
@@ -672,7 +672,10 @@ function markEligible(tagNo, btn) {
   });
 }
 
-function markMultipleEligible(tagNos, btn) {
+function markMultipleEligible(btn) {
+  const tagsStr = btn.getAttribute('data-tags');
+  if (!tagsStr) return;
+  const tagNos = tagsStr.split(',');
   btn.disabled = true;
   btn.innerHTML = `<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>Adding...`;
   
