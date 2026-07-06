@@ -3348,13 +3348,16 @@ def master_delete(id):
     record = db.execute('SELECT tag_no FROM master_records WHERE id = ?', (id,)).fetchone()
     if record:
         tag_no = record['tag_no']
-        db.execute('DELETE FROM master_records WHERE id = ?', (id,))
+        # Delete referencing/child records first to prevent foreign key violations in Postgres
+        db.execute('DELETE FROM eligible_to_sell WHERE tag_id = ?', (tag_no,))
         db.execute('DELETE FROM goats_data WHERE tag_number = ?', (tag_no,))
         db.execute('DELETE FROM sales_records WHERE tag_id = ?', (tag_no,))
         db.execute('DELETE FROM medicine_history WHERE tag_no = ?', (tag_no,))
         db.execute('DELETE FROM vaccine_records WHERE tag_no = ?', (tag_no,))
         db.execute('DELETE FROM mortality_records WHERE tag_id = ?', (tag_no,))
-        db.execute('DELETE FROM eligible_to_sell WHERE tag_id = ?', (tag_no,))
+        
+        # Finally, delete parent record from master_records
+        db.execute('DELETE FROM master_records WHERE id = ?', (id,))
         db.commit()
         flash('Master record and all related history/financial logs deleted successfully!', 'success')
     else:
