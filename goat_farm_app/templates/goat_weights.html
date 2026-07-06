@@ -4,189 +4,143 @@
 
 {% block content %}
 <style>
-  /* Premium Glassmorphic / Skeuomorphic UI Styling */
+  /* Page Container Animation */
   .gw-container {
-    animation: fadeIn 0.6s ease-out;
+    animation: fadeIn 0.4s ease-out;
   }
 
-  .gw-hero {
-    background: linear-gradient(135deg, #115e59 0%, #0d9488 100%);
-    border-radius: 24px;
-    padding: 2.5rem;
-    color: #fff;
-    position: relative;
-    overflow: hidden;
-    margin-bottom: 2rem;
-    box-shadow: 0 10px 30px -10px rgba(13, 148, 136, 0.4);
-  }
-  .gw-hero::before {
-    content: '';
-    position: absolute;
-    top: -50px; right: -50px;
-    width: 200px; height: 200px;
-    background: rgba(255,255,255,0.08);
-    border-radius: 50%;
-  }
-
-  .gw-stat-pill {
-    background: rgba(255, 255, 255, 0.12);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 50px;
-    padding: 0.6rem 1.4rem;
-    font-size: 0.85rem;
-    font-weight: 600;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    backdrop-filter: blur(8px);
-    transition: all 0.3s ease;
-  }
-  .gw-stat-pill:hover {
-    background: rgba(255, 255, 255, 0.2);
-    transform: translateY(-2px);
-  }
-
-  /* Interactive Filter Glass Panel */
+  /* Filter bar matching clean aesthetic */
   .gw-filter-bar {
-    background: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(226, 232, 240, 0.8);
-    border-radius: 20px;
-    padding: 1.25rem 2rem;
-    margin-bottom: 2.5rem;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.02);
-  }
-
-  /* Stunning Floating Card Design */
-  .gw-card {
     background: #ffffff;
     border: 1px solid #e2e8f0;
-    border-radius: 24px;
-    overflow: hidden;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.02);
-    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    border-radius: 16px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 2.5rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
+  }
+
+  /* Exact Card Design from Uploaded Image */
+  .gw-card {
+    background: #ffffff;
+    border: 1px solid #f1f5f9;
+    border-radius: 28px;
+    padding: 2.5rem 2rem;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     height: 100%;
-    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
   }
   .gw-card:hover {
-    transform: translateY(-8px) scale(1.02);
-    box-shadow: 0 20px 40px rgba(13, 148, 136, 0.12);
-    border-color: rgba(13, 148, 136, 0.3);
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
   }
 
-  .gw-card-header {
-    background: linear-gradient(180deg, #f0fdf4 0%, #ffffff 100%);
-    padding: 1.5rem 1.5rem 1.25rem;
-    border-bottom: 1px solid #f1f5f9;
+  /* Card Top Icon Container */
+  .gw-icon-container {
+    width: 80px;
+    height: 80px;
+    background-color: #eef7f2;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+  }
+  .gw-icon-container i {
+    font-size: 2.2rem;
+    color: #3d8c5c;
+    transform: rotate(-45deg);
   }
 
-  .gw-tag-title {
-    font-size: 1.35rem;
-    font-weight: 800;
-    color: #0f766e;
-    letter-spacing: -0.5px;
-  }
-
-  /* Metric Indicators with Soft Depth */
-  .gw-metrics-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    background: #f8fafc;
-    border-bottom: 1px solid #e2e8f0;
-  }
-  .gw-metric-box {
-    padding: 1.25rem;
-    text-align: center;
-    border-right: 1px solid #e2e8f0;
-    transition: background 0.3s;
-  }
-  .gw-metric-box:last-child {
-    border-right: none;
-  }
-  .gw-metric-box:hover {
-    background: #f1f5f9;
-  }
-  .gw-metric-label {
-    font-size: 0.68rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: #64748b;
+  /* Text Elements */
+  .gw-title {
+    font-size: 1.75rem;
     font-weight: 700;
-    margin-bottom: 0.4rem;
-  }
-  .gw-metric-value {
-    font-size: 1.3rem;
-    font-weight: 800;
     color: #1e293b;
+    margin-bottom: 0.5rem;
   }
 
-  .gw-badge-pill {
-    font-size: 0.72rem;
+  /* Status Badge */
+  .gw-status-badge {
+    background-color: #f5b73d;
+    color: #ffffff;
+    font-size: 0.78rem;
     font-weight: 700;
-    padding: 0.35rem 0.75rem;
-    border-radius: 50px;
+    padding: 0.25rem 1rem;
+    border-radius: 8px;
+    text-transform: capitalize;
+    display: inline-block;
+    margin-bottom: 0.9rem;
+  }
+  .gw-status-active {
+    background-color: #4caf50;
+  }
+  .gw-status-expired {
+    background-color: #ef5350;
   }
 
-  /* Dynamic Timeline Feed */
-  .gw-feed-section {
+  /* Activity Count */
+  .gw-activity-text {
+    font-size: 0.95rem;
+    color: #5d7185;
+    margin-bottom: 0.9rem;
+  }
+
+  /* Age Badge */
+  .gw-age-badge {
+    background-color: #f1f8f5;
+    border: 1px solid #d4ebd9;
+    color: #3b7a57;
+    font-weight: 700;
+    font-size: 0.85rem;
+    padding: 0.35rem 1.25rem;
+    border-radius: 8px;
+    display: inline-block;
+    margin-bottom: 1.75rem;
+  }
+
+  /* Action Button */
+  .gw-btn {
+    background-color: #40825c;
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 1.05rem;
+    border: none;
+    border-radius: 12px;
+    padding: 0.8rem 2rem;
+    width: 100%;
+    transition: all 0.2s;
+  }
+  .gw-btn:hover {
+    background-color: #316648;
+    color: #ffffff;
+  }
+
+  /* Modal Details Styling */
+  .modal-content {
+    border-radius: 24px;
+    border: none;
+    overflow: hidden;
+  }
+  .modal-header {
+    background-color: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
     padding: 1.5rem;
   }
-  .gw-timeline-container {
-    position: relative;
-    padding-left: 1.5rem;
+  .modal-body {
+    padding: 2rem;
   }
-  .gw-timeline-container::before {
-    content: '';
-    position: absolute;
-    left: 4.5px;
-    top: 10px;
-    bottom: 10px;
-    width: 3px;
-    background: linear-gradient(180deg, #0d9488 0%, #cbd5e1 100%);
-    border-radius: 2px;
-  }
-
-  .gw-feed-item {
-    position: relative;
-    padding-bottom: 1.25rem;
-  }
-  .gw-feed-item:last-child {
-    padding-bottom: 0;
-  }
-
-  .gw-feed-indicator {
-    position: absolute;
-    left: -1.5rem;
-    top: 4px;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background: #cbd5e1;
-    border: 3px solid #fff;
-    box-shadow: 0 0 0 2px #e2e8f0;
-    transition: all 0.3s ease;
-  }
-  .gw-feed-item:first-child .gw-feed-indicator {
-    background: #0d9488;
-    box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.25);
-    transform: scale(1.2);
-  }
-
-  .gw-feed-card {
-    background: #fff;
+  .metric-badge {
+    background-color: #f8fafc;
     border: 1px solid #e2e8f0;
-    border-radius: 16px;
-    padding: 0.85rem 1.1rem;
-    transition: all 0.3s;
+    border-radius: 12px;
+    padding: 1rem;
+    text-align: center;
   }
-  .gw-feed-card:hover {
-    border-color: #99f6e4;
-    background: #f0fdfa;
-    transform: translateX(4px);
-  }
-
-  .gw-gain-up { color: #0f766e; }
-  .gw-gain-down { color: #be123c; }
 
   @keyframes fadeIn {
     from { opacity: 0; transform: translateY(10px); }
@@ -194,35 +148,22 @@
   }
 </style>
 
-<div class="gw-container">
-  <!-- Hero Section -->
-  <div class="gw-hero">
-    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 position-relative" style="z-index:1;">
-      <div>
-        <h1 class="fw-bold mb-1"><i class="bi bi-activity me-2"></i>Goat Weight Analysis</h1>
-        <p class="mb-0 opacity-75">Track progression charts, baseline weights, and gains for individual goats.</p>
-      </div>
-      <div class="d-flex gap-2">
-        <span class="gw-stat-pill"><i class="bi bi-tag"></i> {{ total_goats }} Active Profiles</span>
-      </div>
-    </div>
-  </div>
-
+<div class="gw-container container mt-4">
   <!-- Dynamic Filter Bar -->
   <div class="gw-filter-bar">
     <form method="GET" action="{{ url_for('goat_weights') }}" class="row g-3 align-items-end">
-      <div class="col-md-3">
+      <div class="col-md-3 col-sm-6">
         <label class="form-label fw-bold text-secondary mb-1" style="font-size: 0.75rem; text-transform: uppercase;">Filter Year</label>
-        <select name="year" class="form-select" style="border-radius: 12px;">
+        <select name="year" class="form-select" style="border-radius: 10px;">
           <option value="">All Years</option>
           {% for yr in years_list %}
           <option value="{{ yr }}" {% if filter_year|string == yr|string %}selected{% endif %}>{{ yr }}</option>
           {% endfor %}
         </select>
       </div>
-      <div class="col-md-3">
+      <div class="col-md-3 col-sm-6">
         <label class="form-label fw-bold text-secondary mb-1" style="font-size: 0.75rem; text-transform: uppercase;">Filter Month</label>
-        <select name="month" class="form-select" style="border-radius: 12px;">
+        <select name="month" class="form-select" style="border-radius: 10px;">
           <option value="">All Months</option>
           {% for m_num, m_name in all_months %}
           <option value="{{ m_num }}" {% if filter_month == m_num %}selected{% endif %}>{{ m_name }}</option>
@@ -230,11 +171,11 @@
         </select>
       </div>
       <div class="col-md-3 d-flex gap-2">
-        <button type="submit" class="btn btn-teal text-white w-100 fw-bold" style="background-color: #0d9488; border-radius: 12px; height: 38px;">
-          <i class="bi bi-filter"></i> Apply
+        <button type="submit" class="btn btn-teal text-white w-100 fw-bold" style="background-color: #40825c; border-radius: 10px; height: 38px; border: none;">
+          <i class="bi bi-funnel"></i> Apply Filter
         </button>
         {% if filter_year or filter_month %}
-        <a href="{{ url_for('goat_weights') }}" class="btn btn-light border w-100 fw-bold" style="border-radius: 12px; height: 38px;">Clear</a>
+        <a href="{{ url_for('goat_weights') }}" class="btn btn-light border w-100 fw-bold" style="border-radius: 10px; height: 38px;">Clear</a>
         {% endif %}
       </div>
     </form>
@@ -242,81 +183,96 @@
 
   <!-- Cards Grid -->
   {% if goat_data %}
-  <div class="row g-4">
+  <div class="row g-4 justify-content-center">
     {% for goat in goat_data %}
-    <div class="col-xl-4 col-md-6">
+    <div class="col-lg-4 col-md-6 col-sm-12">
       <div class="gw-card">
-        
-        <!-- Header -->
-        <div class="gw-card-header">
-          <div class="d-flex justify-content-between align-items-center mb-2">
-            <span class="gw-tag-title"><i class="bi bi-hash"></i>{{ goat.tag_no }}</span>
-            <span class="badge gw-badge-pill" style="background: {% if goat.status == 'Active' %}#ccfbf1; color: #0f766e;{% else %}#fef3c7; color: #d97706;{% endif %}">
-              {{ goat.status }}
-            </span>
-          </div>
-          <div class="d-flex gap-2">
-            <span class="badge bg-light text-secondary border">{{ goat.breed }}</span>
-            <span class="badge bg-light text-secondary border">
-              {% if goat.gender|lower in ['male','m'] %}Male{% else %}Female{% endif %}
-            </span>
-          </div>
+        <!-- Top Tag Icon Container -->
+        <div class="gw-icon-container">
+          <i class="bi bi-tag-fill"></i>
         </div>
 
-        <!-- Metrics Grid -->
-        <div class="gw-metrics-grid">
-          <div class="gw-metric-box">
-            <div class="gw-metric-label">Initial</div>
-            <div class="gw-metric-value">{{ "%.1f"|format(goat.first_weight) if goat.first_weight is not none else '—' }} <span style="font-size: 0.75rem; font-weight: normal; color: #64748b;">kg</span></div>
-          </div>
-          <div class="gw-metric-box">
-            <div class="gw-metric-label">Current</div>
-            <div class="gw-metric-value">{{ "%.1f"|format(goat.current_weight) if goat.current_weight is not none else '—' }} <span style="font-size: 0.75rem; font-weight: normal; color: #64748b;">kg</span></div>
-          </div>
-          <div class="gw-metric-box">
-            <div class="gw-metric-label">Net Gain</div>
-            <div class="gw-metric-value">
-              {% if goat.weight_gain is not none %}
-                <span class="{% if goat.weight_gain >= 0 %}gw-gain-up{% else %}gw-gain-down{% endif %}">
-                  {{ "%+.1f"|format(goat.weight_gain) }}
-                </span>
-              {% else %}—{% endif %}
-            </div>
-          </div>
+        <!-- Goat Name/Tag No -->
+        <div class="gw-title">{{ goat.tag_no }}</div>
+
+        <!-- Status Badge -->
+        <div>
+          <span class="gw-status-badge {% if goat.status|lower == 'active' %}gw-status-active{% elif goat.status|lower in ['expired', 'dead'] %}gw-status-expired{% endif %}">
+            {{ goat.status }}
+          </span>
         </div>
 
-        <!-- History Timeline -->
-        <div class="gw-feed-section">
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <span class="fw-bold text-secondary" style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">Timeline Records</span>
-            <span class="badge bg-secondary text-white rounded-pill">{{ goat.history|length }}</span>
-          </div>
+        <!-- Activity Records Count -->
+        <div class="gw-activity-text">
+          Weight Records: {{ goat.history|length }}
+        </div>
 
-          {% if goat.history %}
-          <div class="gw-timeline-container">
-            {% for entry in goat.history|reverse %}
-            <div class="gw-feed-item">
-              <div class="gw-feed-indicator"></div>
-              <div class="gw-feed-card">
-                <div class="d-flex justify-content-between align-items-center mb-1">
-                  <span class="fw-bold" style="font-size: 0.95rem; color: #1e293b;">{{ "%.1f"|format(entry.weight_kg) }} kg</span>
-                  <span class="text-muted" style="font-size: 0.72rem;">{{ entry.recorded_date }}</span>
+        <!-- Age Badge -->
+        <div>
+          <span class="gw-age-badge">
+            {{ goat.age_str }}
+          </span>
+        </div>
+
+        <!-- View Details Button -->
+        <button class="gw-btn" data-bs-toggle="modal" data-bs-target="#modal-{{ goat.tag_no|replace(' ', '-') }}">
+          View Details
+        </button>
+      </div>
+    </div>
+
+    <!-- Modal for Detailed Weight Log Analysis -->
+    <div class="modal fade" id="modal-{{ goat.tag_no|replace(' ', '-') }}" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content shadow-lg">
+          <div class="modal-header">
+            <h5 class="modal-title fw-bold text-dark"><i class="bi bi-graph-up-arrow me-2 text-success"></i>Weight details: {{ goat.tag_no }}</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="row g-3 mb-4">
+              <div class="col-4">
+                <div class="metric-badge">
+                  <div class="text-muted small text-uppercase fw-bold">First Weight</div>
+                  <div class="fs-4 fw-extrabold text-dark">{{ "%.1f"|format(goat.first_weight) if goat.first_weight is not none else '—' }} kg</div>
                 </div>
-                <div class="d-flex justify-content-between align-items-center">
-                  <span style="font-size: 0.72rem; color: #64748b;"><i class="bi bi-person me-1"></i>{{ entry.recorded_by }}</span>
-                  {% if entry.notes %}
-                  <span class="text-truncate" style="font-size: 0.72rem; color: #94a3b8; max-width: 120px;" title="{{ entry.notes }}">{{ entry.notes }}</span>
-                  {% endif %}
+              </div>
+              <div class="col-4">
+                <div class="metric-badge">
+                  <div class="text-muted small text-uppercase fw-bold">Latest Weight</div>
+                  <div class="fs-4 fw-extrabold text-dark">{{ "%.1f"|format(goat.current_weight) if goat.current_weight is not none else '—' }} kg</div>
+                </div>
+              </div>
+              <div class="col-4">
+                <div class="metric-badge">
+                  <div class="text-muted small text-uppercase fw-bold">Total Gain</div>
+                  <div class="fs-4 fw-extrabold {% if goat.weight_gain and goat.weight_gain >= 0 %}text-success{% else %}text-danger{% endif %}">
+                    {{ "%+.1f"|format(goat.weight_gain) if goat.weight_gain is not none else '—' }} kg
+                  </div>
                 </div>
               </div>
             </div>
-            {% endfor %}
-          </div>
-          {% else %}
-          <div class="text-center py-4 text-muted" style="font-size: 0.85rem;">No historical changes for selected period.</div>
-          {% endif %}
-        </div>
 
+            <!-- List Timeline -->
+            <h6 class="fw-bold text-secondary mb-3"><i class="bi bi-clock-history me-1"></i>Weight History Log</h6>
+            <div class="list-group">
+              {% for entry in goat.history|reverse %}
+              <div class="list-group-item d-flex justify-content-between align-items-center py-3 border-0 bg-light rounded-3 mb-2">
+                <div>
+                  <span class="fw-bold text-dark fs-5">{{ "%.1f"|format(entry.weight_kg) }} kg</span>
+                  <span class="ms-2 badge bg-teal text-white" style="background-color: #40825c;">{{ entry.recorded_date }}</span>
+                </div>
+                <div class="text-end">
+                  <small class="text-secondary d-block"><i class="bi bi-person me-1"></i>{{ entry.recorded_by }}</small>
+                  {% if entry.notes %}
+                  <small class="text-muted italic">{{ entry.notes }}</small>
+                  {% endif %}
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
     {% endfor %}
@@ -325,7 +281,7 @@
   <div class="text-center py-5 text-muted">
     <i class="bi bi-clipboard-x" style="font-size: 3rem; opacity: 0.3;"></i>
     <h5 class="mt-3 fw-bold">No Records Found</h5>
-    <p>Check filters or ensure goats are populated with weights in the Master Register.</p>
+    <p>Try matching with another filter period, or register weights on new profiles.</p>
   </div>
   {% endif %}
 </div>

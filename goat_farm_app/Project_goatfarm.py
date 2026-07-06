@@ -7113,9 +7113,9 @@ def goat_weights():
         (9, 'September'), (10, 'October'), (11, 'November'), (12, 'December')
     ]
 
-    # Fetch all goats from master_records for the cards
+    # Fetch all goats from master_records for the cards (including dob)
     all_goats = db.execute(
-        "SELECT tag_no, breed, gender, status, color, weight_kg FROM master_records ORDER BY tag_no ASC"
+        "SELECT tag_no, breed, gender, status, color, weight_kg, dob FROM master_records ORDER BY tag_no ASC"
     ).fetchall()
 
     goat_data = []
@@ -7165,6 +7165,12 @@ def goat_weights():
                 'notes':        h['notes'] or '',
             })
 
+        # Calculate age string using the existing helper
+        dob_val = goat['dob']
+        if hasattr(dob_val, 'strftime'):
+            dob_val = dob_val.strftime('%Y-%m-%d')
+        age_str = calculate_age_str(dob_val)
+
         goat_data.append({
             'tag_no':        tag,
             'breed':         goat['breed'] or '—',
@@ -7175,6 +7181,7 @@ def goat_weights():
             'first_weight':   first_weight,
             'weight_gain':    weight_gain,
             'history':        history_list,
+            'age_str':        age_str or 'N/A',
         })
 
     # Only show goats that have at least one weight log (whether filtered or not)
