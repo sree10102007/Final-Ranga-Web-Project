@@ -1,0 +1,377 @@
+﻿{% extends 'layout.html' %}
+{% block title %}Goat Weights Report - Ranga Farms{% endblock %}
+{% block page_title %}Goat Weights{% endblock %}
+
+{% block content %}
+<style>
+  .gw-hero {
+    background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 50%, #388e3c 100%);
+    border-radius: 24px;
+    padding: 2rem 2.5rem;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 2rem;
+  }
+  .gw-hero::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 250px; height: 250px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 50%;
+  }
+  .gw-hero::after {
+    content: '';
+    position: absolute;
+    bottom: -40px; left: -30px;
+    width: 160px; height: 160px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 50%;
+  }
+  .gw-stat-pill {
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 50px;
+    padding: .5rem 1.25rem;
+    font-size: .85rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    backdrop-filter: blur(8px);
+  }
+  .gw-filter-bar {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 1rem 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 12px rgba(0,0,0,.04);
+  }
+  .gw-card {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,.04);
+    transition: all .3s ease;
+    height: 100%;
+  }
+  .gw-card:hover {
+    box-shadow: 0 12px 40px rgba(46,125,50,.12);
+    transform: translateY(-3px);
+  }
+  .gw-card-header {
+    background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+    padding: 1.25rem 1.5rem 1rem;
+    border-bottom: 1px solid #bbf7d0;
+  }
+  .gw-tag-badge {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #14532d;
+    letter-spacing: .3px;
+  }
+  .gw-status-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+  .gw-stat-row {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid #f1f5f9;
+  }
+  .gw-stat-cell {
+    flex: 1;
+    padding: 1rem 1.25rem;
+    border-right: 1px solid #f1f5f9;
+    text-align: center;
+  }
+  .gw-stat-cell:last-child { border-right: none; }
+  .gw-stat-label {
+    font-size: .7rem;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: #94a3b8;
+    font-weight: 700;
+    margin-bottom: .25rem;
+  }
+  .gw-stat-value {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #1e293b;
+  }
+  .gw-gain-pos { color: #16a34a; }
+  .gw-gain-neg { color: #dc2626; }
+  .gw-history {
+    padding: 1rem 1.5rem 1.25rem;
+    max-height: 260px;
+    overflow-y: auto;
+  }
+  .gw-history::-webkit-scrollbar { width: 4px; }
+  .gw-history::-webkit-scrollbar-track { background: transparent; }
+  .gw-history::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+  .gw-timeline {
+    position: relative;
+    padding-left: 1.5rem;
+  }
+  .gw-timeline::before {
+    content: '';
+    position: absolute;
+    left: .45rem;
+    top: 0; bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, #4ade80, #86efac, #f0fdf4);
+    border-radius: 2px;
+  }
+  .gw-tl-item {
+    position: relative;
+    margin-bottom: .75rem;
+  }
+  .gw-tl-item:last-child { margin-bottom: 0; }
+  .gw-tl-dot {
+    position: absolute;
+    left: -1.27rem;
+    top: .35rem;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: #22c55e;
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 2px #bbf7d0;
+  }
+  .gw-tl-dot.latest {
+    background: #16a34a;
+    box-shadow: 0 0 0 3px #4ade80;
+    width: 12px; height: 12px;
+    left: -1.35rem;
+  }
+  .gw-tl-content {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: .5rem .85rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .75rem;
+  }
+  .gw-tl-weight {
+    font-weight: 800;
+    color: #1e293b;
+    font-size: .95rem;
+    white-space: nowrap;
+  }
+  .gw-tl-date {
+    font-size: .75rem;
+    color: #64748b;
+    white-space: nowrap;
+  }
+  .gw-tl-by {
+    font-size: .72rem;
+    color: #94a3b8;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100px;
+  }
+  .gw-empty-history {
+    text-align: center;
+    padding: 1.5rem;
+    color: #94a3b8;
+    font-size: .85rem;
+  }
+  .gw-empty-state {
+    text-align: center;
+    padding: 5rem 2rem;
+    color: #94a3b8;
+  }
+</style>
+
+<div class="gw-hero">
+  <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 position-relative" style="z-index:1;">
+    <div>
+      <h1 class="fw-black mb-1" style="font-size:1.9rem; letter-spacing:-.5px;">
+        <i class="bi bi-graph-up-arrow me-2"></i>Goat Weights
+      </h1>
+      <p class="mb-0 opacity-75" style="font-size:.92rem;">
+        Full weight history per goat from first entry to the latest recorded weight.
+      </p>
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+      <span class="gw-stat-pill">
+        <i class="bi bi-heptagon-half"></i>
+        {{ total_goats }} goat{{ 's' if total_goats != 1 else '' }} tracked
+      </span>
+      {% if filter_year or filter_month %}
+      <span class="gw-stat-pill" style="background:rgba(255,255,255,.25);">
+        <i class="bi bi-funnel-fill"></i>
+        {% if filter_month %}{% for m_num, m_name in all_months %}{% if m_num == filter_month %}{{ m_name }}{% endif %}{% endfor %}{% endif %}
+        {% if filter_year %}{{ filter_year }}{% endif %}
+      </span>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<div class="gw-filter-bar">
+  <form method="GET" action="{{ url_for('goat_weights') }}" class="d-flex flex-wrap align-items-end gap-3">
+    <div>
+      <label class="form-label fw-semibold text-muted mb-1" style="font-size:.78rem; text-transform:uppercase; letter-spacing:.06em;">
+        <i class="bi bi-calendar-year me-1"></i>Year
+      </label>
+      <select name="year" id="filter_year" class="form-select form-select-sm" style="min-width:120px; border-radius:10px;">
+        <option value="">All Years</option>
+        {% for yr in years_list %}
+        <option value="{{ yr }}" {% if filter_year|string == yr|string %}selected{% endif %}>{{ yr }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label class="form-label fw-semibold text-muted mb-1" style="font-size:.78rem; text-transform:uppercase; letter-spacing:.06em;">
+        <i class="bi bi-calendar-month me-1"></i>Month
+      </label>
+      <select name="month" id="filter_month" class="form-select form-select-sm" style="min-width:140px; border-radius:10px;">
+        <option value="">All Months</option>
+        {% for m_num, m_name in all_months %}
+        <option value="{{ m_num }}" {% if filter_month == m_num %}selected{% endif %}>{{ m_name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="d-flex gap-2">
+      <button type="submit" class="btn btn-success btn-sm rounded-pill px-4 fw-bold">
+        <i class="bi bi-funnel me-1"></i>Apply
+      </button>
+      {% if filter_year or filter_month %}
+      <a href="{{ url_for('goat_weights') }}" class="btn btn-outline-secondary btn-sm rounded-pill px-3 fw-bold">
+        <i class="bi bi-x-circle me-1"></i>Clear
+      </a>
+      {% endif %}
+    </div>
+  </form>
+</div>
+
+{% if goat_data %}
+<div class="row g-4">
+  {% for goat in goat_data %}
+  <div class="col-xl-4 col-lg-6">
+    <div class="gw-card">
+      <div class="gw-card-header">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <div class="gw-tag-badge mb-1">
+              <i class="bi bi-tag-fill me-1 text-success"></i>{{ goat.tag_no }}
+            </div>
+            <div class="d-flex flex-wrap gap-2 align-items-center mt-1">
+              <span class="badge rounded-pill" style="background:#dcfce7; color:#14532d; font-size:.72rem;">
+                <i class="bi bi-fingerprint me-1"></i>{{ goat.breed }}
+              </span>
+              <span class="badge rounded-pill" style="background:#dbeafe; color:#1e40af; font-size:.72rem;">
+                {% if goat.gender|lower in ['male','m'] %}<i class="bi bi-gender-male me-1"></i>Male
+                {% else %}<i class="bi bi-gender-female me-1"></i>Female{% endif %}
+              </span>
+            </div>
+          </div>
+          <div>
+            {% if goat.status == 'Active' %}
+              <span class="badge rounded-pill px-2 py-1" style="background:#dcfce7; color:#14532d; font-size:.72rem;">
+                <span class="gw-status-dot" style="background:#22c55e;"></span> Active
+              </span>
+            {% elif goat.status == 'Sold' %}
+              <span class="badge rounded-pill px-2 py-1" style="background:#fef9c3; color:#713f12; font-size:.72rem;">
+                <span class="gw-status-dot" style="background:#facc15;"></span> Sold
+              </span>
+            {% else %}
+              <span class="badge rounded-pill px-2 py-1" style="background:#fee2e2; color:#7f1d1d; font-size:.72rem;">
+                <span class="gw-status-dot" style="background:#ef4444;"></span> {{ goat.status }}
+              </span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <div class="gw-stat-row">
+        <div class="gw-stat-cell">
+          <div class="gw-stat-label">First Weight</div>
+          <div class="gw-stat-value">
+            {% if goat.first_weight is not none %}{{ "%.1f"|format(goat.first_weight) }}<span class="text-muted fs-6 fw-normal"> kg</span>{% else %}&mdash;{% endif %}
+          </div>
+        </div>
+        <div class="gw-stat-cell">
+          <div class="gw-stat-label">Latest Weight</div>
+          <div class="gw-stat-value">
+            {% if goat.current_weight is not none %}{{ "%.1f"|format(goat.current_weight) }}<span class="text-muted fs-6 fw-normal"> kg</span>{% else %}&mdash;{% endif %}
+          </div>
+        </div>
+        <div class="gw-stat-cell">
+          <div class="gw-stat-label">Total Gain</div>
+          <div class="gw-stat-value">
+            {% if goat.weight_gain is not none %}
+              {% if goat.weight_gain >= 0 %}
+                <span class="gw-gain-pos">+{{ "%.1f"|format(goat.weight_gain) }}<span style="font-size:.75rem; font-weight:600;"> kg</span></span>
+              {% else %}
+                <span class="gw-gain-neg">{{ "%.1f"|format(goat.weight_gain) }}<span style="font-size:.75rem; font-weight:600;"> kg</span></span>
+              {% endif %}
+            {% else %}&mdash;{% endif %}
+          </div>
+        </div>
+      </div>
+
+      <div class="gw-history">
+        {% if goat.history %}
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="fw-bold text-muted" style="font-size:.72rem; text-transform:uppercase; letter-spacing:.07em;">
+              <i class="bi bi-clock-history me-1"></i>Weight History
+              {% if filter_year or filter_month %}
+              <span class="badge ms-1 rounded-pill" style="background:#fef3c7; color:#92400e; font-size:.68rem;">Filtered</span>
+              {% endif %}
+            </span>
+            <span class="badge rounded-pill" style="background:#f0fdf4; color:#15803d; font-size:.7rem;">
+              {{ goat.history|length }} entr{{ 'y' if goat.history|length == 1 else 'ies' }}
+            </span>
+          </div>
+          <div class="gw-timeline">
+            {% for entry in goat.history %}
+            <div class="gw-tl-item">
+              <div class="gw-tl-dot {% if loop.last %}latest{% endif %}"></div>
+              <div class="gw-tl-content">
+                <span class="gw-tl-weight">{{ "%.1f"|format(entry.weight_kg) }} kg</span>
+                <span class="gw-tl-date"><i class="bi bi-calendar3 me-1 opacity-50"></i>{{ entry.recorded_date }}</span>
+                <span class="gw-tl-by" title="{{ entry.recorded_by }}"><i class="bi bi-person me-1 opacity-50"></i>{{ entry.recorded_by }}</span>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="gw-empty-history">
+            <i class="bi bi-calendar-x d-block mb-2" style="font-size:1.6rem; opacity:.3;"></i>
+            {% if filter_year or filter_month %}No weight entries for the selected period.
+            {% else %}No weight history recorded yet.{% endif %}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="gw-empty-state">
+  <i class="bi bi-heptagon d-block mb-3" style="font-size:4rem; opacity:.15;"></i>
+  <h5 class="fw-bold text-muted">No Weight Records Found</h5>
+  <p class="text-muted mb-4">
+    {% if filter_year or filter_month %}No weight entries exist for the selected period. Try clearing the filter.
+    {% else %}Add goats to the Master Register and enter their weights to see records here.{% endif %}
+  </p>
+  {% if filter_year or filter_month %}
+  <a href="{{ url_for('goat_weights') }}" class="btn btn-outline-success rounded-pill px-4 fw-bold">
+    <i class="bi bi-x-circle me-1"></i>Clear Filter
+  </a>
+  {% else %}
+  <a href="{{ url_for('master_add') }}" class="btn btn-success rounded-pill px-4 fw-bold">
+    <i class="bi bi-plus-circle me-1"></i>Add a Goat
+  </a>
+  {% endif %}
+</div>
+{% endif %}
+{% endblock %}
