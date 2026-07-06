@@ -3328,6 +3328,9 @@ def master_edit(id):
         else:
             db.execute('DELETE FROM mortality_records WHERE tag_id = ?', (tag_no,))
         
+        if status in ['Sold', 'Expired', 'Dead']:
+            db.execute('DELETE FROM eligible_to_sell WHERE tag_id = ?', (tag_no,))
+            
         db.commit()
         flash('Master record updated successfully!', 'success')
         return redirect(url_for('master'))
@@ -3828,6 +3831,7 @@ def eligible_to_sell():
                ets.date_added
         FROM eligible_to_sell ets
         LEFT JOIN master_records mr ON ets.tag_id = mr.tag_no
+        WHERE COALESCE(LOWER(mr.status), 'active') NOT IN ('sold', 'expired', 'dead')
         ORDER BY ets.date_added DESC
     ''').fetchall()
     eligible_goats = [dict(row) for row in eligible_goats_raw]
@@ -3842,7 +3846,7 @@ def populate_eligible():
     goats = db.execute('''
         SELECT tag_no, breed, gender, weight_kg
         FROM master_records
-        WHERE weight_kg > 25 AND status != 'Sold' AND status IS NOT NULL
+        WHERE weight_kg > 25 AND COALESCE(LOWER(status), '') NOT IN ('sold', 'expired', 'dead')
     ''').fetchall()
     
     today = datetime.now().strftime('%Y-%m-%d')
@@ -6697,7 +6701,7 @@ def equipment_purchases():
 def inject_eligible_goats_count():
     try:
         db = get_db()
-        count = db.execute("SELECT COUNT(*) FROM master_records WHERE weight_kg >= 25 AND status != 'Sold' AND status IS NOT NULL").fetchone()[0] or 0
+        count = db.execute("SELECT COUNT(*) FROM master_records WHERE weight_kg >= 25 AND COALESCE(LOWER(status), '') NOT IN ('sold', 'expired', 'dead')").fetchone()[0] or 0
         return dict(eligible_sales_count=count)
     except Exception:
         return dict(eligible_sales_count=0)
@@ -6755,7 +6759,7 @@ def api_notifications():
         goats = db.execute('''
             SELECT tag_no, color, weight_kg 
             FROM master_records 
-            WHERE weight_kg >= 25 AND (status != 'Sold' OR status IS NULL)
+            WHERE weight_kg >= 25 AND COALESCE(LOWER(status), '') NOT IN ('sold', 'expired', 'dead')
         ''').fetchall()
         
         # Check if already added to eligible to sell to avoid redundant prompt or to handle UI gracefully
