@@ -599,6 +599,22 @@ def init_db():
             )
         ''')
         conn.execute('''
+            CREATE TABLE IF NOT EXISTS goat_weights (
+                id SERIAL PRIMARY KEY,
+                goat_tag_no TEXT NOT NULL REFERENCES master_records(tag_no) ON DELETE CASCADE,
+                weight REAL NOT NULL,
+                unit TEXT NOT NULL DEFAULT 'kg',
+                recorded_date DATE NOT NULL,
+                recorded_by TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
+        try:
+            conn.execute('CREATE INDEX IF NOT EXISTS idx_goat_weights_tag_no ON goat_weights(goat_tag_no)')
+            conn.execute('CREATE INDEX IF NOT EXISTS idx_goat_weights_recorded_date ON goat_weights(recorded_date)')
+        except Exception:
+            pass
+        conn.execute('''
             CREATE TABLE IF NOT EXISTS other_sales_records (
                 id SERIAL PRIMARY KEY,
                 sr_no TEXT,
@@ -1124,24 +1140,22 @@ def init_db():
             for row in null_records:
                 current_si += 1
                 conn.execute("UPDATE master_records SET si_no = ? WHERE id = ?", (str(current_si), row[0]))
-        # --- GOAT WEIGHT LOGS TABLE ---
+        # --- GOAT WEIGHTS TABLE ---
         # Tracks the full weight history for every goat (initial + each update)
         conn.execute('''
-            CREATE TABLE IF NOT EXISTS goat_weight_logs (
+            CREATE TABLE IF NOT EXISTS goat_weights (
                 id SERIAL PRIMARY KEY,
-                tag_no TEXT NOT NULL,
-                weight_kg REAL NOT NULL,
+                goat_tag_no TEXT NOT NULL REFERENCES master_records(tag_no) ON DELETE CASCADE,
+                weight REAL NOT NULL,
+                unit TEXT NOT NULL DEFAULT 'kg',
                 recorded_date DATE NOT NULL,
                 recorded_by TEXT,
-                notes TEXT
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         ''')
         try:
-            conn.execute('ALTER TABLE goat_weight_logs ADD COLUMN IF NOT EXISTS recorded_by TEXT')
-        except Exception:
-            pass
-        try:
-            conn.execute('ALTER TABLE goat_weight_logs ADD COLUMN IF NOT EXISTS notes TEXT')
+            conn.execute('CREATE INDEX IF NOT EXISTS idx_goat_weights_tag_no ON goat_weights(goat_tag_no)')
+            conn.execute('CREATE INDEX IF NOT EXISTS idx_goat_weights_recorded_date ON goat_weights(recorded_date)')
         except Exception:
             pass
 
@@ -1310,7 +1324,10 @@ def check_db_connection():
 
 @app.before_request
 def require_login():
-    allowed_routes = ['auth.login', 'static', 'goats', 'goat_detail', 'auth.mfa_verify_login']
+    allowed_routes = [
+        'auth.login', 'static', 'goats', 'goat_detail', 'auth.mfa_verify_login',
+        'get_goat_weights_api', 'post_goat_weights_api',
+    ]
     if request.endpoint not in allowed_routes and 'user_id' not in session:
         return redirect(url_for('auth.login'))
 
@@ -1834,9 +1851,9 @@ def master_add():
                 if initial_weight_val > 0:
                     weight_date = f.get('purchase_date') or datetime.now().strftime('%Y-%m-%d')
                     db.execute('''
-                        INSERT INTO goat_weight_logs (tag_no, weight_kg, recorded_date, recorded_by, notes)
-                        VALUES (?, ?, ?, ?, ?)
-                    ''', (f.get('tag_no'), initial_weight_val, weight_date, session.get('username', 'admin'), 'Initial weight on goat registration'))
+                        INSERT INTO goat_weights (goat_tag_no, weight, unit, recorded_date, recorded_by)
+                        VALUES (?, ?, 'kg', ?, ?)
+                    ''', (f.get('tag_no'), initial_weight_val, weight_date, session.get('username', 'admin')))
             except (ValueError, TypeError):
                 pass
         # Connected Auto-Entry Generation Logic
@@ -3344,10 +3361,10 @@ def master_edit(id):
             old_weight_val = float(old_record['weight_kg'] or 0) if old_record else 0.0
             if new_weight_val > 0 and new_weight_val != old_weight_val:
                 db.execute('''
-                    INSERT INTO goat_weight_logs (tag_no, weight_kg, recorded_date, recorded_by, notes)
-                    VALUES (?, ?, ?, ?, ?)
+                    INSERT INTO goat_weights (goat_tag_no, weight, unit, recorded_date, recorded_by)
+                    VALUES (?, ?, 'kg', ?, ?)
                 ''', (f.get('tag_no'), new_weight_val, datetime.now().strftime('%Y-%m-%d'),
-                      session.get('username', 'admin'), 'Weight updated via master edit'))
+                      session.get('username', 'admin')))
         except (ValueError, TypeError):
             pass
 
@@ -7080,23 +7097,23 @@ def goat_weights():
 
     db = get_db()
 
-    # Backfill: for existing goats that have a weight but no log entry yet,
-    # create a single baseline entry so they appear in the report.
+    # Backfill: for existing active/sold/etc. goats that have a weight but no log entry yet,
+    # create a single baseline entry in goat_weights so they appear in the report.
     existing_goats = db.execute(
         "SELECT tag_no, weight_kg, purchase_date FROM master_records WHERE weight_kg IS NOT NULL AND weight_kg > 0"
     ).fetchall()
     for g in existing_goats:
         already_logged = db.execute(
-            "SELECT 1 FROM goat_weight_logs WHERE tag_no = ?", (g['tag_no'],)
+            "SELECT 1 FROM goat_weights WHERE goat_tag_no = ?", (g['tag_no'],)
         ).fetchone()
         if not already_logged:
             baseline_date = g['purchase_date'] or datetime.now().strftime('%Y-%m-%d')
             if hasattr(baseline_date, 'strftime'):
                 baseline_date = baseline_date.strftime('%Y-%m-%d')
             db.execute('''
-                INSERT INTO goat_weight_logs (tag_no, weight_kg, recorded_date, recorded_by, notes)
-                VALUES (?, ?, ?, ?, ?)
-            ''', (g['tag_no'], g['weight_kg'], baseline_date, 'system', 'Baseline weight (backfilled)'))
+                INSERT INTO goat_weights (goat_tag_no, weight, unit, recorded_date, recorded_by)
+                VALUES (?, ?, 'kg', ?, 'system')
+            ''', (g['tag_no'], g['weight_kg'], baseline_date))
     db.commit()
 
     # Get filter parameters
@@ -7105,7 +7122,7 @@ def goat_weights():
 
     # Fetch all distinct years and months that have weight log entries (for filter dropdowns)
     all_years = db.execute(
-        "SELECT DISTINCT EXTRACT(YEAR FROM recorded_date)::INTEGER AS yr FROM goat_weight_logs ORDER BY yr DESC"
+        "SELECT DISTINCT EXTRACT(YEAR FROM recorded_date)::INTEGER AS yr FROM goat_weights ORDER BY yr DESC"
     ).fetchall()
     all_months = [
         (1, 'January'), (2, 'February'), (3, 'March'), (4, 'April'),
@@ -7124,7 +7141,7 @@ def goat_weights():
 
         # Build weight history query with optional year/month filter
         params = [tag]
-        where_clauses = ["tag_no = ?"]
+        where_clauses = ["goat_tag_no = ?"]
         if filter_year:
             where_clauses.append("EXTRACT(YEAR FROM recorded_date)::INTEGER = ?")
             params.append(int(filter_year))
@@ -7134,23 +7151,19 @@ def goat_weights():
 
         where_sql = " AND ".join(where_clauses)
         history = db.execute(
-            f"SELECT weight_kg, recorded_date, recorded_by, notes FROM goat_weight_logs WHERE {where_sql} ORDER BY recorded_date ASC, id ASC",
+            f"SELECT weight, unit, recorded_date, recorded_by FROM goat_weights WHERE {where_sql} ORDER BY recorded_date ASC, id ASC",
             tuple(params)
         ).fetchall()
 
-        if not history and (filter_year or filter_month):
-            # No records for this filter — still include card but with empty history
-            pass
-
         # Compute stats from the full history (not filtered) for summary figures
         full_history = db.execute(
-            "SELECT weight_kg, recorded_date FROM goat_weight_logs WHERE tag_no = ? ORDER BY recorded_date ASC, id ASC",
+            "SELECT weight, recorded_date FROM goat_weights WHERE goat_tag_no = ? ORDER BY recorded_date ASC, id ASC",
             (tag,)
         ).fetchall()
 
-        first_weight  = full_history[0]['weight_kg']  if full_history else None
-        latest_weight = full_history[-1]['weight_kg'] if full_history else goat['weight_kg']
-        weight_gain   = round(latest_weight - first_weight, 2) if (first_weight is not None and latest_weight is not None) else None
+        first_weight  = full_history[0]['weight']  if full_history else None
+        latest_weight = full_history[-1]['weight'] if full_history else goat['weight_kg']
+        weight_gain   = round(latest_weight - first_weight, 2) if (first_weight is not None and latest_weight is not None) else 0.0
 
         # Format history entries as plain dicts for the template
         history_list = []
@@ -7159,10 +7172,10 @@ def goat_weights():
             if hasattr(rd, 'strftime'):
                 rd = rd.strftime('%Y-%m-%d')
             history_list.append({
-                'weight_kg':    h['weight_kg'],
+                'weight_kg':    h['weight'],
+                'unit':         h['unit'] or 'kg',
                 'recorded_date': rd,
                 'recorded_by':  h['recorded_by'] or '—',
-                'notes':        h['notes'] or '',
             })
 
         # Calculate age string using the existing helper
@@ -7186,7 +7199,7 @@ def goat_weights():
 
     # Only show goats that have at least one weight log (whether filtered or not)
     goats_with_logs = [g for g in goat_data if db.execute(
-        "SELECT 1 FROM goat_weight_logs WHERE tag_no = ?", (g['tag_no'],)
+        "SELECT 1 FROM goat_weights WHERE goat_tag_no = ?", (g['tag_no'],)
     ).fetchone()]
 
     years_list = [row[0] for row in all_years] if all_years else []
@@ -7200,6 +7213,111 @@ def goat_weights():
         filter_month=int(filter_month) if filter_month else '',
         total_goats=len(goats_with_logs),
     )
+
+@app.route('/goats/<path:tagNo>/weights', methods=['GET'])
+def get_goat_weights_api(tagNo):
+    db = get_db()
+    
+    # Check if goat exists
+    goat = db.execute("SELECT tag_no FROM master_records WHERE tag_no = ?", (tagNo,)).fetchone()
+    if not goat:
+        return jsonify({'success': False, 'error': f"Goat with tag '{tagNo}' not found"}), 404
+        
+    filter_year = request.args.get('year', '')
+    filter_month = request.args.get('month', '')
+    
+    params = [tagNo]
+    where_clauses = ["goat_tag_no = ?"]
+    
+    if filter_year:
+        where_clauses.append("EXTRACT(YEAR FROM recorded_date)::INTEGER = ?")
+        params.append(int(filter_year))
+    if filter_month:
+        where_clauses.append("EXTRACT(MONTH FROM recorded_date)::INTEGER = ?")
+        params.append(int(filter_month))
+        
+    where_sql = " AND ".join(where_clauses)
+    records = db.execute(
+        f"SELECT id, weight, unit, recorded_date, recorded_by, created_at FROM goat_weights WHERE {where_sql} ORDER BY recorded_date DESC, id DESC",
+        tuple(params)
+    ).fetchall()
+    
+    result = []
+    for r in records:
+        rd = r['recorded_date']
+        if hasattr(rd, 'strftime'):
+            rd = rd.strftime('%Y-%m-%d')
+        ca = r['created_at']
+        if hasattr(ca, 'isoformat'):
+            ca = ca.isoformat()
+        result.append({
+            'id': r['id'],
+            'weight': r['weight'],
+            'unit': r['unit'],
+            'recorded_date': rd,
+            'recorded_by': r['recorded_by'],
+            'created_at': ca
+        })
+        
+    return jsonify({'success': True, 'records': result})
+
+@app.route('/goats/<path:tagNo>/weights', methods=['POST'])
+@csrf.exempt
+def post_goat_weights_api(tagNo):
+    db = get_db()
+    
+    # Check if goat exists
+    goat = db.execute("SELECT tag_no FROM master_records WHERE tag_no = ?", (tagNo,)).fetchone()
+    if not goat:
+        return jsonify({'success': False, 'error': f"Goat with tag '{tagNo}' not found"}), 404
+        
+    # Get parameters
+    if request.is_json:
+        data = request.get_json() or {}
+    else:
+        data = request.form
+        
+    weight_val = data.get('weight')
+    recorded_date = data.get('recorded_date')
+    recorded_by = data.get('recorded_by') or session.get('username') or 'API'
+    unit = data.get('unit') or 'kg'
+    
+    # Validation
+    if not weight_val:
+        return jsonify({'success': False, 'error': 'Weight parameter is required'}), 400
+    if not recorded_date:
+        return jsonify({'success': False, 'error': 'recorded_date parameter is required'}), 400
+        
+    try:
+        weight = float(weight_val)
+    except (ValueError, TypeError):
+        return jsonify({'success': False, 'error': 'Weight must be a valid number'}), 400
+        
+    if weight <= 0:
+        return jsonify({'success': False, 'error': 'Weight must be a positive number greater than zero'}), 400
+        
+    # Duplicate check: exact same goat + same date
+    existing = db.execute(
+        "SELECT 1 FROM goat_weights WHERE goat_tag_no = ? AND recorded_date = ?",
+        (tagNo, recorded_date)
+    ).fetchone()
+    if existing:
+        return jsonify({'success': False, 'error': f"A weight record already exists for goat {tagNo} on {recorded_date}."}), 400
+        
+    # Insert new record
+    db.execute('''
+        INSERT INTO goat_weights (goat_tag_no, weight, unit, recorded_date, recorded_by)
+        VALUES (?, ?, ?, ?, ?)
+    ''', (tagNo, weight, unit, recorded_date, recorded_by))
+    
+    # Update latest weight in master_records
+    db.execute(
+        "UPDATE master_records SET weight_kg = ? WHERE tag_no = ?",
+        (weight, tagNo)
+    )
+    db.commit()
+    
+    return jsonify({'success': True, 'message': 'Weight entry added successfully'}), 201
 
 if __name__ == '__main__':
     # Default to production-safe settings when running directly.

@@ -308,6 +308,23 @@ def migrate():
         add_column(table_name, 'bill_date', 'DATE')
         add_column(table_name, 'bill_no', 'TEXT')
 
+    # --- 12. GOAT WEIGHTS ---
+    print("Checking goat_weights table and indexes...")
+    cursor.execute('''CREATE TABLE IF NOT EXISTS goat_weights (
+        id SERIAL PRIMARY KEY,
+        goat_tag_no TEXT NOT NULL REFERENCES master_records(tag_no) ON DELETE CASCADE,
+        weight REAL NOT NULL,
+        unit TEXT NOT NULL DEFAULT 'kg',
+        recorded_date DATE NOT NULL,
+        recorded_by TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )''')
+    try:
+        cursor.execute('CREATE INDEX IF NOT EXISTS idx_goat_weights_tag_no ON goat_weights(goat_tag_no)')
+        cursor.execute('CREATE INDEX IF NOT EXISTS idx_goat_weights_recorded_date ON goat_weights(recorded_date)')
+    except Exception as e:
+        print(f"Error creating indexes on goat_weights: {e}")
+
     print("Database migration successfully completed.")
     conn.close()
 
