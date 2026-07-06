@@ -6298,20 +6298,27 @@ def pnl():
         
     for p in purchases_list:
         amt = p['amount'] or 0.0
-        group, ledger, particular = resolve_account_details(p['particular_id'], p['pnl_category'], 'Purchase', p['detail'])
-        classify_and_add(group, ledger, particular, amt)
-        
-        group_type = ledger_groups_dict.get(group, 'Expense')
-        if group_type == 'Expense':
-            if group == 'Direct Expenses':
-                total_direct_expenses += amt
-            else:
-                total_indirect_expenses += amt
+        # Purchases (COGS) are counted separately in total_purchases_sum.
+        # Do NOT add them to total_direct_expenses to avoid double-counting with the
+        # expenses loop below (which also reads the duplicate rows inserted into `expenses`).
         total_purchases_sum += amt
         
-    # --- EXPENSES LEDGERS (DIRECT vs INDIRECT) ---
+    # Build a purchases tree for template display
+    purchases_tree = {}  # group -> {entries: [{label, amount}], total}
+    for p in purchases_list:
+        amt = p['amount'] or 0.0
+        label = p['detail']
+        ptype = p['type']
+        if ptype not in purchases_tree:
+            purchases_tree[ptype] = {'entries': [], 'total': 0.0}
+        purchases_tree[ptype]['entries'].append({'label': label, 'amount': amt})
+        purchases_tree[ptype]['total'] += amt
+
+    # IMPORTANT: Exclude rows with pnl_category='Purchase' — those are duplicate rows
+    # auto-inserted when goat/feed/medicine/vaccine purchases are recorded via vouchers.
+    # Those amounts are already captured from their respective purchase tables above.
     expenses_rows = db.execute(
-        "SELECT id, category, amount, date, description, vendor_name, pnl_category, particular_id FROM expenses WHERE status IN ('Approved','Paid') AND date BETWEEN ? AND ?",
+        "SELECT id, category, amount, date, description, vendor_name, pnl_category, particular_id FROM expenses WHERE status IN ('Approved','Paid') AND (pnl_category IS NULL OR pnl_category != 'Purchase') AND date BETWEEN ? AND ?",
         (from_date, to_date)
     ).fetchall()
 
@@ -6442,6 +6449,7 @@ def pnl():
                            left_total=max(left_total, right_total),
                            right_total=max(left_total, right_total),
                            ledger_pnl_summary=ledger_pnl_summary,
+                           purchases_tree=purchases_tree,
                            direct_expenses_tree=direct_expenses_tree,
                            indirect_expenses_tree=indirect_expenses_tree,
                            sales_accounts_tree=sales_accounts_tree,

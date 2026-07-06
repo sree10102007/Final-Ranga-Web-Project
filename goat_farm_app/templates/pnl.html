@@ -411,6 +411,28 @@
                         </tr>
                         {% endif %}
                         
+                        <!-- Purchases (COGS) -->
+                        {% if purchases_tree %}
+                        {% for ptype, pdata in purchases_tree.items() %}
+                        {% set pt_loop = loop %}
+                        <tr class="sub-section-row collapsible-header" data-target="purchase-grp-{{ pt_loop.index }}">
+                            <td class="indent-1 fw-bold">
+                                <i class="bi bi-chevron-right toggle-chevron"></i>
+                                <i class="bi bi-cart-check me-2 text-primary"></i>{{ ptype }} Purchase
+                            </td>
+                            <td class="financial-number fw-bold">₹{{ "%.2f"|format(pdata.total) }}</td>
+                        </tr>
+                        {% for entry in pdata.entries %}
+                        <tr class="purchase-grp-{{ pt_loop.index }}-child drilldown-link" style="display: none;" data-category="{{ ptype }}">
+                            <td class="indent-2 text-muted">
+                                <i class="bi bi-tag me-2 text-secondary"></i>{{ entry.label }}
+                            </td>
+                            <td class="financial-number text-muted">₹{{ "%.2f"|format(entry.amount) }}</td>
+                        </tr>
+                        {% endfor %}
+                        {% endfor %}
+                        {% endif %}
+
                         <!-- Direct Expenses -->
                         {% for grp_name, grp_data in direct_expenses_tree.items() %}
                         {% set grp_loop = loop %}
