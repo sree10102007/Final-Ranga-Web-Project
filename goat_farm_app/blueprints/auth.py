@@ -112,10 +112,10 @@ def register():
         return redirect(url_for('auth.login'))
         
     db = get_db()
-    current_user = db.execute('SELECT is_admin, is_developer FROM users WHERE id = ?', (session['user_id'],)).fetchone()
-    if not current_user or (int(current_user['is_admin']) != 1 and int(current_user.get('is_developer', 0)) != 1):
+    current_user = db.execute('SELECT is_admin FROM users WHERE id = ?', (session['user_id'],)).fetchone()
+    if not current_user or int(current_user['is_admin']) != 1:
         log_security_event('UNAUTHORIZED_ACCESS', f"Unauthorized access attempt to registration by user ID {session.get('user_id')}")
-        flash('Only administrators or developers can register new accounts.', 'danger')
+        flash('Only administrators can register new accounts.', 'danger')
         return redirect(url_for('dashboard'))
         
     if request.method == 'POST':
@@ -123,7 +123,6 @@ def register():
         password = request.form['password']
         confirm_password = request.form.get('confirm_password')
         is_admin_flag = 1 if request.form.get('is_admin') else 0
-        is_developer_flag = 1 if request.form.get('is_developer') else 0
         
         if password != confirm_password:
             flash('Passwords do not match.', 'danger')
@@ -150,11 +149,11 @@ def register():
             return redirect(url_for('auth.register'))
             
         password_hash = generate_password_hash(password)
-        db.execute('INSERT INTO users (username, password, password_history, is_admin, is_developer) VALUES (?, ?, ?, ?, ?)',
-                   (username, password_hash, password_hash, is_admin_flag, is_developer_flag))
+        db.execute('INSERT INTO users (username, password, password_history, is_admin) VALUES (?, ?, ?, ?)',
+                   (username, password_hash, password_hash, is_admin_flag))
         db.commit()
         
-        log_security_event('USER_REGISTRATION', f"New user {username} (admin={is_admin_flag}, dev={is_developer_flag}) successfully registered by admin/dev {session.get('username')}", username=username)
+        log_security_event('USER_REGISTRATION', f"New user {username} (admin={is_admin_flag}) successfully registered by admin {session.get('username')}", username=username)
         flash('Registration successful!', 'success')
         return redirect(url_for('auth.manage_users'))
         
@@ -165,13 +164,13 @@ def manage_users():
     if 'user_id' not in session:
         return redirect(url_for('auth.login'))
     db = get_db()
-    current_user = db.execute('SELECT is_admin, is_developer FROM users WHERE id = ?', (session['user_id'],)).fetchone()
-    if not current_user or (int(current_user['is_admin']) != 1 and int(current_user.get('is_developer', 0)) != 1):
+    current_user = db.execute('SELECT is_admin FROM users WHERE id = ?', (session['user_id'],)).fetchone()
+    if not current_user or int(current_user['is_admin']) != 1:
         log_security_event('UNAUTHORIZED_ACCESS', "Unauthorized access attempt to manage_users")
-        flash('Administrator or developer privileges required.', 'danger')
+        flash('Administrator privileges required.', 'danger')
         return redirect(url_for('dashboard'))
         
-    users = db.execute('SELECT id, username, is_admin, is_developer, mfa_enabled, login_attempts, locked_until FROM users ORDER BY id').fetchall()
+    users = db.execute('SELECT id, username, is_admin, mfa_enabled, login_attempts, locked_until FROM users ORDER BY id').fetchall()
     return render_template('manage_users.html', users=users)
 
 @auth_bp.route('/delete_user/<int:user_id>', methods=['POST'])
@@ -179,10 +178,10 @@ def delete_user(user_id):
     if 'user_id' not in session:
         return redirect(url_for('auth.login'))
     db = get_db()
-    current_user = db.execute('SELECT is_admin, is_developer FROM users WHERE id = ?', (session['user_id'],)).fetchone()
-    if not current_user or (int(current_user['is_admin']) != 1 and int(current_user.get('is_developer', 0)) != 1):
+    current_user = db.execute('SELECT is_admin FROM users WHERE id = ?', (session['user_id'],)).fetchone()
+    if not current_user or int(current_user['is_admin']) != 1:
         log_security_event('UNAUTHORIZED_ACCESS', f"Unauthorized user deletion attempt by user ID {session.get('user_id')}")
-        flash('Administrator or developer privileges required.', 'danger')
+        flash('Administrator privileges required.', 'danger')
         return redirect(url_for('dashboard'))
         
     if user_id == session['user_id']:
@@ -194,7 +193,7 @@ def delete_user(user_id):
         db.execute('DELETE FROM user_login_tracking WHERE user_id = ?', (user_id,))
         db.execute('DELETE FROM users WHERE id = ?', (user_id,))
         db.commit()
-        log_security_event('USER_DELETION', f"User {user['username']} deleted by admin/dev {session.get('username')}", username=user['username'])
+        log_security_event('USER_DELETION', f"User {user['username']} deleted by admin {session.get('username')}", username=user['username'])
         flash('User deleted successfully.', 'success')
     else:
         flash('User not found.', 'danger')
@@ -206,17 +205,17 @@ def unlock_user(user_id):
     if 'user_id' not in session:
         return redirect(url_for('auth.login'))
     db = get_db()
-    current_user = db.execute('SELECT is_admin, is_developer FROM users WHERE id = ?', (session['user_id'],)).fetchone()
-    if not current_user or (int(current_user['is_admin']) != 1 and int(current_user.get('is_developer', 0)) != 1):
+    current_user = db.execute('SELECT is_admin FROM users WHERE id = ?', (session['user_id'],)).fetchone()
+    if not current_user or int(current_user['is_admin']) != 1:
         log_security_event('UNAUTHORIZED_ACCESS', f"Unauthorized user unlock attempt by user ID {session.get('user_id')}")
-        flash('Administrator or developer privileges required.', 'danger')
+        flash('Administrator privileges required.', 'danger')
         return redirect(url_for('dashboard'))
         
     user = db.execute('SELECT username FROM users WHERE id = ?', (user_id,)).fetchone()
     if user:
         db.execute('UPDATE users SET login_attempts = 0, locked_until = NULL WHERE id = ?', (user_id,))
         db.commit()
-        log_security_event('USER_UNLOCK', f"User {user['username']} unlocked by admin/dev {session.get('username')}", username=user['username'])
+        log_security_event('USER_UNLOCK', f"User {user['username']} unlocked by admin {session.get('username')}", username=user['username'])
         flash('User account unlocked successfully.', 'success')
     else:
         flash('User not found.', 'danger')
