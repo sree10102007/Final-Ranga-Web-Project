@@ -5134,8 +5134,35 @@ def attendance_summary():
         LEFT JOIN attendance a ON e.id=a.employee_id
             AND TO_CHAR(a.date, 'MM') = ? AND TO_CHAR(a.date, 'YYYY') = ?
         GROUP BY e.id ORDER BY CAST(e.sr_no AS INTEGER) ASC''', (month, year)).fetchall()
+    
+    # Calculate total working days in this month/year dynamically
+    try:
+        working_days_row = db.execute('''
+            SELECT COUNT(DISTINCT date) 
+            FROM attendance 
+            WHERE TO_CHAR(date, 'MM') = ? AND TO_CHAR(date, 'YYYY') = ?
+        ''', (month, year)).fetchone()
+        working_days = working_days_row[0] or 0 if working_days_row else 0
+    except Exception:
+        try:
+            working_days_row = db.execute('''
+                SELECT COUNT(DISTINCT date) 
+                FROM attendance 
+                WHERE strftime('%m', date) = ? AND strftime('%Y', date) = ?
+            ''', (month, year)).fetchone()
+            working_days = working_days_row[0] or 0 if working_days_row else 0
+        except Exception:
+            working_days = 0
+            
+    if working_days == 0:
+        import calendar
+        try:
+            working_days = calendar.monthrange(int(year), int(month))[1]
+        except Exception:
+            working_days = 30
+            
     farm = db.execute('SELECT * FROM farm_info LIMIT 1').fetchone()
-    return render_template('attendance_summary.html', data=data, month=month, year=year, farm=farm)
+    return render_template('attendance_summary.html', data=data, month=month, year=year, farm=farm, working_days=working_days)
 
 @app.route('/salary_calculate', methods=['GET', 'POST'])
 def salary_calculate():

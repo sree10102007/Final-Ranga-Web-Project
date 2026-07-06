@@ -12,7 +12,7 @@
     
     @page {
         size: A4 portrait;
-        margin: 1.2cm 1cm 1.2cm 1cm;
+        margin: 15mm 12mm 15mm 12mm;
     }
     
     /* Ensure content area is full width on standard A4 paper */
@@ -22,8 +22,9 @@
         margin: 0 !important;
         padding: 0 !important;
         background: #fff !important;
-        color: #111 !important;
-        font-family: 'Outfit', 'Inter', sans-serif !important;
+        color: #000 !important;
+        font-family: 'Inter', 'Outfit', sans-serif !important;
+        font-size: 11px !important;
     }
     
     .card {
@@ -43,11 +44,9 @@
         display: flex !important;
         justify-content: space-between !important;
         align-items: flex-start !important;
-        border-bottom: 3px solid #198754 !important;
-        padding-bottom: 12px !important;
-        margin-bottom: 20px !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
+        border-bottom: 2px solid #000 !important;
+        padding-bottom: 8px !important;
+        margin-bottom: 15px !important;
     }
     
     .print-header-left {
@@ -56,18 +55,18 @@
     }
     
     .print-header-left h2 {
-        font-size: 20px !important;
-        font-weight: 800 !important;
-        color: #0f5132 !important;
+        font-size: 18px !important;
+        font-weight: bold !important;
+        color: #000 !important;
         margin: 0 0 4px 0 !important;
         text-transform: uppercase !important;
     }
     
     .print-header-left p {
-        font-size: 11px !important;
-        color: #555 !important;
+        font-size: 10px !important;
+        color: #333 !important;
         margin: 0 !important;
-        line-height: 1.4 !important;
+        line-height: 1.3 !important;
     }
     
     .print-header-right {
@@ -76,17 +75,16 @@
     }
     
     .print-header-right h3 {
-        font-size: 16px !important;
-        font-weight: 700 !important;
-        color: #111 !important;
-        margin: 0 0 6px 0 !important;
+        font-size: 14px !important;
+        font-weight: bold !important;
+        color: #000 !important;
+        margin: 0 0 4px 0 !important;
         text-transform: uppercase !important;
-        letter-spacing: 0.5px !important;
     }
     
     .print-header-right p {
-        font-size: 11px !important;
-        color: #555 !important;
+        font-size: 10px !important;
+        color: #333 !important;
         margin: 0 0 2px 0 !important;
     }
     
@@ -94,38 +92,31 @@
     .print-metrics-row {
         display: flex !important;
         justify-content: space-between !important;
-        gap: 12px !important;
-        margin-bottom: 25px !important;
+        gap: 10px !important;
+        margin-bottom: 20px !important;
     }
     
     .print-metric-card {
         flex: 1 !important;
-        border: 1px solid #ddd !important;
-        border-radius: 6px !important;
-        padding: 10px 8px !important;
+        border: 1px solid #000 !important;
+        border-radius: 4px !important;
+        padding: 8px 6px !important;
         text-align: center !important;
-        background-color: #fcfdfe !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
+        background-color: #fff !important;
     }
     
-    .print-metric-card.border-present { border-left: 4px solid #198754 !important; }
-    .print-metric-card.border-leave { border-left: 4px solid #0dcaf0 !important; }
-    .print-metric-card.border-staff { border-left: 4px solid #6c757d !important; }
-    
     .print-metric-card h6 {
-        font-size: 9px !important;
+        font-size: 8px !important;
         text-transform: uppercase !important;
-        color: #555 !important;
-        margin: 0 0 4px 0 !important;
+        color: #000 !important;
+        margin: 0 0 2px 0 !important;
         font-weight: bold !important;
-        letter-spacing: 0.3px !important;
     }
     
     .print-metric-card h3 {
-        font-size: 14px !important;
-        font-weight: 800 !important;
-        color: #111 !important;
+        font-size: 13px !important;
+        font-weight: bold !important;
+        color: #000 !important;
         margin: 0 !important;
     }
     
@@ -133,9 +124,8 @@
     table {
         width: 100% !important;
         border-collapse: collapse !important;
-        margin-top: 15px !important;
-        font-size: 11px !important;
-        table-layout: fixed !important;
+        margin-top: 10px !important;
+        font-size: 10px !important;
     }
     
     .table-responsive {
@@ -143,40 +133,27 @@
     }
     
     th, td {
-        border: 1px solid #dee2e6 !important;
-        padding: 7px 5px !important;
-        text-align: center !important;
+        border: 1px solid #000 !important;
+        padding: 5px 4px !important;
         vertical-align: middle !important;
     }
     
     th {
-        background-color: #0f5132 !important;
-        color: #ffffff !important;
+        background-color: #f2f2f2 !important;
+        color: #000 !important;
         font-weight: bold !important;
         text-transform: uppercase !important;
-        font-size: 10px !important;
-        letter-spacing: 0.3px !important;
-        white-space: normal !important;
-        word-wrap: break-word !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
+        font-size: 9px !important;
+        text-align: center !important;
     }
     
-    td {
-        white-space: nowrap !important;
-    }
+    td.text-start { text-align: left !important; }
+    td.text-center { text-align: center !important; }
+    td.text-end { text-align: right !important; }
     
     tr:nth-child(even) {
-        background-color: #f8f9fa !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
+        background-color: #fafafa !important;
     }
-    
-    /* Strict Column Width Allocations */
-    th:nth-child(1), td:nth-child(1) { width: 40% !important; }  /* Employee Name */
-    th:nth-child(2), td:nth-child(2) { width: 20% !important; }  /* Present */
-    th:nth-child(3), td:nth-child(3) { width: 20% !important; }  /* Leave */
-    th:nth-child(4), td:nth-child(4) { width: 20% !important; }  /* Total Payable Days */
     
     .badge {
         background: transparent !important;
@@ -184,28 +161,31 @@
         border: none !important;
         padding: 0 !important;
         margin: 0 !important;
-        font-size: 11px !important;
-        font-weight: bold !important;
+        font-size: 10px !important;
+        font-weight: normal !important;
         display: inline !important;
     }
     
-    .text-success, .text-danger, .text-info, .text-dark, .fw-bold {
+    .print-summary-row td {
         font-weight: bold !important;
+        background-color: #f2f2f2 !important;
+        border-top: 2px solid #000 !important;
+        border-bottom: 2px solid #000 !important;
     }
-    
-    .text-success { color: #198754 !important; }
-    .text-danger { color: #dc3545 !important; }
-    .text-info { color: #0dcaf0 !important; }
     
     tr {
         page-break-inside: avoid !important;
+    }
+    
+    thead {
+        display: table-header-group !important;
     }
     
     /* Print Signatures Block */
     .print-signatures {
         display: flex !important;
         justify-content: space-between !important;
-        margin-top: 50px !important;
+        margin-top: 40px !important;
         page-break-inside: avoid !important;
     }
     
@@ -215,24 +195,44 @@
     }
     
     .signature-line {
-        border-top: 1px solid #6c757d !important;
-        margin-top: 45px !important;
+        border-top: 1px solid #000 !important;
+        margin-top: 40px !important;
         padding-top: 4px !important;
-        font-size: 11px !important;
-        color: #495057 !important;
-        font-weight: 600 !important;
+        font-size: 10px !important;
+        color: #000 !important;
+        font-weight: bold !important;
     }
 }
 </style>
+
+<!-- Pre-calculate metrics for print view -->
+{% set total_working = working_days|int %}
+{% set ns_pre = namespace(total_present=0, total_absent=0, total_leave=0, pct_sum=0) %}
+{% for row in data %}
+    {% set p_days = row.present|int %}
+    {% set l_days = row.leave|int %}
+    {% set a_days = total_working - p_days - l_days %}
+    {% if a_days < 0 %}{% set a_days = 0 %}{% endif %}
+    {% set a_pct = 0.0 %}
+    {% if total_working > 0 %}{% set a_pct = (p_days / total_working) * 100 %}{% endif %}
+    {% set ns_pre.total_present = ns_pre.total_present + p_days %}
+    {% set ns_pre.total_absent = ns_pre.total_absent + a_days %}
+    {% set ns_pre.total_leave = ns_pre.total_leave + l_days %}
+    {% set ns_pre.pct_sum = ns_pre.pct_sum + a_pct %}
+{% endfor %}
+{% set avg_pct = 0.0 %}
+{% if data|length > 0 %}
+    {% set avg_pct = ns_pre.pct_sum / data|length %}
+{% endif %}
 
 <div class="container mt-4">
     <!-- Printable Header (Only visible when printing / PDF saving) -->
     <div id="printable-header" class="d-none d-print-block">
         <div class="print-header">
             <div class="print-header-left">
-                <h2>{{ farm.farm_name }}</h2>
-                <p class="mb-1"><i class="fas fa-map-marker-alt me-1"></i> {{ farm.address }}</p>
-                {% if farm.phone %}<p class="mb-0"><i class="fas fa-phone me-1"></i> Phone: {{ farm.phone }}</p>{% endif %}
+                <h2>{{ farm.farm_name if farm else 'Ranga Farms' }}</h2>
+                <p class="mb-1"><i class="fas fa-map-marker-alt me-1"></i> {{ farm.address if farm else 'Aandigounder Street, Pachapalayam, Perur, Coimbatore 641010' }}</p>
+                {% if farm and farm.phone %}<p class="mb-0"><i class="fas fa-phone me-1"></i> Phone: {{ farm.phone }}</p>{% endif %}
             </div>
             <div class="print-header-right">
                 <h3>Monthly Attendance Summary</h3>
@@ -242,23 +242,26 @@
         </div>
         
         <!-- Print Summary Metrics -->
-        {% set ns = namespace(total_present=0, total_leave=0) %}
-        {% for row in data %}
-            {% set ns.total_present = ns.total_present + row.present|int %}
-            {% set ns.total_leave = ns.total_leave + row.leave|int %}
-        {% endfor %}
         <div class="print-metrics-row">
-            <div class="print-metric-card border-staff">
-                <h6>Total Staff</h6>
+            <div class="print-metric-card">
+                <h6>Total Employees</h6>
                 <h3>{{ data|length }}</h3>
             </div>
-            <div class="print-metric-card border-present">
-                <h6>Total Present Days</h6>
-                <h3>{{ ns.total_present }}</h3>
+            <div class="print-metric-card">
+                <h6>Total Working Days</h6>
+                <h3>{{ total_working }}</h3>
             </div>
-            <div class="print-metric-card border-leave">
-                <h6>Total Leave Days</h6>
-                <h3>{{ ns.total_leave }}</h3>
+            <div class="print-metric-card">
+                <h6>Total Present Days</h6>
+                <h3>{{ ns_pre.total_present }}</h3>
+            </div>
+            <div class="print-metric-card">
+                <h6>Total Absent Days</h6>
+                <h3>{{ ns_pre.total_absent }}</h3>
+            </div>
+            <div class="print-metric-card">
+                <h6>Average Attendance %</h6>
+                <h3>{{ "%.1f"|format(avg_pct) }}%</h3>
             </div>
         </div>
     </div>
@@ -315,30 +318,65 @@
             <table id="printable-table" class="table table-hover mb-0 align-middle">
                 <thead class="bg-light text-muted small fw-bold text-center">
                     <tr>
-                        <th class="text-center py-3">Employee Name</th>
-                        <th class="text-center py-3">Present</th>
-                        <th class="text-center py-3">Leave</th>
-                        <th class="text-center py-3">Total Payable Days</th>
+                        <th class="text-center py-3" style="width: 8%;">S.No</th>
+                        <th class="text-start py-3" style="width: 32%;">Employee Name</th>
+                        <th class="text-center py-3" style="width: 12%;">Working Days</th>
+                        <th class="text-center py-3" style="width: 12%;">Present Days</th>
+                        <th class="text-center py-3" style="width: 12%;">Absent Days</th>
+                        <th class="text-center py-3" style="width: 12%;">Leave Days</th>
+                        <th class="text-end py-3" style="width: 12%;">Attendance %</th>
                     </tr>
                 </thead>
                 <tbody>
+                    {% set ns = namespace(total_present=0, total_absent=0, total_leave=0, pct_sum=0) %}
                     {% for row in data %}
-                    <tr class="text-center">
-                        <td class="py-3 fw-bold text-dark text-center">{{ row.name }}</td>
-                        <td class="py-3 text-center"><span class="badge bg-success px-3">{{ row.present }}</span></td>
-                        <td class="py-3 text-center"><span class="badge bg-info text-dark px-3">{{ row.leave }}</span></td>
-                        <td class="py-3 fw-bold text-primary text-center">
-                            {{ row.present }} Days
-                        </td>
-                    </tr>
+                        {% set present_days = row.present|int %}
+                        {% set leave_days = row.leave|int %}
+                        {% set absent_days = total_working - present_days - leave_days %}
+                        {% if absent_days < 0 %}{% set absent_days = 0 %}{% endif %}
+                        
+                        {% set att_pct = 0.0 %}
+                        {% if total_working > 0 %}
+                            {% set att_pct = (present_days / total_working) * 100 %}
+                        {% endif %}
+                        
+                        {% set ns.total_present = ns.total_present + present_days %}
+                        {% set ns.total_absent = ns.total_absent + absent_days %}
+                        {% set ns.total_leave = ns.total_leave + leave_days %}
+                        {% set ns.pct_sum = ns.pct_sum + att_pct %}
+                        
+                        <tr class="align-middle">
+                            <td class="text-center py-3">{{ loop.index }}</td>
+                            <td class="text-start py-3 fw-bold text-dark">{{ row.name }}</td>
+                            <td class="text-center py-3">{{ total_working }}</td>
+                            <td class="text-center py-3"><span class="badge bg-success-subtle text-success px-2.5 py-1 border border-success-subtle rounded-pill">{{ present_days }}</span></td>
+                            <td class="text-center py-3"><span class="badge bg-danger-subtle text-danger px-2.5 py-1 border border-danger-subtle rounded-pill">{{ absent_days }}</span></td>
+                            <td class="text-center py-3"><span class="badge bg-info-subtle text-info px-2.5 py-1 border border-info-subtle rounded-pill">{{ leave_days }}</span></td>
+                            <td class="text-end py-3 fw-bold text-dark">{{ "%.1f"|format(att_pct) }}%</td>
+                        </tr>
                     {% else %}
                     <tr>
-                        <td colspan="8" class="text-center py-5 text-muted">
+                        <td colspan="7" class="text-center py-5 text-muted">
                             <i class="bi bi-calendar-x d-block mb-3" data-style="font-size: 2.5rem; opacity: 0.5;"></i>
                             No employees found to generate a summary.
                         </td>
                     </tr>
                     {% endfor %}
+                    
+                    {% if data %}
+                    {% set avg_pct = 0.0 %}
+                    {% if data|length > 0 %}
+                        {% set avg_pct = ns.pct_sum / data|length %}
+                    {% endif %}
+                    <tr class="fw-bold bg-light text-dark align-middle print-summary-row">
+                        <td colspan="2" class="text-start py-3">Total Summary</td>
+                        <td class="text-center py-3">{{ total_working }}</td>
+                        <td class="text-center py-3 text-success">{{ ns.total_present }}</td>
+                        <td class="text-center py-3 text-danger">{{ ns.total_absent }}</td>
+                        <td class="text-center py-3 text-info">{{ ns.total_leave }}</td>
+                        <td class="text-end py-3 text-success fs-6">{{ "%.1f"|format(avg_pct) }}%</td>
+                    </tr>
+                    {% endif %}
                 </tbody>
             </table>
         </div>

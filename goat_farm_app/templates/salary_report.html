@@ -5,14 +5,14 @@
 {% block content %}
 <style>
 @media print {
-    /* Hide layout chrome, form elements, normal header, and summary boxes during printing */
+    /* Hide layout chrome, form elements, normal header, and filters during printing */
     .sidebar, .navbar, .d-print-none, form, .btn, .alert, i, .fas, .bi, .btn-group {
         display: none !important;
     }
     
     @page {
         size: A4 portrait;
-        margin: 1.2cm 1cm 1.2cm 1cm;
+        margin: 15mm 12mm 15mm 12mm;
     }
     
     /* Ensure content area is full width on standard A4 paper */
@@ -22,8 +22,9 @@
         margin: 0 !important;
         padding: 0 !important;
         background: #fff !important;
-        color: #111 !important;
-        font-family: 'Outfit', 'Inter', sans-serif !important;
+        color: #000 !important;
+        font-family: 'Inter', 'Outfit', sans-serif !important;
+        font-size: 11px !important;
     }
     
     .card {
@@ -43,11 +44,9 @@
         display: flex !important;
         justify-content: space-between !important;
         align-items: flex-start !important;
-        border-bottom: 3px solid #198754 !important;
-        padding-bottom: 12px !important;
-        margin-bottom: 20px !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
+        border-bottom: 2px solid #000 !important;
+        padding-bottom: 8px !important;
+        margin-bottom: 15px !important;
     }
     
     .print-header-left {
@@ -56,18 +55,18 @@
     }
     
     .print-header-left h2 {
-        font-size: 20px !important;
-        font-weight: 800 !important;
-        color: #0f5132 !important;
+        font-size: 18px !important;
+        font-weight: bold !important;
+        color: #000 !important;
         margin: 0 0 4px 0 !important;
         text-transform: uppercase !important;
     }
     
     .print-header-left p {
-        font-size: 11px !important;
-        color: #555 !important;
+        font-size: 10px !important;
+        color: #333 !important;
         margin: 0 !important;
-        line-height: 1.4 !important;
+        line-height: 1.3 !important;
     }
     
     .print-header-right {
@@ -76,17 +75,16 @@
     }
     
     .print-header-right h3 {
-        font-size: 16px !important;
-        font-weight: 700 !important;
-        color: #111 !important;
-        margin: 0 0 6px 0 !important;
+        font-size: 14px !important;
+        font-weight: bold !important;
+        color: #000 !important;
+        margin: 0 0 4px 0 !important;
         text-transform: uppercase !important;
-        letter-spacing: 0.5px !important;
     }
     
     .print-header-right p {
-        font-size: 11px !important;
-        color: #555 !important;
+        font-size: 10px !important;
+        color: #333 !important;
         margin: 0 0 2px 0 !important;
     }
     
@@ -94,39 +92,31 @@
     .print-metrics-row {
         display: flex !important;
         justify-content: space-between !important;
-        gap: 12px !important;
-        margin-bottom: 25px !important;
+        gap: 10px !important;
+        margin-bottom: 20px !important;
     }
     
     .print-metric-card {
         flex: 1 !important;
-        border: 1px solid #ddd !important;
-        border-radius: 6px !important;
-        padding: 10px 8px !important;
+        border: 1px solid #000 !important;
+        border-radius: 4px !important;
+        padding: 8px 6px !important;
         text-align: center !important;
-        background-color: #fcfdfe !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
+        background-color: #fff !important;
     }
     
-    .print-metric-card.border-payable { border-left: 4px solid #0dcaf0 !important; }
-    .print-metric-card.border-paid { border-left: 4px solid #198754 !important; }
-    .print-metric-card.border-pending { border-left: 4px solid #dc3545 !important; }
-    .print-metric-card.border-employees { border-left: 4px solid #6c757d !important; }
-    
     .print-metric-card h6 {
-        font-size: 9px !important;
+        font-size: 8px !important;
         text-transform: uppercase !important;
-        color: #555 !important;
-        margin: 0 0 4px 0 !important;
+        color: #000 !important;
+        margin: 0 0 2px 0 !important;
         font-weight: bold !important;
-        letter-spacing: 0.3px !important;
     }
     
     .print-metric-card h3 {
-        font-size: 14px !important;
-        font-weight: 800 !important;
-        color: #111 !important;
+        font-size: 13px !important;
+        font-weight: bold !important;
+        color: #000 !important;
         margin: 0 !important;
     }
     
@@ -134,9 +124,8 @@
     table {
         width: 100% !important;
         border-collapse: collapse !important;
-        margin-top: 15px !important;
-        font-size: 11px !important;
-        table-layout: fixed !important;
+        margin-top: 10px !important;
+        font-size: 10px !important;
     }
     
     .table-responsive {
@@ -144,44 +133,27 @@
     }
     
     th, td {
-        border: 1px solid #dee2e6 !important;
-        padding: 7px 4px !important;
-        text-align: center !important;
+        border: 1px solid #000 !important;
+        padding: 5px 4px !important;
         vertical-align: middle !important;
     }
     
     th {
-        background-color: #0f5132 !important;
-        color: #ffffff !important;
+        background-color: #f2f2f2 !important;
+        color: #000 !important;
         font-weight: bold !important;
         text-transform: uppercase !important;
         font-size: 9px !important;
-        letter-spacing: 0.2px !important;
-        white-space: normal !important;
-        word-wrap: break-word !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
+        text-align: center !important;
     }
     
-    td {
-        white-space: nowrap !important;
-    }
+    td.text-start { text-align: left !important; }
+    td.text-center { text-align: center !important; }
+    td.text-end { text-align: right !important; }
     
     tr:nth-child(even) {
-        background-color: #f8f9fa !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
+        background-color: #fafafa !important;
     }
-    
-    /* Strict Column Width Allocations (Optimized for space and wrapping) */
-    th:nth-child(1), td:nth-child(1) { width: 5% !important; }   /* Sr# */
-    th:nth-child(2), td:nth-child(2) { width: 20% !important; }  /* Name */
-    th:nth-child(3), td:nth-child(3) { width: 13% !important; }  /* Role */
-    th:nth-child(4), td:nth-child(4) { width: 12% !important; }  /* Daily Wage */
-    th:nth-child(5), td:nth-child(5) { width: 12% !important; }  /* Days Worked */
-    th:nth-child(6), td:nth-child(6) { width: 13% !important; }  /* Paying Amount */
-    th:nth-child(7), td:nth-child(7) { width: 13% !important; }  /* Paid Amount */
-    th:nth-child(8), td:nth-child(8) { width: 12% !important; }  /* Balance Due */
     
     .badge {
         background: transparent !important;
@@ -189,28 +161,31 @@
         border: none !important;
         padding: 0 !important;
         margin: 0 !important;
-        font-size: 11px !important;
-        font-weight: bold !important;
+        font-size: 10px !important;
+        font-weight: normal !important;
         display: inline !important;
     }
     
-    .text-success, .text-danger, .text-info, .text-dark, .fw-bold {
+    .print-summary-row td {
         font-weight: bold !important;
+        background-color: #f2f2f2 !important;
+        border-top: 2px solid #000 !important;
+        border-bottom: 2px solid #000 !important;
     }
-    
-    .text-success { color: #198754 !important; }
-    .text-danger { color: #dc3545 !important; }
-    .text-info { color: #0dcaf0 !important; }
     
     tr {
         page-break-inside: avoid !important;
+    }
+    
+    thead {
+        display: table-header-group !important;
     }
     
     /* Print Signatures Block */
     .print-signatures {
         display: flex !important;
         justify-content: space-between !important;
-        margin-top: 50px !important;
+        margin-top: 40px !important;
         page-break-inside: avoid !important;
     }
     
@@ -220,12 +195,12 @@
     }
     
     .signature-line {
-        border-top: 1px solid #6c757d !important;
-        margin-top: 45px !important;
+        border-top: 1px solid #000 !important;
+        margin-top: 40px !important;
         padding-top: 4px !important;
-        font-size: 11px !important;
-        color: #495057 !important;
-        font-weight: 600 !important;
+        font-size: 10px !important;
+        color: #000 !important;
+        font-weight: bold !important;
     }
 }
 </style>
@@ -235,9 +210,9 @@
     <div id="printable-header" class="d-none d-print-block">
         <div class="print-header">
             <div class="print-header-left">
-                <h2>{{ farm.farm_name }}</h2>
-                <p class="mb-1"><i class="fas fa-map-marker-alt me-1"></i> {{ farm.address }}</p>
-                {% if farm.phone %}<p class="mb-0"><i class="fas fa-phone me-1"></i> Phone: {{ farm.phone }}</p>{% endif %}
+                <h2>{{ farm.farm_name if farm else 'Ranga Farms' }}</h2>
+                <p class="mb-1"><i class="fas fa-map-marker-alt me-1"></i> {{ farm.address if farm else 'Aandigounder Street, Pachapalayam, Perur, Coimbatore 641010' }}</p>
+                {% if farm and farm.phone %}<p class="mb-0"><i class="fas fa-phone me-1"></i> Phone: {{ farm.phone }}</p>{% endif %}
             </div>
             <div class="print-header-right">
                 <h3>Monthly Salary Report</h3>
@@ -248,19 +223,19 @@
         
         <!-- Print Summary Metrics -->
         <div class="print-metrics-row">
-            <div class="print-metric-card border-employees">
+            <div class="print-metric-card">
                 <h6>Total Employees</h6>
                 <h3>{{ employees|length }}</h3>
             </div>
-            <div class="print-metric-card border-payable">
+            <div class="print-metric-card">
                 <h6>Total Payable</h6>
                 <h3>₹ {{ "{:,.2f}".format(total_payable) }}</h3>
             </div>
-            <div class="print-metric-card border-paid">
+            <div class="print-metric-card">
                 <h6>Total Paid</h6>
                 <h3>₹ {{ "{:,.2f}".format(total_paid) }}</h3>
             </div>
-            <div class="print-metric-card border-pending">
+            <div class="print-metric-card">
                 <h6>Total Pending</h6>
                 <h3>₹ {{ "{:,.2f}".format(total_pending) }}</h3>
             </div>
@@ -345,30 +320,39 @@
             <table id="printable-table" class="table table-hover mb-0 align-middle">
                 <thead class="bg-light text-muted small fw-bold text-center">
                     <tr>
-                        <th class="text-center py-3">Sr#</th>
-                        <th class="text-center py-3">Name</th>
-                        <th class="text-center py-3">Role</th>
-                        <th class="text-center py-3">Daily Wage</th>
-                        <th class="text-center py-3">Days Worked</th>
-                        <th class="text-center py-3">Paying Amount</th>
-                        <th class="text-center py-3">Paid Amount</th>
-                        <th class="text-center py-3">Balance Due</th>
+                        <th class="text-center py-3" style="width: 8%;">S.No</th>
+                        <th class="text-start py-3" style="width: 26%;">Employee Name</th>
+                        <th class="text-start py-3" style="width: 18%;">Role / Designation</th>
+                        <th class="text-end py-3" style="width: 12%;">Basic Salary</th>
+                        <th class="text-center py-3" style="width: 12%;">Days Worked</th>
+                        <th class="text-end py-3" style="width: 12%;">Paying Amount</th>
+                        <th class="text-end py-3" style="width: 12%;">Paid Amount</th>
+                        <th class="text-end py-3" style="width: 12%;">Balance Due</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% if employees %}
                         {% for emp in employees %}
-                        <tr class="text-center">
-                            <td class="py-3"><span class="badge bg-secondary-subtle text-secondary fw-bold px-3 py-2 rounded-pill border">{{ emp.sr_no or emp.id }}</span></td>
-                            <td class="py-3"><span class="fw-bold text-dark">{{ emp.name }}</span></td>
-                            <td class="py-3"><span class="badge bg-light text-dark border px-3 py-1">{{ emp.role }}</span></td>
-                            <td class="py-3 fw-bold text-dark">₹ {{ "%.2f"|format(emp.daily_wage) }}</td>
-                            <td class="py-3 text-secondary">{{ emp.days_worked }} days</td>
-                            <td class="py-3 text-info fw-bold">₹ {{ "%.2f"|format(emp.paying_amount) }}</td>
-                            <td class="py-3 text-success fw-bold">₹ {{ "%.2f"|format(emp.paid_amount) }}</td>
-                            <td class="py-3 text-danger fw-bold">₹ {{ "%.2f"|format(emp.balance_due) }}</td>
+                        <tr class="align-middle">
+                            <td class="text-center py-3">{{ loop.index }}</td>
+                            <td class="text-start py-3 fw-bold text-dark">{{ emp.name }}</td>
+                            <td class="text-start py-3"><span class="badge bg-light text-dark border px-2.5 py-1 rounded">{{ emp.role }}</span></td>
+                            <td class="text-end py-3">₹ {{ "%.2f"|format(emp.daily_wage) }}</td>
+                            <td class="text-center py-3">{{ emp.days_worked }} days</td>
+                            <td class="text-end py-3 text-info fw-bold">₹ {{ "%.2f"|format(emp.paying_amount) }}</td>
+                            <td class="text-end py-3 text-success fw-bold">₹ {{ "%.2f"|format(emp.paid_amount) }}</td>
+                            <td class="text-end py-3 text-danger fw-bold">₹ {{ "%.2f"|format(emp.balance_due) }}</td>
                         </tr>
                         {% endfor %}
+                        
+                        <tr class="fw-bold bg-light text-dark align-middle print-summary-row">
+                            <td colspan="3" class="text-start py-3">Total Summary</td>
+                            <td class="text-end py-3">-</td>
+                            <td class="text-center py-3">-</td>
+                            <td class="text-end py-3 text-info">₹ {{ "%.2f"|format(total_payable) }}</td>
+                            <td class="text-end py-3 text-success">₹ {{ "%.2f"|format(total_paid) }}</td>
+                            <td class="text-end py-3 text-danger">₹ {{ "%.2f"|format(total_pending) }}</td>
+                        </tr>
                     {% else %}
                     <tr>
                         <td colspan="8" class="text-center text-muted py-5">
