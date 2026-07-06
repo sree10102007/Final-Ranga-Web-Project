@@ -743,6 +743,11 @@ def init_db():
         except sqlite3.OperationalError:
             pass
 
+        try:
+            conn.execute("ALTER TABLE master_records ADD COLUMN IF NOT EXISTS weight_alert_seen INTEGER DEFAULT 0")
+        except Exception:
+            pass
+
         add_column("feed_inventory", "purchase_id", "INTEGER")
         add_column("medicine_inventory", "purchase_id", "INTEGER")
         add_column("vaccine_inventory", "purchase_id", "INTEGER")
@@ -3268,6 +3273,13 @@ def master_edit(id):
         except Exception:
             dob_str = None
 
+        # Check if weight crossed 25 kg threshold to reset the seen flag
+        old_record = db.execute('SELECT weight_kg, weight_alert_seen FROM master_records WHERE id = ?', (id,)).fetchone()
+        new_weight = float(f.get('weight_kg') or 0)
+        weight_alert_seen = old_record['weight_alert_seen'] if old_record else 0
+        if old_record and (old_record['weight_kg'] is None or old_record['weight_kg'] < 25) and new_weight >= 25:
+            weight_alert_seen = 0
+
         db.execute('''
             UPDATE master_records SET 
             si_no = ?, tag_no = ?, breed = ?, breed_percent = ?, status = ?, sold = ?, expired = ?, gender = ?,
@@ -3277,7 +3289,8 @@ def master_edit(id):
             delivery_date = ?, new_goat_gender = ?, new_goat_color = ?, birth_weight = ?,
             selling_date = ?, selling_weight = ?, selling_price = ?, mortality_date = ?,
             mortality_weight = ?, mortality_reason = ?, insurance_claim_amount = ?,
-            insurance_inform_date = ?, insurance_claim_date = ?, kit_status = ?, dob = ? WHERE id = ?
+            insurance_inform_date = ?, insurance_claim_date = ?, kit_status = ?, dob = ?,
+            weight_alert_seen = ? WHERE id = ?
         ''', (
             f.get('si_no'), f.get('tag_no'), f.get('breed'), f.get('breed_percent'), f.get('status'),
             f.get('sold'), f.get('expired'), f.get('gender'), f.get('purchase_date'), f.get('color'),
@@ -3287,7 +3300,8 @@ def master_edit(id):
             f.get('delivery_date'), f.get('new_goat_gender'), f.get('new_goat_color'), f.get('birth_weight'),
             f.get('selling_date') or None, f.get('selling_weight'), f.get('selling_price'), f.get('mortality_date') or None,
             f.get('mortality_weight'), f.get('mortality_reason'), f.get('insurance_claim_amount'),
-            f.get('insurance_inform_date') or None, f.get('insurance_claim_date') or None, 1 if f.get('kit_status') else 0, dob_str, id
+            f.get('insurance_inform_date') or None, f.get('insurance_claim_date') or None, 1 if f.get('kit_status') else 0, dob_str,
+            weight_alert_seen, id
         ))
         
         # Connected Mortality Log Synchronization
@@ -6754,19 +6768,18 @@ def api_notifications():
     db = get_db()
     user_id = session['user_id']
     
-    # 1. Weight Alerts (only if just logged in / has_seen_weight_notification is 0)
+    # 1. Weight Alerts (only if weight_alert_seen is 0)
     weight_alerts = []
-    tracking = db.execute('SELECT has_seen_weight_notification FROM user_login_tracking WHERE user_id = ?', (user_id,)).fetchone()
-    if tracking and tracking['has_seen_weight_notification'] == 0:
-        # Fetch goats >= 25 kg and not already in eligible_to_sell
-        goats = db.execute('''
-            SELECT tag_no, color, weight_kg 
-            FROM master_records 
-            WHERE weight_kg >= 25 
-              AND COALESCE(LOWER(status), '') NOT IN ('sold', 'expired', 'dead')
-              AND NOT EXISTS (SELECT 1 FROM eligible_to_sell WHERE tag_id = master_records.tag_no)
-        ''').fetchall()
-        
+    # Fetch goats >= 25 kg and weight_alert_seen is 0
+    goats = db.execute('''
+        SELECT tag_no, color, weight_kg 
+        FROM master_records 
+        WHERE weight_kg >= 25 
+          AND COALESCE(LOWER(status), '') NOT IN ('sold', 'expired', 'dead')
+          AND weight_alert_seen = 0
+    ''').fetchall()
+    
+    if goats:
         for g in goats:
             weight_alerts.append({
                 'tag_no': g['tag_no'],
@@ -6774,9 +6787,8 @@ def api_notifications():
                 'weight_kg': g['weight_kg'],
                 'already_eligible': False
             })
-            
-        # Update tracking to 1 so they don't see it again during this login session
-        db.execute('UPDATE user_login_tracking SET has_seen_weight_notification = 1 WHERE user_id = ?', (user_id,))
+            # Mark this particular goat's weight alert as seen!
+            db.execute('UPDATE master_records SET weight_alert_seen = 1 WHERE tag_no = ?', (g['tag_no'],))
         db.commit()
 
     # 2. Low Stock Alerts (check closing_stock vs alert_level)
