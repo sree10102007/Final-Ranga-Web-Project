@@ -121,11 +121,11 @@
                                                 <input type="number" step="0.01" class="form-control border-success qty-input" name="quantity" required placeholder="0.0" value="{{ item.quantity }}" data-oninput="recalcRowTotal(this)">
                                             </div>
                                             <div class="col-md-2 col-sm-3 col-6">
-                                                <label class="form-label text-muted small fw-bold">UNIT OF MEASURE *</label>
+                                                <label class="form-label text-muted small fw-bold">Units *</label>
                                                 <input type="text" class="form-control border-success field-unit" name="unit" required placeholder="e.g. Bags" value="{{ item.unit }}">
                                             </div>
                                             <div class="col-md-2 col-sm-3 col-6">
-                                                <label class="form-label text-muted small fw-bold">PRICE PER UNIT *</label>
+                                                <label class="form-label text-muted small fw-bold">Per Unit Rs *</label>
                                                 <div class="input-group">
                                                     <span class="input-group-text bg-light border-success">₹</span>
                                                     <input type="number" step="0.01" class="form-control border-success price-input" name="price_per_unit" required placeholder="0.00" value="{{ item.price_per_unit }}" data-oninput="recalcRowTotal(this)">
@@ -205,11 +205,11 @@
                                             <input type="number" step="0.01" class="form-control border-success qty-input" name="quantity" required placeholder="0.0" data-oninput="recalcRowTotal(this)">
                                         </div>
                                         <div class="col-md-2 col-sm-3 col-6">
-                                            <label class="form-label text-muted small fw-bold">UNIT OF MEASURE *</label>
+                                            <label class="form-label text-muted small fw-bold">Units *</label>
                                             <input type="text" class="form-control border-success field-unit" name="unit" required placeholder="e.g. Bags">
                                         </div>
                                         <div class="col-md-2 col-sm-3 col-6">
-                                            <label class="form-label text-muted small fw-bold">PRICE PER UNIT *</label>
+                                            <label class="form-label text-muted small fw-bold">Per Unit Rs *</label>
                                             <div class="input-group">
                                                 <span class="input-group-text bg-light border-success">₹</span>
                                                 <input type="number" step="0.01" class="form-control border-success price-input" name="price_per_unit" required placeholder="0.00" data-oninput="recalcRowTotal(this)">
@@ -344,11 +344,11 @@ const otherRowTemplate = `
             <input type="number" step="0.01" class="form-control border-success qty-input" name="quantity" required placeholder="0.0" data-oninput="recalcRowTotal(this)">
         </div>
         <div class="col-md-2 col-sm-3 col-6">
-            <label class="form-label text-muted small fw-bold">UNIT OF MEASURE *</label>
+            <label class="form-label text-muted small fw-bold">Units *</label>
             <input type="text" class="form-control border-success field-unit" name="unit" required placeholder="e.g. Bags">
         </div>
         <div class="col-md-2 col-sm-3 col-6">
-            <label class="form-label text-muted small fw-bold">PRICE PER UNIT *</label>
+            <label class="form-label text-muted small fw-bold">Per Unit Rs *</label>
             <div class="input-group">
                 <span class="input-group-text bg-light border-success">₹</span>
                 <input type="number" step="0.01" class="form-control border-success price-input" name="price_per_unit" required placeholder="0.00" data-oninput="recalcRowTotal(this)">
