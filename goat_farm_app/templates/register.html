@@ -29,6 +29,10 @@
                         <input type="checkbox" name="is_admin" class="form-check-input" id="is_admin">
                         <label class="form-check-label" for="is_admin">Administrator Account</label>
                     </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" name="is_developer" class="form-check-input" id="is_developer">
+                        <label class="form-check-label" for="is_developer">Developer Account</label>
+                    </div>
                     {% endif %}
                     <button class="btn btn-primary w-100 mb-3" type="submit">Register</button>
                     <div class="text-center"><a href="{{ url_for('auth.login') }}">Back to Login</a></div>

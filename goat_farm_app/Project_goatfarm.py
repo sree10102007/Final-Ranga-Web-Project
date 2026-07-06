@@ -551,6 +551,7 @@ def init_db():
         add_user_col("locked_until", "TIMESTAMP DEFAULT NULL")
         add_user_col("password_history", "TEXT")
         add_user_col("is_admin", "INTEGER DEFAULT 0")
+        add_user_col("is_developer", "INTEGER DEFAULT 0")
 
         conn.execute('''
             CREATE TABLE IF NOT EXISTS goats_data (
@@ -6760,8 +6761,8 @@ def inject_user_admin_status():
     if 'user_id' in session:
         try:
             db = get_db()
-            user = db.execute('SELECT is_admin FROM users WHERE id = ?', (session['user_id'],)).fetchone()
-            if user and int(user['is_admin']) == 1:
+            user = db.execute('SELECT is_admin, is_developer FROM users WHERE id = ?', (session['user_id'],)).fetchone()
+            if user and (int(user['is_admin']) == 1 or int(user.get('is_developer', 0)) == 1):
                 return dict(is_admin_session=True)
         except Exception:
             pass
