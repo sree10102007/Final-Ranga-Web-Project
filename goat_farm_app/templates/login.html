@@ -16,9 +16,26 @@
                 <form method="POST">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <div class="mb-3"><label>Username</label><input type="text" name="username" class="form-control" required></div>
-                    <div class="mb-3"><label>Password</label><input type="password" name="password" class="form-control" required></div>
+                    <div class="mb-3"><label>Password</label><input type="password" name="password" id="password" class="form-control" required></div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="show_password">
+                        <label class="form-check-label" for="show_password">Show Password</label>
+                    </div>
                     <button class="btn btn-success w-100 mb-3" type="submit">Login</button>
                 </form>
+                <script nonce="{{ csp_nonce }}">
+                document.addEventListener("DOMContentLoaded", function() {
+                    var checkbox = document.getElementById("show_password");
+                    if (checkbox) {
+                        checkbox.addEventListener("change", function() {
+                            var p = document.getElementById("password");
+                            if (p) {
+                                p.type = checkbox.checked ? "text" : "password";
+                            }
+                        });
+                    }
+                });
+                </script>
             </div>
         </div>
     </div>

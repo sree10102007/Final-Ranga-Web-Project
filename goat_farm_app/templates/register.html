@@ -21,7 +21,7 @@
                     <div class="mb-3"><label>Password</label><input type="password" name="password" id="password" class="form-control" required></div>
                     <div class="mb-3"><label>Confirm Password</label><input type="password" name="confirm_password" id="confirm_password" class="form-control" required></div>
                     <div class="mb-3 form-check">
-                        <input type="checkbox" class="form-check-input" id="show_password" onclick="togglePasswordVisibility()">
+                        <input type="checkbox" class="form-check-input" id="show_password">
                         <label class="form-check-label" for="show_password">Show Password</label>
                     </div>
                     {% if is_admin %}
@@ -34,17 +34,18 @@
                     <div class="text-center"><a href="{{ url_for('auth.login') }}">Back to Login</a></div>
                 </form>
                 <script nonce="{{ csp_nonce }}">
-                function togglePasswordVisibility() {
-                    var p = document.getElementById("password");
-                    var cp = document.getElementById("confirm_password");
-                    if (p.type === "password") {
-                        p.type = "text";
-                        cp.type = "text";
-                    } else {
-                        p.type = "password";
-                        cp.type = "password";
+                document.addEventListener("DOMContentLoaded", function() {
+                    var checkbox = document.getElementById("show_password");
+                    if (checkbox) {
+                        checkbox.addEventListener("change", function() {
+                            var p = document.getElementById("password");
+                            var cp = document.getElementById("confirm_password");
+                            var type = checkbox.checked ? "text" : "password";
+                            if (p) p.type = type;
+                            if (cp) cp.type = type;
+                        });
                     }
-                }
+                });
                 </script>
             </div>
         </div>
