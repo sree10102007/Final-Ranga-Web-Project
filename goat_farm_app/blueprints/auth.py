@@ -184,6 +184,15 @@ def manage_users():
         flash('Administrator privileges required.', 'danger')
         return redirect(url_for('dashboard'))
         
+    # One-shot cleanup: reset login_attempts for any account that has no active lock.
+    # This fixes accounts that accumulated failed attempts without hitting the lockout
+    # threshold, and any stale data from before this fix was applied.
+    db.execute(
+        'UPDATE users SET login_attempts = 0 WHERE login_attempts > 0 '
+        'AND (locked_until IS NULL OR locked_until <= NOW())'
+    )
+    db.commit()
+
     raw_users = db.execute('SELECT id, username, is_admin, mfa_enabled, login_attempts, locked_until FROM users ORDER BY id').fetchall()
     
     # Compute a server-side is_locked flag so the template never mistakes an
@@ -203,12 +212,16 @@ def manage_users():
             else:
                 # Expired lock — silently clear it in the background
                 db.execute('UPDATE users SET login_attempts = 0, locked_until = NULL WHERE id = ?', (u['id'],))
+        login_attempts = u['login_attempts'] or 0
+        if locked_until and not is_locked:
+            # Expired lock was cleared above — also zero out login_attempts in the dict
+            login_attempts = 0
         users_with_status.append({
             'id': u['id'],
             'username': u['username'],
             'is_admin': u['is_admin'],
             'mfa_enabled': u['mfa_enabled'],
-            'login_attempts': u['login_attempts'],
+            'login_attempts': login_attempts,
             'locked_until': u['locked_until'],
             'is_locked': is_locked,
         })

@@ -81,7 +81,7 @@
                         </td>
                         <td class="px-4 py-3 text-end">
                             <div class="d-flex justify-content-end gap-2">
-                                {% if u.is_locked or u.login_attempts > 0 %}
+                                {% if u.is_locked %}
                                 <form action="{{ url_for('auth.unlock_user', user_id=u.id) }}" method="POST" class="d-inline">
                                     <button type="submit" class="btn btn-outline-warning btn-sm rounded-pill px-3">
                                         <i class="bi bi-unlock-fill me-1"></i> Unlock
