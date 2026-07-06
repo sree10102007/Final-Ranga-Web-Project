@@ -6253,14 +6253,21 @@ def pnl():
             }
         particulars[particular]['amount'] += amount
 
+    # Known income-type group names — always treated as Income regardless of ledger_groups table
+    INCOME_GROUPS = {'Sales', 'Direct Income', 'Indirect Income', 'Other Income'}
+
     def classify_and_add(group, ledger, particular, amount):
-        group_type = ledger_groups_dict.get(group, 'Expense')
+        # Prefer DB lookup, but fall back to known income group names to avoid misclassification
+        group_type = ledger_groups_dict.get(group)
+        if group_type is None:
+            group_type = 'Income' if group in INCOME_GROUPS else 'Expense'
+
         if group_type == 'Expense':
             if group == 'Direct Expenses':
                 add_to_tree(direct_expenses_tree, group, ledger, particular, amount)
             else:
                 add_to_tree(indirect_expenses_tree, group, ledger, particular, amount)
-        else: # Income
+        else:  # Income
             if group == 'Sales':
                 add_to_tree(sales_accounts_tree, group, ledger, particular, amount)
             elif group == 'Direct Income':
