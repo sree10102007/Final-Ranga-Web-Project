@@ -6278,10 +6278,30 @@ def pnl():
     # --- PURCHASES (COGS) ACCOUNT LEDGERS ---
     purchases_list = []
     
-    # Goat purchases
-    rows = db.execute("SELECT id, seller_name AS detail, purchase_date AS date, price AS amount, pnl_category, particular_id FROM purchases WHERE purchase_date BETWEEN ? AND ?", (from_date, to_date)).fetchall()
+    # Track tags already purchased to prevent double counting
+    purchased_tags = set()
+
+    # Goat purchases from vouchers
+    rows = db.execute("SELECT id, tag_id, seller_name AS detail, purchase_date AS date, price AS amount, pnl_category, particular_id FROM purchases WHERE purchase_date BETWEEN ? AND ?", (from_date, to_date)).fetchall()
     for r in rows:
-        purchases_list.append({'type': 'Goat', 'detail': r['detail'], 'date': r['date'], 'amount': r['amount'] or 0.0, 'pnl_category': r['pnl_category'] or 'Purchase', 'particular_id': r['particular_id']})
+        # Simplify detail to "Goat Purchases" instead of individual tags or suppliers as requested
+        purchases_list.append({'type': 'Goat', 'detail': 'Goat Purchases', 'date': r['date'], 'amount': r['amount'] or 0.0, 'pnl_category': r['pnl_category'] or 'Purchase', 'particular_id': r['particular_id']})
+        if r['tag_id']:
+            purchased_tags.add(str(r['tag_id']).strip())
+        
+    # Goats added directly to Master records (Goat Directory) that are not in purchases table
+    master_rows = db.execute("SELECT tag_no, purchase_date, purchase_amount FROM master_records WHERE purchase_date BETWEEN ? AND ? AND purchase_amount > 0", (from_date, to_date)).fetchall()
+    for mr in master_rows:
+        tag_no_str = str(mr['tag_no']).strip() if mr['tag_no'] else ""
+        if tag_no_str not in purchased_tags:
+            purchases_list.append({
+                'type': 'Goat',
+                'detail': 'Goat Purchases',
+                'date': mr['purchase_date'],
+                'amount': mr['purchase_amount'] or 0.0,
+                'pnl_category': 'Purchase',
+                'particular_id': None
+            })
         
     # Feed purchases
     rows = db.execute("SELECT id, supplier AS detail, purchase_date AS date, cost AS amount, pnl_category, particular_id FROM feed_purchases WHERE purchase_date BETWEEN ? AND ?", (from_date, to_date)).fetchall()
@@ -6307,19 +6327,26 @@ def pnl():
         amt = p['amount'] or 0.0
         # Purchases (COGS) are counted separately in total_purchases_sum.
         # Do NOT add them to total_direct_expenses to avoid double-counting with the
-        # expenses loop below (which also reads the duplicate rows inserted into `expenses`).
+        # expenses loop below.
         total_purchases_sum += amt
         
-    # Build a purchases tree for template display
+    # Build a purchases tree for template display, aggregating entries by label to avoid mini tags
     purchases_tree = {}  # group -> {entries: [{label, amount}], total}
     for p in purchases_list:
         amt = p['amount'] or 0.0
         label = p['detail']
         ptype = p['type']
         if ptype not in purchases_tree:
-            purchases_tree[ptype] = {'entries': [], 'total': 0.0}
-        purchases_tree[ptype]['entries'].append({'label': label, 'amount': amt})
+            purchases_tree[ptype] = {'entries': {}, 'total': 0.0}
+        purchases_tree[ptype]['entries'][label] = purchases_tree[ptype]['entries'].get(label, 0.0) + amt
         purchases_tree[ptype]['total'] += amt
+
+    # Convert the aggregated entries dict to list of dicts for rendering
+    for ptype in purchases_tree:
+        entries_list = []
+        for label, total_amt in purchases_tree[ptype]['entries'].items():
+            entries_list.append({'label': label, 'amount': total_amt})
+        purchases_tree[ptype]['entries'] = entries_list
 
     # ── OTHER VOUCHERS → P&L (from Expenses Master / Voucher Register) ──────────
     # NOTE: The `expenses` table is deliberately NOT read here. It is a UI mirror
@@ -6381,7 +6408,8 @@ def pnl():
     # Goat sales
     rows = db.execute("SELECT id, tag_id AS detail, date_of_sale AS date, sold_price AS amount, pnl_category FROM sales_records WHERE date_of_sale BETWEEN ? AND ?", (from_date, to_date)).fetchall()
     for r in rows:
-        sales_list.append({'type': 'Goat Sale', 'detail': f"Goat tag {r['detail']}", 'date': r['date'], 'amount': r['amount'] or 0.0, 'pnl_category': r['pnl_category'] or 'Sales'})
+        # Simplify detail to "Goat Sales" instead of itemizing individual tag numbers
+        sales_list.append({'type': 'Goat Sale', 'detail': 'Goat Sales', 'date': r['date'], 'amount': r['amount'] or 0.0, 'pnl_category': r['pnl_category'] or 'Sales'})
         
     # Other sales
     rows = db.execute("SELECT id, item_name AS detail, date_of_sale AS date, total_amount AS amount, pnl_category FROM other_sales_records WHERE date_of_sale BETWEEN ? AND ?", (from_date, to_date)).fetchall()
