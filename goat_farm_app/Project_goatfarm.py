@@ -6761,7 +6761,7 @@ def api_notifications():
             FROM master_records 
             WHERE weight_kg >= 25 
               AND COALESCE(LOWER(status), '') NOT IN ('sold', 'expired', 'dead')
-              AND tag_no NOT IN (SELECT tag_id FROM eligible_to_sell)
+              AND NOT EXISTS (SELECT 1 FROM eligible_to_sell WHERE tag_id = master_records.tag_no)
         ''').fetchall()
         
         for g in goats:
