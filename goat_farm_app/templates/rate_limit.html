@@ -60,6 +60,7 @@
             margin: 0 0 1rem;
             background: linear-gradient(to right, #fca5a5, #f43f5e);
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
         }
         p {
@@ -118,7 +119,7 @@
         </div>
     </div>
     <script nonce="{{ csp_nonce }}">
-        let seconds = {{ retry_after }};
+        let seconds = parseInt("{{ retry_after }}", 10);
         const countdownEl = document.getElementById('countdown');
         const interval = setInterval(() => {
             seconds--;
