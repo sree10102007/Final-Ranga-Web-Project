@@ -16,7 +16,7 @@
     }
     
     /* Ensure content area is full width on standard A4 paper */
-    body, .main-content, .container, .container-fluid {
+    body, #main-content, .container, .container-fluid {
         width: 100% !important;
         max-width: 100% !important;
         margin: 0 !important;
@@ -88,21 +88,24 @@
         margin: 0 0 2px 0 !important;
     }
     
-    /* Print-specific metrics summary grid */
+    /* Print-specific metrics summary grid using table display to guarantee horizontal layout */
     .print-metrics-row {
-        display: flex !important;
-        justify-content: space-between !important;
-        gap: 10px !important;
+        display: table !important;
+        width: 100% !important;
+        table-layout: fixed !important;
         margin-bottom: 20px !important;
+        border-spacing: 10px 0 !important;
+        border-collapse: separate !important;
     }
     
     .print-metric-card {
-        flex: 1 !important;
+        display: table-cell !important;
         border: 1px solid #000 !important;
         border-radius: 4px !important;
         padding: 8px 6px !important;
         text-align: center !important;
         background-color: #fff !important;
+        vertical-align: middle !important;
     }
     
     .print-metric-card h6 {
@@ -144,12 +147,11 @@
         font-weight: bold !important;
         text-transform: uppercase !important;
         font-size: 9px !important;
-        text-align: center !important;
     }
     
-    td.text-start { text-align: left !important; }
-    td.text-center { text-align: center !important; }
-    td.text-end { text-align: right !important; }
+    th.text-start, td.text-start { text-align: left !important; }
+    th.text-center, td.text-center { text-align: center !important; }
+    th.text-end, td.text-end { text-align: right !important; }
     
     tr:nth-child(even) {
         background-color: #fafafa !important;
@@ -181,17 +183,21 @@
         display: table-header-group !important;
     }
     
-    /* Print Signatures Block */
+    /* Print Signatures Block using table display to guarantee horizontal layout */
     .print-signatures {
-        display: flex !important;
-        justify-content: space-between !important;
+        display: table !important;
+        width: 100% !important;
+        table-layout: fixed !important;
         margin-top: 40px !important;
+        border-spacing: 30px 0 !important;
+        border-collapse: separate !important;
         page-break-inside: avoid !important;
     }
     
     .signature-box {
-        width: 180px !important;
+        display: table-cell !important;
         text-align: center !important;
+        vertical-align: bottom !important;
     }
     
     .signature-line {
