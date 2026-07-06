@@ -546,33 +546,46 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // 1. Render Target Weight Met Alerts (>= 25 kg)
         if (data.weight_alerts && data.weight_alerts.length > 0) {
-          data.weight_alerts.forEach(goat => {
-            const toastEl = document.createElement('div');
-            toastEl.className = 'toast show farm-toast weight-alert';
-            toastEl.setAttribute('role', 'alert');
-            toastEl.setAttribute('aria-live', 'assertive');
-            toastEl.setAttribute('aria-atomic', 'true');
-            toastEl.setAttribute('data-bs-autohide', 'false');
+          const toastEl = document.createElement('div');
+          toastEl.className = 'toast show farm-toast weight-alert';
+          toastEl.setAttribute('role', 'alert');
+          toastEl.setAttribute('aria-live', 'assertive');
+          toastEl.setAttribute('aria-atomic', 'true');
+          toastEl.setAttribute('data-bs-autohide', 'false');
 
-            toastEl.innerHTML = `
-              <div class="toast-header d-flex align-items-center justify-content-between">
-                <strong class="me-auto text-success d-flex align-items-center gap-2"><i class="bi bi-award-fill fs-5"></i>Goat Reached 25 kg!</strong>
-                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-              </div>
-              <div class="toast-body">
-                <div class="mb-2">Goat <strong>${goat.tag_no}</strong> (${goat.color}) weighs <strong>${goat.weight_kg} kg</strong>. It is eligible to sell!</div>
-                <div class="d-flex gap-2 mt-3">
-                  ${goat.already_eligible ? 
-                    `<span class="badge bg-success-subtle text-success py-2 px-3 rounded-pill w-100 text-center fs-7"><i class="bi bi-check-circle-fill me-1"></i>Already Listed for Sale</span>` :
-                    `<button class="btn btn-sm btn-success rounded-pill px-3 py-1.5 w-100 fw-bold shadow-sm" data-onclick="markEligible('${goat.tag_no}', this)">
-                       <i class="bi bi-cart-plus me-1"></i>Add to Sell List
-                     </button>`
-                  }
-                </div>
+          let bodyContent = '';
+          if (data.weight_alerts.length === 1) {
+            const goat = data.weight_alerts[0];
+            bodyContent = `
+              <div class="mb-2">Goat <strong>${goat.tag_no}</strong> (${goat.color}) weighs <strong>${goat.weight_kg} kg</strong>. It is eligible to sell!</div>
+              <div class="mt-3">
+                <button class="btn btn-sm btn-success rounded-pill px-3 py-1.5 w-100 fw-bold shadow-sm" data-onclick="markEligible('${goat.tag_no}', this)">
+                  <i class="bi bi-cart-plus me-1"></i>Add to Sell List
+                </button>
               </div>
             `;
-            container.appendChild(toastEl);
-          });
+          } else {
+            const tags = data.weight_alerts.map(g => `<strong>${g.tag_no}</strong> (${g.weight_kg} kg)`).join(', ');
+            bodyContent = `
+              <div class="mb-2"><strong>${data.weight_alerts.length} goats</strong> have reached 25 kg and are eligible to sell: ${tags}.</div>
+              <div class="mt-3">
+                <button class="btn btn-sm btn-success rounded-pill px-3 py-1.5 w-100 fw-bold shadow-sm" data-onclick="markMultipleEligible(${JSON.stringify(data.weight_alerts.map(g => g.tag_no)).replace(/"/g, '&quot;')}, this)">
+                  <i class="bi bi-cart-plus me-1"></i>Add All to Sell List
+                </button>
+              </div>
+            `;
+          }
+
+          toastEl.innerHTML = `
+            <div class="toast-header d-flex align-items-center justify-content-between">
+              <strong class="me-auto text-success d-flex align-items-center gap-2"><i class="bi bi-award-fill fs-5"></i>Goat Reached 25 kg!</strong>
+              <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body">
+              ${bodyContent}
+            </div>
+          `;
+          container.appendChild(toastEl);
         }
 
         // 2. Render Low Stock Alerts
@@ -657,6 +670,36 @@ function markEligible(tagNo, btn) {
     btn.innerHTML = `<i class="bi bi-cart-plus me-1"></i>Add to Sell List`;
     showFeedbackToast('danger', 'Network error. Please try again.');
   });
+}
+
+function markMultipleEligible(tagNos, btn) {
+  btn.disabled = true;
+  btn.innerHTML = `<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>Adding...`;
+  
+  const promises = tagNos.map(tagNo => 
+    fetch(`/api/add_to_eligible/${tagNo}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' }
+    }).then(res => res.json())
+  );
+  
+  Promise.all(promises)
+    .then(results => {
+      const failed = results.filter(r => !r.success);
+      if (failed.length === 0) {
+        btn.parentElement.innerHTML = `<span class="badge bg-success-subtle text-success py-2 px-3 rounded-pill w-100 text-center fs-7"><i class="bi bi-check-circle-fill me-1"></i>All Listed for Sale</span>`;
+        showFeedbackToast('success', 'All goats successfully marked as eligible to sell!');
+      } else {
+        btn.disabled = false;
+        btn.innerHTML = `<i class="bi bi-cart-plus me-1"></i>Add All to Sell List`;
+        showFeedbackToast('danger', 'Some goats could not be added.');
+      }
+    })
+    .catch(err => {
+      btn.disabled = false;
+      btn.innerHTML = `<i class="bi bi-cart-plus me-1"></i>Add All to Sell List`;
+      showFeedbackToast('danger', 'Network error. Please try again.');
+    });
 }
 
 function completeReminder(id, btn) {

@@ -6755,22 +6755,21 @@ def api_notifications():
     weight_alerts = []
     tracking = db.execute('SELECT has_seen_weight_notification FROM user_login_tracking WHERE user_id = ?', (user_id,)).fetchone()
     if tracking and tracking['has_seen_weight_notification'] == 0:
-        # Fetch goats >= 25 kg
+        # Fetch goats >= 25 kg and not already in eligible_to_sell
         goats = db.execute('''
             SELECT tag_no, color, weight_kg 
             FROM master_records 
-            WHERE weight_kg >= 25 AND COALESCE(LOWER(status), '') NOT IN ('sold', 'expired', 'dead')
+            WHERE weight_kg >= 25 
+              AND COALESCE(LOWER(status), '') NOT IN ('sold', 'expired', 'dead')
+              AND tag_no NOT IN (SELECT tag_id FROM eligible_to_sell)
         ''').fetchall()
-        
-        # Check if already added to eligible to sell to avoid redundant prompt or to handle UI gracefully
-        eligible_tags = {r['tag_id'] for r in db.execute('SELECT tag_id FROM eligible_to_sell').fetchall()}
         
         for g in goats:
             weight_alerts.append({
                 'tag_no': g['tag_no'],
                 'color': g['color'] or 'N/A',
                 'weight_kg': g['weight_kg'],
-                'already_eligible': g['tag_no'] in eligible_tags
+                'already_eligible': False
             })
             
         # Update tracking to 1 so they don't see it again during this login session
