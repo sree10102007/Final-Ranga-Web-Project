@@ -15,9 +15,12 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 
 csrf = CSRFProtect()
+default_limits_str = os.environ.get("RATELIMIT_DEFAULT", "120 per minute")
+default_limits = [limit.strip() for limit in default_limits_str.split(",") if limit.strip()]
+
 limiter = Limiter(
     key_func=get_remote_address,
-    default_limits=["200 per day", "50 per hour"]
+    default_limits=default_limits
 )
 
 # Resolve root path to handle Windows folder redirection (e.g. OneDrive)
