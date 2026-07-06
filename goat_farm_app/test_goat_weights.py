@@ -1,4 +1,4 @@
-﻿import sys
+import sys
 import os
 
 # Add parent directory so goat_farm_app package is importable
@@ -156,6 +156,26 @@ class TestGoatWeights(unittest.TestCase):
         data = json.loads(response.data)
         self.assertFalse(data['success'])
 
+    # ------------------------------------------------------------------ #
+    # GET /goats/weights/summary - returns weight summaries               #
+    # ------------------------------------------------------------------ #
+    def test_get_weights_summary(self):
+        self.mock_conn.execute.return_value.fetchall.return_value = [
+            {'tag_no': 'TEST-GOAT-01', 'status': 'Active', 'weight_kg': 15.0}
+        ]
+        self.mock_conn.execute.return_value.fetchone.side_effect = [
+            [1], # count query returns 1
+            {'weight': 15.0, 'unit': 'kg', 'recorded_date': '2026-07-06'} # latest_row query
+        ]
+        response = self.client.get('/goats/weights/summary')
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data)
+        self.assertTrue(data['success'])
+        self.assertEqual(len(data['summary']), 1)
+        self.assertEqual(data['summary'][0]['tag_no'], 'TEST-GOAT-01')
+        self.assertEqual(data['summary'][0]['weight_records_count'], 1)
+
 
 if __name__ == '__main__':
+    unittest.main(verbosity=2)
     unittest.main(verbosity=2)

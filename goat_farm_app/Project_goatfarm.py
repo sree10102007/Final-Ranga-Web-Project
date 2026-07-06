@@ -1326,7 +1326,7 @@ def check_db_connection():
 def require_login():
     allowed_routes = [
         'auth.login', 'static', 'goats', 'goat_detail', 'auth.mfa_verify_login',
-        'get_goat_weights_api', 'post_goat_weights_api',
+        'get_goat_weights_api', 'post_goat_weights_api', 'get_goat_weights_summary',
     ]
     if request.endpoint not in allowed_routes and 'user_id' not in session:
         return redirect(url_for('auth.login'))
@@ -7116,9 +7116,10 @@ def goat_weights():
             ''', (g['tag_no'], g['weight_kg'], baseline_date))
     db.commit()
 
-    # Get filter parameters
+    # Get filter/search parameters
     filter_year  = request.args.get('year', '')
     filter_month = request.args.get('month', '')
+    search_q     = request.args.get('search', '')
 
     # Fetch all distinct years and months that have weight log entries (for filter dropdowns)
     all_years = db.execute(
@@ -7197,21 +7198,36 @@ def goat_weights():
             'age_str':        age_str or 'N/A',
         })
 
-    # Only show goats that have at least one weight log (whether filtered or not)
-    goats_with_logs = [g for g in goat_data if db.execute(
-        "SELECT 1 FROM goat_weights WHERE goat_tag_no = ?", (g['tag_no'],)
-    ).fetchone()]
+    # Search filter matching the exact logic of the goats directory
+    if search_q:
+        search_q_stripped = search_q.strip()
+        filtered_goats = []
+        
+        # Last 4 digits match
+        if len(search_q_stripped) == 4 and search_q_stripped.isdigit():
+            for g in goat_data:
+                if g['tag_no'].endswith(search_q_stripped):
+                    filtered_goats.append(g)
+                    
+        # Partial match
+        for g in goat_data:
+            if (search_q_stripped in g['tag_no'] or 
+                search_q_stripped.lower() in (g['tag_no'] or '').lower()) and g not in filtered_goats:
+                filtered_goats.append(g)
+        goat_data = filtered_goats
 
     years_list = [row[0] for row in all_years] if all_years else []
 
     return render_template(
         'goat_weights.html',
-        goat_data=goats_with_logs,
+        goat_data=goat_data,
         all_months=all_months,
         years_list=years_list,
         filter_year=filter_year,
         filter_month=int(filter_month) if filter_month else '',
-        total_goats=len(goats_with_logs),
+        search_q=search_q,
+        total_goats=len(goat_data),
+        datetime_now_str=datetime.now().strftime('%Y-%m-%d'),
     )
 
 @app.route('/goats/<path:tagNo>/weights', methods=['GET'])
@@ -7318,6 +7334,38 @@ def post_goat_weights_api(tagNo):
     db.commit()
     
     return jsonify({'success': True, 'message': 'Weight entry added successfully'}), 201
+
+@app.route('/goats/weights/summary', methods=['GET'])
+def get_goat_weights_summary():
+    db = get_db()
+    goats = db.execute("SELECT tag_no, status, weight_kg FROM master_records ORDER BY tag_no ASC").fetchall()
+    
+    result = []
+    for g in goats:
+        count_row = db.execute("SELECT COUNT(*) FROM goat_weights WHERE goat_tag_no = ?", (g['tag_no'],)).fetchone()
+        count = count_row[0] if count_row else 0
+        
+        latest_row = db.execute(
+            "SELECT weight, unit, recorded_date FROM goat_weights WHERE goat_tag_no = ? ORDER BY recorded_date DESC, id DESC LIMIT 1",
+            (g['tag_no'],)
+        ).fetchone()
+        
+        latest_weight = latest_row['weight'] if latest_row else g['weight_kg']
+        latest_unit = latest_row['unit'] if latest_row else 'kg'
+        latest_date = latest_row['recorded_date'] if latest_row else None
+        if hasattr(latest_date, 'strftime'):
+            latest_date = latest_date.strftime('%Y-%m-%d')
+            
+        result.append({
+            'tag_no': g['tag_no'],
+            'status': g['status'] or 'Active',
+            'weight_records_count': count,
+            'latest_weight': latest_weight,
+            'unit': latest_unit,
+            'latest_recorded_date': latest_date
+        })
+        
+    return jsonify({'success': True, 'summary': result})
 
 if __name__ == '__main__':
     # Default to production-safe settings when running directly.
