@@ -7312,28 +7312,45 @@ def post_goat_weights_api(tagNo):
     if weight <= 0:
         return jsonify({'success': False, 'error': 'Weight must be a positive number greater than zero'}), 400
         
-    # Duplicate check: exact same goat + same date
+    # Duplicate check: exact same goat + same date -> UPDATE instead of failing!
     existing = db.execute(
         "SELECT 1 FROM goat_weights WHERE goat_tag_no = ? AND recorded_date = ?",
         (tagNo, recorded_date)
     ).fetchone()
-    if existing:
-        return jsonify({'success': False, 'error': f"A weight record already exists for goat {tagNo} on {recorded_date}."}), 400
-        
-    # Insert new record
-    db.execute('''
-        INSERT INTO goat_weights (goat_tag_no, weight, unit, recorded_date, recorded_by)
-        VALUES (?, ?, ?, ?, ?)
-    ''', (tagNo, weight, unit, recorded_date, recorded_by))
     
-    # Update latest weight in master_records
-    db.execute(
-        "UPDATE master_records SET weight_kg = ? WHERE tag_no = ?",
-        (weight, tagNo)
-    )
+    if existing:
+        db.execute('''
+            UPDATE goat_weights 
+            SET weight = ?, recorded_by = ?
+            WHERE goat_tag_no = ? AND recorded_date = ?
+        ''', (weight, recorded_by, tagNo, recorded_date))
+        message = 'Weight entry updated successfully'
+        status_code = 200
+    else:
+        # Insert new record
+        db.execute('''
+            INSERT INTO goat_weights (goat_tag_no, weight, unit, recorded_date, recorded_by)
+            VALUES (?, ?, ?, ?, ?)
+        ''', (tagNo, weight, unit, recorded_date, recorded_by))
+        message = 'Weight entry added successfully'
+        status_code = 201
+    
+    # Always update the latest weight in master_records to the chronologically last entered weight
+    latest_entry = db.execute('''
+        SELECT weight FROM goat_weights 
+        WHERE goat_tag_no = ? 
+        ORDER BY recorded_date DESC, id DESC LIMIT 1
+    ''', (tagNo,)).fetchone()
+    
+    if latest_entry:
+        db.execute(
+            "UPDATE master_records SET weight_kg = ? WHERE tag_no = ?",
+            (latest_entry['weight'], tagNo)
+        )
+        
     db.commit()
     
-    return jsonify({'success': True, 'message': 'Weight entry added successfully'}), 201
+    return jsonify({'success': True, 'message': message}), status_code
 
 @app.route('/goats/weights/summary', methods=['GET'])
 def get_goat_weights_summary():

@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 import os
 
 # Add parent directory so goat_farm_app package is importable
@@ -46,7 +46,8 @@ class TestGoatWeights(unittest.TestCase):
     def test_post_weight_success(self):
         self.mock_conn.execute.return_value.fetchone.side_effect = [
             {'tag_no': 'TEST-GOAT-01'},   # goat exists check
-            None,                          # no duplicate on that date
+            None,                          # duplicate check returns None (no duplicate on that date)
+            {'weight': 18.5}              # latest_entry query returns weight
         ]
         payload = {'weight': 18.5, 'recorded_date': '2026-07-07', 'recorded_by': 'Tester'}
         response = self.client.post(
@@ -91,12 +92,13 @@ class TestGoatWeights(unittest.TestCase):
         self.assertFalse(data['success'])
 
     # ------------------------------------------------------------------ #
-    # POST - reject duplicate date                                        #
+    # POST - update weight if duplicate date is posted                    #
     # ------------------------------------------------------------------ #
     def test_post_weight_duplicate(self):
         self.mock_conn.execute.return_value.fetchone.side_effect = [
-            {'tag_no': 'TEST-GOAT-01'},          # goat exists
-            {'goat_tag_no': 'TEST-GOAT-01'},     # duplicate found
+            {'tag_no': 'TEST-GOAT-01'},          # goat exists check
+            {'goat_tag_no': 'TEST-GOAT-01'},     # duplicate found -> updates!
+            {'weight': 20.0}                     # latest_entry query returns weight
         ]
         payload = {'weight': 20.0, 'recorded_date': '2026-07-07'}
         response = self.client.post(
@@ -104,10 +106,10 @@ class TestGoatWeights(unittest.TestCase):
             data=json.dumps(payload),
             content_type='application/json',
         )
-        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.status_code, 200)
         data = json.loads(response.data)
-        self.assertFalse(data['success'])
-        self.assertIn('already exists', data['error'].lower())
+        self.assertTrue(data['success'])
+        self.assertIn('updated successfully', data['message'])
 
     # ------------------------------------------------------------------ #
     # POST - 404 when goat does not exist                                 #
@@ -177,5 +179,4 @@ class TestGoatWeights(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    unittest.main(verbosity=2)
     unittest.main(verbosity=2)
