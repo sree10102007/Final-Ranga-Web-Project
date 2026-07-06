@@ -39,7 +39,7 @@
                 <tbody>
                     {% for r in records %}
                     <tr>
-                        <td class="ps-4">{{ r.sr_no }}</td>
+                        <td class="ps-4">{{ loop.index }}</td>
                         <td class="fw-bold"><span class="badge bg-dark">{{ r.tag_id }}</span></td>
                         <td><small>{{ r.breed }} {{ r.breed_percent }}%<br>{{ r.gender }}</small></td>
                         <td><small>B: {{ r.birth_date }}<br>D: <strong class="text-danger">{{ r.expired_date }}</strong><br>Age: {{ r.total_age_month }} Mo</small></td>

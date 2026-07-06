@@ -44,7 +44,7 @@
             <tbody>
                 {% for record in records %}
                 <tr>
-                    <td>{{ record.s_no }}</td>
+                    <td>{{ loop.index }}</td>
                     <td><span class="badge bg-success-subtle text-success border border-success border-opacity-10">{{ record.kid_id }}</span></td>
                     <td>
                         <div class="fw-bold">{{ record.breed }}</div>

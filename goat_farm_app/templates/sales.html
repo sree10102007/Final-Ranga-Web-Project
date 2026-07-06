@@ -41,7 +41,7 @@
                 <tbody>
                     {% for r in records %}
                     <tr>
-                        <td class="ps-4">{{ r.sr_no }}</td>
+                        <td class="ps-4">{{ loop.index }}</td>
                         <td class="fw-bold"><span class="badge bg-success">{{ r.tag_id }}</span></td>
                         <td><small>{{ r.breed }} ({{ r.breed_percent }}%) - {{ r.gender }}</small></td>
                         <td>{{ r.weight }} kg</td>

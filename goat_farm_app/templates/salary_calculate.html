@@ -71,7 +71,7 @@
             <tbody>
                 {% for s in salaries %}
                 <tr>
-                    <td class="fw-bold">{{ s.sr_no or s.id }}</td>
+                    <td class="fw-bold">{{ loop.index }}</td>
                     <td><span class="badge bg-success-subtle text-success border">{{ s.name }}</span></td>
                     <td class="text-muted">{{ s.role }}</td>
                     <td>

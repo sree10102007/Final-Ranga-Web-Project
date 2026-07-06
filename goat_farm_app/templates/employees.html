@@ -40,7 +40,7 @@
                     {% if records %}
                         {% for emp in records %}
                         <tr>
-                            <td><span class="badge bg-primary fs-6">{{ emp.sr_no or emp.id }}</span></td>
+                            <td><span class="badge bg-primary fs-6">{{ loop.index }}</span></td>
                             <td>{{ emp.name }}</td>
                             <td>{{ emp.phone or '-' }}</td>
                             <td><span class="badge bg-info">{{ emp.role }}</span></td>
