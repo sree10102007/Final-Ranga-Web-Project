@@ -6321,51 +6321,46 @@ def pnl():
         purchases_tree[ptype]['entries'].append({'label': label, 'amount': amt})
         purchases_tree[ptype]['total'] += amt
 
-    # IMPORTANT: Exclude rows with pnl_category='Purchase' — those are duplicate rows
-    # auto-inserted when goat/feed/medicine/vaccine purchases are recorded via vouchers.
-    # Those amounts are already captured from their respective purchase tables above.
-    expenses_rows = db.execute(
-        "SELECT id, category, amount, date, description, vendor_name, pnl_category, particular_id FROM expenses WHERE status IN ('Approved','Paid') AND (pnl_category IS NULL OR pnl_category != 'Purchase') AND date BETWEEN ? AND ?",
-        (from_date, to_date)
-    ).fetchall()
-
-    for r in expenses_rows:
-        cat = r['category']
-        pnl_cat = (r['pnl_category'] or '').strip()
-        if cat and ('labor' in cat.lower() or 'labour' in cat.lower()):
-            continue
-        amt = r['amount'] or 0.0
-        pid = r['particular_id']
-
-        group, ledger, particular = resolve_account_details(pid, pnl_cat, cat, r['description'] or cat)
-        if group == 'Capital Account':
-            continue
-            
-        classify_and_add(group, ledger, particular, amt)
-        
-        group_type = ledger_groups_dict.get(group, 'Expense')
-        if group_type == 'Expense':
-            if group == 'Direct Expenses':
-                total_direct_expenses += amt
-            else:
-                total_indirect_expenses += amt
-
-    # ── OTHER VOUCHERS → P&L (from Expenses Master) ────────────────────────────
+    # ── OTHER VOUCHERS → P&L (from Expenses Master / Voucher Register) ──────────
+    # NOTE: The `expenses` table is deliberately NOT read here. It is a UI mirror
+    # table that duplicates every purchase entry (goat/feed/medicine/vaccine) for
+    # the Expenses Management page. Reading it here would double-count all purchases.
+    # `other_vouchers` is the correct, deduplicated source for non-purchase expenses.
     ov_rows = db.execute(
-        "SELECT ov.*, el.ledger_group FROM other_vouchers ov LEFT JOIN expense_particulars ep ON ov.particular_id = ep.id LEFT JOIN expense_ledgers el ON ep.ledger_id = el.id WHERE ov.voucher_date BETWEEN ? AND ?",
+        """SELECT ov.*, el.ledger_group
+           FROM other_vouchers ov
+           LEFT JOIN expense_particulars ep ON ov.particular_id = ep.id
+           LEFT JOIN expense_ledgers el ON ep.ledger_id = el.id
+           WHERE ov.voucher_date BETWEEN ? AND ?""",
         (from_date, to_date)
     ).fetchall()
 
     ledger_pnl_summary = {}
     for ov in ov_rows:
         amt = ov['amount'] or 0.0
+        pid = ov['particular_id']
         pnl_cat = (ov['pnl_category'] or 'Direct Expenses').strip()
         ledger_grp = (ov['ledger_group'] or pnl_cat).strip()
         label = ov['particular_name'] or 'Other Voucher Expense'
 
+        # Accumulate for the breakdown display panel
         if label not in ledger_pnl_summary:
             ledger_pnl_summary[label] = {'group': ledger_grp, 'amount': 0.0}
         ledger_pnl_summary[label]['amount'] += amt
+
+        # Classify into the expense trees and totals
+        group, ledger, particular = resolve_account_details(pid, pnl_cat, label, label)
+        if group == 'Capital Account':
+            continue
+        classify_and_add(group, ledger, particular, amt)
+        group_type = ledger_groups_dict.get(group)
+        if group_type is None:
+            group_type = 'Income' if group in INCOME_GROUPS else 'Expense'
+        if group_type == 'Expense':
+            if group == 'Direct Expenses':
+                total_direct_expenses += amt
+            else:
+                total_indirect_expenses += amt
 
     # Fetch employee salary payments
     hr_salaries_row = db.execute("""
