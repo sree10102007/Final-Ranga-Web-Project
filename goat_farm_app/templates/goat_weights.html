@@ -16,10 +16,12 @@
         <form action="{{ url_for('goat_weights') }}" method="GET" class="d-flex flex-column gap-1">
             <div class="input-group">
                 <span class="input-group-text bg-light border-0"><i class="bi bi-search"></i></span>
-                <input type="text" name="search" class="form-control border-0 bg-light" placeholder="Search by Tag ID or last 4 digits..." value="{{ search_q or '' }}">
+                <input type="text" name="search" class="form-control border-0 bg-light"
+                    placeholder="Search by Tag ID or last 4 digits..." value="{{ search_q or '' }}">
                 <button class="btn btn-success" type="submit">Search</button>
             </div>
-            <small class="text-muted"><i class="bi bi-info-circle me-1"></i>You can search by full Tag ID or the last 4 digits</small>
+            <small class="text-muted"><i class="bi bi-info-circle me-1"></i>You can search by full Tag ID or the last 4
+                digits</small>
         </form>
     </div>
 </div>
@@ -30,31 +32,35 @@
         <div class="card border-0 h-100 rounded-4 shadow-sm">
             <div class="card-body text-center p-4">
                 <!-- Scale/Weight Icon Container -->
-                <div class="mb-3 d-inline-flex align-items-center justify-content-center bg-success bg-opacity-10 rounded-4" style="width: 70px; height: 70px;">
+                <div class="mb-3 d-inline-flex align-items-center justify-content-center bg-success bg-opacity-10 rounded-4"
+                    style="width: 70px; height: 70px;">
                     <i class="bi bi-speedometer2 text-success fs-2"></i>
                 </div>
-                
+
                 <!-- Tag No -->
                 <h4 class="fw-800 mb-1" style="color: #1a2e1a;">{{ goat.tag_no }}</h4>
-                
+
                 <!-- Status Badge -->
                 <div class="mb-2">
-                    <span class="badge {% if goat.status == 'Active' %}bg-primary{% elif goat.status == 'Sold' %}bg-warning{% else %}bg-danger{% endif %}">
+                    <span
+                        class="badge {% if goat.status == 'Active' %}bg-primary{% elif goat.status == 'Sold' %}bg-warning{% else %}bg-danger{% endif %}">
                         {{ goat.status or 'Active' }}
                     </span>
                 </div>
-                
+
                 <!-- Weight Records Count -->
                 <p class="text-muted small mb-1">Weight Records: {{ goat.history|length }}</p>
-                
+
                 <!-- Latest Weight Pill Badge -->
                 <div class="mb-2">
                     {% if goat.current_weight %}
-                    <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-10 fw-bold px-3 py-2">
+                    <span
+                        class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-10 fw-bold px-3 py-2">
                         {{ "%.1f"|format(goat.current_weight) }} kg
                     </span>
                     {% else %}
-                    <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-10 fw-bold px-3 py-2">
+                    <span
+                        class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-10 fw-bold px-3 py-2">
                         No weight recorded yet
                     </span>
                     {% endif %}
@@ -63,24 +69,27 @@
                 <!-- Weight Gain Comparison Pill -->
                 <div class="mb-3" style="min-height: 25px;">
                     {% if goat.current_weight and goat.weight_gain is not none %}
-                        {% if goat.weight_gain > 0 %}
-                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-10 fw-bold px-2 py-1 small">
-                            <i class="bi bi-arrow-up-right me-1"></i>Gain: +{{ "%.1f"|format(goat.weight_gain) }} kg
-                        </span>
-                        {% elif goat.weight_gain < 0 %}
-                        <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-10 fw-bold px-2 py-1 small">
-                            <i class="bi bi-arrow-down-left me-1"></i>Loss: {{ "%.1f"|format(goat.weight_gain) }} kg
+                    {% if goat.weight_gain > 0 %}
+                    <span
+                        class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-10 fw-bold px-2 py-1 small">
+                        <i class="bi bi-arrow-up-right me-1"></i>Gain: +{{ "%.1f"|format(goat.weight_gain) }} kg
+                    </span>
+                    {% elif goat.weight_gain < 0 %} <span
+                        class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-10 fw-bold px-2 py-1 small">
+                        <i class="bi bi-arrow-down-left me-1"></i>Loss: {{ "%.1f"|format(goat.weight_gain) }} kg
                         </span>
                         {% else %}
-                        <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-10 fw-bold px-2 py-1 small">
+                        <span
+                            class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-10 fw-bold px-2 py-1 small">
                             <i class="bi bi-dash me-1"></i>0.0 kg change
                         </span>
                         {% endif %}
-                    {% endif %}
+                        {% endif %}
                 </div>
 
                 <!-- View Details Button -->
-                <button class="btn btn-success w-100 shadow-sm" data-bs-toggle="modal" data-bs-target="#weightModal-{{ loop.index }}">
+                <button class="btn btn-success w-100 shadow-sm" data-bs-toggle="modal"
+                    data-bs-target="#weightModal-{{ loop.index }}">
                     View Details
                 </button>
             </div>
@@ -88,7 +97,8 @@
     </div>
 
     <!-- Weight Details Modal for Each Goat -->
-    <div class="modal fade" id="weightModal-{{ loop.index }}" tabindex="-1" aria-labelledby="weightModalLabel-{{ loop.index }}" aria-hidden="true">
+    <div class="modal fade" id="weightModal-{{ loop.index }}" tabindex="-1"
+        aria-labelledby="weightModalLabel-{{ loop.index }}" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content border-0 rounded-4">
                 <div class="modal-header border-bottom border-light p-4">
@@ -107,7 +117,8 @@
                                 <select name="year" class="form-select border-0 bg-white" style="border-radius: 8px;">
                                     <option value="">All Years</option>
                                     {% for yr in years_list %}
-                                    <option value="{{ yr }}" {% if filter_year|string == yr|string %}selected{% endif %}>{{ yr }}</option>
+                                    <option value="{{ yr }}" {% if filter_year|string==yr|string %}selected{% endif %}>
+                                        {{ yr }}</option>
                                     {% endfor %}
                                 </select>
                             </div>
@@ -116,30 +127,39 @@
                                 <select name="month" class="form-select border-0 bg-white" style="border-radius: 8px;">
                                     <option value="">All Months</option>
                                     {% for m_num, m_name in all_months %}
-                                    <option value="{{ m_num }}" {% if filter_month == m_num %}selected{% endif %}>{{ m_name }}</option>
+                                    <option value="{{ m_num }}" {% if filter_month=m_num %}selected{% endif %}>{{ m_name
+                                        }}</option>
                                     {% endfor %}
                                 </select>
                             </div>
                             <div class="col-md-2 d-grid">
-                                <button type="submit" class="btn btn-success" style="border-radius: 8px;">Filter</button>
+                                <button type="submit" class="btn btn-success"
+                                    style="border-radius: 8px;">Filter</button>
                             </div>
                         </form>
                     </div>
 
                     <!-- Add New Weight Record Form -->
                     <div class="card border-0 bg-light bg-opacity-50 p-4 rounded-3 mb-4">
-                        <h6 class="fw-800 mb-3 text-dark"><i class="bi bi-plus-circle-fill text-success me-2"></i>Add Weight Record</h6>
+                        <h6 class="fw-800 mb-3 text-dark"><i class="bi bi-plus-circle-fill text-success me-2"></i>Add
+                            Weight Record</h6>
                         <form id="addWeightForm-{{ loop.index }}" class="row g-3 align-items-end">
                             <div class="col-md-4 col-sm-12">
-                                <label class="form-label text-muted small fw-bold mb-1">Weight (kg) <span class="text-danger">*</span></label>
-                                <input type="number" step="0.1" name="weight" class="form-control border-0 bg-white" placeholder="e.g. 24.5" required min="0.1">
+                                <label class="form-label text-muted small fw-bold mb-1">Weight (kg) <span
+                                        class="text-danger">*</span></label>
+                                <input type="number" step="0.1" name="weight" class="form-control border-0 bg-white"
+                                    placeholder="e.g. 24.5" required min="0.1">
                             </div>
                             <div class="col-md-4 col-sm-12">
-                                <label class="form-label text-muted small fw-bold mb-1">Date Recorded <span class="text-danger">*</span></label>
-                                <input type="date" name="recorded_date" class="form-control border-0 bg-white" required value="{{ datetime_now_str }}">
+                                <label class="form-label text-muted small fw-bold mb-1">Date Recorded <span
+                                        class="text-danger">*</span></label>
+                                <input type="date" name="recorded_date" class="form-control border-0 bg-white" required
+                                    value="{{ datetime_now_str }}">
                             </div>
                             <div class="col-md-4 d-grid">
-                                <button type="button" class="btn btn-success" onclick="submitWeightForm({{ goat.tag_no|tojson|safe }}, '{{ loop.index }}')">
+                                <button type="button" class="btn btn-success"
+                                    data-tag="{{ goat.tag_no }}" data-index="{{ loop.index }}"
+                                    onclick="submitWeightForm(this.dataset.tag, this.dataset.index)">
                                     Save Record
                                 </button>
                             </div>
@@ -148,7 +168,8 @@
                     </div>
 
                     <!-- History Timeline Feed -->
-                    <h6 class="fw-800 text-dark mb-3"><i class="bi bi-clock-history text-secondary me-2"></i>Weight Log Feed</h6>
+                    <h6 class="fw-800 text-dark mb-3"><i class="bi bi-clock-history text-secondary me-2"></i>Weight Log
+                        Feed</h6>
                     {% if goat.history %}
                     <div class="table-responsive">
                         <table class="table table-hover align-middle border-0">
@@ -164,9 +185,11 @@
                                 {% for entry in goat.history|reverse %}
                                 <tr>
                                     <td class="py-3 fw-bold text-dark">{{ entry.recorded_date }}</td>
-                                    <td class="py-3 fw-extrabold text-success fs-5">{{ "%.1f"|format(entry.weight_kg) }}</td>
+                                    <td class="py-3 fw-extrabold text-success fs-5">{{ "%.1f"|format(entry.weight_kg) }}
+                                    </td>
                                     <td class="py-3 text-muted">{{ entry.unit }}</td>
-                                    <td class="py-3 text-muted"><i class="bi bi-person me-1"></i>{{ entry.recorded_by }}</td>
+                                    <td class="py-3 text-muted"><i class="bi bi-person me-1"></i>{{ entry.recorded_by }}
+                                    </td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -194,62 +217,62 @@
 </div>
 
 <!-- AJAX Weight submission logic -->
-<script>
-function submitWeightForm(tagNo, index) {
-    const form = document.getElementById('addWeightForm-' + index);
-    const alertBox = document.getElementById('formAlert-' + index);
-    
-    const weight = form.querySelector('[name=\"weight\"]').value;
-    const recordedDate = form.querySelector('[name=\"recorded_date\"]').value;
-    
-    if (!weight || weight <= 0) {
-        alertBox.className = 'alert alert-danger mt-2';
-        alertBox.textContent = 'Weight must be a positive number greater than zero.';
-        alertBox.classList.remove('d-none');
-        return;
-    }
-    if (!recordedDate) {
-        alertBox.className = 'alert alert-danger mt-2';
-        alertBox.textContent = 'Recorded date is required.';
-        alertBox.classList.remove('d-none');
-        return;
-    }
+<script nonce="{{ csp_nonce }}">
+    function submitWeightForm(tagNo, index) {
+        const form = document.getElementById('addWeightForm-' + index);
+        const alertBox = document.getElementById('formAlert-' + index);
 
-    const payload = {
-        weight: parseFloat(weight),
-        recorded_date: recordedDate
-    };
+        const weight = form.querySelector('[name=weight]').value;
+        const recordedDate = form.querySelector('[name=recorded_date]').value;
 
-    fetch('/goats/' + encodeURIComponent(tagNo) + '/weights', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': typeof csrfToken !== 'undefined' ? csrfToken : ''
-        },
-        body: JSON.stringify(payload)
-    })
-    .then(response => response.json().then(data => ({ status: response.status, data: data })))
-    .then(res => {
-        if (res.status === 200 || res.status === 201) {
-            alertBox.className = 'alert alert-success mt-2';
-            alertBox.textContent = res.data.message || 'Weight record saved successfully!';
-            alertBox.classList.remove('d-none');
-            // Reload the dashboard after a short pause
-            setTimeout(() => {
-                location.reload();
-            }, 800);
-        } else {
+        if (!weight || weight <= 0) {
             alertBox.className = 'alert alert-danger mt-2';
-            alertBox.textContent = res.data.error || 'Failed to save record.';
+            alertBox.textContent = 'Weight must be a positive number greater than zero.';
             alertBox.classList.remove('d-none');
+            return;
         }
-    })
-    .catch(err => {
-        console.error('Error:', err);
-        alertBox.className = 'alert alert-danger mt-2';
-        alertBox.textContent = 'An unexpected connection error occurred.';
-        alertBox.classList.remove('d-none');
-    });
-}
+        if (!recordedDate) {
+            alertBox.className = 'alert alert-danger mt-2';
+            alertBox.textContent = 'Recorded date is required.';
+            alertBox.classList.remove('d-none');
+            return;
+        }
+
+        const payload = {
+            weight: parseFloat(weight),
+            recorded_date: recordedDate
+        };
+
+        fetch('/goats/' + encodeURIComponent(tagNo) + '/weights', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': typeof csrfToken !== 'undefined' ? csrfToken : ''
+            },
+            body: JSON.stringify(payload)
+        })
+            .then(response => response.json().then(data => ({ status: response.status, data: data })))
+            .then(res => {
+                if (res.status === 200 || res.status === 201) {
+                    alertBox.className = 'alert alert-success mt-2';
+                    alertBox.textContent = res.data.message || 'Weight record saved successfully!';
+                    alertBox.classList.remove('d-none');
+                    // Reload the dashboard after a short pause
+                    setTimeout(() => {
+                        location.reload();
+                    }, 800);
+                } else {
+                    alertBox.className = 'alert alert-danger mt-2';
+                    alertBox.textContent = res.data.error || 'Failed to save record.';
+                    alertBox.classList.remove('d-none');
+                }
+            })
+            .catch(err => {
+                console.error('Error:', err);
+                alertBox.className = 'alert alert-danger mt-2';
+                alertBox.textContent = 'An unexpected connection error occurred.';
+                alertBox.classList.remove('d-none');
+            });
+    }
 </script>
 {% endblock %}
