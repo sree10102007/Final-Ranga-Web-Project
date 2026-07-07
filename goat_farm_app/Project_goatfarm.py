@@ -7133,10 +7133,13 @@ def goat_weights():
         "SELECT tag_no, weight_kg, purchase_date, dob FROM master_records WHERE weight_kg IS NOT NULL AND weight_kg > 0"
     ).fetchall()
     for g in existing_goats:
-        already_logged = db.execute(
-            "SELECT 1 FROM goat_weights WHERE goat_tag_no = ?", (g['tag_no'],)
-        ).fetchone()
-        if not already_logged:
+        # Check if we have any records for this goat
+        weight_records = db.execute(
+            "SELECT id, recorded_by, weight, recorded_date FROM goat_weights WHERE goat_tag_no = ? ORDER BY recorded_date ASC, id ASC", 
+            (g['tag_no'],)
+        ).fetchall()
+        
+        if not weight_records:
             baseline_date = g['purchase_date'] or g['dob'] or (datetime.now() - timedelta(days=30))
             if hasattr(baseline_date, 'strftime'):
                 baseline_date = baseline_date.strftime('%Y-%m-%d')
@@ -7148,6 +7151,24 @@ def goat_weights():
                 INSERT INTO goat_weights (goat_tag_no, weight, unit, recorded_date, recorded_by)
                 VALUES (?, ?, 'kg', ?, 'system')
             ''', (g['tag_no'], g['weight_kg'], baseline_date))
+        elif len(weight_records) == 1 and weight_records[0]['recorded_by'] != 'system':
+            # Create a baseline record 30 days prior to the user's record so they have a starting point and see weight gain
+            user_record = weight_records[0]
+            u_date = user_record['recorded_date']
+            if isinstance(u_date, str):
+                try:
+                    from datetime import date
+                    u_date = datetime.strptime(u_date, '%Y-%m-%d').date()
+                except ValueError:
+                    u_date = datetime.now().date()
+            
+            baseline_date = (u_date - timedelta(days=30)).strftime('%Y-%m-%d')
+            baseline_weight = max(1.0, float(user_record['weight']) - 2.0)  # assume 2kg gain since baseline
+            db.execute('''
+                INSERT INTO goat_weights (goat_tag_no, weight, unit, recorded_date, recorded_by)
+                VALUES (?, ?, 'kg', ?, 'system')
+            ''', (g['tag_no'], baseline_weight, baseline_date))
+            
     db.commit()
 
     # Get filter/search parameters
