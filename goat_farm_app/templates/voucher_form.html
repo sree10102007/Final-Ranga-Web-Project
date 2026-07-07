@@ -94,27 +94,27 @@
                         <!-- Row 3: Particulars, Ledger Group, Purchase Price, Notes -->
                         <div class="row g-3 mb-3">
                             <div class="col-md-3">
-                                <label class="form-label text-muted small fw-bold">PARTICULARS <span class="text-danger">*</span></label>
+                                <label class="form-label text-muted small fw-bold">LEDGER ACCOUNT <span class="text-danger">*</span></label>
                                 {% if particulars %}
                                 <select name="particular_id" class="form-select" required id="particular_select" data-onchange="updateParticularName(this)">
-                                    <option value="">— Select Particular —</option>
+                                    <option value="">— Select Ledger Account —</option>
                                     {% for p in particulars %}
                                     <option value="{{ p.id }}" {% if record and record.particular_id == p.id %}selected{% endif %}>
-                                        {{ p.name }}{% if p.ledger_name %} ({{ p.ledger_name }}){% endif %}
+                                        {{ p.name }}
                                     </option>
                                     {% endfor %}
                                 </select>
                                 <input type="hidden" name="particular_name" id="particular_name_hidden"
                                        value="{% if record %}{{ record.particular_name or '' }}{% endif %}">
                                 <div class="form-text">
-                                    <a href="{{ url_for('expense_ledgers', tab='particulars') }}" target="_blank" class="text-decoration-none small">
-                                        <i class="bi bi-plus-circle me-1"></i>Create new particular
+                                    <a href="{{ url_for('expense_ledgers', tab='ledgers') }}" target="_blank" class="text-decoration-none small">
+                                        <i class="bi bi-plus-circle me-1"></i>Create new ledger account
                                     </a>
                                 </div>
                                 {% else %}
                                 <div class="alert alert-warning small rounded-3 mb-2 border-0 py-2">
-                                    <i class="bi bi-exclamation-triangle me-2"></i>No particulars.
-                                    <a href="{{ url_for('expense_ledgers', tab='particulars') }}" class="fw-bold">Create first</a>
+                                    <i class="bi bi-exclamation-triangle me-2"></i>No ledger accounts.
+                                    <a href="{{ url_for('expense_ledgers', tab='ledgers') }}" class="fw-bold">Create first</a>
                                 </div>
                                 <input type="text" name="particular_name" class="form-control" required
                                        placeholder="Enter expense type"
@@ -207,27 +207,27 @@
                         <!-- Row 3: Particulars, Ledger Group, Notes -->
                         <div class="row g-3 mb-3">
                             <div class="col-md-3">
-                                <label class="form-label text-muted small fw-bold">PARTICULARS <span class="text-danger">*</span></label>
+                                <label class="form-label text-muted small fw-bold">LEDGER ACCOUNT <span class="text-danger">*</span></label>
                                 {% if particulars %}
                                 <select name="particular_id" class="form-select" required id="particular_select" data-onchange="updateParticularName(this)">
-                                    <option value="">— Select Particular —</option>
+                                    <option value="">— Select Ledger Account —</option>
                                     {% for p in particulars %}
                                     <option value="{{ p.id }}" {% if record and record.particular_id == p.id %}selected{% endif %}>
-                                        {{ p.name }}{% if p.ledger_name %} ({{ p.ledger_name }}){% endif %}
+                                        {{ p.name }}
                                     </option>
                                     {% endfor %}
                                 </select>
                                 <input type="hidden" name="particular_name" id="particular_name_hidden"
                                        value="{% if record %}{{ record.particular_name or '' }}{% endif %}">
                                 <div class="form-text">
-                                    <a href="{{ url_for('expense_ledgers', tab='particulars') }}" target="_blank" class="text-decoration-none small">
-                                        <i class="bi bi-plus-circle me-1"></i>Create new particular
+                                    <a href="{{ url_for('expense_ledgers', tab='ledgers') }}" target="_blank" class="text-decoration-none small">
+                                        <i class="bi bi-plus-circle me-1"></i>Create new ledger account
                                     </a>
                                 </div>
                                 {% else %}
                                 <div class="alert alert-warning small rounded-3 mb-2 border-0 py-2">
-                                    <i class="bi bi-exclamation-triangle me-2"></i>No particulars.
-                                    <a href="{{ url_for('expense_ledgers', tab='particulars') }}" class="fw-bold">Create first</a>
+                                    <i class="bi bi-exclamation-triangle me-2"></i>No ledger accounts.
+                                    <a href="{{ url_for('expense_ledgers', tab='ledgers') }}" class="fw-bold">Create first</a>
                                 </div>
                                 <input type="text" name="particular_name" class="form-control" required
                                        placeholder="Enter expense type"
@@ -316,27 +316,27 @@
                                 </select>
                             </div>
                             <div class="col-md-3">
-                                <label class="form-label text-muted small fw-bold">PARTICULARS <span class="text-danger">*</span></label>
+                                <label class="form-label text-muted small fw-bold">LEDGER ACCOUNT <span class="text-danger">*</span></label>
                                 {% if particulars %}
                                 <select name="particular_id" class="form-select" required id="particular_select" data-onchange="updateParticularName(this)">
-                                    <option value="">— Select Particular —</option>
+                                    <option value="">— Select Ledger Account —</option>
                                     {% for p in particulars %}
                                     <option value="{{ p.id }}" {% if record and record.particular_id == p.id %}selected{% endif %}>
-                                        {{ p.name }}{% if p.ledger_name %} ({{ p.ledger_name }}){% endif %}
+                                        {{ p.name }}
                                     </option>
                                     {% endfor %}
                                 </select>
                                 <input type="hidden" name="particular_name" id="particular_name_hidden"
                                        value="{% if record %}{{ record.particular_name or '' }}{% endif %}">
                                 <div class="form-text">
-                                    <a href="{{ url_for('expense_ledgers', tab='particulars') }}" target="_blank" class="text-decoration-none small">
-                                        <i class="bi bi-plus-circle me-1"></i>Create new particular
+                                    <a href="{{ url_for('expense_ledgers', tab='ledgers') }}" target="_blank" class="text-decoration-none small">
+                                        <i class="bi bi-plus-circle me-1"></i>Create new ledger account
                                     </a>
                                 </div>
                                 {% else %}
                                 <div class="alert alert-warning small rounded-3 mb-2 border-0 py-2">
-                                    <i class="bi bi-exclamation-triangle me-2"></i>No particulars.
-                                    <a href="{{ url_for('expense_ledgers', tab='particulars') }}" class="fw-bold">Create first</a>
+                                    <i class="bi bi-exclamation-triangle me-2"></i>No ledger accounts.
+                                    <a href="{{ url_for('expense_ledgers', tab='ledgers') }}" class="fw-bold">Create first</a>
                                 </div>
                                 <input type="text" name="particular_name" class="form-control" required
                                        placeholder="Enter expense type"
@@ -408,27 +408,27 @@
                         <!-- Row 2: Particulars (Category) + Quantity + Unit + Total Amount -->
                         <div class="row g-3 mb-3">
                             <div class="col-md-3">
-                                <label class="form-label text-muted small fw-bold">PARTICULARS <span class="text-danger">*</span></label>
+                                <label class="form-label text-muted small fw-bold">LEDGER ACCOUNT <span class="text-danger">*</span></label>
                                 {% if particulars %}
                                 <select name="particular_id" class="form-select" required id="particular_select" data-onchange="updateParticularName(this)">
-                                    <option value="">— Select Particular —</option>
+                                    <option value="">— Select Ledger Account —</option>
                                     {% for p in particulars %}
                                     <option value="{{ p.id }}" {% if record and record.particular_id == p.id %}selected{% endif %}>
-                                        {{ p.name }}{% if p.ledger_name %} ({{ p.ledger_name }}){% endif %}
+                                        {{ p.name }}
                                     </option>
                                     {% endfor %}
                                 </select>
                                 <input type="hidden" name="particular_name" id="particular_name_hidden"
                                        value="{% if record %}{{ record.particular_name or '' }}{% endif %}">
                                 <div class="form-text">
-                                    <a href="{{ url_for('expense_ledgers', tab='particulars') }}" target="_blank" class="text-decoration-none small">
-                                        <i class="bi bi-plus-circle me-1"></i>Create new particular
+                                    <a href="{{ url_for('expense_ledgers', tab='ledgers') }}" target="_blank" class="text-decoration-none small">
+                                        <i class="bi bi-plus-circle me-1"></i>Create new ledger account
                                     </a>
                                 </div>
                                 {% else %}
                                 <div class="alert alert-warning small rounded-3 mb-2 border-0 py-2">
-                                    <i class="bi bi-exclamation-triangle me-2"></i>No particulars defined.
-                                    <a href="{{ url_for('expense_ledgers', tab='particulars') }}" class="fw-bold">Create particulars first</a>
+                                    <i class="bi bi-exclamation-triangle me-2"></i>No ledger accounts defined.
+                                    <a href="{{ url_for('expense_ledgers', tab='ledgers') }}" class="fw-bold">Create ledger account first</a>
                                 </div>
                                 <input type="text" name="particular_name" class="form-control" required
                                        placeholder="Enter expense type e.g. Consumables, Repairs"

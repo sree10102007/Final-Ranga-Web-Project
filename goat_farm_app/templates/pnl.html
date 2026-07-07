@@ -457,76 +457,7 @@
 
 
 
-    <!-- EXPENSES MASTER LEDGER BREAKDOWN PANEL -->
-    {% if ledger_pnl_summary %}
-    <div class="d-print-none mt-5">
-        <div class="card border-0 rounded-4 shadow-sm overflow-hidden">
-            <div class="card-header border-0 p-4 d-flex align-items-center justify-content-between bg-dark text-white">
-                <div>
-                    <h6 class="fw-800 mb-1 text-white"><i class="bi bi-currency-rupee me-2"></i>Expenses Master — Ledger Breakdown</h6>
-                    <p class="mb-0 small opacity-75">Other Voucher expenses grouped by Expense Particulars & Ledger Group for this period</p>
-                </div>
-                <a href="{{ url_for('expenses_master') }}" class="btn btn-light btn-sm rounded-pill px-3 fw-bold text-dark shadow-sm">
-                    <i class="bi bi-arrow-right-circle me-1"></i>Manage
-                </a>
-            </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th class="py-3 px-4 text-muted small fw-bold text-uppercase">#</th>
-                                <th class="py-3 px-3 text-muted small fw-bold text-uppercase">Particular (Expense Category)</th>
-                                <th class="py-3 px-3 text-muted small fw-bold text-uppercase">Ledger Group</th>
-                                <th class="py-3 px-3 text-muted small fw-bold text-uppercase text-end">Amount (₹)</th>
-                                <th class="py-3 px-3 text-muted small fw-bold text-uppercase text-center">P&L Impact</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% set ns = namespace(total=0) %}
-                            {% for label, info in ledger_pnl_summary.items() %}
-                            {% set ns.total = ns.total + info.amount %}
-                            <tr>
-                                <td class="py-3 px-4 text-muted font-monospace small">{{ loop.index }}</td>
-                                <td class="py-3 px-3">
-                                    <span class="fw-semibold text-dark">{{ label }}</span>
-                                </td>
-                                <td class="py-3 px-3">
-                                    {% set grp = info.group %}
-                                    <span class="badge rounded-pill px-3 py-2 small fw-bold
-                                        {% if grp == 'Direct Expenses' %}bg-warning-subtle text-warning
-                                        {% elif grp in ('Indirect Expenses','Administrative Expenses','Selling Expenses') %}bg-secondary-subtle text-secondary
-                                        {% elif grp == 'Capital Account' %}bg-primary-subtle text-primary
-                                        {% else %}bg-success-subtle text-success{% endif %}">
-                                        {{ grp }}
-                                    </span>
-                                </td>
-                                <td class="py-3 px-3 text-end font-monospace fw-semibold">₹{{ "%.2f"|format(info.amount) }}</td>
-                                <td class="py-3 px-3 text-center">
-                                    {% if grp == 'Capital Account' %}
-                                    <span class="badge bg-primary-subtle text-primary small">Balance Sheet</span>
-                                    {% elif grp in ('Indirect Expenses','Administrative Expenses','Selling Expenses') %}
-                                    <span class="badge bg-secondary-subtle text-secondary small">Indirect (Net Profit)</span>
-                                    {% else %}
-                                    <span class="badge bg-warning-subtle text-warning small">Direct (Gross Profit)</span>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                        <tfoot class="table-light">
-                            <tr class="fw-bold">
-                                <td colspan="3" class="py-3 px-4 text-dark">Total — Other Vouchers (Period)</td>
-                                <td class="py-3 px-3 text-end font-monospace text-success">₹{{ "%.2f"|format(ns.total) }}</td>
-                                <td></td>
-                            </tr>
-                        </tfoot>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-    {% endif %}
+
 </div>
 
 <!-- Glassmorphic Transaction Drilldown Modal -->

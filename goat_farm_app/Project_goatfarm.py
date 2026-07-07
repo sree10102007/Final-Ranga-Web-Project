@@ -1017,15 +1017,7 @@ def init_db():
                 description TEXT
             )
         ''')
-        conn.execute('''
-            CREATE TABLE IF NOT EXISTS expense_particulars (
-                id SERIAL PRIMARY KEY,
-                name TEXT UNIQUE NOT NULL,
-                ledger_id INTEGER,
-                description TEXT,
-                FOREIGN KEY (ledger_id) REFERENCES expense_ledgers(id)
-            )
-        ''')
+        conn.execute('DROP TABLE IF EXISTS expense_particulars CASCADE')
         conn.execute('''
             CREATE TABLE IF NOT EXISTS expense_units (
                 id SERIAL PRIMARY KEY,
@@ -1048,7 +1040,6 @@ def init_db():
                 amount REAL NOT NULL DEFAULT 0,
                 notes TEXT,
                 pnl_category TEXT DEFAULT 'Direct Expenses',
-                FOREIGN KEY (particular_id) REFERENCES expense_particulars(id),
                 FOREIGN KEY (unit_id) REFERENCES expense_units(id)
             )
         ''')
@@ -4109,7 +4100,7 @@ def voucher_add(v_type):
         particular_id = int(particular_id) if particular_id else None
         particular_name = f.get('particular_name', '').strip()
         if particular_id and not particular_name:
-            p = db.execute('SELECT name FROM expense_particulars WHERE id=?', (particular_id,)).fetchone()
+            p = db.execute('SELECT ledger_name AS name FROM expense_ledgers WHERE id=?', (particular_id,)).fetchone()
             particular_name = p['name'] if p else ''
 
         if v_type == 'goat':
@@ -4265,7 +4256,7 @@ def voucher_add(v_type):
 
             # Resolve particular_name from DB if only id given
             if particular_id and not particular_name:
-                p = db.execute('SELECT name FROM expense_particulars WHERE id=?', (particular_id,)).fetchone()
+                p = db.execute('SELECT ledger_name AS name FROM expense_ledgers WHERE id=?', (particular_id,)).fetchone()
                 particular_name = p['name'] if p else ''
             # Resolve unit_name from DB if only id given
             if unit_id and not unit_name:
@@ -4311,11 +4302,9 @@ def voucher_add(v_type):
         }
 
     particulars = db.execute("""
-        SELECT ep.* FROM expense_particulars ep
-        LEFT JOIN expense_ledgers el ON ep.ledger_id = el.id
-        LEFT JOIN ledger_groups lg ON el.ledger_group = lg.group_name
-        WHERE lg.group_type IS NULL OR lg.group_type = 'Expense'
-        ORDER BY ep.name
+        SELECT id, ledger_name AS name, ledger_group
+        FROM expense_ledgers
+        ORDER BY ledger_name
     """).fetchall()
     expense_units = db.execute('SELECT * FROM expense_units ORDER BY unit_name').fetchall()
     ledgers = db.execute('SELECT * FROM expense_ledgers ORDER BY ledger_name').fetchall()
@@ -4435,7 +4424,7 @@ def voucher_edit(v_type, id, sub_type=None):
         particular_id = int(particular_id) if particular_id else None
         particular_name = f.get('particular_name', '').strip()
         if particular_id and not particular_name:
-            p = db.execute('SELECT name FROM expense_particulars WHERE id=?', (particular_id,)).fetchone()
+            p = db.execute('SELECT ledger_name AS name FROM expense_ledgers WHERE id=?', (particular_id,)).fetchone()
             particular_name = p['name'] if p else ''
 
         if v_type == 'goat':
@@ -4626,7 +4615,7 @@ def voucher_edit(v_type, id, sub_type=None):
             new_particular_id = f.get('particular_id') or None
             new_particular_name = f.get('particular_name', '').strip()
             if new_particular_id and not new_particular_name:
-                p = db.execute('SELECT name FROM expense_particulars WHERE id=?', (new_particular_id,)).fetchone()
+                p = db.execute('SELECT ledger_name AS name FROM expense_ledgers WHERE id=?', (new_particular_id,)).fetchone()
                 new_particular_name = p['name'] if p else ''
             new_bill_date = f.get('bill_date') or None
             new_bill_no = f.get('bill_no', '').strip()
@@ -4664,11 +4653,9 @@ def voucher_edit(v_type, id, sub_type=None):
         return redirect(url_for('voucher_register', v_type=v_type))
 
     particulars = db.execute("""
-        SELECT ep.* FROM expense_particulars ep
-        LEFT JOIN expense_ledgers el ON ep.ledger_id = el.id
-        LEFT JOIN ledger_groups lg ON el.ledger_group = lg.group_name
-        WHERE lg.group_type IS NULL OR lg.group_type = 'Expense'
-        ORDER BY ep.name
+        SELECT id, ledger_name AS name, ledger_group
+        FROM expense_ledgers
+        ORDER BY ledger_name
     """).fetchall()
     expense_units = db.execute('SELECT * FROM expense_units ORDER BY unit_name').fetchall()
     ledgers = db.execute('SELECT * FROM expense_ledgers ORDER BY ledger_name').fetchall()
@@ -5549,7 +5536,7 @@ def expense_add():
 
         # Resolve names from DB if only id given
         if particular_id and not particular_name:
-            p = db.execute('SELECT name FROM expense_particulars WHERE id=?', (particular_id,)).fetchone()
+            p = db.execute('SELECT ledger_name AS name FROM expense_ledgers WHERE id=?', (particular_id,)).fetchone()
             particular_name = p['name'] if p else ''
         if unit_id and not unit_name:
             u = db.execute('SELECT unit_name FROM expense_units WHERE id=?', (unit_id,)).fetchone()
@@ -5581,11 +5568,9 @@ def expense_add():
         return redirect(url_for('expenses'))
 
     particulars = db.execute("""
-        SELECT ep.* FROM expense_particulars ep
-        LEFT JOIN expense_ledgers el ON ep.ledger_id = el.id
-        LEFT JOIN ledger_groups lg ON el.ledger_group = lg.group_name
-        WHERE lg.group_type IS NULL OR lg.group_type = 'Expense'
-        ORDER BY ep.name
+        SELECT id, ledger_name AS name, ledger_group
+        FROM expense_ledgers
+        ORDER BY ledger_name
     """).fetchall()
     expense_units = db.execute('SELECT * FROM expense_units ORDER BY unit_name').fetchall()
     ledgers = db.execute('SELECT * FROM expense_ledgers ORDER BY ledger_name').fetchall()
@@ -5662,7 +5647,7 @@ def expense_edit(expense_id):
 
         # Resolve names from DB if only id given
         if particular_id and not particular_name:
-            p = db.execute('SELECT name FROM expense_particulars WHERE id=?', (particular_id,)).fetchone()
+            p = db.execute('SELECT ledger_name AS name FROM expense_ledgers WHERE id=?', (particular_id,)).fetchone()
             particular_name = p['name'] if p else ''
         if unit_id and not unit_name:
             u = db.execute('SELECT unit_name FROM expense_units WHERE id=?', (unit_id,)).fetchone()
@@ -5696,11 +5681,9 @@ def expense_edit(expense_id):
         return redirect(url_for('expenses'))
         
     particulars = db.execute("""
-        SELECT ep.* FROM expense_particulars ep
-        LEFT JOIN expense_ledgers el ON ep.ledger_id = el.id
-        LEFT JOIN ledger_groups lg ON el.ledger_group = lg.group_name
-        WHERE lg.group_type IS NULL OR lg.group_type = 'Expense'
-        ORDER BY ep.name
+        SELECT id, ledger_name AS name, ledger_group
+        FROM expense_ledgers
+        ORDER BY ledger_name
     """).fetchall()
     expense_units = db.execute('SELECT * FROM expense_units ORDER BY unit_name').fetchall()
     ledgers = db.execute('SELECT * FROM expense_ledgers ORDER BY ledger_name').fetchall()
@@ -5713,14 +5696,13 @@ def expenses_master():
     db = get_db()
     ledger_count = db.execute('SELECT COUNT(*) FROM expense_ledgers').fetchone()[0] or 0
     group_count = db.execute('SELECT COUNT(*) FROM ledger_groups').fetchone()[0] or 0
-    particular_count = db.execute('SELECT COUNT(*) FROM expense_particulars').fetchone()[0] or 0
     unit_count = db.execute('SELECT COUNT(*) FROM expense_units').fetchone()[0] or 0
     other_voucher_count = db.execute('SELECT COUNT(*) FROM other_vouchers').fetchone()[0] or 0
     other_voucher_sum = db.execute('SELECT SUM(amount) FROM other_vouchers').fetchone()[0] or 0.0
     expense_count = db.execute("SELECT COUNT(*) FROM expenses").fetchone()[0] or 0
     expense_sum = db.execute("SELECT SUM(amount) FROM expenses WHERE status='Approved' OR status='Paid'").fetchone()[0] or 0.0
     return render_template('expenses_master.html',
-        ledger_count=ledger_count, group_count=group_count, particular_count=particular_count,
+        ledger_count=ledger_count, group_count=group_count,
         unit_count=unit_count, other_voucher_count=other_voucher_count,
         other_voucher_sum=other_voucher_sum, expense_count=expense_count,
         expense_sum=expense_sum)
@@ -5750,14 +5732,7 @@ def expense_ledgers():
         g['ledger_count'] = sum(1 for l in ledgers if l['ledger_group'] == g['group_name'])
     group_names = {g['group_name'] for g in groups}
     unassigned_ledgers = [l for l in ledgers if l['ledger_group'] not in group_names or not l['ledger_group']]
-    particulars = db.execute('''
-        SELECT ep.*, el.ledger_name, el.ledger_group, lg.group_type
-        FROM expense_particulars ep
-        LEFT JOIN expense_ledgers el ON ep.ledger_id = el.id
-        LEFT JOIN ledger_groups lg ON el.ledger_group = lg.group_name
-        ORDER BY ep.name
-    ''').fetchall()
-    return render_template('expense_ledgers.html', ledgers=ledgers, groups=groups, unassigned_ledgers=unassigned_ledgers, particulars=particulars)
+    return render_template('expense_ledgers.html', ledgers=ledgers, groups=groups, unassigned_ledgers=unassigned_ledgers)
 
 @app.route('/expense_ledger_edit/<int:lid>', methods=['GET', 'POST'])
 def expense_ledger_edit(lid):
@@ -5785,8 +5760,6 @@ def expense_ledger_edit(lid):
 def expense_ledger_delete(lid):
     db = get_db()
     try:
-        # Set referencing particulars' ledger_id to NULL to avoid ForeignKey violations
-        db.execute('UPDATE expense_particulars SET ledger_id = NULL WHERE ledger_id = ?', (lid,))
         db.execute('DELETE FROM expense_ledgers WHERE id=?', (lid,))
         db.commit()
         flash('Ledger deleted.', 'success')
@@ -5874,56 +5847,7 @@ def ledger_group_delete(gid):
     flash('Ledger Group deleted successfully. Any linked ledgers are now unassigned.', 'success')
     return redirect(url_for('expense_ledgers', tab='groups'))
 
-@app.route('/expense_particulars', methods=['GET', 'POST'])
-def expense_particulars():
-    db = get_db()
-    if request.method == 'POST':
-        action = request.form.get('action', 'add')
-        if action == 'add':
-            pname = request.form.get('name', '').strip()
-            ledger_id = request.form.get('ledger_id') or None
-            pdesc = request.form.get('description', '').strip()
-            if pname:
-                try:
-                    db.execute('INSERT INTO expense_particulars (name, ledger_id, description) VALUES (?, ?, ?)', (pname, ledger_id, pdesc))
-                    db.commit()
-                    flash(f'Particular "{pname}" created!', 'success')
-                except Exception:
-                    flash('Particular name already exists!', 'danger')
-            else:
-                flash('Particular name is required.', 'danger')
-        return redirect(url_for('expense_ledgers', tab='particulars'))
-    return redirect(url_for('expense_ledgers', tab='particulars'))
 
-@app.route('/expense_particular_edit/<int:pid>', methods=['GET', 'POST'])
-def expense_particular_edit(pid):
-    db = get_db()
-    particular = db.execute('SELECT * FROM expense_particulars WHERE id=?', (pid,)).fetchone()
-    if not particular:
-        flash('Particular not found.', 'danger')
-        return redirect(url_for('expense_ledgers', tab='particulars'))
-    if request.method == 'POST':
-        pname = request.form.get('name', '').strip()
-        ledger_id = request.form.get('ledger_id') or None
-        pdesc = request.form.get('description', '').strip()
-        if pname:
-            try:
-                db.execute('UPDATE expense_particulars SET name=?, ledger_id=?, description=? WHERE id=?', (pname, ledger_id, pdesc, pid))
-                db.commit()
-                flash('Particular updated!', 'success')
-            except Exception:
-                flash('Particular name already exists!', 'danger')
-        return redirect(url_for('expense_ledgers', tab='particulars'))
-    ledgers = db.execute('SELECT * FROM expense_ledgers ORDER BY ledger_group, ledger_name').fetchall()
-    return render_template('expense_particular_edit.html', particular=particular, ledgers=ledgers)
-
-@app.route('/expense_particular_delete/<int:pid>', methods=['POST'])
-def expense_particular_delete(pid):
-    db = get_db()
-    db.execute('DELETE FROM expense_particulars WHERE id=?', (pid,))
-    db.commit()
-    flash('Particular deleted.', 'success')
-    return redirect(url_for('expense_ledgers', tab='particulars'))
 
 @app.route('/expense_units', methods=['GET', 'POST'])
 def expense_units_view():
@@ -6226,12 +6150,11 @@ def pnl():
     ledgers_by_name = {r['ledger_name'].strip().lower(): r['ledger_group'] for r in ledgers_rows}
     ledgers_by_id = {r['id']: r['ledger_group'] for r in ledgers_rows}
 
-    particulars_rows = db.execute("SELECT id, name, ledger_id FROM expense_particulars").fetchall()
     particulars_by_id = {}
-    for r in particulars_rows:
+    for r in ledgers_rows:
         particulars_by_id[r['id']] = {
-            'name': r['name'],
-            'ledger_group': ledgers_by_id.get(r['ledger_id'], 'Direct Expenses')
+            'name': r['ledger_name'],
+            'ledger_group': r['ledger_group'] or 'Direct Expenses'
         }
 
     # Classifier helper to map ledger/particular details to standard CFI row names
@@ -6608,14 +6531,12 @@ def api_pnl_drilldown():
             'ledger_group': r['ledger_group']
         } for r in ledgers_rows}
 
-        particulars_rows = db.execute("SELECT id, name, ledger_id FROM expense_particulars").fetchall()
         particulars_by_id = {}
-        for r in particulars_rows:
-            ledger_info = ledgers_by_id.get(r['ledger_id'])
+        for r in ledgers_rows:
             particulars_by_id[r['id']] = {
-                'name': r['name'],
-                'ledger_name': ledger_info['ledger_name'] if ledger_info else 'Unassigned Ledger',
-                'ledger_group': ledger_info['ledger_group'] if ledger_info else 'Direct Expenses'
+                'name': r['ledger_name'],
+                'ledger_name': r['ledger_name'],
+                'ledger_group': r['ledger_group'] or 'Direct Expenses'
             }
 
         def resolve_account_details(particular_id, pnl_category, fallback_ledger_name, fallback_particular_name):

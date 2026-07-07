@@ -27,11 +27,6 @@
             <i class="bi bi-journal-bookmark-fill me-2"></i>Ledger Accounts
         </a>
     </li>
-    <li class="nav-item" role="presentation">
-        <a href="?tab=particulars" class="nav-link rounded-3 fw-bold py-2.5 {% if active_tab == 'particulars' %}active bg-primary text-white{% else %}text-muted{% endif %}" role="tab">
-            <i class="bi bi-tags-fill me-2"></i>Expense Particulars
-        </a>
-    </li>
 </ul>
 
 <div class="tab-content" id="ledgerTabsContent">
@@ -227,88 +222,6 @@
     </div>
     {% endif %}
 
-    <!-- ── TAB 3: EXPENSE PARTICULARS ── -->
-    {% if active_tab == 'particulars' %}
-    <div class="row g-4">
-        <!-- Form to Add Particular -->
-        <div class="col-lg-4">
-            <div class="card border-0 shadow-sm rounded-4">
-                <div class="card-header bg-primary text-white rounded-top-4 p-4 border-0">
-                    <h6 class="fw-bold mb-0"><i class="bi bi-plus-circle me-2"></i>Create New Particular</h6>
-                </div>
-                <div class="card-body p-4">
-                    <form method="post" action="{{ url_for('expense_particulars') }}">
-                        <input type="hidden" name="action" value="add">
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold text-dark">Particular Name <span class="text-danger">*</span></label>
-                            <input type="text" name="name" class="form-control rounded-3" required placeholder="e.g. Office Stationery">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold text-dark">Linked Ledger</label>
-                            <select name="ledger_id" class="form-select rounded-3">
-                                <option value="">— No Ledger —</option>
-                                {% for l in ledgers %}
-                                <option value="{{ l.id }}">{{ l.ledger_name }} ({{ l.ledger_group }})</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="mb-4">
-                            <label class="form-label small fw-bold text-dark">Description</label>
-                            <textarea name="description" class="form-control rounded-3" rows="3" placeholder="Brief description..."></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100 rounded-pill fw-bold shadow-sm">
-                            <i class="bi bi-plus-circle me-2"></i>Add Particular
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
-        
-        <!-- List of Particulars -->
-        <div class="col-lg-8">
-            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-                <div class="card-header bg-white border-bottom p-4">
-                    <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-tags me-2 text-primary"></i>All Expense Particulars ({{ particulars|length }})</h6>
-                </div>
-                <div class="list-group list-group-flush">
-                    {% for p in particulars %}
-                    <div class="list-group-item px-4 py-3 border-bottom d-flex align-items-center justify-content-between">
-                        <div>
-                            <div class="fw-semibold text-dark">{{ p.name }}</div>
-                            <div class="d-flex align-items-center gap-2 mt-1 flex-wrap">
-                                {% if p.ledger_name %}
-                                <span class="badge rounded-pill px-2.5 py-1 small fw-bold bg-success-subtle text-success">
-                                    Linked: {{ p.ledger_name }}
-                                </span>
-                                <span class="badge rounded-pill px-2 py-0.5 small fw-bold font-monospace text-muted">
-                                    {{ p.ledger_group }} {% if p.group_type %}({{ p.group_type }}){% endif %}
-                                </span>
-                                {% else %}
-                                <span class="badge rounded-pill px-2.5 py-1 small fw-bold bg-danger-subtle text-danger">
-                                    Unlinked (No Ledger)
-                                </span>
-                                {% endif %}
-                            </div>
-                            {% if p.description %}
-                            <div class="text-muted small mt-1">{{ p.description }}</div>
-                            {% endif %}
-                        </div>
-                        <div class="d-flex gap-2">
-                            <a href="{{ url_for('expense_particular_edit', pid=p.id) }}" class="btn btn-outline-warning btn-sm rounded-pill px-3">
-                                <i class="bi bi-pencil me-1"></i>Edit
-                            </a>
-                            <form action="{{ url_for('expense_particular_delete', pid=p.id) }}" method="post" class="d-inline" data-confirm="Delete this particular?">
-                                <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3">
-                                    <i class="bi bi-trash me-1"></i>Delete
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
-    </div>
-    {% endif %}
+
 </div>
 {% endblock %}

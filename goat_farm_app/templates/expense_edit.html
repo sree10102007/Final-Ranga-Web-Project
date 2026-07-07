@@ -34,22 +34,22 @@
                             </div>
                         </div>
 
-                        <!-- Row 2: Particulars (Expense Category) -->
+                        <!-- Row 2: Ledger Account -->
                         <div class="mb-3">
-                            <label class="form-label text-muted small fw-bold">PARTICULARS <span class="text-danger">*</span></label>
+                            <label class="form-label text-muted small fw-bold">LEDGER ACCOUNT <span class="text-danger">*</span></label>
                             {% if particulars %}
                             <select name="particular_id" class="form-select" required id="particular_select" data-onchange="updateParticularName(this)">
-                                <option value="">— Select Particular —</option>
+                                <option value="">— Select Ledger Account —</option>
                                 {% for p in particulars %}
                                 <option value="{{ p.id }}" {% if record['particular_id'] == p.id or (not record['particular_id'] and record['category'] == p.name) %}selected{% endif %}>
-                                    {{ p.name }}{% if p.ledger_name %} ({{ p.ledger_name }}){% endif %}
+                                    {{ p.name }}
                                 </option>
                                 {% endfor %}
                             </select>
                             <input type="hidden" name="particular_name" id="particular_name_hidden" value="{{ record['category'] or '' }}">
                             <div class="form-text">
-                                <a href="{{ url_for('expense_particulars') }}" target="_blank" class="text-decoration-none small">
-                                    <i class="bi bi-plus-circle me-1"></i>Create new particular
+                                <a href="{{ url_for('expense_ledgers', tab='ledgers') }}" target="_blank" class="text-decoration-none small">
+                                    <i class="bi bi-plus-circle me-1"></i>Create new ledger account
                                 </a>
                             </div>
                             {% else %}
