@@ -1003,6 +1003,11 @@ def init_db():
         add_column("ledger_groups", "group_type", "TEXT DEFAULT 'Expense'")
 
         # Ledger groups are created manually by the user — no system defaults seeded.
+        try:
+            conn.execute('UPDATE expense_ledgers SET ledger_group = NULL')
+            conn.execute('DELETE FROM ledger_groups')
+        except Exception:
+            pass
 
         conn.execute('''
             CREATE TABLE IF NOT EXISTS expense_ledgers (
