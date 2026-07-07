@@ -13,6 +13,7 @@
             <div class="card border-0 shadow-sm rounded-4">
                 <div class="card-body p-4">
                     <form method="POST" action="{{ url_for('farm_settings') }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <h5 class="fw-bold text-dark mb-3 border-bottom pb-2">Farm Information</h5>
                         
                         <div class="mb-3">

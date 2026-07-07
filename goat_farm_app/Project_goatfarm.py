@@ -4821,12 +4821,25 @@ def farm_settings():
     db = get_db()
     if request.method == 'POST':
         f = request.form
-        db.execute('''INSERT OR REPLACE INTO farm_settings (id, farm_name, address, phone, email, bank_name, account_no, ifsc_code, gst_no)
-                      VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?)''',
-            (f.get('farm_name'), f.get('address'), f.get('phone'), f.get('email'),
-             f.get('bank_name'), f.get('account_no'), f.get('ifsc_code'), f.get('gst_no')))
-        db.commit()
-        flash('Settings updated!', 'success')
+        try:
+            db.execute('''INSERT INTO farm_settings (id, farm_name, address, phone, email, bank_name, account_no, ifsc_code, gst_no)
+                          VALUES (1, %s, %s, %s, %s, %s, %s, %s, %s)
+                          ON CONFLICT (id) DO UPDATE SET
+                              farm_name  = EXCLUDED.farm_name,
+                              address    = EXCLUDED.address,
+                              phone      = EXCLUDED.phone,
+                              email      = EXCLUDED.email,
+                              bank_name  = EXCLUDED.bank_name,
+                              account_no = EXCLUDED.account_no,
+                              ifsc_code  = EXCLUDED.ifsc_code,
+                              gst_no     = EXCLUDED.gst_no''',
+                (f.get('farm_name'), f.get('address'), f.get('phone'), f.get('email'),
+                 f.get('bank_name'), f.get('account_no'), f.get('ifsc_code'), f.get('gst_no')))
+            db.commit()
+            flash('Settings updated!', 'success')
+        except Exception as e:
+            db.rollback()
+            flash(f'Error saving settings: {str(e)}', 'danger')
         return redirect(url_for('farm_settings'))
     settings = db.execute('SELECT * FROM farm_settings WHERE id = 1').fetchone()
     user = db.execute('SELECT mfa_enabled FROM users WHERE id = ?', (session['user_id'],)).fetchone()
