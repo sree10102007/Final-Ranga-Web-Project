@@ -42,7 +42,7 @@
                                    value="{% if record %}{{ record.date_of_sale }}{% else %}{{ today }}{% endif %}">
                         </div>
                         <div class="col-md-5">
-                            <label class="form-label text-muted small fw-bold">LEDGER GROUP <span class="text-danger">*</span></label>
+                            <label class="form-label text-muted small fw-bold">LEDGER ACCOUNTS <span class="text-danger">*</span></label>
                             <select name="pnl_category" class="form-select border-success" required>
                                 {% for g in ledger_groups %}
                                 <option value="{{ g.group_name }}" {% if record and record.pnl_category == g.group_name %}selected{% elif not record and g.group_name == 'Sales' %}selected{% endif %}>{{ g.group_name }}</option>

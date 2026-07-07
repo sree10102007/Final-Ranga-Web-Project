@@ -123,14 +123,6 @@
                                 {% endif %}
                             </div>
                             <div class="col-md-3">
-                                <label class="form-label text-muted small fw-bold">LEDGER GROUP <span class="text-danger">*</span></label>
-                                <select name="pnl_category" class="form-select" required>
-                                    {% for g in ledger_groups %}
-                                    <option value="{{ g.group_name }}" {% if record and record.pnl_category == g.group_name %}selected{% elif not record and g.group_name == 'Direct Expenses' %}selected{% endif %}>{{ g.group_name }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <div class="col-md-3">
                                 <label class="form-label text-muted small fw-bold">PURCHASE PRICE (₹)</label>
                                 <div class="input-group">
                                     <span class="input-group-text bg-light">₹</span>
@@ -138,7 +130,7 @@
                                            value="{% if record %}{{ record.price }}{% endif %}">
                                 </div>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-6">
                                 <label class="form-label text-muted small fw-bold">NOTES / DESCRIPTION</label>
                                 <input type="text" name="notes" class="form-control" placeholder="Enter other purchase specifications..."
                                        value="{% if record %}{{ record.notes or '' }}{% endif %}">
@@ -235,15 +227,7 @@
                                 <input type="hidden" name="particular_id" value="">
                                 {% endif %}
                             </div>
-                            <div class="col-md-3">
-                                <label class="form-label text-muted small fw-bold">LEDGER GROUP <span class="text-danger">*</span></label>
-                                <select name="pnl_category" class="form-select" required>
-                                    {% for g in ledger_groups %}
-                                    <option value="{{ g.group_name }}" {% if record and record.pnl_category == g.group_name %}selected{% elif not record and g.group_name == 'Direct Expenses' %}selected{% endif %}>{{ g.group_name }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <div class="col-md-6">
+                            <div class="col-md-9">
                                 <label class="form-label text-muted small fw-bold">NOTES / DESCRIPTION</label>
                                 <input type="text" name="notes" class="form-control" placeholder="Details about this feed purchase..."
                                        value="{% if record %}{{ record.notes or '' }}{% endif %}">
@@ -344,15 +328,7 @@
                                 <input type="hidden" name="particular_id" value="">
                                 {% endif %}
                             </div>
-                            <div class="col-md-3">
-                                <label class="form-label text-muted small fw-bold">LEDGER GROUP <span class="text-danger">*</span></label>
-                                <select name="pnl_category" class="form-select" required>
-                                    {% for g in ledger_groups %}
-                                    <option value="{{ g.group_name }}" {% if record and record.pnl_category == g.group_name %}selected{% elif not record and g.group_name == 'Direct Expenses' %}selected{% endif %}>{{ g.group_name }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <div class="col-md-3">
+                            <div class="col-md-6">
                                 <label class="form-label text-muted small fw-bold">NOTES / DESCRIPTION</label>
                                 <input type="text" name="notes" class="form-control" placeholder="Details about this health voucher..."
                                        value="{% if record %}{{ record.notes or '' }}{% endif %}">
@@ -479,17 +455,8 @@
                             </div>
                         </div>
 
-                        <!-- Row 3: Ledger Group + Notes -->
                         <div class="row g-3 mb-3">
-                            <div class="col-md-3">
-                                <label class="form-label text-muted small fw-bold">LEDGER GROUP</label>
-                                <select name="pnl_category" class="form-select">
-                                    {% for g in ledger_groups %}
-                                    <option value="{{ g.group_name }}" {% if record and record.pnl_category == g.group_name %}selected{% elif not record and g.group_name == 'Direct Expenses' %}selected{% endif %}>{{ g.group_name }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <div class="col-md-9">
+                            <div class="col-md-12">
                                 <label class="form-label text-muted small fw-bold">NOTES / DESCRIPTION</label>
                                 <input type="text" name="notes" class="form-control" placeholder="Details about this expense..."
                                        value="{% if record %}{{ record.notes or '' }}{% endif %}">

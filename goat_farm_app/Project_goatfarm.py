@@ -2031,7 +2031,13 @@ def sales_register(s_type):
 @app.route('/sales/<s_type>/add', methods=['GET', 'POST'])
 def sales_add(s_type):
     db = get_db()
-    ledger_groups = db.execute("SELECT * FROM ledger_groups WHERE group_type = 'Income' ORDER BY group_name").fetchall()
+    ledger_groups = db.execute("""
+        SELECT el.id, el.ledger_name AS group_name, el.ledger_group
+        FROM expense_ledgers el
+        LEFT JOIN ledger_groups lg ON el.ledger_group = lg.group_name
+        WHERE lg.group_type = 'Income'
+        ORDER BY el.ledger_name
+    """).fetchall()
     today_str = datetime.now().strftime('%Y-%m-%d')
     res = db.execute('SELECT MAX(CAST(sr_no AS INTEGER)) FROM sales_records').fetchone()[0]
     res_other = db.execute('SELECT MAX(CAST(sr_no AS INTEGER)) FROM other_sales_records').fetchone()[0]
@@ -2154,7 +2160,13 @@ def sales_add(s_type):
 @app.route('/sales/<s_type>/edit/<int:id>', methods=['GET', 'POST'])
 def sales_edit(s_type, id):
     db = get_db()
-    ledger_groups = db.execute("SELECT * FROM ledger_groups WHERE group_type = 'Income' ORDER BY group_name").fetchall()
+    ledger_groups = db.execute("""
+        SELECT el.id, el.ledger_name AS group_name, el.ledger_group
+        FROM expense_ledgers el
+        LEFT JOIN ledger_groups lg ON el.ledger_group = lg.group_name
+        WHERE lg.group_type = 'Income'
+        ORDER BY el.ledger_name
+    """).fetchall()
     today_str = datetime.now().strftime('%Y-%m-%d')
     
     if s_type == 'goat':
@@ -4103,6 +4115,11 @@ def voucher_add(v_type):
             p = db.execute('SELECT ledger_name AS name FROM expense_ledgers WHERE id=?', (particular_id,)).fetchone()
             particular_name = p['name'] if p else ''
 
+        if particular_id:
+            ledger_info = db.execute('SELECT ledger_group FROM expense_ledgers WHERE id = ?', (particular_id,)).fetchone()
+            if ledger_info and ledger_info['ledger_group']:
+                pnl_cat = ledger_info['ledger_group']
+
         if v_type == 'goat':
             tag_id = f.get('tag_id')
             price = float(f.get('price') or 0)
@@ -4426,6 +4443,11 @@ def voucher_edit(v_type, id, sub_type=None):
         if particular_id and not particular_name:
             p = db.execute('SELECT ledger_name AS name FROM expense_ledgers WHERE id=?', (particular_id,)).fetchone()
             particular_name = p['name'] if p else ''
+
+        if particular_id:
+            ledger_info = db.execute('SELECT ledger_group FROM expense_ledgers WHERE id = ?', (particular_id,)).fetchone()
+            if ledger_info and ledger_info['ledger_group']:
+                pnl_cat = ledger_info['ledger_group']
 
         if v_type == 'goat':
             tag_id = f.get('tag_id')
