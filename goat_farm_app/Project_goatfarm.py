@@ -6144,7 +6144,24 @@ def pnl():
     now = datetime.now()
 
     # ── INCOME SECTION ───────────────────────────────────────────────────────────
-    # Aggregate by ledger account name (pnl_category on each sale = selected income ledger account)
+    # Build a ledger name lookup: pnl_category text -> canonical ledger_name from expense_ledgers
+    ledger_name_by_text = {}
+    all_ledgers = db.execute("SELECT id, ledger_name, ledger_group FROM expense_ledgers").fetchall()
+    for ldr in all_ledgers:
+        ledger_name_by_text[ldr['ledger_name'].strip().lower()] = ldr['ledger_name']
+        ledger_name_by_text[str(ldr['id'])] = ldr['ledger_name']
+
+    def resolve_ledger_name(pnl_cat, fallback):
+        """Resolve pnl_category to canonical ledger account name."""
+        if pnl_cat:
+            key = pnl_cat.strip().lower()
+            if key in ledger_name_by_text:
+                return ledger_name_by_text[key]
+            # Return the raw value if it looks like a real name (not a generic group)
+            if pnl_cat.strip():
+                return pnl_cat.strip()
+        return fallback
+
     income_map = {}  # acct_name -> [12 monthly floats]
 
     goat_sales = db.execute(
@@ -6155,7 +6172,7 @@ def pnl():
         m = get_month_idx(s['date_of_sale'])
         if m is None:
             continue
-        acct = (s['pnl_category'] or 'Goat Sales').strip()
+        acct = resolve_ledger_name(s['pnl_category'], 'Goat Sales')
         if acct not in income_map:
             income_map[acct] = [0.0] * 12
         income_map[acct][m] += float(s['sold_price'] or 0.0)
@@ -6168,7 +6185,7 @@ def pnl():
         m = get_month_idx(s['date_of_sale'])
         if m is None:
             continue
-        acct = (s['pnl_category'] or 'Other Sales').strip()
+        acct = resolve_ledger_name(s['pnl_category'], 'Other Sales')
         if acct not in income_map:
             income_map[acct] = [0.0] * 12
         income_map[acct][m] += float(s['total_amount'] or 0.0)
@@ -6249,7 +6266,9 @@ def pnl():
     cogs_row = {'name': 'Cost of Goods Sold (COGS)', 'monthly': cogs_monthly, 'full_year': cogs_fy}
 
     # ── EXPENSE SECTION ──────────────────────────────────────────────────────────
-    # Aggregate by ledger account name (particular_name) from other_vouchers
+    # Build a lookup: expense_ledger id -> ledger_name (for particular_id resolution)
+    ledger_name_by_id = {ldr['id']: ldr['ledger_name'] for ldr in all_ledgers}
+
     expense_map = {}  # acct_name -> [12 monthly floats]
 
     ovs = db.execute("""
@@ -6263,7 +6282,12 @@ def pnl():
         if m is None:
             continue
         amt = float(ov['amount'] or 0.0)
-        acct = (ov['particular_name'] or ov['pnl_category'] or 'General Expense').strip()
+        # Resolve ledger account name: try particular_id first, then particular_name, then pnl_category
+        p_id = ov['particular_id']
+        if p_id and p_id in ledger_name_by_id:
+            acct = ledger_name_by_id[p_id]
+        else:
+            acct = resolve_ledger_name(ov['particular_name'] or ov['pnl_category'], 'General Expense')
         if acct not in expense_map:
             expense_map[acct] = [0.0] * 12
         expense_map[acct][m] += amt
