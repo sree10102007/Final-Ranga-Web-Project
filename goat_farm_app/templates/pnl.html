@@ -288,33 +288,29 @@
                             <i class="bi bi-graph-up me-2 text-primary"></i>INCOME / REVENUE
                         </td>
                     </tr>
-                    <tr class="interactive-row" onclick="viewDrilldown('Sales')">
-                        <td class="col-particulars indent-particular">Goat Sales</td>
-                        {% for val in pnl_data.revenue_1.monthly %}
-                            <td>{{ format_cell(val) }}</td>
+                    {% if income_rows %}
+                        {% for row in income_rows %}
+                        <tr class="interactive-row" onclick="viewDrilldown('{{ row.name }}')">
+                            <td class="col-particulars indent-particular">{{ row.name }}</td>
+                            {% for val in row.monthly %}
+                                <td>{{ format_cell(val) }}</td>
+                            {% endfor %}
+                            <td class="fw-bold">{{ format_cell(row.full_year) }}</td>
+                        </tr>
                         {% endfor %}
-                        <td class="fw-bold">{{ format_cell(pnl_data.revenue_1.full_year) }}</td>
-                    </tr>
-                    <tr class="interactive-row" onclick="viewDrilldown('Other Income')">
-                        <td class="col-particulars indent-particular">Other Sales &amp; Incomes</td>
-                        {% for val in pnl_data.revenue_2.monthly %}
-                            <td>{{ format_cell(val) }}</td>
-                        {% endfor %}
-                        <td class="fw-bold">{{ format_cell(pnl_data.revenue_2.full_year) }}</td>
-                    </tr>
-                    <tr class="interactive-row" onclick="viewDrilldown('Discount')">
-                        <td class="col-particulars indent-particular">Returns, Refunds, Discounts</td>
-                        {% for val in pnl_data.returns.monthly %}
-                            <td>{{ format_cell(val) }}</td>
-                        {% endfor %}
-                        <td class="fw-bold">{{ format_cell(pnl_data.returns.full_year) }}</td>
-                    </tr>
+                    {% else %}
+                        <tr>
+                            <td class="col-particulars indent-particular text-muted" colspan="14">
+                                <i class="bi bi-info-circle me-2"></i>No income transactions recorded for this period.
+                            </td>
+                        </tr>
+                    {% endif %}
                     <tr class="row-total-net" style="background-color: rgba(13,148,136,0.06);">
                         <td class="col-particulars fw-bold">Total Income</td>
-                        {% for val in pnl_data.net_revenue.monthly %}
+                        {% for val in pnl_data.total_income.monthly %}
                             <td class="fw-bold text-success">{{ format_cell(val) }}</td>
                         {% endfor %}
-                        <td class="fw-bold text-success">{{ format_cell(pnl_data.net_revenue.full_year) }}</td>
+                        <td class="fw-bold text-success">{{ format_cell(pnl_data.total_income.full_year) }}</td>
                     </tr>
 
                     <!-- ── EXPENSES SECTION ── -->
@@ -323,111 +319,26 @@
                             <i class="bi bi-graph-down me-2 text-danger"></i>EXPENSES
                         </td>
                     </tr>
+                    <!-- COGS always shown as a single purchases row -->
                     <tr class="interactive-row" onclick="viewDrilldown('Purchase')">
-                        <td class="col-particulars indent-particular">Cost of Goods Sold (COGS)</td>
-                        {% for val in pnl_data.cogs.monthly %}
+                        <td class="col-particulars indent-particular">{{ cogs_row.name }}</td>
+                        {% for val in cogs_row.monthly %}
                             <td>{{ format_cell(val) }}</td>
                         {% endfor %}
-                        <td class="fw-bold">{{ format_cell(pnl_data.cogs.full_year) }}</td>
+                        <td class="fw-bold">{{ format_cell(cogs_row.full_year) }}</td>
                     </tr>
-                    <tr class="interactive-row" onclick="viewDrilldown('advertising')">
-                        <td class="col-particulars indent-particular">Advertising &amp; Promotion</td>
-                        {% for val in pnl_data.advertising.monthly %}
-                            <td>{{ format_cell(val) }}</td>
+                    <!-- Dynamic expense rows from ledger accounts -->
+                    {% if expense_rows %}
+                        {% for row in expense_rows %}
+                        <tr class="interactive-row" onclick="viewDrilldown('{{ row.name }}')">
+                            <td class="col-particulars indent-particular">{{ row.name }}</td>
+                            {% for val in row.monthly %}
+                                <td>{{ format_cell(val) }}</td>
+                            {% endfor %}
+                            <td class="fw-bold">{{ format_cell(row.full_year) }}</td>
+                        </tr>
                         {% endfor %}
-                        <td class="fw-bold">{{ format_cell(pnl_data.advertising.full_year) }}</td>
-                    </tr>
-                    <tr class="interactive-row" onclick="viewDrilldown('depreciation')">
-                        <td class="col-particulars indent-particular">Depreciation &amp; Amortization</td>
-                        {% for val in pnl_data.depreciation.monthly %}
-                            <td>{{ format_cell(val) }}</td>
-                        {% endfor %}
-                        <td class="fw-bold">{{ format_cell(pnl_data.depreciation.full_year) }}</td>
-                    </tr>
-                    <tr class="interactive-row" onclick="viewDrilldown('insurance')">
-                        <td class="col-particulars indent-particular">Insurance</td>
-                        {% for val in pnl_data.insurance.monthly %}
-                            <td>{{ format_cell(val) }}</td>
-                        {% endfor %}
-                        <td class="fw-bold">{{ format_cell(pnl_data.insurance.full_year) }}</td>
-                    </tr>
-                    <tr class="interactive-row" onclick="viewDrilldown('maintenance')">
-                        <td class="col-particulars indent-particular">Maintenance</td>
-                        {% for val in pnl_data.maintenance.monthly %}
-                            <td>{{ format_cell(val) }}</td>
-                        {% endfor %}
-                        <td class="fw-bold">{{ format_cell(pnl_data.maintenance.full_year) }}</td>
-                    </tr>
-                    <tr class="interactive-row" onclick="viewDrilldown('office')">
-                        <td class="col-particulars indent-particular">Office Supplies</td>
-                        {% for val in pnl_data.office.monthly %}
-                            <td>{{ format_cell(val) }}</td>
-                        {% endfor %}
-                        <td class="fw-bold">{{ format_cell(pnl_data.office.full_year) }}</td>
-                    </tr>
-                    <tr class="interactive-row" onclick="viewDrilldown('rent')">
-                        <td class="col-particulars indent-particular">Rent</td>
-                        {% for val in pnl_data.rent.monthly %}
-                            <td>{{ format_cell(val) }}</td>
-                        {% endfor %}
-                        <td class="fw-bold">{{ format_cell(pnl_data.rent.full_year) }}</td>
-                    </tr>
-                    <tr class="interactive-row" onclick="viewDrilldown('salaries')">
-                        <td class="col-particulars indent-particular">Salaries, Benefits &amp; Wages</td>
-                        {% for val in pnl_data.salaries.monthly %}
-                            <td>{{ format_cell(val) }}</td>
-                        {% endfor %}
-                        <td class="fw-bold">{{ format_cell(pnl_data.salaries.full_year) }}</td>
-                    </tr>
-                    <tr class="interactive-row" onclick="viewDrilldown('telecom')">
-                        <td class="col-particulars indent-particular">Telecommunication</td>
-                        {% for val in pnl_data.telecom.monthly %}
-                            <td>{{ format_cell(val) }}</td>
-                        {% endfor %}
-                        <td class="fw-bold">{{ format_cell(pnl_data.telecom.full_year) }}</td>
-                    </tr>
-                    <tr class="interactive-row" onclick="viewDrilldown('travel')">
-                        <td class="col-particulars indent-particular">Travel</td>
-                        {% for val in pnl_data.travel.monthly %}
-                            <td>{{ format_cell(val) }}</td>
-                        {% endfor %}
-                        <td class="fw-bold">{{ format_cell(pnl_data.travel.full_year) }}</td>
-                    </tr>
-                    <tr class="interactive-row" onclick="viewDrilldown('utilities')">
-                        <td class="col-particulars indent-particular">Utilities</td>
-                        {% for val in pnl_data.utilities.monthly %}
-                            <td>{{ format_cell(val) }}</td>
-                        {% endfor %}
-                        <td class="fw-bold">{{ format_cell(pnl_data.utilities.full_year) }}</td>
-                    </tr>
-                    <tr class="interactive-row" onclick="viewDrilldown('other_1')">
-                        <td class="col-particulars indent-particular">Other Expense 1 (Direct)</td>
-                        {% for val in pnl_data.other_1.monthly %}
-                            <td>{{ format_cell(val) }}</td>
-                        {% endfor %}
-                        <td class="fw-bold">{{ format_cell(pnl_data.other_1.full_year) }}</td>
-                    </tr>
-                    <tr class="interactive-row" onclick="viewDrilldown('other_2')">
-                        <td class="col-particulars indent-particular">Other Expense 2 (Indirect)</td>
-                        {% for val in pnl_data.other_2.monthly %}
-                            <td>{{ format_cell(val) }}</td>
-                        {% endfor %}
-                        <td class="fw-bold">{{ format_cell(pnl_data.other_2.full_year) }}</td>
-                    </tr>
-                    <tr class="interactive-row" onclick="viewDrilldown('interest')">
-                        <td class="col-particulars indent-particular">Interest Expense</td>
-                        {% for val in pnl_data.interest.monthly %}
-                            <td>{{ format_cell(val) }}</td>
-                        {% endfor %}
-                        <td class="fw-bold">{{ format_cell(pnl_data.interest.full_year) }}</td>
-                    </tr>
-                    <tr class="interactive-row" onclick="viewDrilldown('taxes')">
-                        <td class="col-particulars indent-particular">Income Taxes</td>
-                        {% for val in pnl_data.taxes.monthly %}
-                            <td>{{ format_cell(val) }}</td>
-                        {% endfor %}
-                        <td class="fw-bold">{{ format_cell(pnl_data.taxes.full_year) }}</td>
-                    </tr>
+                    {% endif %}
                     <tr class="row-total-net" style="background-color: rgba(220,38,38,0.05);">
                         <td class="col-particulars fw-bold">Total Expenses</td>
                         {% for val in pnl_data.total_expenses.monthly %}

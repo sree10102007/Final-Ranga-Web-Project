@@ -6077,33 +6077,19 @@ def salary_report():
 
 
 @app.route('/pnl', methods=['GET', 'POST'])
-
 def pnl():
     if 'user_id' not in session:
         return redirect(url_for('auth.login'))
         
     db = get_db()
-    
-    # Year filter parameter
-    selected_year = request.args.get('year') or request.form.get('year')
-    now = datetime.now()
-    if not selected_year:
-        selected_year = str(now.year)
-        
-    # Stock Valuation toggle
-    if request.method == 'POST':
-        include_stock = '1' if 'include_stock' in request.form else '0'
-    else:
-        include_stock = '1' if request.args.get('include_stock') == '1' else '0'
-
-    # Manual Stock overrides
+    selected_year = request.args.get('year') or request.form.get('year') or str(datetime.now().year)
+    include_stock = '1' if ('include_stock' in request.form or request.args.get('include_stock') == '1') else '0'
     manual_opening = request.args.get('opening_stock', '') or request.form.get('opening_stock', '')
     manual_closing = request.args.get('closing_stock', '') or request.form.get('closing_stock', '')
 
     import calendar
     from datetime import timedelta
 
-    # Dynamic Stock Calculation helper
     def get_stock_val(target_date):
         feed_val = db.execute("""
             SELECT SUM(f.closing_stock * f.cost_per_unit)
@@ -6138,297 +6124,184 @@ def pnl():
             ) latest ON v.id = latest.max_id
         """, (target_date,)).fetchone()[0] or 0.0
 
-        return feed_val + med_val + vac_val
-
-    # Structure to hold monthly matrix values (indices 0 to 11 for Jan to Dec)
-    monthly_data = {
-        'revenue_1': [0.0] * 12,    # Goat Sales
-        'revenue_2': [0.0] * 12,    # Other Sales / Direct Income
-        'returns': [0.0] * 12,      # Refunds, Discounts
-        'cogs': [0.0] * 12,         # Cost of Goods Sold
-        'advertising': [0.0] * 12,
-        'depreciation': [0.0] * 12,
-        'insurance': [0.0] * 12,
-        'maintenance': [0.0] * 12,
-        'office': [0.0] * 12,
-        'rent': [0.0] * 12,
-        'salaries': [0.0] * 12,
-        'telecom': [0.0] * 12,
-        'travel': [0.0] * 12,
-        'utilities': [0.0] * 12,
-        'other_1': [0.0] * 12,      # Other Direct Expenses
-        'other_2': [0.0] * 12,      # Other Indirect Expenses
-        'interest': [0.0] * 12,
-        'taxes': [0.0] * 12,
-        'opening_stock': [0.0] * 12,
-        'closing_stock': [0.0] * 12
-    }
-
-    # Fetch lookup structures
-    groups_rows = db.execute("SELECT group_name, group_type FROM ledger_groups").fetchall()
-    ledger_groups_dict = {r['group_name']: r['group_type'] for r in groups_rows}
-
-    ledgers_rows = db.execute("SELECT id, ledger_name, ledger_group FROM expense_ledgers").fetchall()
-    ledgers_by_name = {r['ledger_name'].strip().lower(): r['ledger_group'] for r in ledgers_rows}
-    ledgers_by_id = {r['id']: r['ledger_group'] for r in ledgers_rows}
-
-    particulars_by_id = {}
-    for r in ledgers_rows:
-        particulars_by_id[r['id']] = {
-            'name': r['ledger_name'],
-            'ledger_group': r['ledger_group'] or 'Direct Expenses'
-        }
-
-    # Classifier helper to map ledger/particular details to standard CFI row names
-    def classify_expense(particular_id, pnl_cat, name):
-        grp = 'Direct Expenses'
-        if particular_id and particular_id in particulars_by_id:
-            grp = particulars_by_id[particular_id]['ledger_group']
-        elif pnl_cat in ledger_groups_dict:
-            grp = pnl_cat
-            
-        name_lower = (name or '').lower()
-        pnl_cat_lower = (pnl_cat or '').lower()
-        
-        # Mapping rules based on keywords
-        if 'adver' in name_lower or 'promo' in name_lower or 'market' in name_lower:
-            return 'advertising'
-        elif 'deprec' in name_lower or 'amort' in name_lower:
-            return 'depreciation'
-        elif 'insur' in name_lower:
-            return 'insurance'
-        elif 'mainten' in name_lower or 'repair' in name_lower:
-            return 'maintenance'
-        elif 'office' in name_lower or 'station' in name_lower or 'suppl' in name_lower:
-            return 'office'
-        elif 'rent' in name_lower:
-            return 'rent'
-        elif 'salaries' in name_lower or 'salary' in name_lower or 'wage' in name_lower or 'payroll' in name_lower or 'staff' in name_lower or 'hr' in name_lower:
-            return 'salaries'
-        elif 'telecom' in name_lower or 'phone' in name_lower or 'internet' in name_lower or 'mobile' in name_lower:
-            return 'telecom'
-        elif 'travel' in name_lower or 'fuel' in name_lower or 'convey' in name_lower or 'vehicle' in name_lower:
-            return 'travel'
-        elif 'utilit' in name_lower or 'electric' in name_lower or 'water' in name_lower or 'power' in name_lower:
-            return 'utilities'
-        elif 'interest' in name_lower or 'interest' in pnl_cat_lower:
-            return 'interest'
-        elif 'tax' in name_lower or 'tax' in pnl_cat_lower:
-            return 'taxes'
-            
-        # Fallback to direct or indirect categories
-        if grp == 'Direct Expenses':
-            return 'other_1'
-        return 'other_2'
-
-    # Safe Date parser
+    # Safe Date parser — returns 0-based month index (0=Jan…11=Dec)
     def get_month_idx(date_val):
         if not date_val:
             return None
         if hasattr(date_val, 'month'):
-            return date_val.month
+            return date_val.month - 1
         try:
             date_str = str(date_val).split(' ')[0]
             dt = datetime.strptime(date_str, '%Y-%m-%d')
-            return dt.month
+            return dt.month - 1
         except Exception:
             return None
 
-    # Load Year's Data
     start_date = f"{selected_year}-01-01"
-    end_date = f"{selected_year}-12-31"
+    end_date   = f"{selected_year}-12-31"
+    now = datetime.now()
 
-    # 1. Sales (Goat Sales)
-    sales = db.execute("SELECT date_of_sale, sold_price FROM sales_records WHERE date_of_sale BETWEEN ? AND ?", (start_date, end_date)).fetchall()
-    for s in sales:
+    # ── INCOME SECTION ───────────────────────────────────────────────────────────
+    # Aggregate by ledger account name (pnl_category on each sale = selected income ledger account)
+    income_map = {}  # acct_name -> [12 monthly floats]
+
+    goat_sales = db.execute(
+        "SELECT date_of_sale, sold_price, pnl_category FROM sales_records WHERE date_of_sale BETWEEN ? AND ?",
+        (start_date, end_date)
+    ).fetchall()
+    for s in goat_sales:
         m = get_month_idx(s['date_of_sale'])
-        if m:
-            monthly_data['revenue_1'][m-1] += float(s['sold_price'] or 0.0)
+        if m is None:
+            continue
+        acct = (s['pnl_category'] or 'Goat Sales').strip()
+        if acct not in income_map:
+            income_map[acct] = [0.0] * 12
+        income_map[acct][m] += float(s['sold_price'] or 0.0)
 
-    # 2. Other Sales
-    other_sales = db.execute("SELECT date_of_sale, total_amount, pnl_category FROM other_sales_records WHERE date_of_sale BETWEEN ? AND ?", (start_date, end_date)).fetchall()
-    for os_rec in other_sales:
-        m = get_month_idx(os_rec['date_of_sale'])
-        if m:
-            cat = (os_rec['pnl_category'] or '').lower()
-            if 'discount' in cat or 'refund' in cat:
-                monthly_data['returns'][m-1] -= float(os_rec['total_amount'] or 0.0)
-            else:
-                monthly_data['revenue_2'][m-1] += float(os_rec['total_amount'] or 0.0)
+    other_sales = db.execute(
+        "SELECT date_of_sale, total_amount, pnl_category FROM other_sales_records WHERE date_of_sale BETWEEN ? AND ?",
+        (start_date, end_date)
+    ).fetchall()
+    for s in other_sales:
+        m = get_month_idx(s['date_of_sale'])
+        if m is None:
+            continue
+        acct = (s['pnl_category'] or 'Other Sales').strip()
+        if acct not in income_map:
+            income_map[acct] = [0.0] * 12
+        income_map[acct][m] += float(s['total_amount'] or 0.0)
 
-    # 3. Purchases & Direct COGS (Goat, Feed, Medicine, Vaccine, Equipment)
+    income_rows = []
+    for name, monthly in sorted(income_map.items()):
+        fy = sum(monthly)
+        if fy != 0.0:
+            income_rows.append({'name': name, 'monthly': monthly, 'full_year': fy})
+
+    total_income_monthly = [sum(r['monthly'][i] for r in income_rows) for i in range(12)]
+    total_income_fy = sum(total_income_monthly)
+
+    # ── COGS / PURCHASES ─────────────────────────────────────────────────────────
+    cogs_monthly = [0.0] * 12
+
     purchases_tags = set()
-    rows = db.execute("SELECT tag_id, purchase_date, price FROM purchases WHERE purchase_date BETWEEN ? AND ?", (start_date, end_date)).fetchall()
+    rows = db.execute(
+        "SELECT tag_id, purchase_date, price FROM purchases WHERE purchase_date BETWEEN ? AND ?",
+        (start_date, end_date)
+    ).fetchall()
     for r in rows:
         m = get_month_idx(r['purchase_date'])
-        if m:
-            monthly_data['cogs'][m-1] += float(r['price'] or 0.0)
+        if m is not None:
+            cogs_monthly[m] += float(r['price'] or 0.0)
         if r['tag_id']:
             purchases_tags.add(str(r['tag_id']).strip())
 
-    master_purchases = db.execute("SELECT tag_no, purchase_date, purchase_amount FROM master_records WHERE purchase_date BETWEEN ? AND ? AND purchase_amount > 0", (start_date, end_date)).fetchall()
+    master_purchases = db.execute(
+        "SELECT tag_no, purchase_date, purchase_amount FROM master_records WHERE purchase_date BETWEEN ? AND ? AND purchase_amount > 0",
+        (start_date, end_date)
+    ).fetchall()
     for r in master_purchases:
         if str(r['tag_no']).strip() not in purchases_tags:
             m = get_month_idx(r['purchase_date'])
-            if m:
-                monthly_data['cogs'][m-1] += float(r['purchase_amount'] or 0.0)
+            if m is not None:
+                cogs_monthly[m] += float(r['purchase_amount'] or 0.0)
 
-    # Feed, Med, Vaccine purchases
-    feed_p = db.execute("SELECT purchase_date, cost FROM feed_purchases WHERE purchase_date BETWEEN ? AND ?", (start_date, end_date)).fetchall()
-    for r in feed_p:
-        m = get_month_idx(r['purchase_date'])
-        if m:
-            monthly_data['cogs'][m-1] += float(r['cost'] or 0.0)
+    for table, date_col, amt_col in [
+        ('feed_purchases',     'purchase_date', 'cost'),
+        ('medicine_purchases', 'purchase_date', 'cost'),
+        ('vaccine_purchases',  'purchase_date', 'cost'),
+    ]:
+        rows = db.execute(
+            f"SELECT {date_col}, {amt_col} FROM {table} WHERE {date_col} BETWEEN ? AND ?",
+            (start_date, end_date)
+        ).fetchall()
+        for r in rows:
+            m = get_month_idx(r[date_col])
+            if m is not None:
+                cogs_monthly[m] += float(r[amt_col] or 0.0)
 
-    med_p = db.execute("SELECT purchase_date, cost FROM medicine_purchases WHERE purchase_date BETWEEN ? AND ?", (start_date, end_date)).fetchall()
-    for r in med_p:
-        m = get_month_idx(r['purchase_date'])
-        if m:
-            monthly_data['cogs'][m-1] += float(r['cost'] or 0.0)
-
-    vac_p = db.execute("SELECT purchase_date, cost FROM vaccine_purchases WHERE purchase_date BETWEEN ? AND ?", (start_date, end_date)).fetchall()
-    for r in vac_p:
-        m = get_month_idx(r['purchase_date'])
-        if m:
-            monthly_data['cogs'][m-1] += float(r['cost'] or 0.0)
-
-    equip_p = db.execute("SELECT purchase_date, purchase_cost FROM equipment WHERE purchase_date BETWEEN ? AND ?", (start_date, end_date)).fetchall()
+    equip_p = db.execute(
+        "SELECT purchase_date, purchase_cost FROM equipment WHERE purchase_date BETWEEN ? AND ?",
+        (start_date, end_date)
+    ).fetchall()
     for r in equip_p:
         m = get_month_idx(r['purchase_date'])
-        if m:
-            monthly_data['cogs'][m-1] += float(r['purchase_cost'] or 0.0)
+        if m is not None:
+            cogs_monthly[m] += float(r['purchase_cost'] or 0.0)
 
-    # Apply Stock Valuation monthly matrix if checked
-    for m in range(1, 13):
-        m_start = f"{selected_year}-{m:02d}-01"
-        last_day = calendar.monthrange(int(selected_year), m)[1]
-        m_end = f"{selected_year}-{m:02d}-{last_day:02d}"
-
-        # Previous month closing is current opening stock
-        prev_dt = datetime.strptime(m_start, '%Y-%m-%d') - timedelta(days=1)
-        prev_date_str = prev_dt.strftime('%Y-%m-%d')
-
-        m_opening = get_stock_val(prev_date_str)
-        m_closing = get_stock_val(m_end)
-
+    # Apply stock valuation adjustment if toggled
+    for mi in range(1, 13):
+        m_start_s = f"{selected_year}-{mi:02d}-01"
+        last_day = calendar.monthrange(int(selected_year), mi)[1]
+        m_end_s = f"{selected_year}-{mi:02d}-{last_day:02d}"
+        prev_dt = datetime.strptime(m_start_s, '%Y-%m-%d') - timedelta(days=1)
+        m_opening = get_stock_val(prev_dt.strftime('%Y-%m-%d'))
+        m_closing = get_stock_val(m_end_s)
         if include_stock == '1':
-            # Check manual overrides for the final months if submitted
-            if m == now.month and manual_opening != '':
+            if mi == now.month and manual_opening != '':
                 m_opening = float(manual_opening)
-            if m == now.month and manual_closing != '':
+            if mi == now.month and manual_closing != '':
                 m_closing = float(manual_closing)
+            cogs_monthly[mi-1] = m_opening + cogs_monthly[mi-1] - m_closing
 
-            monthly_data['opening_stock'][m-1] = m_opening
-            monthly_data['closing_stock'][m-1] = m_closing
-            # COGS = Opening Stock + Purchases - Closing Stock
-            monthly_data['cogs'][m-1] = m_opening + monthly_data['cogs'][m-1] - m_closing
-        else:
-            monthly_data['opening_stock'][m-1] = 0.0
-            monthly_data['closing_stock'][m-1] = 0.0
+    cogs_fy = sum(cogs_monthly)
+    cogs_row = {'name': 'Cost of Goods Sold (COGS)', 'monthly': cogs_monthly, 'full_year': cogs_fy}
 
-    # 4. Expenses (Other Vouchers)
+    # ── EXPENSE SECTION ──────────────────────────────────────────────────────────
+    # Aggregate by ledger account name (particular_name) from other_vouchers
+    expense_map = {}  # acct_name -> [12 monthly floats]
+
     ovs = db.execute("""
         SELECT ov.voucher_date, ov.particular_name, ov.amount, ov.pnl_category, ov.particular_id
         FROM other_vouchers ov
         WHERE ov.voucher_date BETWEEN ? AND ?
     """, (start_date, end_date)).fetchall()
-    
-    ledger_pnl_summary = {}
+
     for ov in ovs:
         m = get_month_idx(ov['voucher_date'])
-        if m:
-            amt = float(ov['amount'] or 0.0)
-            category_row = classify_expense(ov['particular_id'], ov['pnl_category'], ov['particular_name'])
-            
-            # Substract discounts if they appear as debit
-            if category_row == 'returns' or 'discount' in (ov['pnl_category'] or '').lower():
-                monthly_data['returns'][m-1] -= amt
-            else:
-                monthly_data[category_row][m-1] += amt
+        if m is None:
+            continue
+        amt = float(ov['amount'] or 0.0)
+        acct = (ov['particular_name'] or ov['pnl_category'] or 'General Expense').strip()
+        if acct not in expense_map:
+            expense_map[acct] = [0.0] * 12
+        expense_map[acct][m] += amt
 
-            # Populate ledger_pnl_summary for drilldown panel
-            label = ov['particular_name'] or 'Other Voucher Expense'
-            if label not in ledger_pnl_summary:
-                ledger_pnl_summary[label] = {'group': ov['pnl_category'] or 'Direct Expenses', 'amount': 0.0}
-            ledger_pnl_summary[label]['amount'] += amt
-
-    # 5. Salary Payments (Payroll HR)
-    salaries = db.execute("SELECT paid_date, net_salary FROM salary_payments WHERE paid_date BETWEEN ? AND ?", (start_date, end_date)).fetchall()
-    for s in salaries:
+    salaries_q = db.execute(
+        "SELECT paid_date, net_salary FROM salary_payments WHERE paid_date BETWEEN ? AND ?",
+        (start_date, end_date)
+    ).fetchall()
+    for s in salaries_q:
         m = get_month_idx(s['paid_date'])
-        if m:
-            monthly_data['salaries'][m-1] += float(s['net_salary'] or 0.0)
+        if m is None:
+            continue
+        acct = 'Salary Payments'
+        if acct not in expense_map:
+            expense_map[acct] = [0.0] * 12
+        expense_map[acct][m] += float(s['net_salary'] or 0.0)
 
-    # Compute Totals per row and add to the matrix
-    calculated_rows = {}
-    for key, values in monthly_data.items():
-        calculated_rows[key] = {
-            'monthly': values,
-            'full_year': sum(values)
-        }
+    expense_rows = []
+    for name, monthly in sorted(expense_map.items()):
+        fy = sum(monthly)
+        if fy != 0.0:
+            expense_rows.append({'name': name, 'monthly': monthly, 'full_year': fy})
 
-    # Construct total rows for Net Revenue, Total Expenses, EBIT, EBT, Net Earnings
-    net_revenue_monthly = []
-    cogs_monthly = calculated_rows['cogs']['monthly']
-    gross_profit_monthly = []
-    
-    # Expense monthly lists
-    advertising = calculated_rows['advertising']['monthly']
-    depreciation = calculated_rows['depreciation']['monthly']
-    insurance = calculated_rows['insurance']['monthly']
-    maintenance = calculated_rows['maintenance']['monthly']
-    office = calculated_rows['office']['monthly']
-    rent = calculated_rows['rent']['monthly']
-    salaries_list = calculated_rows['salaries']['monthly']
-    telecom = calculated_rows['telecom']['monthly']
-    travel = calculated_rows['travel']['monthly']
-    utilities = calculated_rows['utilities']['monthly']
-    other_1 = calculated_rows['other_1']['monthly']
-    other_2 = calculated_rows['other_2']['monthly']
-    interest = calculated_rows['interest']['monthly']
-    taxes = calculated_rows['taxes']['monthly']
+    total_expenses_monthly = [
+        cogs_monthly[i] + sum(r['monthly'][i] for r in expense_rows)
+        for i in range(12)
+    ]
+    total_expenses_fy = sum(total_expenses_monthly)
 
-    total_expenses_monthly = []
-    ebit_monthly = []
-    ebt_monthly = []
-    net_earnings_monthly = []
+    # ── NET PROFIT / LOSS ────────────────────────────────────────────────────────
+    net_earnings_monthly = [total_income_monthly[i] - total_expenses_monthly[i] for i in range(12)]
+    net_earnings_fy = sum(net_earnings_monthly)
 
-    for i in range(12):
-        # Total Net Revenue = Revenue 1 + Revenue 2 + Returns (Discounts are negative values)
-        net_rev = calculated_rows['revenue_1']['monthly'][i] + calculated_rows['revenue_2']['monthly'][i] + calculated_rows['returns']['monthly'][i]
-        net_revenue_monthly.append(net_rev)
-        
-        # Gross Profit = Net Revenue - COGS
-        gp = net_rev - cogs_monthly[i]
-        gross_profit_monthly.append(gp)
+    pnl_data = {
+        'total_income':   {'monthly': total_income_monthly,   'full_year': total_income_fy},
+        'cogs':           {'monthly': cogs_monthly,           'full_year': cogs_fy},
+        'total_expenses': {'monthly': total_expenses_monthly, 'full_year': total_expenses_fy},
+        'net_earnings':   {'monthly': net_earnings_monthly,   'full_year': net_earnings_fy},
+    }
 
-        # Total Expenses
-        tot_exp = (advertising[i] + depreciation[i] + insurance[i] + maintenance[i] + office[i] + 
-                   rent[i] + salaries_list[i] + telecom[i] + travel[i] + utilities[i] + 
-                   other_1[i] + other_2[i])
-        total_expenses_monthly.append(tot_exp)
-
-        # EBIT = Gross Profit - Total Expenses
-        ebit = gp - tot_exp
-        ebit_monthly.append(ebit)
-
-        # EBT = EBIT - Interest
-        ebt = ebit - interest[i]
-        ebt_monthly.append(ebt)
-
-        # Net Earnings = EBT - Taxes
-        net_earn = ebt - taxes[i]
-        net_earnings_monthly.append(net_earn)
-
-    # Attach computed metrics
-    calculated_rows['net_revenue'] = {'monthly': net_revenue_monthly, 'full_year': sum(net_revenue_monthly)}
-    calculated_rows['gross_profit'] = {'monthly': gross_profit_monthly, 'full_year': sum(gross_profit_monthly)}
-    calculated_rows['total_expenses'] = {'monthly': total_expenses_monthly, 'full_year': sum(total_expenses_monthly)}
-    calculated_rows['ebit'] = {'monthly': ebit_monthly, 'full_year': sum(ebit_monthly)}
-    calculated_rows['ebt'] = {'monthly': ebt_monthly, 'full_year': sum(ebt_monthly)}
-    calculated_rows['net_earnings'] = {'monthly': net_earnings_monthly, 'full_year': sum(net_earnings_monthly)}
-
-    # Render months headers
     months_headers = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
 
     return render_template('pnl.html',
@@ -6439,8 +6312,10 @@ def pnl():
                            computed_opening=get_stock_val(f"{selected_year}-01-01"),
                            computed_closing=get_stock_val(f"{selected_year}-12-31"),
                            months_headers=months_headers,
-                           pnl_data=calculated_rows,
-                           ledger_pnl_summary=ledger_pnl_summary,
+                           pnl_data=pnl_data,
+                           income_rows=income_rows,
+                           expense_rows=expense_rows,
+                           cogs_row=cogs_row,
                            from_date=start_date,
                            to_date=end_date)
 
