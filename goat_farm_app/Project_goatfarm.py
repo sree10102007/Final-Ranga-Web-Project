@@ -5784,9 +5784,15 @@ def expense_ledger_edit(lid):
 @app.route('/expense_ledger_delete/<int:lid>', methods=['POST'])
 def expense_ledger_delete(lid):
     db = get_db()
-    db.execute('DELETE FROM expense_ledgers WHERE id=?', (lid,))
-    db.commit()
-    flash('Ledger deleted.', 'success')
+    try:
+        # Set referencing particulars' ledger_id to NULL to avoid ForeignKey violations
+        db.execute('UPDATE expense_particulars SET ledger_id = NULL WHERE ledger_id = ?', (lid,))
+        db.execute('DELETE FROM expense_ledgers WHERE id=?', (lid,))
+        db.commit()
+        flash('Ledger deleted.', 'success')
+    except Exception as e:
+        db.rollback()
+        flash('Failed to delete ledger due to database constraints.', 'danger')
     return redirect(url_for('expense_ledgers', tab='ledgers'))
 
 @app.route('/ledger_groups', methods=['GET', 'POST'])
