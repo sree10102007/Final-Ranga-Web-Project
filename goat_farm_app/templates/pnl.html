@@ -266,22 +266,13 @@
         <div class="brand-header-bar">
             <div class="brand-header-title">Ranga Farms</div>
             <div class="brand-header-subtitle">Profit and Loss (P&L) Statement</div>
-            <div class="brand-header-unit">[Figures in INR (₹) - thousands/absolute values]</div>
-            <div class="brand-header-year">{{ selected_year }}</div>
+
         </div>
 
         <!-- 12-Month Matrix Grid -->
         <div class="table-responsive">
             <table class="table-pnl-matrix">
-                <thead>
-                    <tr>
-                        <th class="col-particulars" style="width: 22%;">Particulars</th>
-                        {% for month in months_headers %}
-                            <th style="width: 6.2%;">{{ month }}</th>
-                        {% endfor %}
-                        <th style="width: 8%; background-color: var(--corporate-blue-dark);">Full Year</th>
-                    </tr>
-                </thead>
+
                 <tbody>
                     <!-- REVENUE SECTION -->
                     <tr class="row-group-title">
