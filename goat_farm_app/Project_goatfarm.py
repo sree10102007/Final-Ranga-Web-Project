@@ -7193,8 +7193,8 @@ def goat_weights():
         ).fetchall()
 
         first_weight  = full_history[0]['weight']  if full_history else None
-        latest_weight = full_history[-1]['weight'] if full_history else goat['weight_kg']
-        weight_gain   = round(latest_weight - first_weight, 2) if (first_weight is not None and latest_weight is not None) else 0.0
+        latest_weight = full_history[-1]['weight'] if full_history else (goat['weight_kg'] if goat['weight_kg'] else None)
+        weight_gain   = round(float(latest_weight) - float(first_weight), 2) if (first_weight is not None and latest_weight is not None) else 0.0
 
         # Format history entries as plain dicts for the template
         history_list = []
@@ -7246,7 +7246,7 @@ def goat_weights():
                 filtered_goats.append(g)
         goat_data = filtered_goats
 
-    years_list = [row[0] for row in all_years] if all_years else []
+    years_list = [row['yr'] for row in all_years if row['yr'] is not None] if all_years else []
 
     return render_template(
         'goat_weights.html',

@@ -127,7 +127,7 @@
                                 <select name="month" class="form-select border-0 bg-white" style="border-radius: 8px;">
                                     <option value="">All Months</option>
                                     {% for m_num, m_name in all_months %}
-                                    <option value="{{ m_num }}" {% if filter_month=m_num %}selected{% endif %}>{{ m_name
+                                    <option value="{{ m_num }}" {% if filter_month==m_num %}selected{% endif %}>{{ m_name
                                         }}</option>
                                     {% endfor %}
                                 </select>
