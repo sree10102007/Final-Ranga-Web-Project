@@ -4,7 +4,7 @@ psycopg2-binary==2.9.10
 python-dotenv==1.2.2
 Flask-WTF==1.2.2
 pyotp==2.9.0
-qrcode==7.4.2
+qrcode==8.2
 Flask-Limiter==3.7.0
 cryptography==48.0.1
 redis==5.2.1
