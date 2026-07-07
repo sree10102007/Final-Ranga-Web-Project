@@ -157,9 +157,8 @@
                                     value="{{ datetime_now_str }}">
                             </div>
                             <div class="col-md-4 d-grid">
-                                <button type="button" class="btn btn-success"
-                                    data-tag="{{ goat.tag_no }}" data-index="{{ loop.index }}"
-                                    onclick="submitWeightForm(this.dataset.tag, this.dataset.index)">
+                                <button type="button" class="btn btn-success save-weight-btn"
+                                    data-tag="{{ goat.tag_no }}" data-index="{{ loop.index }}">
                                     Save Record
                                 </button>
                             </div>
@@ -222,10 +221,15 @@
         const form = document.getElementById('addWeightForm-' + index);
         const alertBox = document.getElementById('formAlert-' + index);
 
-        const weight = form.querySelector('[name=weight]').value;
-        const recordedDate = form.querySelector('[name=recorded_date]').value;
+        const weightInput = form.querySelector('[name=weight]');
+        const dateInput   = form.querySelector('[name=recorded_date]');
+        const weight      = weightInput ? weightInput.value.trim() : '';
+        const recordedDate = dateInput ? dateInput.value.trim() : '';
 
-        if (!weight || weight <= 0) {
+        alertBox.classList.add('d-none');
+        alertBox.textContent = '';
+
+        if (!weight || parseFloat(weight) <= 0) {
             alertBox.className = 'alert alert-danger mt-2';
             alertBox.textContent = 'Weight must be a positive number greater than zero.';
             alertBox.classList.remove('d-none');
@@ -244,36 +248,51 @@
             recorded_date: recordedDate
         };
 
+        // Get CSRF token from meta tag or cookie
+        const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+        const token = (typeof csrfToken !== 'undefined') ? csrfToken
+                    : (csrfMeta ? csrfMeta.getAttribute('content') : '');
+
         fetch('/goats/' + encodeURIComponent(tagNo) + '/weights', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRFToken': typeof csrfToken !== 'undefined' ? csrfToken : ''
+                'X-CSRFToken': token
             },
             body: JSON.stringify(payload)
         })
-            .then(response => response.json().then(data => ({ status: response.status, data: data })))
-            .then(res => {
-                if (res.status === 200 || res.status === 201) {
-                    alertBox.className = 'alert alert-success mt-2';
-                    alertBox.textContent = res.data.message || 'Weight record saved successfully!';
-                    alertBox.classList.remove('d-none');
-                    // Reload the dashboard after a short pause
-                    setTimeout(() => {
-                        location.reload();
-                    }, 800);
-                } else {
-                    alertBox.className = 'alert alert-danger mt-2';
-                    alertBox.textContent = res.data.error || 'Failed to save record.';
-                    alertBox.classList.remove('d-none');
-                }
-            })
-            .catch(err => {
-                console.error('Error:', err);
-                alertBox.className = 'alert alert-danger mt-2';
-                alertBox.textContent = 'An unexpected connection error occurred.';
-                alertBox.classList.remove('d-none');
+        .then(function(response) {
+            return response.json().then(function(data) {
+                return { status: response.status, data: data };
             });
+        })
+        .then(function(res) {
+            if (res.status === 200 || res.status === 201) {
+                alertBox.className = 'alert alert-success mt-2';
+                alertBox.textContent = res.data.message || 'Weight record saved successfully!';
+                alertBox.classList.remove('d-none');
+                setTimeout(function() { location.reload(); }, 1000);
+            } else {
+                alertBox.className = 'alert alert-danger mt-2';
+                alertBox.textContent = res.data.error || 'Failed to save record.';
+                alertBox.classList.remove('d-none');
+            }
+        })
+        .catch(function(err) {
+            console.error('Weight save error:', err);
+            alertBox.className = 'alert alert-danger mt-2';
+            alertBox.textContent = 'Connection error. Please try again.';
+            alertBox.classList.remove('d-none');
+        });
     }
+
+    // Attach click handlers to all Save Record buttons (avoids CSP inline-handler block)
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.save-weight-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                submitWeightForm(this.dataset.tag, this.dataset.index);
+            });
+        });
+    });
 </script>
 {% endblock %}
