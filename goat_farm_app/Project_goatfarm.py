@@ -7161,9 +7161,9 @@ def goat_weights():
         (9, 'September'), (10, 'October'), (11, 'November'), (12, 'December')
     ]
 
-    # Fetch all goats from master_records for the cards (including dob)
+    # Fetch all goats from master_records for the cards (including dob and birth_weight)
     all_goats = db.execute(
-        "SELECT tag_no, breed, gender, status, color, weight_kg, dob FROM master_records ORDER BY tag_no ASC"
+        "SELECT tag_no, breed, gender, status, color, weight_kg, dob, birth_weight FROM master_records ORDER BY tag_no ASC"
     ).fetchall()
 
     goat_data = []
@@ -7192,7 +7192,8 @@ def goat_weights():
             (tag,)
         ).fetchall()
 
-        first_weight  = full_history[0]['weight']  if full_history else None
+        # Prefer birth_weight as first_weight if available, else first history record
+        first_weight = goat['birth_weight'] if (goat['birth_weight'] and goat['birth_weight'] > 0) else (full_history[0]['weight'] if full_history else None)
         latest_weight = full_history[-1]['weight'] if full_history else (goat['weight_kg'] if goat['weight_kg'] else None)
         weight_gain   = round(float(latest_weight) - float(first_weight), 2) if (first_weight is not None and latest_weight is not None) else 0.0
 
