@@ -6124,6 +6124,8 @@ def pnl():
             ) latest ON v.id = latest.max_id
         """, (target_date,)).fetchone()[0] or 0.0
 
+        return feed_val + med_val + vac_val
+
     # Safe Date parser — returns 0-based month index (0=Jan…11=Dec)
     def get_month_idx(date_val):
         if not date_val:
