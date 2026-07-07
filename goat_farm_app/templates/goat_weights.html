@@ -223,7 +223,8 @@ function submitWeightForm(tagNo, index) {
     fetch('/goats/' + encodeURIComponent(tagNo) + '/weights', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'X-CSRFToken': typeof csrfToken !== 'undefined' ? csrfToken : ''
         },
         body: JSON.stringify(payload)
     })

@@ -7264,6 +7264,7 @@ def goat_weights():
 def get_goat_weights_api(tagNo):
     db = get_db()
     
+    tagNo = tagNo.strip()
     # Check if goat exists
     goat = db.execute("SELECT tag_no FROM master_records WHERE tag_no = ?", (tagNo,)).fetchone()
     if not goat:
@@ -7312,6 +7313,7 @@ def get_goat_weights_api(tagNo):
 def post_goat_weights_api(tagNo):
     db = get_db()
     
+    tagNo = tagNo.strip()
     # Check if goat exists
     goat = db.execute("SELECT tag_no FROM master_records WHERE tag_no = ?", (tagNo,)).fetchone()
     if not goat:
