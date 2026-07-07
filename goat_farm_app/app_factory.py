@@ -4,8 +4,7 @@ import json
 import logging
 from logging.handlers import RotatingFileHandler
 from flask import Flask, g
-from flask_wtf.csrf import CSRFProtect
-from goat_farm_app.extensions import limiter
+from goat_farm_app.extensions import limiter, csrf
 import secrets
 
 # Resolve root path to handle Windows folder redirection (e.g. OneDrive)
@@ -80,7 +79,7 @@ def create_app(config_name=None):
     setup_logging()
     
     app = Flask(__name__, root_path=base_dir) # nosemgrep: csrf-protection-missing
-    CSRFProtect(app)
+    csrf.init_app(app)
     
     if not config_name:
         config_name = os.environ.get('FLASK_ENV', 'production').lower()
