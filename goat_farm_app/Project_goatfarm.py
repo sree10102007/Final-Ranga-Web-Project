@@ -1002,26 +1002,7 @@ def init_db():
         
         add_column("ledger_groups", "group_type", "TEXT DEFAULT 'Expense'")
 
-        # Seed default ledger groups if empty or missing
-        default_groups = [
-            ('Direct Expenses', 'Direct expenses on farm operations', 'Expense'),
-            ('Indirect Expenses', 'Indirect expenses/overheads', 'Expense'),
-            ('Capital Account', 'Capital assets and investments', 'Expense'),
-            ('Administrative Expenses', 'Admin and office expenses', 'Expense'),
-            ('Selling Expenses', 'Marketing and selling costs', 'Expense'),
-            ('Direct Income', 'Direct revenue from sales of goats, milk, manure, etc.', 'Income'),
-            ('Indirect Income', 'Indirect revenue/interest/subsidies', 'Income'),
-            ('Sales', 'Sales revenue from farm products', 'Income')
-        ]
-        for gname, gdesc, gtype in default_groups:
-            try:
-                row = conn.execute('SELECT 1 FROM ledger_groups WHERE group_name = ?', (gname,)).fetchone()
-                if not row:
-                    conn.execute('INSERT INTO ledger_groups (group_name, description, group_type) VALUES (?, ?, ?)', (gname, gdesc, gtype))
-                else:
-                    conn.execute('UPDATE ledger_groups SET group_type = ? WHERE group_name = ? AND group_type IS NULL', (gtype, gname))
-            except Exception:
-                pass
+        # Ledger groups are created manually by the user — no system defaults seeded.
 
         conn.execute('''
             CREATE TABLE IF NOT EXISTS expense_ledgers (
@@ -1082,23 +1063,7 @@ def init_db():
                 except Exception:
                     pass
 
-        # Seed default expense ledgers if empty
-        ledger_count = conn.execute('SELECT COUNT(*) FROM expense_ledgers').fetchone()[0]
-        if ledger_count == 0:
-            default_ledgers = [
-                ('Consumables Non Taxable', 'Direct Expenses', 'Day-to-day consumable items'),
-                ('Electricity Charges', 'Indirect Expenses', 'Power and electricity bills'),
-                ('Repair & Maintenance', 'Indirect Expenses', 'Farm equipment and structure repairs'),
-                ('Transport & Logistics', 'Direct Expenses', 'Freight, vehicle fuel, logistics'),
-                ('Veterinary Expenses', 'Direct Expenses', 'Vet visits and consultations'),
-                ('Capital Assets', 'Capital Account', 'Machinery, equipment, infrastructure'),
-                ('Miscellaneous Expenses', 'Indirect Expenses', 'General petty cash expenses'),
-            ]
-            for lname, lgrp, ldesc in default_ledgers:
-                try:
-                    conn.execute('INSERT INTO expense_ledgers (ledger_name, ledger_group, description) VALUES (?, ?, ?)', (lname, lgrp, ldesc))
-                except Exception:
-                    pass
+        # Expense ledgers (accounts) are created manually by the user — no system defaults seeded.
         # Check if admin user exists (robust against parallel worker race conditions)
         try:
             admin_password = os.environ.get('ADMIN_PASSWORD', 'admin123')
