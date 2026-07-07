@@ -6263,7 +6263,7 @@ def pnl():
             cogs_monthly[mi-1] = m_opening + cogs_monthly[mi-1] - m_closing
 
     cogs_fy = sum(cogs_monthly)
-    cogs_row = {'name': 'Cost of Goods Sold (COGS)', 'monthly': cogs_monthly, 'full_year': cogs_fy}
+    cogs_row = {'name': 'Goat Purchase', 'monthly': cogs_monthly, 'full_year': cogs_fy}
 
     # ── EXPENSE SECTION ──────────────────────────────────────────────────────────
     # Build a lookup: expense_ledger id -> ledger_name (for particular_id resolution)
