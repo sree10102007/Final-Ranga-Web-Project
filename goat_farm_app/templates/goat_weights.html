@@ -68,23 +68,27 @@
 
                 <!-- Weight Gain Comparison Pill -->
                 <div class="mb-3" style="min-height: 25px;">
-                    {% if goat.current_weight and goat.weight_gain is not none %}
-                    {% if goat.weight_gain > 0 %}
-                    <span
-                        class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-10 fw-bold px-2 py-1 small">
-                        <i class="bi bi-arrow-up-right me-1"></i>Gain: +{{ "%.1f"|format(goat.weight_gain) }} kg
-                    </span>
-                    {% elif goat.weight_gain < 0 %} <span
-                        class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-10 fw-bold px-2 py-1 small">
-                        <i class="bi bi-arrow-down-left me-1"></i>Loss: {{ "%.1f"|format(goat.weight_gain) }} kg
-                        </span>
+                    {% if goat.current_weight is not none %}
+                        {% if goat.weight_gain is not none and goat.first_weight is not none and goat.first_weight != goat.current_weight %}
+                            {% if goat.weight_gain > 0 %}
+                            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-10 fw-bold px-2 py-1 small">
+                                <i class="bi bi-arrow-up-right me-1"></i>Gain: +{{ "%.1f"|format(goat.weight_gain) }} kg
+                            </span>
+                            {% elif goat.weight_gain < 0 %}
+                            <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-10 fw-bold px-2 py-1 small">
+                                <i class="bi bi-arrow-down-left me-1"></i>Loss: {{ "%.1f"|format(goat.weight_gain) }} kg
+                            </span>
+                            {% else %}
+                            <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-10 fw-bold px-2 py-1 small">
+                                <i class="bi bi-dash me-1"></i>No change
+                            </span>
+                            {% endif %}
                         {% else %}
-                        <span
-                            class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-10 fw-bold px-2 py-1 small">
-                            <i class="bi bi-dash me-1"></i>0.0 kg change
+                        <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-10 fw-bold px-2 py-1 small">
+                            <i class="bi bi-dash me-1"></i>Only 1 record
                         </span>
                         {% endif %}
-                        {% endif %}
+                    {% endif %}
                 </div>
 
                 <!-- View Details Button -->
