@@ -7311,6 +7311,16 @@ def get_goat_weights_api(tagNo):
 @app.route('/goats/<path:tagNo>/weights', methods=['POST'])
 @csrf.exempt
 def post_goat_weights_api(tagNo):
+    # Parse body once
+    if request.is_json:
+        data = request.get_json(force=True) or {}
+    else:
+        data = request.form
+
+    # Prefer tag_no from body to avoid URL path encoding issues with special chars (/, spaces, etc.)
+    if data.get('tag_no'):
+        tagNo = str(data['tag_no'])
+
     db = get_db()
     
     tagNo = tagNo.strip()
@@ -7319,15 +7329,9 @@ def post_goat_weights_api(tagNo):
     if not goat:
         return jsonify({'success': False, 'error': f"Goat with tag '{tagNo}' not found"}), 404
         
-    # Get parameters
-    if request.is_json:
-        data = request.get_json() or {}
-    else:
-        data = request.form
-        
     weight_val = data.get('weight')
     recorded_date = data.get('recorded_date')
-    recorded_by = data.get('recorded_by') or session.get('username') or 'API'
+    recorded_by = data.get('recorded_by') or session.get('username') or 'Farm User'
     unit = data.get('unit') or 'kg'
     
     # Validation
@@ -7391,8 +7395,8 @@ def get_goat_weights_summary():
     
     result = []
     for g in goats:
-        count_row = db.execute("SELECT COUNT(*) FROM goat_weights WHERE goat_tag_no = ?", (g['tag_no'],)).fetchone()
-        count = count_row[0] if count_row else 0
+        count_row = db.execute("SELECT COUNT(*) as cnt FROM goat_weights WHERE goat_tag_no = ?", (g['tag_no'],)).fetchone()
+        count = count_row['cnt'] if count_row else 0
         
         latest_row = db.execute(
             "SELECT weight, unit, recorded_date FROM goat_weights WHERE goat_tag_no = ? ORDER BY recorded_date DESC, id DESC LIMIT 1",
