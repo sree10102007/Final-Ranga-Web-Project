@@ -4822,28 +4822,45 @@ def farm_settings():
     if request.method == 'POST':
         f = request.form
         try:
-            db.execute('''INSERT INTO farm_settings (id, farm_name, address, phone, email, bank_name, account_no, ifsc_code, gst_no)
-                          VALUES (1, %s, %s, %s, %s, %s, %s, %s, %s)
-                          ON CONFLICT (id) DO UPDATE SET
-                              farm_name  = EXCLUDED.farm_name,
-                              address    = EXCLUDED.address,
-                              phone      = EXCLUDED.phone,
-                              email      = EXCLUDED.email,
-                              bank_name  = EXCLUDED.bank_name,
-                              account_no = EXCLUDED.account_no,
-                              ifsc_code  = EXCLUDED.ifsc_code,
-                              gst_no     = EXCLUDED.gst_no''',
-                (f.get('farm_name'), f.get('address'), f.get('phone'), f.get('email'),
-                 f.get('bank_name'), f.get('account_no'), f.get('ifsc_code'), f.get('gst_no')))
+            farm_name  = f.get('farm_name', '').strip()
+            address    = f.get('address', '').strip()
+            phone      = f.get('phone', '').strip()
+            email      = f.get('email', '').strip()
+            bank_name  = f.get('bank_name', '').strip()
+            account_no = f.get('account_no', '').strip()
+            ifsc_code  = f.get('ifsc_code', '').strip()
+            gst_no     = f.get('gst_no', '').strip()
+
+            existing = db.execute('SELECT id FROM farm_settings WHERE id = 1').fetchone()
+            if existing:
+                db.execute('''UPDATE farm_settings
+                              SET farm_name = ?, address = ?, phone = ?, email = ?,
+                                  bank_name = ?, account_no = ?, ifsc_code = ?, gst_no = ?
+                              WHERE id = 1''',
+                    (farm_name, address, phone, email, bank_name, account_no, ifsc_code, gst_no))
+            else:
+                db.execute('''INSERT INTO farm_settings (farm_name, address, phone, email, bank_name, account_no, ifsc_code, gst_no)
+                              VALUES (?, ?, ?, ?, ?, ?, ?, ?)''',
+                    (farm_name, address, phone, email, bank_name, account_no, ifsc_code, gst_no))
             db.commit()
-            flash('Settings updated!', 'success')
+            flash('Farm settings saved successfully!', 'success')
         except Exception as e:
-            db.rollback()
+            try:
+                db.rollback()
+            except Exception:
+                pass
+            app.logger.error(f'Farm settings save error: {e}', exc_info=True)
             flash(f'Error saving settings: {str(e)}', 'danger')
         return redirect(url_for('farm_settings'))
-    settings = db.execute('SELECT * FROM farm_settings WHERE id = 1').fetchone()
-    user = db.execute('SELECT mfa_enabled FROM users WHERE id = ?', (session['user_id'],)).fetchone()
-    mfa_enabled = user['mfa_enabled'] if user else 0
+    try:
+        settings = db.execute('SELECT * FROM farm_settings WHERE id = 1').fetchone()
+    except Exception:
+        settings = None
+    try:
+        user = db.execute('SELECT mfa_enabled FROM users WHERE id = ?', (session['user_id'],)).fetchone()
+        mfa_enabled = user['mfa_enabled'] if user else 0
+    except Exception:
+        mfa_enabled = 0
     return render_template('farm_settings.html', settings=settings, mfa_enabled=mfa_enabled)
 
 @app.route('/reports_list')
