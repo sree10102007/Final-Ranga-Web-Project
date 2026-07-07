@@ -7130,16 +7130,20 @@ def goat_weights():
     # Backfill: for existing active/sold/etc. goats that have a weight but no log entry yet,
     # create a single baseline entry in goat_weights so they appear in the report.
     existing_goats = db.execute(
-        "SELECT tag_no, weight_kg, purchase_date FROM master_records WHERE weight_kg IS NOT NULL AND weight_kg > 0"
+        "SELECT tag_no, weight_kg, purchase_date, dob FROM master_records WHERE weight_kg IS NOT NULL AND weight_kg > 0"
     ).fetchall()
     for g in existing_goats:
         already_logged = db.execute(
             "SELECT 1 FROM goat_weights WHERE goat_tag_no = ?", (g['tag_no'],)
         ).fetchone()
         if not already_logged:
-            baseline_date = g['purchase_date'] or datetime.now().strftime('%Y-%m-%d')
+            baseline_date = g['purchase_date'] or g['dob'] or (datetime.now() - timedelta(days=30))
             if hasattr(baseline_date, 'strftime'):
                 baseline_date = baseline_date.strftime('%Y-%m-%d')
+            elif isinstance(baseline_date, str):
+                pass
+            else:
+                baseline_date = datetime.now().strftime('%Y-%m-%d')
             db.execute('''
                 INSERT INTO goat_weights (goat_tag_no, weight, unit, recorded_date, recorded_by)
                 VALUES (?, ?, 'kg', ?, 'system')
@@ -7349,10 +7353,10 @@ def post_goat_weights_api(tagNo):
     if weight <= 0:
         return jsonify({'success': False, 'error': 'Weight must be a positive number greater than zero'}), 400
         
-    # Duplicate check: exact same goat + same date -> UPDATE instead of failing!
+    # Duplicate check: exact same goat + same date + same recorder -> UPDATE instead of failing!
     existing = db.execute(
-        "SELECT 1 FROM goat_weights WHERE goat_tag_no = ? AND recorded_date = ?",
-        (tagNo, recorded_date)
+        "SELECT 1 FROM goat_weights WHERE goat_tag_no = ? AND recorded_date = ? AND recorded_by = ?",
+        (tagNo, recorded_date, recorded_by)
     ).fetchone()
     
     if existing:
