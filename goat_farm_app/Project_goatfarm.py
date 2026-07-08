@@ -1312,18 +1312,38 @@ def dashboard():
     income = goat_sales + other_sales
     
     # Detailed expense calculation for dashboard
-    # 1. Purchases (Goats, Feed, Med, Vac)
+    # 1. Purchases (Goats, Feed, Med, Vac, Equipment)
     exp_goat = db.execute("SELECT SUM(price) FROM purchases").fetchone()[0] or 0.0
-    exp_feed = db.execute("SELECT SUM(total_cost) FROM feed_inventory").fetchone()[0] or 0.0
+    # Also add master_records purchase amounts that aren't in purchases to avoid missing them
+    master_goat_purch = db.execute("""
+        SELECT SUM(purchase_amount) 
+        FROM master_records 
+        WHERE purchase_amount > 0 
+          AND tag_no NOT IN (SELECT COALESCE(tag_id, '') FROM purchases WHERE tag_id IS NOT NULL)
+    """).fetchone()[0] or 0.0
+    exp_goat += master_goat_purch
+
+    exp_feed = db.execute("SELECT SUM(cost) FROM feed_purchases").fetchone()[0] or 0.0
     exp_med = db.execute("SELECT SUM(cost) FROM medicine_purchases").fetchone()[0] or 0.0
     exp_vac = db.execute("SELECT SUM(cost) FROM vaccine_purchases").fetchone()[0] or 0.0
+    exp_equip = db.execute("SELECT SUM(purchase_cost) FROM equipment").fetchone()[0] or 0.0
     
     # 2. Operations (Maintenance + Salaries + General Expenses)
     exp_salary = db.execute("SELECT SUM(net_salary) FROM salary_payments").fetchone()[0] or 0.0
     exp_maint = db.execute("SELECT SUM(service_cost) FROM equipment_services").fetchone()[0] or 0.0
-    exp_gen = db.execute("SELECT SUM(amount) FROM expenses WHERE status='Approved' AND LOWER(COALESCE(category, '')) NOT LIKE '%labor%' AND LOWER(COALESCE(category, '')) NOT LIKE '%labour%'").fetchone()[0] or 0.0
     
-    expense = exp_goat + exp_feed + exp_med + exp_vac + exp_salary + exp_maint + exp_gen
+    # Filter exp_gen to get Approved or Paid expenses, excluding the ones already counted above
+    exp_gen = db.execute("""
+        SELECT SUM(amount) 
+        FROM expenses 
+        WHERE (status = 'Approved' OR status = 'Paid') 
+          AND LOWER(COALESCE(category, '')) NOT LIKE '%labor%' 
+          AND LOWER(COALESCE(category, '')) NOT LIKE '%labour%'
+          AND LOWER(COALESCE(category, '')) NOT LIKE '%purchase%'
+          AND LOWER(COALESCE(category, '')) NOT LIKE '%salary%'
+    """).fetchone()[0] or 0.0
+    
+    expense = exp_goat + exp_feed + exp_med + exp_vac + exp_salary + exp_maint + exp_gen + exp_equip
     profit = income - expense
     
     # 3. Weight Notification Logic (Disabled)
