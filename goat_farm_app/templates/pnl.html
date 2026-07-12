@@ -5,120 +5,140 @@
 
 {% block content %}
 <style nonce="{{ csp_nonce }}">
-    /* Premium Corporate Styling inspired by Corporate Finance Institute */
+    /* Premium Forest Green Theme inspired by the reference image */
     :root {
-        --corporate-blue: #0A2540;
-        --corporate-blue-dark: #051424;
-        --corporate-gray-bg: #f4f6f8;
-        --corporate-border: #d2d9e0;
-        --corporate-text: #1a2530;
-        --corporate-text-muted: #5e6e7f;
-        --corporate-accent-blue: #1c75bc;
-        --corporate-danger: #d9534f;
+        --ranga-green: #113f28;
+        --ranga-green-hover: rgba(17, 63, 40, 0.08);
+        --corporate-border: #cbd5e1;
+        --corporate-text: #1e293b;
+        --corporate-text-muted: #64748b;
+        --corporate-danger: #dc2626;
+        --corporate-success: #16a34a;
     }
 
     .corporate-container {
-        font-family: 'Inter', 'Outfit', sans-serif;
-        background-color: #ffffff;
+        font-family: 'Inter', sans-serif;
+        background-color: #fafbf9;
         border: 1px solid var(--corporate-border);
         border-radius: 12px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
         overflow: hidden;
         margin-bottom: 40px;
     }
 
     /* Brand Header Bar matching the image */
     .brand-header-bar {
-        background-color: var(--corporate-blue);
+        background-color: var(--ranga-green);
         color: #ffffff;
-        padding: 30px 40px;
-        position: relative;
+        padding: 24px 32px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 2px solid var(--ranga-green);
+    }
+
+    .brand-header-left {
+        display: flex;
+        flex-direction: column;
     }
 
     .brand-header-title {
         font-size: 1.8rem;
         font-weight: 800;
-        letter-spacing: -0.5px;
+        letter-spacing: 0.5px;
         margin: 0;
-        text-transform: uppercase;
+        line-height: 1.2;
     }
 
     .brand-header-subtitle {
-        font-size: 1.1rem;
+        font-size: 0.95rem;
         font-weight: 600;
-        opacity: 0.9;
+        opacity: 0.8;
         margin-top: 4px;
-        margin-bottom: 0;
+        letter-spacing: 0.5px;
     }
 
-    .brand-header-unit {
-        font-size: 0.82rem;
-        opacity: 0.7;
-        margin-top: 8px;
-    }
-
-    .brand-header-year {
-        position: absolute;
-        bottom: 12px;
-        right: 40px;
-        font-size: 1.2rem;
+    .brand-header-badge {
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        color: #ffffff;
+        padding: 6px 16px;
+        border-radius: 50px;
+        font-size: 0.8rem;
         font-weight: 700;
-        letter-spacing: 1px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
 
-    /* Table matrix styling */
+    /* T-Format Table matrix styling */
     .table-pnl-matrix {
         width: 100%;
         border-collapse: collapse;
         margin-bottom: 0;
+        background-color: #ffffff;
     }
 
     .table-pnl-matrix th {
-        background-color: var(--corporate-blue-dark);
-        color: #ffffff;
+        background-color: #f1f5f9;
+        color: var(--corporate-text-muted);
         font-weight: 700;
-        font-size: 0.8rem;
+        font-size: 0.78rem;
         letter-spacing: 0.5px;
-        padding: 10px 16px;
+        padding: 12px 20px;
+        border-bottom: 1.5px solid var(--corporate-border);
+        text-transform: uppercase;
+    }
+
+    .table-pnl-matrix th.col-amount {
         text-align: right;
-        border-bottom: 2px solid var(--corporate-border);
     }
 
     .table-pnl-matrix th.col-particulars {
         text-align: left;
-        background-color: var(--corporate-blue);
     }
 
     .table-pnl-matrix td {
-        padding: 8px 16px;
-        font-size: 0.88rem;
+        padding: 12px 20px;
+        font-size: 0.9rem;
         color: var(--corporate-text);
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .table-pnl-matrix td.col-amount {
         text-align: right;
-        border-bottom: 1px solid var(--corporate-gray-bg);
         font-family: 'JetBrains Mono', 'Courier New', monospace;
+        font-weight: 600;
     }
 
     .table-pnl-matrix td.col-particulars {
         text-align: left;
         font-weight: 500;
-        color: var(--corporate-text);
-        font-family: 'Inter', sans-serif;
     }
 
-    /* Rows types matching CFI structure */
+    /* Vertical T-Account Center Divider */
+    .border-center-divider {
+        border-right: 2px solid var(--corporate-border) !important;
+    }
+
+    /* Helper styles for rows and nesting */
+    .indent-particular {
+        padding-left: 36px !important;
+    }
+
+    .indent-deep {
+        padding-left: 54px !important;
+    }
+
+    .interactive-cell {
+        cursor: pointer;
+        transition: all 0.15s ease;
+    }
+
+    .interactive-cell:hover {
+        background-color: var(--ranga-green-hover) !important;
+        color: var(--ranga-green) !important;
+    }
+
     .row-total-net {
-        font-weight: 700;
-        border-top: 1.5px solid var(--corporate-text);
-        border-bottom: 1.5px solid var(--corporate-text);
-        background-color: #fcfdfe;
-    }
-
-    .row-total-net td {
-        color: var(--corporate-text) !important;
-        font-family: 'JetBrains Mono', monospace !important;
-    }
-
-    .row-gross-profit {
         font-weight: 700;
         border-top: 1.5px solid var(--corporate-text);
         border-bottom: 1.5px solid var(--corporate-text);
@@ -129,66 +149,20 @@
         font-weight: 800;
         border-top: 1.5px solid var(--corporate-text);
         border-bottom: 4px double var(--corporate-text);
-        background-color: #f4f7fa;
+        background-color: #f8fafc;
     }
 
-    .row-group-title {
-        font-weight: 700;
-        text-transform: uppercase;
-        color: var(--corporate-blue-dark);
-        font-size: 0.9rem;
-    }
-
-    .row-group-title td {
-        padding-top: 18px;
-        padding-bottom: 8px;
-        border-bottom: none;
-    }
-
-    .indent-particular {
-        padding-left: 28px !important;
-    }
-
-    /* Interactive highlights */
-    .interactive-row {
-        cursor: pointer;
-        transition: background-color 0.15s ease;
-    }
-
-    .interactive-row:hover {
-        background-color: rgba(28, 117, 188, 0.06) !important;
-    }
-
-    /* Negative number parentheses format */
-    .num-neg {
-        color: var(--corporate-danger) !important;
-    }
-
-    /* Print styles */
-    .pnl-card {
-        background: #ffffff;
-        border: 1px solid var(--corporate-border);
-        border-radius: 12px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    .row-grand-total td {
+        font-size: 0.95rem;
     }
 </style>
 
-<!-- Macros for CFI Bracketed Formatting -->
-{% macro format_cell(val) %}
-    {% if val is not none %}
-        {% if val < -0.01 %}
-            <span class="num-neg">({{ "%.1f"|format(val|abs) }})</span>
-        {% elif val == 0.0 %}
-            <span style="opacity: 0.5;">-</span>
-        {% else %}
-            <span>{{ "%.1f"|format(val) }}</span>
-        {% endif %}
-    {% else %}
-        <span style="opacity: 0.5;">-</span>
-    {% endif %}
-{% endmacro %}
-
 <div class="container py-4">
+    <!-- Header Page Title Centered as shown in reference -->
+    <div class="text-center mb-4">
+        <h4 class="fw-bold text-dark text-uppercase tracking-wider" style="letter-spacing: 1.5px;">Profit & Loss Statement</h4>
+    </div>
+
     <!-- Filter Controls Toolbar -->
     <div class="row mb-4 d-print-none">
         <div class="col-12">
@@ -260,111 +234,124 @@
         </div>
     </div>
 
-    <!-- Corporate P&L Report Container -->
+    <!-- T-Format P&L Report Container -->
     <div class="corporate-container" id="pnl-report-view">
         <!-- Brand Header Bar matching the image -->
         <div class="brand-header-bar">
-            <div class="brand-header-title">Ranga Farms</div>
-            <div class="brand-header-subtitle">Profit and Loss (P&L) Statement</div>
-
+            <div class="brand-header-left">
+                <div class="brand-header-title">RANGA FARMS</div>
+                <div class="brand-header-subtitle">PROFIT & LOSS A/C</div>
+            </div>
+            <div class="brand-header-badge">
+                Period: Full Year
+            </div>
         </div>
 
-        <!-- Stacked P&L Layout: Income → Expenses → Net Profit/Loss -->
         <div class="table-responsive">
             <table class="table-pnl-matrix">
                 <thead>
                     <tr>
-                        <th class="col-particulars" style="width: 22%;">Particulars</th>
-                        {% for month in months_headers %}
-                            <th style="width: 6%;">{{ month }}</th>
-                        {% endfor %}
-                        <th style="width: 8%; background-color: var(--corporate-blue-dark);">Full Year</th>
+                        <th class="col-particulars" style="width: 35%;">Particulars (Debit Side)</th>
+                        <th class="col-amount border-center-divider" style="width: 15%;">Amount (₹)</th>
+                        <th class="col-particulars" style="width: 35%;">Particulars (Credit Side)</th>
+                        <th class="col-amount" style="width: 15%;">Amount (₹)</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- ── INCOME SECTION ── -->
-                    <tr class="row-group-title">
-                        <td colspan="14" style="background: linear-gradient(90deg, rgba(37,99,235,0.07) 0%, transparent 100%);">
-                            <i class="bi bi-graph-up me-2 text-primary"></i>INCOME / REVENUE
-                        </td>
-                    </tr>
-                    {% if income_rows %}
-                        {% for row in income_rows %}
-                        <tr class="interactive-row" onclick="viewDrilldown('{{ row.name }}')">
-                            <td class="col-particulars indent-particular">{{ row.name }}</td>
-                            {% for val in row.monthly %}
-                                <td>{{ format_cell(val) }}</td>
-                            {% endfor %}
-                            <td class="fw-bold">{{ format_cell(row.full_year) }}</td>
-                        </tr>
-                        {% endfor %}
-                    {% else %}
-                        <tr>
-                            <td class="col-particulars indent-particular text-muted" colspan="14">
-                                <i class="bi bi-info-circle me-2"></i>No income transactions recorded for this period.
-                            </td>
-                        </tr>
-                    {% endif %}
-                    <tr class="row-total-net" style="background-color: rgba(13,148,136,0.06);">
-                        <td class="col-particulars fw-bold">Total Income</td>
-                        {% for val in pnl_data.total_income.monthly %}
-                            <td class="fw-bold text-success">{{ format_cell(val) }}</td>
-                        {% endfor %}
-                        <td class="fw-bold text-success">{{ format_cell(pnl_data.total_income.full_year) }}</td>
-                    </tr>
+                    {# Setup variables to balance the Debit and Credit accounts #}
+                    {% set cogs_len = 1 %}
+                    {% set exp_len = expense_rows|length %}
+                    {% set net_val = pnl_data.net_earnings.full_year %}
+                    {% set has_profit = 1 if net_val >= 0 else 0 %}
+                    {% set has_loss = 1 if net_val < 0 else 0 %}
 
-                    <!-- ── EXPENSES SECTION ── -->
-                    <tr class="row-group-title">
-                        <td colspan="14" style="background: linear-gradient(90deg, rgba(220,38,38,0.07) 0%, transparent 100%); padding-top: 22px;">
-                            <i class="bi bi-graph-down me-2 text-danger"></i>EXPENSES
-                        </td>
-                    </tr>
-                    <!-- COGS always shown as a single purchases row -->
-                    <tr class="interactive-row" onclick="viewDrilldown('Purchase')">
-                        <td class="col-particulars indent-particular">{{ cogs_row.name }}</td>
-                        {% for val in cogs_row.monthly %}
-                            <td>{{ format_cell(val) }}</td>
-                        {% endfor %}
-                        <td class="fw-bold">{{ format_cell(cogs_row.full_year) }}</td>
-                    </tr>
-                    <!-- Dynamic expense rows from ledger accounts -->
-                    {% if expense_rows %}
-                        {% for row in expense_rows %}
-                        <tr class="interactive-row" onclick="viewDrilldown('{{ row.name }}')">
-                            <td class="col-particulars indent-particular">{{ row.name }}</td>
-                            {% for val in row.monthly %}
-                                <td>{{ format_cell(val) }}</td>
-                            {% endfor %}
-                            <td class="fw-bold">{{ format_cell(row.full_year) }}</td>
-                        </tr>
-                        {% endfor %}
+                    {% set debit_len = cogs_len + exp_len + has_profit %}
+                    {% set credit_len = (income_rows|length) + has_loss %}
+
+                    {% if debit_len > credit_len %}
+                        {% set max_rows = debit_len %}
+                    {% else %}
+                        {% set max_rows = credit_len %}
                     {% endif %}
-                    <tr class="row-total-net" style="background-color: rgba(220,38,38,0.05);">
-                        <td class="col-particulars fw-bold">Total Expenses</td>
-                        {% for val in pnl_data.total_expenses.monthly %}
-                            <td class="fw-bold text-danger">{{ format_cell(val) }}</td>
-                        {% endfor %}
-                        <td class="fw-bold text-danger">{{ format_cell(pnl_data.total_expenses.full_year) }}</td>
+
+                    {% for i in range(max_rows) %}
+                        <tr>
+                            {# ── DEBIT SIDE (Expenses) ── #}
+                            {% if i == 0 %}
+                                {# COGS/Goat Purchase #}
+                                <td class="col-particulars interactive-cell" onclick="viewDrilldown('{{ cogs_row.name }}')">
+                                    <span class="me-2"><i class="bi bi-cart-fill text-muted"></i></span> {{ cogs_row.name }}
+                                </td>
+                                <td class="col-amount border-center-divider">
+                                    {{ "%.2f"|format(cogs_row.full_year) }}
+                                </td>
+                            {% elif i > 0 and i <= exp_len %}
+                                {# Expense Rows #}
+                                {% set exp_item = expense_rows[i - 1] %}
+                                <td class="col-particulars interactive-cell" onclick="viewDrilldown('{{ exp_item.name }}')">
+                                    <span class="me-2"><i class="bi bi-folder-fill text-muted"></i></span> {{ exp_item.name }}
+                                </td>
+                                <td class="col-amount border-center-divider">
+                                    {{ "%.2f"|format(exp_item.full_year) }}
+                                </td>
+                            {% elif i == exp_len + 1 and has_profit %}
+                                {# Net Profit #}
+                                <td class="col-particulars text-success fw-bold">
+                                    <span class="me-2"><i class="bi bi-plus-circle-fill text-success"></i></span> Net Profit c/o (to P&L A/C)
+                                </td>
+                                <td class="col-amount text-success fw-bold border-center-divider">
+                                    {{ "%.2f"|format(net_val) }}
+                                </td>
+                            {% else %}
+                                {# Empty Spacer #}
+                                <td class="col-particulars text-muted"></td>
+                                <td class="col-amount border-center-divider"></td>
+                            {% endif %}
+
+                            {# ── CREDIT SIDE (Income) ── #}
+                            {% if i < income_rows|length %}
+                                {# Income Rows #}
+                                {% set inc_item = income_rows[i] %}
+                                <td class="col-particulars interactive-cell" onclick="viewDrilldown('{{ inc_item.name }}')">
+                                    <span class="me-2"><i class="bi bi-graph-up-arrow text-success"></i></span> {{ inc_item.name }}
+                                </td>
+                                <td class="col-amount">
+                                    {{ "%.2f"|format(inc_item.full_year) }}
+                                </td>
+                            {% elif i == income_rows|length and has_loss %}
+                                {# Net Loss #}
+                                <td class="col-particulars text-danger fw-bold">
+                                    <span class="me-2"><i class="bi bi-dash-circle-fill text-danger"></i></span> Gross Loss c/o (to P&L A/C)
+                                </td>
+                                <td class="col-amount text-danger fw-bold">
+                                    {{ "%.2f"|format(net_val|abs) }}
+                                </td>
+                            {% else %}
+                                {# Empty Spacer #}
+                                <td class="col-particulars text-muted"></td>
+                                <td class="col-amount"></td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+
+                    {# Balance totals #}
+                    {% if net_val >= 0 %}
+                        {% set total_balanced = pnl_data.total_income.full_year %}
+                    {% else %}
+                        {% set total_balanced = pnl_data.total_expenses.full_year %}
+                    {% endif %}
+
+                    <tr class="row-grand-total">
+                        <td class="col-particulars text-uppercase fw-bold">Total</td>
+                        <td class="col-amount border-center-divider">{{ "%.2f"|format(total_balanced) }}</td>
+                        <td class="col-particulars text-uppercase fw-bold">Total</td>
+                        <td class="col-amount">{{ "%.2f"|format(total_balanced) }}</td>
                     </tr>
                 </tbody>
-
-                <!-- ── NET PROFIT / LOSS ── -->
-                <tfoot>
-                    <tr class="row-grand-total">
-                        <td class="col-particulars py-3" style="font-size: 0.95rem;">
-                            <i class="bi bi-calculator me-2"></i>Net Profit / Loss
-                        </td>
-                        {% for val in pnl_data.net_earnings.monthly %}
-                            <td class="fw-bold py-3 {% if val < 0 %}text-danger{% else %}text-success{% endif %}">{{ format_cell(val) }}</td>
-                        {% endfor %}
-                        <td class="fw-bold py-3 {% if pnl_data.net_earnings.full_year < 0 %}text-danger{% else %}text-success{% endif %}" style="font-size: 1rem;">
-                            {{ format_cell(pnl_data.net_earnings.full_year) }}
-                        </td>
-                    </tr>
-                </tfoot>
             </table>
         </div>
     </div>
+</div>
 
 
 
