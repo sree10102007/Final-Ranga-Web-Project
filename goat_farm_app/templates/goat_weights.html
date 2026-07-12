@@ -24,6 +24,11 @@
                 digits</small>
         </form>
     </div>
+    <div class="col-lg-6 col-md-4 col-sm-12 text-md-end text-start">
+        <button id="downloadCsvBtn" class="btn btn-outline-success shadow-sm rounded-pill fw-bold">
+            <i class="bi bi-file-earmark-spreadsheet me-1"></i> Download CSV
+        </button>
+    </div>
 </div>
 
 <div class="row g-4">
@@ -290,6 +295,35 @@
         });
     }
 
+    // Download CSV function
+    function downloadCSV() {
+        const rawText = document.getElementById('goat-weights-data').textContent;
+        const data = JSON.parse(rawText);
+        
+        let csv = "Tag Number,Breed,Gender,Status,Color,Age,Recorded Date,Weight (kg),Recorded By\n";
+        
+        data.forEach(function(g) {
+            const ageStr = g.age_str || 'N/A';
+            if (g.history && g.history.length > 0) {
+                g.history.forEach(function(h) {
+                    csv += `"${g.tag_no}","${g.breed}","${g.gender}","${g.status}","${g.color}","${ageStr}","${h.recorded_date}",${h.weight_kg},"${h.recorded_by}"\n`;
+                });
+            } else {
+                csv += `"${g.tag_no}","${g.breed}","${g.gender}","${g.status}","${g.color}","${ageStr}","",${g.current_weight || ''},"—"\n`;
+            }
+        });
+        
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", "Goat_Weights_Report.csv");
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
     // Attach click handlers to all Save Record buttons (avoids CSP inline-handler block)
     document.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll('.save-weight-btn').forEach(function(btn) {
@@ -297,6 +331,15 @@
                 submitWeightForm(this.dataset.tag, this.dataset.index);
             });
         });
+
+        const downloadBtn = document.getElementById('downloadCsvBtn');
+        if (downloadBtn) {
+            downloadBtn.addEventListener('click', downloadCSV);
+        }
     });
+</script>
+
+<script id="goat-weights-data" type="application/json">
+    {{ goat_data | tojson | safe }}
 </script>
 {% endblock %}
