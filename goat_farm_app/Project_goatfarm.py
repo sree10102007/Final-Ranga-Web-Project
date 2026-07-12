@@ -6222,28 +6222,6 @@ def pnl():
     # ── COGS / PURCHASES ─────────────────────────────────────────────────────────
     cogs_monthly = [0.0] * 12
 
-    purchases_tags = set()
-    rows = db.execute(
-        "SELECT tag_id, purchase_date, price FROM purchases WHERE purchase_date BETWEEN ? AND ?",
-        (start_date, end_date)
-    ).fetchall()
-    for r in rows:
-        m = get_month_idx(r['purchase_date'])
-        if m is not None:
-            cogs_monthly[m] += float(r['price'] or 0.0)
-        if r['tag_id']:
-            purchases_tags.add(str(r['tag_id']).strip())
-
-    master_purchases = db.execute(
-        "SELECT tag_no, purchase_date, purchase_amount FROM master_records WHERE purchase_date BETWEEN ? AND ? AND purchase_amount > 0",
-        (start_date, end_date)
-    ).fetchall()
-    for r in master_purchases:
-        if str(r['tag_no']).strip() not in purchases_tags:
-            m = get_month_idx(r['purchase_date'])
-            if m is not None:
-                cogs_monthly[m] += float(r['purchase_amount'] or 0.0)
-
     for table, date_col, amt_col in [
         ('feed_purchases',     'purchase_date', 'cost'),
         ('medicine_purchases', 'purchase_date', 'cost'),
@@ -6283,7 +6261,7 @@ def pnl():
             cogs_monthly[mi-1] = m_opening + cogs_monthly[mi-1] - m_closing
 
     cogs_fy = sum(cogs_monthly)
-    cogs_row = {'name': 'Goat Purchase', 'monthly': cogs_monthly, 'full_year': cogs_fy}
+    cogs_row = {'name': 'Cost of Goods Sold', 'monthly': cogs_monthly, 'full_year': cogs_fy}
 
     # ── EXPENSE SECTION ──────────────────────────────────────────────────────────
     # Build a lookup: expense_ledger id -> ledger_name (for particular_id resolution)
@@ -6517,20 +6495,12 @@ def api_pnl_drilldown():
             if category == 'All' or category in (g, l, p):
                 transactions.append({'date': r['date'], 'reference': f"Salary: {r['reference']}", 'detail': f"HR Payroll - paid via {r['detail']}", 'amount': r['amount'], 'category': l, 'type': 'expense'})
 
-        # 2. Goat purchases
-        rows = db.execute("SELECT id, seller_name AS detail, purchase_date AS date, price AS amount, pnl_category, tag_id, particular_id FROM purchases WHERE purchase_date BETWEEN ? AND ?", (from_date, to_date)).fetchall()
-        for r in rows:
-            r_cat = r['pnl_category'] or 'Purchase'
-            g, l, p = resolve_account_details(r['particular_id'], r_cat, 'Purchase', 'Goat Purchases')
-            if category == 'All' or category in (g, l, p):
-                transactions.append({'date': r['date'], 'reference': f"Goat: {r['tag_id']}", 'detail': f"Purchased from {r['detail']}", 'amount': r['amount'], 'category': l, 'type': 'expense'})
-            
         # 3. Feed purchases
         rows = db.execute("SELECT id, supplier AS detail, purchase_date AS date, cost AS amount, pnl_category, feed_name, particular_id FROM feed_purchases WHERE purchase_date BETWEEN ? AND ?", (from_date, to_date)).fetchall()
         for r in rows:
             r_cat = r['pnl_category'] or 'Purchase'
             g, l, p = resolve_account_details(r['particular_id'], r_cat, 'Purchase', 'Feed Purchases')
-            if category == 'All' or category in (g, l, p):
+            if category == 'All' or category in (g, l, p) or (category == 'Cost of Goods Sold' and (g == 'Purchase' or l == 'Purchase')):
                 transactions.append({'date': r['date'], 'reference': f"Feed: {r['feed_name']}", 'detail': f"Supplier: {r['detail']}", 'amount': r['amount'], 'category': l, 'type': 'expense'})
             
         # 4. Medicine purchases
@@ -6538,7 +6508,7 @@ def api_pnl_drilldown():
         for r in rows:
             r_cat = r['pnl_category'] or 'Purchase'
             g, l, p = resolve_account_details(r['particular_id'], r_cat, 'Purchase', 'Medicine Purchases')
-            if category == 'All' or category in (g, l, p):
+            if category == 'All' or category in (g, l, p) or (category == 'Cost of Goods Sold' and (g == 'Purchase' or l == 'Purchase')):
                 transactions.append({'date': r['date'], 'reference': f"Med: {r['medicine_name']}", 'detail': f"Supplier: {r['detail']}", 'amount': r['amount'], 'category': l, 'type': 'expense'})
             
         # 5. Vaccine purchases
@@ -6546,7 +6516,7 @@ def api_pnl_drilldown():
         for r in rows:
             r_cat = r['pnl_category'] or 'Purchase'
             g, l, p = resolve_account_details(r['particular_id'], r_cat, 'Purchase', 'Vaccine Purchases')
-            if category == 'All' or category in (g, l, p):
+            if category == 'All' or category in (g, l, p) or (category == 'Cost of Goods Sold' and (g == 'Purchase' or l == 'Purchase')):
                 transactions.append({'date': r['date'], 'reference': f"Vac: {r['vaccine_name']}", 'detail': f"Supplier: {r['detail']}", 'amount': r['amount'], 'category': l, 'type': 'expense'})
             
         # 6. Equipment purchases
@@ -6554,7 +6524,7 @@ def api_pnl_drilldown():
         for r in rows:
             r_cat = r['pnl_category'] or 'Purchase'
             g, l, p = resolve_account_details(None, r_cat, 'Purchase', f"Asset: {r['detail']}")
-            if category == 'All' or category in (g, l, p):
+            if category == 'All' or category in (g, l, p) or (category == 'Cost of Goods Sold' and (g == 'Purchase' or l == 'Purchase')):
                 transactions.append({'date': r['date'], 'reference': f"Asset: {r['detail']}", 'detail': f"Asset Purchase", 'amount': r['amount'] or 0.0, 'category': l, 'type': 'expense'})
 
         # 7. Goat sales
