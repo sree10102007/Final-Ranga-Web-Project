@@ -6230,6 +6230,75 @@ def pnl():
 
     expense_map = {}  # acct_name -> [12 monthly floats]
 
+    # 1. Goat Purchases
+    purchases_tags = set()
+    rows = db.execute(
+        "SELECT tag_id, purchase_date, price, particular_id, particular_name, pnl_category FROM purchases WHERE purchase_date BETWEEN ? AND ?",
+        (start_date, end_date)
+    ).fetchall()
+    for r in rows:
+        m = get_month_idx(r['purchase_date'])
+        if m is not None:
+            p_id = r['particular_id']
+            if p_id and p_id in ledger_name_by_id:
+                acct = ledger_name_by_id[p_id]
+            else:
+                acct = resolve_ledger_name(r['particular_name'] or r['pnl_category'] or 'Livestock Purchase', 'Goat Purchases')
+            if acct not in expense_map:
+                expense_map[acct] = [0.0] * 12
+            expense_map[acct][m] += float(r['price'] or 0.0)
+        if r['tag_id']:
+            purchases_tags.add(str(r['tag_id']).strip())
+
+    master_purchases = db.execute(
+        "SELECT tag_no, purchase_date, purchase_amount FROM master_records WHERE purchase_date BETWEEN ? AND ? AND purchase_amount > 0",
+        (start_date, end_date)
+    ).fetchall()
+    for r in master_purchases:
+        if str(r['tag_no']).strip() not in purchases_tags:
+            m = get_month_idx(r['purchase_date'])
+            if m is not None:
+                acct = 'Goat Purchases'
+                if acct not in expense_map:
+                    expense_map[acct] = [0.0] * 12
+                expense_map[acct][m] += float(r['purchase_amount'] or 0.0)
+
+    # 2. Feed, Medicine, and Vaccine Purchases
+    for table, date_col, amt_col, fallback in [
+        ('feed_purchases',     'purchase_date', 'cost', 'Feed Purchases'),
+        ('medicine_purchases', 'purchase_date', 'cost', 'Medicine Purchases'),
+        ('vaccine_purchases',  'purchase_date', 'cost', 'Vaccine Purchases'),
+    ]:
+        p_rows = db.execute(
+            f"SELECT {date_col}, {amt_col}, particular_id, particular_name, pnl_category FROM {table} WHERE {date_col} BETWEEN ? AND ?",
+            (start_date, end_date)
+        ).fetchall()
+        for r in p_rows:
+            m = get_month_idx(r[date_col])
+            if m is not None:
+                p_id = r.get('particular_id')
+                if p_id and p_id in ledger_name_by_id:
+                    acct = ledger_name_by_id[p_id]
+                else:
+                    acct = resolve_ledger_name(r.get('particular_name') or r.get('pnl_category') or fallback, fallback)
+                if acct not in expense_map:
+                    expense_map[acct] = [0.0] * 12
+                expense_map[acct][m] += float(r[amt_col] or 0.0)
+
+    # 3. Equipment Purchases
+    equip_p = db.execute(
+        "SELECT purchase_date, purchase_cost, pnl_category FROM equipment WHERE purchase_date BETWEEN ? AND ?",
+        (start_date, end_date)
+    ).fetchall()
+    for r in equip_p:
+        m = get_month_idx(r['purchase_date'])
+        if m is not None:
+            acct = resolve_ledger_name(r['pnl_category'] or 'Equipment Purchases', 'Equipment Purchases')
+            if acct not in expense_map:
+                expense_map[acct] = [0.0] * 12
+            expense_map[acct][m] += float(r['purchase_cost'] or 0.0)
+
+    # 4. Other general vouchers
     ovs = db.execute("""
         SELECT ov.voucher_date, ov.particular_name, ov.amount, ov.pnl_category, ov.particular_id
         FROM other_vouchers ov
@@ -6241,7 +6310,6 @@ def pnl():
         if m is None:
             continue
         amt = float(ov['amount'] or 0.0)
-        # Resolve ledger account name: try particular_id first, then particular_name, then pnl_category
         p_id = ov['particular_id']
         if p_id and p_id in ledger_name_by_id:
             acct = ledger_name_by_id[p_id]
@@ -6456,12 +6524,20 @@ def api_pnl_drilldown():
             if category == 'All' or category in (g, l, p):
                 transactions.append({'date': r['date'], 'reference': f"Salary: {r['reference']}", 'detail': f"HR Payroll - paid via {r['detail']}", 'amount': r['amount'], 'category': l, 'type': 'expense'})
 
+        # 2. Goat purchases
+        rows = db.execute("SELECT id, seller_name AS detail, purchase_date AS date, price AS amount, pnl_category, tag_id, particular_id FROM purchases WHERE purchase_date BETWEEN ? AND ?", (from_date, to_date)).fetchall()
+        for r in rows:
+            r_cat = r['pnl_category'] or 'Purchase'
+            g, l, p = resolve_account_details(r['particular_id'], r_cat, 'Purchase', 'Goat Purchases')
+            if category == 'All' or category in (g, l, p):
+                transactions.append({'date': r['date'], 'reference': f"Goat: {r['tag_id']}", 'detail': f"Purchased from {r['detail']}", 'amount': r['amount'], 'category': l, 'type': 'expense'})
+
         # 3. Feed purchases
         rows = db.execute("SELECT id, supplier AS detail, purchase_date AS date, cost AS amount, pnl_category, feed_name, particular_id FROM feed_purchases WHERE purchase_date BETWEEN ? AND ?", (from_date, to_date)).fetchall()
         for r in rows:
             r_cat = r['pnl_category'] or 'Purchase'
             g, l, p = resolve_account_details(r['particular_id'], r_cat, 'Purchase', 'Feed Purchases')
-            if category == 'All' or category in (g, l, p) or (category == 'Cost of Goods Sold' and (g == 'Purchase' or l == 'Purchase')):
+            if category == 'All' or category in (g, l, p):
                 transactions.append({'date': r['date'], 'reference': f"Feed: {r['feed_name']}", 'detail': f"Supplier: {r['detail']}", 'amount': r['amount'], 'category': l, 'type': 'expense'})
             
         # 4. Medicine purchases
@@ -6469,7 +6545,7 @@ def api_pnl_drilldown():
         for r in rows:
             r_cat = r['pnl_category'] or 'Purchase'
             g, l, p = resolve_account_details(r['particular_id'], r_cat, 'Purchase', 'Medicine Purchases')
-            if category == 'All' or category in (g, l, p) or (category == 'Cost of Goods Sold' and (g == 'Purchase' or l == 'Purchase')):
+            if category == 'All' or category in (g, l, p):
                 transactions.append({'date': r['date'], 'reference': f"Med: {r['medicine_name']}", 'detail': f"Supplier: {r['detail']}", 'amount': r['amount'], 'category': l, 'type': 'expense'})
             
         # 5. Vaccine purchases
@@ -6477,7 +6553,7 @@ def api_pnl_drilldown():
         for r in rows:
             r_cat = r['pnl_category'] or 'Purchase'
             g, l, p = resolve_account_details(r['particular_id'], r_cat, 'Purchase', 'Vaccine Purchases')
-            if category == 'All' or category in (g, l, p) or (category == 'Cost of Goods Sold' and (g == 'Purchase' or l == 'Purchase')):
+            if category == 'All' or category in (g, l, p):
                 transactions.append({'date': r['date'], 'reference': f"Vac: {r['vaccine_name']}", 'detail': f"Supplier: {r['detail']}", 'amount': r['amount'], 'category': l, 'type': 'expense'})
             
         # 6. Equipment purchases
@@ -6485,7 +6561,7 @@ def api_pnl_drilldown():
         for r in rows:
             r_cat = r['pnl_category'] or 'Purchase'
             g, l, p = resolve_account_details(None, r_cat, 'Purchase', f"Asset: {r['detail']}")
-            if category == 'All' or category in (g, l, p) or (category == 'Cost of Goods Sold' and (g == 'Purchase' or l == 'Purchase')):
+            if category == 'All' or category in (g, l, p):
                 transactions.append({'date': r['date'], 'reference': f"Asset: {r['detail']}", 'detail': f"Asset Purchase", 'amount': r['amount'] or 0.0, 'category': l, 'type': 'expense'})
 
         # 7. Goat sales
