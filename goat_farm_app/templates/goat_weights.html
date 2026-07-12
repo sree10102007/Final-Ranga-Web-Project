@@ -300,17 +300,47 @@
         const rawText = document.getElementById('goat-weights-data').textContent;
         const data = JSON.parse(rawText);
         
-        let csv = "Tag Number,Breed,Gender,Status,Color,Age,Recorded Date,Weight (kg),Recorded By\n";
-        
+        // Find max weight records for any goat to build headers dynamically
+        let maxWeights = 0;
         data.forEach(function(g) {
-            const ageStr = g.age_str || 'N/A';
-            if (g.history && g.history.length > 0) {
-                g.history.forEach(function(h) {
-                    csv += `"${g.tag_no}","${g.breed}","${g.gender}","${g.status}","${g.color}","${ageStr}","${h.recorded_date}",${h.weight_kg},"${h.recorded_by}"\n`;
-                });
-            } else {
-                csv += `"${g.tag_no}","${g.breed}","${g.gender}","${g.status}","${g.color}","${ageStr}","",${g.current_weight || ''},"—"\n`;
+            const numWeights = g.history ? g.history.length : 0;
+            if (numWeights > maxWeights) {
+                maxWeights = numWeights;
             }
+        });
+        
+        // Build CSV Header
+        let csv = "Tag Number,Color";
+        for (let j = 1; j <= maxWeights; j++) {
+            csv += `,Weight ${j} (kg)`;
+        }
+        csv += "\n";
+        
+        // Build Rows
+        data.forEach(function(g) {
+            let row = `"${g.tag_no}","${g.color}"`;
+            
+            // Extract weights and sort them in increasing order
+            let weights = [];
+            if (g.history && g.history.length > 0) {
+                weights = g.history.map(function(h) {
+                    return parseFloat(h.weight_kg);
+                }).sort(function(a, b) {
+                    return a - b;
+                });
+            } else if (g.current_weight) {
+                weights = [parseFloat(g.current_weight)];
+            }
+            
+            // Append weights to row
+            for (let j = 0; j < maxWeights; j++) {
+                if (j < weights.length) {
+                    row += `,${weights[j]}`;
+                } else {
+                    row += ",";
+                }
+            }
+            csv += row + "\n";
         });
         
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
