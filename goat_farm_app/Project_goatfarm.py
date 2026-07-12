@@ -6219,48 +6219,9 @@ def pnl():
     total_income_monthly = [sum(r['monthly'][i] for r in income_rows) for i in range(12)]
     total_income_fy = sum(total_income_monthly)
 
-    # ── COGS / PURCHASES ─────────────────────────────────────────────────────────
+    # ── COGS / PURCHASES (Removed) ───────────────────────────────────────────────
     cogs_monthly = [0.0] * 12
-
-    for table, date_col, amt_col in [
-        ('feed_purchases',     'purchase_date', 'cost'),
-        ('medicine_purchases', 'purchase_date', 'cost'),
-        ('vaccine_purchases',  'purchase_date', 'cost'),
-    ]:
-        rows = db.execute(
-            f"SELECT {date_col}, {amt_col} FROM {table} WHERE {date_col} BETWEEN ? AND ?",
-            (start_date, end_date)
-        ).fetchall()
-        for r in rows:
-            m = get_month_idx(r[date_col])
-            if m is not None:
-                cogs_monthly[m] += float(r[amt_col] or 0.0)
-
-    equip_p = db.execute(
-        "SELECT purchase_date, purchase_cost FROM equipment WHERE purchase_date BETWEEN ? AND ?",
-        (start_date, end_date)
-    ).fetchall()
-    for r in equip_p:
-        m = get_month_idx(r['purchase_date'])
-        if m is not None:
-            cogs_monthly[m] += float(r['purchase_cost'] or 0.0)
-
-    # Apply stock valuation adjustment if toggled
-    for mi in range(1, 13):
-        m_start_s = f"{selected_year}-{mi:02d}-01"
-        last_day = calendar.monthrange(int(selected_year), mi)[1]
-        m_end_s = f"{selected_year}-{mi:02d}-{last_day:02d}"
-        prev_dt = datetime.strptime(m_start_s, '%Y-%m-%d') - timedelta(days=1)
-        m_opening = get_stock_val(prev_dt.strftime('%Y-%m-%d'))
-        m_closing = get_stock_val(m_end_s)
-        if include_stock == '1':
-            if mi == now.month and manual_opening != '':
-                m_opening = float(manual_opening)
-            if mi == now.month and manual_closing != '':
-                m_closing = float(manual_closing)
-            cogs_monthly[mi-1] = m_opening + cogs_monthly[mi-1] - m_closing
-
-    cogs_fy = sum(cogs_monthly)
+    cogs_fy = 0.0
     cogs_row = {'name': 'Cost of Goods Sold', 'monthly': cogs_monthly, 'full_year': cogs_fy}
 
     # ── EXPENSE SECTION ──────────────────────────────────────────────────────────

@@ -259,7 +259,7 @@
                 </thead>
                 <tbody>
                     {# Setup variables to balance the Debit and Credit accounts #}
-                    {% set cogs_len = 1 %}
+                    {% set cogs_len = 0 %}
                     {% set exp_len = expense_rows|length %}
                     {% set net_val = pnl_data.net_earnings.full_year %}
                     {% set has_profit = 1 if net_val >= 0 else 0 %}
@@ -277,24 +277,16 @@
                     {% for i in range(max_rows) %}
                         <tr>
                             {# ── DEBIT SIDE (Expenses) ── #}
-                            {% if i == 0 %}
-                                {# COGS/Goat Purchase #}
-                                <td class="col-particulars interactive-cell" onclick="viewDrilldown('{{ cogs_row.name }}')">
-                                    <span class="me-2"><i class="bi bi-cart-fill text-muted"></i></span> {{ cogs_row.name }}
-                                </td>
-                                <td class="col-amount border-center-divider">
-                                    {{ "%.2f"|format(cogs_row.full_year) }}
-                                </td>
-                            {% elif i > 0 and i <= exp_len %}
+                            {% if i < exp_len %}
                                 {# Expense Rows #}
-                                {% set exp_item = expense_rows[i - 1] %}
+                                {% set exp_item = expense_rows[i] %}
                                 <td class="col-particulars interactive-cell" onclick="viewDrilldown('{{ exp_item.name }}')">
                                     <span class="me-2"><i class="bi bi-folder-fill text-muted"></i></span> {{ exp_item.name }}
                                 </td>
                                 <td class="col-amount border-center-divider">
                                     {{ "%.2f"|format(exp_item.full_year) }}
                                 </td>
-                            {% elif i == exp_len + 1 and has_profit %}
+                            {% elif i == exp_len and has_profit %}
                                 {# Net Profit #}
                                 <td class="col-particulars text-success fw-bold">
                                     <span class="me-2"><i class="bi bi-plus-circle-fill text-success"></i></span> Net Profit c/o (to P&L A/C)
