@@ -6102,7 +6102,11 @@ def pnl():
         return redirect(url_for('auth.login'))
         
     db = get_db()
+    filter_type = request.args.get('filter_type') or request.form.get('filter_type') or 'yearly'
     selected_year = request.args.get('year') or request.form.get('year') or str(datetime.now().year)
+    selected_month = request.args.get('month') or request.form.get('month') or str(datetime.now().month)
+    custom_from = request.args.get('from_date') or request.form.get('from_date') or datetime.now().strftime('%Y-%m-%d')
+    custom_to = request.args.get('to_date') or request.form.get('to_date') or datetime.now().strftime('%Y-%m-%d')
     include_stock = '1' if ('include_stock' in request.form or request.args.get('include_stock') == '1') else '0'
     manual_opening = request.args.get('opening_stock', '') or request.form.get('opening_stock', '')
     manual_closing = request.args.get('closing_stock', '') or request.form.get('closing_stock', '')
@@ -6159,8 +6163,18 @@ def pnl():
         except Exception:
             return None
 
-    start_date = f"{selected_year}-01-01"
-    end_date   = f"{selected_year}-12-31"
+    if filter_type == 'yearly':
+        start_date = f"{selected_year}-01-01"
+        end_date   = f"{selected_year}-12-31"
+    elif filter_type == 'monthly':
+        m_int = int(selected_month)
+        y_int = int(selected_year)
+        last_day = calendar.monthrange(y_int, m_int)[1]
+        start_date = f"{y_int}-{m_int:02d}-01"
+        end_date   = f"{y_int}-{m_int:02d}-{last_day:02d}"
+    else:
+        start_date = custom_from
+        end_date = custom_to
     now = datetime.now()
 
     # ── INCOME SECTION ───────────────────────────────────────────────────────────
@@ -6209,6 +6223,22 @@ def pnl():
         if acct not in income_map:
             income_map[acct] = [0.0] * 12
         income_map[acct][m] += float(s['total_amount'] or 0.0)
+
+    # Insurance Claims
+    insurance_claims = db.execute('''
+        SELECT COALESCE(insurance_claim_date, mortality_date) AS claim_date, insurance_claim_amount 
+        FROM master_records 
+        WHERE status = 'Expired' AND insurance_claim_amount > 0 
+        AND COALESCE(insurance_claim_date, mortality_date) BETWEEN ? AND ?
+    ''', (start_date, end_date)).fetchall()
+    for ic in insurance_claims:
+        m = get_month_idx(ic['claim_date'])
+        if m is None:
+            continue
+        acct = 'Insurance Claim'
+        if acct not in income_map:
+            income_map[acct] = [0.0] * 12
+        income_map[acct][m] += float(ic['insurance_claim_amount'] or 0.0)
 
     income_rows = []
     for name, monthly in sorted(income_map.items()):
@@ -6359,11 +6389,15 @@ def pnl():
 
     return render_template('pnl.html',
                            selected_year=selected_year,
+                           filter_type=filter_type,
+                           selected_month=int(selected_month),
+                           custom_from=custom_from,
+                           custom_to=custom_to,
                            include_stock=(include_stock == '1'),
                            manual_opening=manual_opening,
                            manual_closing=manual_closing,
-                           computed_opening=get_stock_val(f"{selected_year}-01-01"),
-                           computed_closing=get_stock_val(f"{selected_year}-12-31"),
+                           computed_opening=get_stock_val(start_date),
+                           computed_closing=get_stock_val(end_date),
                            months_headers=months_headers,
                            pnl_data=pnl_data,
                            income_rows=income_rows,
@@ -6583,6 +6617,27 @@ def api_pnl_drilldown():
                 g = 'Sales'
             if category == 'All' or category in (g, l, p):
                 transactions.append({'date': r['date'], 'reference': r['reference'], 'detail': f"Sold to {r['buyer_name']} - {r['notes'] or ''}", 'amount': r['amount'], 'category': l, 'type': 'income'})
+
+        # 8b. Insurance claims
+        rows = db.execute('''
+            SELECT tag_no AS reference, COALESCE(insurance_claim_date, mortality_date) AS date, insurance_claim_amount AS amount 
+            FROM master_records 
+            WHERE status = 'Expired' AND insurance_claim_amount > 0 
+            AND COALESCE(insurance_claim_date, mortality_date) BETWEEN ? AND ?
+        ''', (from_date, to_date)).fetchall()
+        for r in rows:
+            g, l, p = resolve_account_details(None, 'Insurance Claim', 'Insurance Claim', 'Insurance Claim')
+            if g == 'Direct Expenses' or g not in ledger_groups_dict:
+                g = 'Indirect Income'
+            if category == 'All' or category in (g, l, p):
+                transactions.append({
+                    'date': r['date'],
+                    'reference': f"Goat: {r['reference']}",
+                    'detail': f"Insurance Claim for Expired Goat",
+                    'amount': r['amount'],
+                    'category': l,
+                    'type': 'income'
+                })
 
         # 9. Expenses
         rows = db.execute("SELECT id, date, category AS reference, description AS detail, amount, pnl_category, particular_id FROM expenses WHERE status IN ('Approved', 'Paid') AND date BETWEEN ? AND ? ORDER BY date DESC", (from_date, to_date)).fetchall()
@@ -6941,24 +6996,6 @@ def goat_weights():
                 INSERT INTO goat_weights (goat_tag_no, weight, unit, recorded_date, recorded_by)
                 VALUES (?, ?, 'kg', ?, 'system')
             ''', (g['tag_no'], g['weight_kg'], baseline_date))
-        elif len(weight_records) == 1 and weight_records[0]['recorded_by'] != 'system':
-            # Create a baseline record 30 days prior to the user's record so they have a starting point and see weight gain
-            user_record = weight_records[0]
-            u_date = user_record['recorded_date']
-            if isinstance(u_date, str):
-                try:
-                    from datetime import date
-                    u_date = datetime.strptime(u_date, '%Y-%m-%d').date()
-                except ValueError:
-                    u_date = datetime.now().date()
-            
-            baseline_date = (u_date - timedelta(days=30)).strftime('%Y-%m-%d')
-            baseline_weight = max(1.0, float(user_record['weight']) - 2.0)  # assume 2kg gain since baseline
-            db.execute('''
-                INSERT INTO goat_weights (goat_tag_no, weight, unit, recorded_date, recorded_by)
-                VALUES (?, ?, 'kg', ?, 'system')
-            ''', (g['tag_no'], baseline_weight, baseline_date))
-            
     db.commit()
 
     # Get filter/search parameters

@@ -106,32 +106,35 @@
                                             </div>
                                         </div>
                                     </div>
+                                {% else %}
                                     <!-- Other Item Row in Edit mode -->
                                     <div class="card border border-primary-subtle rounded-3 p-3 mb-3 item-row position-relative bg-light bg-opacity-25">
                                         <button type="button" class="btn btn-sm btn-outline-danger position-absolute top-0 end-0 m-2 remove-row-btn" data-onclick="removeRow(this)">
                                             <i class="bi bi-trash"></i> Remove
                                         </button>
                                         <div class="row g-3">
-                                            <div class="col-md-4 col-12">
+                                            <div class="col-md-6 col-12">
                                                 <label class="form-label text-muted small fw-bold">ITEM DESCRIPTION *</label>
                                                 <input type="text" class="form-control border-success field-item-name" name="item_name" required placeholder="e.g. Goat Litter Manure" value="{{ item.item_name }}">
                                             </div>
-                                            <div class="col-md-2 col-sm-3 col-6">
+                                            <div class="col-md-3 col-sm-6 col-6">
                                                 <label class="form-label text-muted small fw-bold">QUANTITY *</label>
                                                 <input type="number" step="0.01" class="form-control border-success qty-input" name="quantity" required placeholder="0.0" value="{{ item.quantity }}" data-oninput="recalcRowTotal(this)">
                                             </div>
-                                            <div class="col-md-2 col-sm-3 col-6">
+                                            <div class="col-md-3 col-sm-6 col-6">
                                                 <label class="form-label text-muted small fw-bold">Units *</label>
                                                 <input type="text" class="form-control border-success field-unit" name="unit" required placeholder="e.g. Bags" value="{{ item.unit }}">
                                             </div>
-                                            <div class="col-md-2 col-sm-3 col-6">
+                                        </div>
+                                        <div class="row g-3 mt-1">
+                                            <div class="col-md-6 col-sm-6 col-6">
                                                 <label class="form-label text-muted small fw-bold">Per Unit Rs *</label>
                                                 <div class="input-group">
                                                     <span class="input-group-text bg-light border-success">₹</span>
                                                     <input type="number" step="0.01" class="form-control border-success price-input" name="price_per_unit" required placeholder="0.00" value="{{ item.price_per_unit }}" data-oninput="recalcRowTotal(this)">
                                                 </div>
                                             </div>
-                                            <div class="col-md-2 col-sm-3 col-6">
+                                            <div class="col-md-6 col-sm-6 col-6">
                                                 <label class="form-label text-muted small fw-bold">TOTAL AMOUNT</label>
                                                 <div class="input-group">
                                                     <span class="input-group-text bg-light border-success">₹</span>
@@ -196,26 +199,28 @@
                                         <i class="bi bi-trash"></i> Remove
                                     </button>
                                     <div class="row g-3">
-                                        <div class="col-md-4 col-12">
+                                        <div class="col-md-6 col-12">
                                             <label class="form-label text-muted small fw-bold">ITEM DESCRIPTION *</label>
                                             <input type="text" class="form-control border-success field-item-name" name="item_name" required placeholder="e.g. Goat Litter Manure">
                                         </div>
-                                        <div class="col-md-2 col-sm-3 col-6">
+                                        <div class="col-md-3 col-sm-6 col-6">
                                             <label class="form-label text-muted small fw-bold">QUANTITY *</label>
                                             <input type="number" step="0.01" class="form-control border-success qty-input" name="quantity" required placeholder="0.0" data-oninput="recalcRowTotal(this)">
                                         </div>
-                                        <div class="col-md-2 col-sm-3 col-6">
+                                        <div class="col-md-3 col-sm-6 col-6">
                                             <label class="form-label text-muted small fw-bold">Units *</label>
                                             <input type="text" class="form-control border-success field-unit" name="unit" required placeholder="e.g. Bags">
                                         </div>
-                                        <div class="col-md-2 col-sm-3 col-6">
+                                    </div>
+                                    <div class="row g-3 mt-1">
+                                        <div class="col-md-6 col-sm-6 col-6">
                                             <label class="form-label text-muted small fw-bold">Per Unit Rs *</label>
                                             <div class="input-group">
                                                 <span class="input-group-text bg-light border-success">₹</span>
                                                 <input type="number" step="0.01" class="form-control border-success price-input" name="price_per_unit" required placeholder="0.00" data-oninput="recalcRowTotal(this)">
                                             </div>
                                         </div>
-                                        <div class="col-md-2 col-sm-3 col-6">
+                                        <div class="col-md-6 col-sm-6 col-6">
                                             <label class="form-label text-muted small fw-bold">TOTAL AMOUNT</label>
                                             <div class="input-group">
                                                 <span class="input-group-text bg-light border-success">₹</span>
@@ -335,26 +340,28 @@ const otherRowTemplate = `
         <i class="bi bi-trash"></i> Remove
     </button>
     <div class="row g-3">
-        <div class="col-md-4 col-12">
+        <div class="col-md-6 col-12">
             <label class="form-label text-muted small fw-bold">ITEM DESCRIPTION *</label>
             <input type="text" class="form-control border-success field-item-name" name="item_name" required placeholder="e.g. Goat Litter Manure">
         </div>
-        <div class="col-md-2 col-sm-3 col-6">
+        <div class="col-md-3 col-sm-6 col-6">
             <label class="form-label text-muted small fw-bold">QUANTITY *</label>
             <input type="number" step="0.01" class="form-control border-success qty-input" name="quantity" required placeholder="0.0" data-oninput="recalcRowTotal(this)">
         </div>
-        <div class="col-md-2 col-sm-3 col-6">
+        <div class="col-md-3 col-sm-6 col-6">
             <label class="form-label text-muted small fw-bold">Units *</label>
             <input type="text" class="form-control border-success field-unit" name="unit" required placeholder="e.g. Bags">
         </div>
-        <div class="col-md-2 col-sm-3 col-6">
+    </div>
+    <div class="row g-3 mt-1">
+        <div class="col-md-6 col-sm-6 col-6">
             <label class="form-label text-muted small fw-bold">Per Unit Rs *</label>
             <div class="input-group">
                 <span class="input-group-text bg-light border-success">₹</span>
                 <input type="number" step="0.01" class="form-control border-success price-input" name="price_per_unit" required placeholder="0.00" data-oninput="recalcRowTotal(this)">
             </div>
         </div>
-        <div class="col-md-2 col-sm-3 col-6">
+        <div class="col-md-6 col-sm-6 col-6">
             <label class="form-label text-muted small fw-bold">TOTAL AMOUNT</label>
             <div class="input-group">
                 <span class="input-group-text bg-light border-success">₹</span>

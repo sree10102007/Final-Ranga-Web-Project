@@ -300,46 +300,54 @@
         const rawText = document.getElementById('goat-weights-data').textContent;
         const data = JSON.parse(rawText);
         
-        // Find max weight records for any goat to build headers dynamically
-        let maxWeights = 0;
+        // Collect all unique dates across all goats
+        let uniqueDates = [];
         data.forEach(function(g) {
-            const numWeights = g.history ? g.history.length : 0;
-            if (numWeights > maxWeights) {
-                maxWeights = numWeights;
+            if (g.history) {
+                g.history.forEach(function(h) {
+                    if (h.recorded_date && !uniqueDates.includes(h.recorded_date)) {
+                        uniqueDates.push(h.recorded_date);
+                    }
+                });
             }
+        });
+        
+        // Sort dates chronologically
+        uniqueDates.sort(function(a, b) {
+            return new Date(a) - new Date(b);
         });
         
         // Build CSV Header
         let csv = "Tag Number,Color";
-        for (let j = 1; j <= maxWeights; j++) {
-            csv += `,Weight ${j} (kg)`;
-        }
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        uniqueDates.forEach(function(dateStr, idx) {
+            const d = new Date(dateStr);
+            const day = String(d.getDate()).padStart(2, '0');
+            const month = months[d.getMonth()];
+            const year = d.getFullYear();
+            csv += `,${day} ${month} ${year} - ${idx + 1}`;
+        });
         csv += "\n";
         
         // Build Rows
         data.forEach(function(g) {
             let row = `"${g.tag_no}","${g.color}"`;
             
-            // Extract weights and sort them in increasing order
-            let weights = [];
-            if (g.history && g.history.length > 0) {
-                weights = g.history.map(function(h) {
-                    return parseFloat(h.weight_kg);
-                }).sort(function(a, b) {
-                    return a - b;
+            // Map of date -> weight
+            let dateWeightMap = {};
+            if (g.history) {
+                g.history.forEach(function(h) {
+                    dateWeightMap[h.recorded_date] = h.weight_kg;
                 });
-            } else if (g.current_weight) {
-                weights = [parseFloat(g.current_weight)];
             }
             
-            // Append weights to row
-            for (let j = 0; j < maxWeights; j++) {
-                if (j < weights.length) {
-                    row += `,${weights[j]}`;
+            uniqueDates.forEach(function(dateStr) {
+                if (dateWeightMap[dateStr] !== undefined) {
+                    row += `,${dateWeightMap[dateStr]}`;
                 } else {
                     row += ",";
                 }
-            }
+            });
             csv += row + "\n";
         });
         

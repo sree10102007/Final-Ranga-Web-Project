@@ -166,71 +166,98 @@
     <!-- Filter Controls Toolbar -->
     <div class="row mb-4 d-print-none">
         <div class="col-12">
-            <form method="POST" action="{{ url_for('pnl') }}" class="pnl-card p-3 bg-white">
-                <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
-                    <div class="d-flex align-items-center gap-2 flex-wrap">
-                        <span class="small fw-bold text-dark text-uppercase ms-2">Year:</span>
-                        <select name="year" id="yearFilter" class="form-select form-select-sm rounded-pill text-dark px-3" style="min-width: 110px;">
+            <form method="POST" action="{{ url_for('pnl') }}" class="pnl-card p-4 bg-white shadow-sm rounded-3">
+                <!-- Filter Type Row -->
+                <div class="row g-3 align-items-center mb-3">
+                    <div class="col-md-3 col-12">
+                        <label class="form-label small fw-bold text-uppercase text-muted mb-1">Filter Type</label>
+                        <select name="filter_type" id="filterTypeSelect" class="form-select form-select-sm rounded-pill text-dark px-3">
+                            <option value="yearly" {% if filter_type == 'yearly' %}selected{% endif %}>Yearly</option>
+                            <option value="monthly" {% if filter_type == 'monthly' %}selected{% endif %}>Monthly</option>
+                            <option value="custom" {% if filter_type == 'custom' %}selected{% endif %}>Custom Date / Single Day</option>
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-3 col-6 filter-group" id="yearGroup">
+                        <label class="form-label small fw-bold text-uppercase text-muted mb-1">Year</label>
+                        <select name="year" id="yearFilter" class="form-select form-select-sm rounded-pill text-dark px-3">
                             {% for y in range(2024, 2061) %}
                                 <option value="{{ y }}" {% if selected_year == y|string %}selected{% endif %}>{{ y }}</option>
                             {% endfor %}
                         </select>
                     </div>
 
-                    <div class="d-flex flex-wrap align-items-center gap-3">
+                    <div class="col-md-3 col-6 filter-group" id="monthGroup" style="display: none;">
+                        <label class="form-label small fw-bold text-uppercase text-muted mb-1">Month</label>
+                        <select name="month" id="monthFilter" class="form-select form-select-sm rounded-pill text-dark px-3">
+                            {% for m_num, m_name in [
+                                (1, 'January'), (2, 'February'), (3, 'March'), (4, 'April'),
+                                (5, 'May'), (6, 'June'), (7, 'July'), (8, 'August'),
+                                (9, 'September'), (10, 'October'), (11, 'November'), (12, 'December')
+                            ] %}
+                                <option value="{{ m_num }}" {% if selected_month == m_num %}selected{% endif %}>{{ m_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-3 col-6 filter-group" id="fromDateGroup" style="display: none;">
+                        <label class="form-label small fw-bold text-uppercase text-muted mb-1">From Date</label>
+                        <input type="date" name="from_date" id="fromDateInput" class="form-control form-control-sm rounded-pill text-dark px-3" value="{{ custom_from }}">
+                    </div>
+
+                    <div class="col-md-3 col-6 filter-group" id="toDateGroup" style="display: none;">
+                        <label class="form-label small fw-bold text-uppercase text-muted mb-1">To Date</label>
+                        <input type="date" name="to_date" id="toDateInput" class="form-control form-control-sm rounded-pill text-dark px-3" value="{{ custom_to }}">
+                    </div>
+
+                    <div class="col-md-3 col-12 d-flex align-items-center mt-md-4 mt-3">
                         <div class="form-check form-switch mb-0 d-flex align-items-center gap-2">
                             <input class="form-check-input cursor-pointer" style="width: 2.2em; height: 1.1em;" type="checkbox" name="include_stock" id="includeStock" {% if include_stock %}checked{% endif %}>
                             <label class="form-check-label small fw-bold text-muted cursor-pointer mb-0" for="includeStock">Stock Valuation</label>
                         </div>
-
-                        <button class="btn btn-sm btn-outline-secondary rounded-pill px-3 fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#stockOverrides" title="Manual Stock Valuation">
-                            <i class="bi bi-sliders me-1"></i> Stock Valuation
-                        </button>
-                        <button id="detailedLedgerBtn" class="btn btn-sm btn-info rounded-pill px-3 fw-bold text-white shadow-sm" type="button" title="View Detailed General Ledger">
-                            <i class="bi bi-list-task me-1"></i> Detailed Ledger
-                        </button>
-                        <button class="btn btn-sm btn-success rounded-pill px-3 fw-bold shadow-sm" type="submit">
-                            <i class="bi bi-funnel me-1"></i> Apply Filter
-                        </button>
-                        <button id="printBtn" class="btn btn-sm btn-primary rounded-pill px-3 fw-bold shadow-sm" type="button">
-                            <i class="bi bi-printer me-1"></i> Print
-                        </button>
-                        <a href="{{ url_for('expenses_master') }}" class="btn btn-sm btn-outline-dark rounded-pill px-3 fw-bold">
-                            <i class="bi bi-currency-rupee me-1"></i> Expenses Master
-                        </a>
                     </div>
                 </div>
-            </form>
-        </div>
-    </div>
 
-    <!-- Manual Stock Overrides Collapse -->
-    <div class="collapse mb-4 d-print-none" id="stockOverrides">
-        <div class="pnl-card bg-light border-0">
-            <div class="card-body p-4">
-                <h6 class="fw-bold mb-3 text-dark"><i class="bi bi-sliders me-2 text-success"></i>Stock Valuation & Overrides</h6>
-                <form method="POST" action="{{ url_for('pnl') }}" class="row g-3">
-                    <input type="hidden" name="year" value="{{ selected_year }}">
-                    <input type="hidden" name="include_stock" value="1">
-                    <div class="col-md-6">
-                        <label class="form-label small fw-bold">Opening Stock Valuation (₹)</label>
+                <!-- Stock Valuation Inputs Row -->
+                <div class="row g-3 align-items-center border-top pt-3 mt-2" id="stockInputsContainer" {% if not include_stock %}style="display: none;"{% endif %}>
+                    <div class="col-md-6 col-12">
+                        <label class="form-label small fw-bold text-uppercase text-muted mb-1">Opening Stock Valuation (₹)</label>
                         <div class="input-group input-group-sm">
-                            <span class="input-group-text">₹</span>
+                            <span class="input-group-text bg-light text-dark">₹</span>
                             <input type="number" step="0.01" name="opening_stock" class="form-control" placeholder="{{ '%.2f'|format(computed_opening) }}" value="{{ manual_opening }}">
                         </div>
                     </div>
-                    <div class="col-md-6">
-                        <label class="form-label small fw-bold">Closing Stock Valuation (₹)</label>
+                    <div class="col-md-6 col-12">
+                        <label class="form-label small fw-bold text-uppercase text-muted mb-1">Closing Stock Valuation (₹)</label>
                         <div class="input-group input-group-sm">
-                            <span class="input-group-text">₹</span>
+                            <span class="input-group-text bg-light text-dark">₹</span>
                             <input type="number" step="0.01" name="closing_stock" class="form-control" placeholder="{{ '%.2f'|format(computed_closing) }}" value="{{ manual_closing }}">
                         </div>
                     </div>
-                    <div class="col-12 text-end mt-3">
-                        <button type="submit" class="btn btn-sm btn-success rounded-pill px-4 fw-bold">Save Overrides</button>
+                </div>
+
+                <!-- Actions Row -->
+                <div class="row g-3 align-items-center border-top pt-3 mt-3">
+                    <div class="col-12 d-flex flex-wrap align-items-center justify-content-between gap-2">
+                        <div>
+                            <button id="detailedLedgerBtn" class="btn btn-sm btn-info rounded-pill px-3 fw-bold text-white shadow-sm" type="button" title="View Detailed General Ledger">
+                                <i class="bi bi-list-task me-1"></i> Detailed Ledger
+                            </button>
+                            <a href="{{ url_for('expenses_master') }}" class="btn btn-sm btn-outline-dark rounded-pill px-3 fw-bold">
+                                <i class="bi bi-currency-rupee me-1"></i> Expenses Master
+                            </a>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button id="printBtn" class="btn btn-sm btn-primary rounded-pill px-3 fw-bold shadow-sm" type="button">
+                                <i class="bi bi-printer me-1"></i> Print
+                            </button>
+                            <button class="btn btn-sm btn-success rounded-pill px-4 fw-bold shadow-sm" type="submit">
+                                <i class="bi bi-funnel me-1"></i> Apply Filter & Stock
+                            </button>
+                        </div>
                     </div>
-                </form>
-            </div>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -243,7 +270,7 @@
                 <div class="brand-header-subtitle">PROFIT & LOSS A/C</div>
             </div>
             <div class="brand-header-badge">
-                Period: Full Year
+                Period: {{ from_date }} to {{ to_date }}
             </div>
         </div>
 
@@ -399,12 +426,51 @@
 
 <script nonce="{{ csp_nonce }}">
 document.addEventListener("DOMContentLoaded", function() {
-    // Toggle manual stock valuation change
+    // Toggle manual stock valuation inputs visibility
     const includeStock = document.getElementById('includeStock');
-    if (includeStock) {
+    const stockInputsContainer = document.getElementById('stockInputsContainer');
+    if (includeStock && stockInputsContainer) {
         includeStock.addEventListener('change', function() {
-            this.form.submit();
+            if (this.checked) {
+                stockInputsContainer.style.display = 'flex';
+            } else {
+                stockInputsContainer.style.display = 'none';
+            }
         });
+    }
+
+    // Toggle filter inputs visibility based on Filter Type selection
+    const filterTypeSelect = document.getElementById('filterTypeSelect');
+    const yearGroup = document.getElementById('yearGroup');
+    const monthGroup = document.getElementById('monthGroup');
+    const fromDateGroup = document.getElementById('fromDateGroup');
+    const toDateGroup = document.getElementById('toDateGroup');
+
+    function updateFilterInputsVisibility() {
+        if (!filterTypeSelect) return;
+        const val = filterTypeSelect.value;
+        if (val === 'yearly') {
+            if (yearGroup) yearGroup.style.display = 'block';
+            if (monthGroup) monthGroup.style.display = 'none';
+            if (fromDateGroup) fromDateGroup.style.display = 'none';
+            if (toDateGroup) toDateGroup.style.display = 'none';
+        } else if (val === 'monthly') {
+            if (yearGroup) yearGroup.style.display = 'block';
+            if (monthGroup) monthGroup.style.display = 'block';
+            if (fromDateGroup) fromDateGroup.style.display = 'none';
+            if (toDateGroup) toDateGroup.style.display = 'none';
+        } else if (val === 'custom') {
+            if (yearGroup) yearGroup.style.display = 'none';
+            if (monthGroup) monthGroup.style.display = 'none';
+            if (fromDateGroup) fromDateGroup.style.display = 'block';
+            if (toDateGroup) toDateGroup.style.display = 'block';
+        }
+    }
+
+    if (filterTypeSelect) {
+        filterTypeSelect.addEventListener('change', updateFilterInputsVisibility);
+        // run on page load
+        updateFilterInputsVisibility();
     }
 
     // Print Button

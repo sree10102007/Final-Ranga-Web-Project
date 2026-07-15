@@ -1,4 +1,4 @@
-﻿import sys
+import sys
 import os
 
 # Add parent directory so goat_farm_app package is importable
@@ -166,7 +166,7 @@ class TestGoatWeights(unittest.TestCase):
             {'tag_no': 'TEST-GOAT-01', 'status': 'Active', 'weight_kg': 15.0}
         ]
         self.mock_conn.execute.return_value.fetchone.side_effect = [
-            [1], # count query returns 1
+            {'cnt': 1}, # count query returns 1
             {'weight': 15.0, 'unit': 'kg', 'recorded_date': '2026-07-06'} # latest_row query
         ]
         response = self.client.get('/goats/weights/summary')
