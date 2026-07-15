@@ -6224,12 +6224,21 @@ def pnl():
             income_map[acct] = [0.0] * 12
         income_map[acct][m] += float(s['total_amount'] or 0.0)
 
-    # Insurance Claims
+    # Insurance Claims (Union of master_records and mortality_records to capture all claims)
     insurance_claims = db.execute('''
-        SELECT COALESCE(insurance_claim_date, expired_date) AS claim_date, claim_amount 
-        FROM mortality_records 
-        WHERE claim_amount > 0 
-        AND COALESCE(insurance_claim_date, expired_date) BETWEEN ? AND ?
+        WITH AllClaims AS (
+            SELECT tag_no, COALESCE(insurance_claim_date, mortality_date, purchase_date, '2026-01-01') AS claim_date, insurance_claim_amount AS amount
+            FROM master_records
+            WHERE LOWER(status) IN ('expired', 'dead') AND insurance_claim_amount > 0
+            UNION
+            SELECT tag_id AS tag_no, COALESCE(insurance_claim_date, expired_date, '2026-01-01') AS claim_date, claim_amount AS amount
+            FROM mortality_records
+            WHERE claim_amount > 0
+        )
+        SELECT claim_date, MAX(amount) AS amount
+        FROM AllClaims
+        WHERE claim_date BETWEEN ? AND ?
+        GROUP BY tag_no, claim_date
     ''', (start_date, end_date)).fetchall()
     for ic in insurance_claims:
         m = get_month_idx(ic['claim_date'])
@@ -6238,7 +6247,7 @@ def pnl():
         acct = 'Insurance Claim'
         if acct not in income_map:
             income_map[acct] = [0.0] * 12
-        income_map[acct][m] += float(ic['claim_amount'] or 0.0)
+        income_map[acct][m] += float(ic['amount'] or 0.0)
 
     income_rows = []
     for name, monthly in sorted(income_map.items()):
@@ -6620,10 +6629,19 @@ def api_pnl_drilldown():
 
         # 8b. Insurance claims
         rows = db.execute('''
-            SELECT tag_id AS reference, COALESCE(insurance_claim_date, expired_date) AS date, claim_amount AS amount 
-            FROM mortality_records 
-            WHERE claim_amount > 0 
-            AND COALESCE(insurance_claim_date, expired_date) BETWEEN ? AND ?
+            WITH AllClaims AS (
+                SELECT tag_no, COALESCE(insurance_claim_date, mortality_date, purchase_date, '2026-01-01') AS claim_date, insurance_claim_amount AS amount
+                FROM master_records
+                WHERE LOWER(status) IN ('expired', 'dead') AND insurance_claim_amount > 0
+                UNION
+                SELECT tag_id AS tag_no, COALESCE(insurance_claim_date, expired_date, '2026-01-01') AS claim_date, claim_amount AS amount
+                FROM mortality_records
+                WHERE claim_amount > 0
+            )
+            SELECT tag_no AS reference, claim_date AS date, MAX(amount) AS amount
+            FROM AllClaims
+            WHERE claim_date BETWEEN ? AND ?
+            GROUP BY tag_no, claim_date
         ''', (from_date, to_date)).fetchall()
         for r in rows:
             g, l, p = resolve_account_details(None, 'Insurance Claim', 'Insurance Claim', 'Insurance Claim')
