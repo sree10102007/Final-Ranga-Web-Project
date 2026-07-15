@@ -6226,10 +6226,10 @@ def pnl():
 
     # Insurance Claims
     insurance_claims = db.execute('''
-        SELECT COALESCE(insurance_claim_date, mortality_date) AS claim_date, insurance_claim_amount 
-        FROM master_records 
-        WHERE status = 'Expired' AND insurance_claim_amount > 0 
-        AND COALESCE(insurance_claim_date, mortality_date) BETWEEN ? AND ?
+        SELECT COALESCE(insurance_claim_date, expired_date) AS claim_date, claim_amount 
+        FROM mortality_records 
+        WHERE claim_amount > 0 
+        AND COALESCE(insurance_claim_date, expired_date) BETWEEN ? AND ?
     ''', (start_date, end_date)).fetchall()
     for ic in insurance_claims:
         m = get_month_idx(ic['claim_date'])
@@ -6238,7 +6238,7 @@ def pnl():
         acct = 'Insurance Claim'
         if acct not in income_map:
             income_map[acct] = [0.0] * 12
-        income_map[acct][m] += float(ic['insurance_claim_amount'] or 0.0)
+        income_map[acct][m] += float(ic['claim_amount'] or 0.0)
 
     income_rows = []
     for name, monthly in sorted(income_map.items()):
@@ -6620,10 +6620,10 @@ def api_pnl_drilldown():
 
         # 8b. Insurance claims
         rows = db.execute('''
-            SELECT tag_no AS reference, COALESCE(insurance_claim_date, mortality_date) AS date, insurance_claim_amount AS amount 
-            FROM master_records 
-            WHERE status = 'Expired' AND insurance_claim_amount > 0 
-            AND COALESCE(insurance_claim_date, mortality_date) BETWEEN ? AND ?
+            SELECT tag_id AS reference, COALESCE(insurance_claim_date, expired_date) AS date, claim_amount AS amount 
+            FROM mortality_records 
+            WHERE claim_amount > 0 
+            AND COALESCE(insurance_claim_date, expired_date) BETWEEN ? AND ?
         ''', (from_date, to_date)).fetchall()
         for r in rows:
             g, l, p = resolve_account_details(None, 'Insurance Claim', 'Insurance Claim', 'Insurance Claim')
@@ -6972,30 +6972,8 @@ def goat_weights():
 
     db = get_db()
 
-    # Backfill: for existing active/sold/etc. goats that have a weight but no log entry yet,
-    # create a single baseline entry in goat_weights so they appear in the report.
-    existing_goats = db.execute(
-        "SELECT tag_no, weight_kg, purchase_date, dob FROM master_records WHERE weight_kg IS NOT NULL AND weight_kg > 0"
-    ).fetchall()
-    for g in existing_goats:
-        # Check if we have any records for this goat
-        weight_records = db.execute(
-            "SELECT id, recorded_by, weight, recorded_date FROM goat_weights WHERE goat_tag_no = ? ORDER BY recorded_date ASC, id ASC", 
-            (g['tag_no'],)
-        ).fetchall()
-        
-        if not weight_records:
-            baseline_date = g['purchase_date'] or g['dob'] or (datetime.now() - timedelta(days=30))
-            if hasattr(baseline_date, 'strftime'):
-                baseline_date = baseline_date.strftime('%Y-%m-%d')
-            elif isinstance(baseline_date, str):
-                pass
-            else:
-                baseline_date = datetime.now().strftime('%Y-%m-%d')
-            db.execute('''
-                INSERT INTO goat_weights (goat_tag_no, weight, unit, recorded_date, recorded_by)
-                VALUES (?, ?, 'kg', ?, 'system')
-            ''', (g['tag_no'], g['weight_kg'], baseline_date))
+    # Purge any existing baseline backfill entries from database to ensure no fake "+2.0 kg" gains exist
+    db.execute("DELETE FROM goat_weights WHERE recorded_by = 'system'")
     db.commit()
 
     # Get filter/search parameters
