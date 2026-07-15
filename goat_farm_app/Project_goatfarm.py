@@ -6229,7 +6229,7 @@ def pnl():
         WITH AllClaims AS (
             SELECT tag_no, COALESCE(insurance_claim_date, mortality_date, purchase_date, '2026-01-01') AS claim_date, insurance_claim_amount AS amount
             FROM master_records
-            WHERE LOWER(status) IN ('expired', 'dead') AND insurance_claim_amount > 0
+            WHERE insurance_claim_amount > 0
             UNION
             SELECT tag_id AS tag_no, COALESCE(insurance_claim_date, expired_date, '2026-01-01') AS claim_date, claim_amount AS amount
             FROM mortality_records
@@ -6632,7 +6632,7 @@ def api_pnl_drilldown():
             WITH AllClaims AS (
                 SELECT tag_no, COALESCE(insurance_claim_date, mortality_date, purchase_date, '2026-01-01') AS claim_date, insurance_claim_amount AS amount
                 FROM master_records
-                WHERE LOWER(status) IN ('expired', 'dead') AND insurance_claim_amount > 0
+                WHERE insurance_claim_amount > 0
                 UNION
                 SELECT tag_id AS tag_no, COALESCE(insurance_claim_date, expired_date, '2026-01-01') AS claim_date, claim_amount AS amount
                 FROM mortality_records
