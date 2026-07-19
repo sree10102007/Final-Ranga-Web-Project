@@ -25,6 +25,7 @@
 
     <!-- Attendance Form Sheet -->
     <form method="POST" action="{{ url_for('attendance_save') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <!-- Hidden input for date so it submits for the selected date -->
         <input type="hidden" name="date" value="{{ date_filter }}">
         

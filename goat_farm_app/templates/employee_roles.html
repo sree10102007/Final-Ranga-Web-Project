@@ -24,6 +24,7 @@
             <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white p-4">
                 <h4 class="fw-700 text-dark mb-3"><i class="bi bi-plus-circle text-success me-2"></i>Add Custom Role</h4>
                 <form method="POST" action="{{ url_for('employee_roles') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <div class="mb-3">
                         <label class="form-label fw-semibold small text-uppercase text-muted" for="role_name">Role Name <span class="text-danger">*</span></label>
                         <input type="text" class="form-control rounded-3 text-dark border-light px-3 py-2" id="role_name" name="role_name" placeholder="e.g. Supervisor, Cleaner" required>
