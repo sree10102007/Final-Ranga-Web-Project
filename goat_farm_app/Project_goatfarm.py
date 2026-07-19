@@ -5104,7 +5104,15 @@ def init_employee_tables():
 
 with app.app_context():
     if not db_connection_error:
-        init_employee@app.route('/employee_add', methods=['GET', 'POST'])
+        init_employee_tables()
+
+@app.route('/employees')
+def employees():
+    db = get_db()
+    records = db.execute('SELECT * FROM employees ORDER BY CAST(sr_no AS INTEGER) ASC').fetchall()
+    return render_template('employees.html', records=records)
+
+@app.route('/employee_add', methods=['GET', 'POST'])
 def employee_add():
     db = get_db()
     roles = db.execute("SELECT role_name FROM employee_roles ORDER BY role_name").fetchall()
@@ -5203,11 +5211,7 @@ def employee_role_delete(role_id):
     db.execute("DELETE FROM employee_roles WHERE id = ?", (role_id,))
     db.commit()
     flash(f"Role '{role['role_name']}' deleted successfully.", 'success')
-    return redirect(url_for('employee_roles'))ank_name'), f.get('account_no'), f.get('ifsc_code'), emp_id))
-        db.commit()
-        flash('Employee updated!', 'success')
-        return redirect(url_for('employees'))
-    return render_template('employee_edit.html', record=record)
+    return redirect(url_for('employee_roles'))
 
 @app.route('/employee_detail/<int:emp_id>')
 def employee_detail(emp_id):
