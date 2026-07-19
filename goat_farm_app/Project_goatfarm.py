@@ -5280,7 +5280,7 @@ def attendance_save():
     emps = db.execute("SELECT id FROM employees WHERE status='Active'").fetchall()
     for emp in emps:
         emp_id = emp['id']
-        status = request.form.get(f'status_{emp_id}', 'Present')
+        status = request.form.get(f'status_{emp_id}', 'P')
         notes = request.form.get(f'notes_{emp_id}', '').strip()
         
         # Check if record exists for this employee and date
@@ -5301,8 +5301,9 @@ def attendance_summary():
     month = request.args.get('month', datetime.now().strftime('%m'))
     year = request.args.get('year', datetime.now().strftime('%Y'))
     data = db.execute('''SELECT e.id, e.name, e.sr_no, 
-        SUM(CASE WHEN a.status IN ('P', 'Present') THEN 1 ELSE 0 END) as present,
-        SUM(CASE WHEN a.status IN ('L', 'Leave', 'On Leave') THEN 1 ELSE 0 END) as leave
+        SUM(CASE WHEN a.status IN ('P', 'Present') THEN 1.0 WHEN a.status = 'H' THEN 0.5 ELSE 0.0 END) as present,
+        SUM(CASE WHEN a.status IN ('L', 'Leave', 'On Leave') THEN 1.0 ELSE 0.0 END) as leave,
+        SUM(CASE WHEN a.status IN ('A', 'Absent') THEN 1.0 WHEN a.status = 'H' THEN 0.5 ELSE 0.0 END) as absent
         FROM employees e
         LEFT JOIN attendance a ON e.id=a.employee_id
             AND TO_CHAR(a.date, 'MM') = ? AND TO_CHAR(a.date, 'YYYY') = ?
@@ -5336,6 +5337,60 @@ def attendance_summary():
             
     farm = db.execute('SELECT * FROM farm_info LIMIT 1').fetchone()
     return render_template('attendance_summary.html', data=data, month=month, year=year, farm=farm, working_days=working_days)
+
+@app.route('/attendance/export')
+def attendance_export():
+    db = get_db()
+    date_val = request.args.get('date')
+    emp_id = request.args.get('employee_id')
+    
+    query = """
+        SELECT a.date, e.name as employee_name, e.phone, a.status, a.notes
+        FROM attendance a
+        JOIN employees e ON a.employee_id = e.id
+        WHERE 1=1
+    """
+    params = []
+    if date_val:
+        query += " AND a.date = ?"
+        params.append(date_val)
+    if emp_id:
+        query += " AND a.employee_id = ?"
+        params.append(emp_id)
+        
+    query += " ORDER BY a.date DESC, CAST(e.sr_no AS INTEGER) ASC"
+    
+    rows = db.execute(query, params).fetchall()
+    
+    import csv
+    from io import StringIO
+    from flask import Response
+    
+    si = StringIO()
+    cw = csv.writer(si)
+    cw.writerow(['Date', 'Employee Name', 'Phone', 'Status', 'Notes'])
+    for r in rows:
+        cw.writerow([
+            r['date'],
+            r['employee_name'],
+            r['phone'] or '',
+            r['status'],
+            r['notes'] or ''
+        ])
+        
+    output = si.getvalue()
+    filename = "attendance_export"
+    if date_val:
+        filename += f"_{date_val}"
+    if emp_id:
+        filename += f"_emp_{emp_id}"
+    filename += ".csv"
+    
+    return Response(
+        output,
+        mimetype="text/csv",
+        headers={"Content-disposition": f"attachment; filename={filename}"}
+    )
 
 @app.route('/salary_calculate', methods=['GET', 'POST'])
 def salary_calculate():
