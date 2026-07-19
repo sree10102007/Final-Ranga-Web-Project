@@ -5455,9 +5455,9 @@ def salary_calculate():
         
     salaries = []
     for emp in data:
-        present = emp['present_days'] or 0
+        present = float(emp['present_days'] or 0)
         wage_type = emp['wage_type']
-        wage_rate = emp['wage_rate'] or 0
+        wage_rate = float(emp['wage_rate'] or 0)
         
         computed = 0.0
         if wage_type == 'Monthly':
@@ -5468,9 +5468,9 @@ def salary_calculate():
             computed = wage_rate * present
             
         # Get paid amount in this period range
-        paid = db.execute('''SELECT SUM(net_salary) FROM salary_payments 
+        paid = float(db.execute('''SELECT SUM(net_salary) FROM salary_payments 
                              WHERE employee_id=? AND paid_date BETWEEN ? AND ?''', 
-                           (emp['id'], start_date, end_date)).fetchone()[0] or 0.0
+                           (emp['id'], start_date, end_date)).fetchone()[0] or 0.0)
         
         salaries.append({
             'id': emp['id'],
@@ -6174,9 +6174,9 @@ def salary_report():
     total_pending = 0.0
 
     for emp in data:
-        present = emp['present_days'] or 0
+        present = float(emp['present_days'] or 0)
         wage_type = emp['wage_type']
-        wage_rate = emp['wage_rate'] or 0
+        wage_rate = float(emp['wage_rate'] or 0)
         
         import calendar
         try:
@@ -6192,9 +6192,9 @@ def salary_report():
         elif wage_type == 'Daily':
             computed = wage_rate * present
             
-        paid = db.execute('''SELECT SUM(net_salary) FROM salary_payments 
+        paid = float(db.execute('''SELECT SUM(net_salary) FROM salary_payments 
                              WHERE employee_id=? AND month=? AND year=?''', 
-                           (emp['id'], int(month), int(year))).fetchone()[0] or 0.0
+                           (emp['id'], int(month), int(year))).fetchone()[0] or 0.0)
         
         balance = max(0.0, computed - paid)
         
