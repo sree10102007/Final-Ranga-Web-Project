@@ -5098,6 +5098,43 @@ def init_employee_tables():
             report_type TEXT, generated_date DATE,
             from_date DATE, to_date DATE, file_path TEXT, notes TEXT
         )''')
+
+        # ── EMPLOYEE ROLES ──────────────────────────────────────────────
+        conn.execute('''CREATE TABLE IF NOT EXISTS employee_roles (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            role_name TEXT NOT NULL UNIQUE,
+            description TEXT
+        )''')
+        # Seed default roles if the table is empty
+        role_count = conn.execute('SELECT COUNT(*) FROM employee_roles').fetchone()[0]
+        if role_count == 0:
+            default_roles = [
+                ('Manager',      'Farm manager responsible for overall operations'),
+                ('Veterinarian', 'Animal health and medical care'),
+                ('Handler',      'Daily animal handling and care'),
+                ('Cleaner',      'Facility cleaning and sanitation'),
+                ('Feeder',       'Animal feeding and nutrition management'),
+                ('Laborer',      'General farm labor'),
+                ('Other',        'Other roles'),
+            ]
+            for r_name, r_desc in default_roles:
+                try:
+                    conn.execute(
+                        'INSERT INTO employee_roles (role_name, description) VALUES (?, ?)',
+                        (r_name, r_desc)
+                    )
+                except Exception:
+                    pass  # already exists, skip
+
+        # ── ATTENDANCE STATUS MIGRATION ─────────────────────────────────
+        # Migrate old text status values to single-char codes
+        try:
+            conn.execute("UPDATE attendance SET status='P' WHERE status='Present'")
+            conn.execute("UPDATE attendance SET status='L' WHERE status IN ('Leave','On Leave')")
+            conn.execute("UPDATE attendance SET status='A' WHERE status='Absent'")
+        except Exception:
+            pass
+
         conn.commit()
 
 
