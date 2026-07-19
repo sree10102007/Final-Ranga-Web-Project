@@ -32,13 +32,9 @@
                                 <label class="form-label" for="role">Role</label>
                                 <select class="form-select" id="role" name="role">
                                     <option value="">Select Role</option>
-                                    <option value="Manager" {% if record.role == 'Manager' %}selected{% endif %}>Manager</option>
-                                    <option value="Veterinarian" {% if record.role == 'Veterinarian' %}selected{% endif %}>Veterinarian</option>
-                                    <option value="Handler" {% if record.role == 'Handler' %}selected{% endif %}>Handler</option>
-                                    <option value="Cleaner" {% if record.role == 'Cleaner' %}selected{% endif %}>Cleaner</option>
-                                    <option value="Feeder" {% if record.role == 'Feeder' %}selected{% endif %}>Feeder</option>
-                                    <option value="Laborer" {% if record.role == 'Laborer' %}selected{% endif %}>Laborer</option>
-                                    <option value="Other" {% if record.role == 'Other' %}selected{% endif %}>Other</option>
+                                    {% for r in roles %}
+                                    <option value="{{ r.role_name }}" {% if record.role == r.role_name %}selected{% endif %}>{{ r.role_name }}</option>
+                                    {% endfor %}
                                 </select>
                             </div>
                         </div>

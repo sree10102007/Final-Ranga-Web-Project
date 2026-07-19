@@ -33,13 +33,9 @@
                                 <label class="form-label" for="role">Role <span class="text-danger">*</span></label>
                                 <select class="form-select" id="role" name="role" required>
                                     <option value="">Select Role</option>
-                                    <option value="Manager">Manager</option>
-                                    <option value="Veterinarian">Veterinarian</option>
-                                    <option value="Handler">Handler</option>
-                                    <option value="Cleaner">Cleaner</option>
-                                    <option value="Feeder">Feeder</option>
-                                    <option value="Laborer">Laborer</option>
-                                    <option value="Other">Other</option>
+                                    {% for r in roles %}
+                                    <option value="{{ r.role_name }}" {% if form_data and form_data.role == r.role_name %}selected{% endif %}>{{ r.role_name }}</option>
+                                    {% endfor %}
                                 </select>
                             </div>
                         </div>
