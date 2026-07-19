@@ -1301,47 +1301,75 @@ def dashboard():
     end_date = request.args.get('end_date', '')
     search_q = request.args.get('search', '')
     
+    if not start_date or not end_date:
+        # Default to current year to match P&L default
+        current_year = datetime.now().year
+        start_date = f"{current_year}-01-01"
+        end_date = f"{current_year}-12-31"
+        
     # 1. Dashboard Metrics
     total_goats = db.execute("SELECT COUNT(*) FROM master_records WHERE status = 'Active'").fetchone()[0] or 0
     total_kids = db.execute("SELECT COUNT(*) FROM kid_records").fetchone()[0] or 0
     total_employees = db.execute("SELECT COUNT(*) FROM employees WHERE status = 'Active'").fetchone()[0] or 0
     
-    # Income = sales + other sales
-    goat_sales = db.execute("SELECT SUM(sold_price) FROM sales_records").fetchone()[0] or 0.0
-    other_sales = db.execute("SELECT SUM(total_amount) FROM other_sales_records").fetchone()[0] or 0.0
-    income = goat_sales + other_sales
+    # Income = sales + other sales + insurance claims
+    goat_sales = db.execute("SELECT SUM(sold_price) FROM sales_records WHERE date_of_sale BETWEEN ? AND ?", (start_date, end_date)).fetchone()[0] or 0.0
+    other_sales = db.execute("SELECT SUM(total_amount) FROM other_sales_records WHERE date_of_sale BETWEEN ? AND ?", (start_date, end_date)).fetchone()[0] or 0.0
+    
+    ins_claims = db.execute('''
+        WITH AllClaims AS (
+            SELECT tag_no, COALESCE(insurance_claim_date, mortality_date, purchase_date, '2026-01-01') AS claim_date, insurance_claim_amount AS amount
+            FROM master_records
+            WHERE insurance_claim_amount > 0
+            UNION
+            SELECT tag_id AS tag_no, COALESCE(insurance_claim_date, expired_date, '2026-01-01') AS claim_date, claim_amount AS amount
+            FROM mortality_records
+            WHERE claim_amount > 0
+        )
+        SELECT SUM(amount)
+        FROM (
+            SELECT MAX(amount) AS amount
+            FROM AllClaims
+            WHERE claim_date BETWEEN ? AND ?
+            GROUP BY tag_no, claim_date
+        ) t
+    ''', (start_date, end_date)).fetchone()[0] or 0.0
+    
+    income = goat_sales + other_sales + ins_claims
     
     # Detailed expense calculation for dashboard
     # 1. Purchases (Goats, Feed, Med, Vac, Equipment)
-    exp_goat = db.execute("SELECT SUM(price) FROM purchases").fetchone()[0] or 0.0
+    exp_goat = db.execute("SELECT SUM(price) FROM purchases WHERE purchase_date BETWEEN ? AND ?", (start_date, end_date)).fetchone()[0] or 0.0
     # Also add master_records purchase amounts that aren't in purchases to avoid missing them
     master_goat_purch = db.execute("""
         SELECT SUM(purchase_amount) 
         FROM master_records 
         WHERE purchase_amount > 0 
+          AND purchase_date BETWEEN ? AND ?
           AND tag_no NOT IN (SELECT COALESCE(tag_id, '') FROM purchases WHERE tag_id IS NOT NULL)
-    """).fetchone()[0] or 0.0
+    """, (start_date, end_date)).fetchone()[0] or 0.0
     exp_goat += master_goat_purch
-
-    exp_feed = db.execute("SELECT SUM(cost) FROM feed_purchases").fetchone()[0] or 0.0
-    exp_med = db.execute("SELECT SUM(cost) FROM medicine_purchases").fetchone()[0] or 0.0
-    exp_vac = db.execute("SELECT SUM(cost) FROM vaccine_purchases").fetchone()[0] or 0.0
-    exp_equip = db.execute("SELECT SUM(purchase_cost) FROM equipment").fetchone()[0] or 0.0
+ 
+    exp_feed = db.execute("SELECT SUM(cost) FROM feed_purchases WHERE purchase_date BETWEEN ? AND ?", (start_date, end_date)).fetchone()[0] or 0.0
+    exp_med = db.execute("SELECT SUM(cost) FROM medicine_purchases WHERE purchase_date BETWEEN ? AND ?", (start_date, end_date)).fetchone()[0] or 0.0
+    exp_vac = db.execute("SELECT SUM(cost) FROM vaccine_purchases WHERE purchase_date BETWEEN ? AND ?", (start_date, end_date)).fetchone()[0] or 0.0
+    exp_equip = db.execute("SELECT SUM(purchase_cost) FROM equipment WHERE purchase_date BETWEEN ? AND ?", (start_date, end_date)).fetchone()[0] or 0.0
     
     # 2. Operations (Maintenance + Salaries + General Expenses)
-    exp_salary = db.execute("SELECT SUM(net_salary) FROM salary_payments").fetchone()[0] or 0.0
-    exp_maint = db.execute("SELECT SUM(service_cost) FROM equipment_services").fetchone()[0] or 0.0
+    exp_salary = db.execute("SELECT SUM(net_salary) FROM salary_payments WHERE paid_date BETWEEN ? AND ?", (start_date, end_date)).fetchone()[0] or 0.0
+    exp_maint = db.execute("SELECT SUM(service_cost) FROM equipment_services WHERE service_date BETWEEN ? AND ?", (start_date, end_date)).fetchone()[0] or 0.0
     
     # Filter exp_gen to get Approved or Paid expenses, excluding the ones already counted above
     exp_gen = db.execute("""
         SELECT SUM(amount) 
         FROM expenses 
         WHERE (status = 'Approved' OR status = 'Paid') 
+          AND date BETWEEN ? AND ?
           AND LOWER(COALESCE(category, '')) NOT LIKE '%labor%' 
           AND LOWER(COALESCE(category, '')) NOT LIKE '%labour%'
           AND LOWER(COALESCE(category, '')) NOT LIKE '%purchase%'
           AND LOWER(COALESCE(category, '')) NOT LIKE '%salary%'
-    """).fetchone()[0] or 0.0
+    """, (start_date, end_date)).fetchone()[0] or 0.0
     
     expense = exp_goat + exp_feed + exp_med + exp_vac + exp_salary + exp_maint + exp_gen + exp_equip
     profit = income - expense
@@ -1386,7 +1414,8 @@ def dashboard():
         income=income, expense=expense, profit=profit, 
         total_goats=total_goats, total_kids=total_kids, total_employees=total_employees,
         goats=goats, search_q=search_q, searched_goat=searched_goat,
-        heavy_goats=heavy_goats, show_weight_notification=show_weight_notification)
+        heavy_goats=heavy_goats, show_weight_notification=show_weight_notification,
+        start_date=start_date, end_date=end_date)
 
 @app.route('/records')
 def records():
@@ -5075,17 +5104,10 @@ def init_employee_tables():
 
 with app.app_context():
     if not db_connection_error:
-        init_employee_tables()
-
-@app.route('/employees')
-def employees():
-    db = get_db()
-    records = db.execute('SELECT * FROM employees ORDER BY CAST(sr_no AS INTEGER) ASC').fetchall()
-    return render_template('employees.html', records=records)
-
-@app.route('/employee_add', methods=['GET', 'POST'])
+        init_employee@app.route('/employee_add', methods=['GET', 'POST'])
 def employee_add():
     db = get_db()
+    roles = db.execute("SELECT role_name FROM employee_roles ORDER BY role_name").fetchall()
     if request.method == 'POST':
         f = request.form
         role = f.get('role', '').strip()
@@ -5093,7 +5115,7 @@ def employee_add():
             flash('role is needed', 'danger')
             res = db.execute("SELECT MAX(CAST(sr_no AS INTEGER)) FROM employees").fetchone()[0]
             next_sr = (res or 0) + 1
-            return render_template('employee_add.html', next_sr=next_sr, form_data=f)
+            return render_template('employee_add.html', next_sr=next_sr, form_data=f, roles=roles)
             
         db.execute('''INSERT INTO employees (sr_no, name, role, phone, address, join_date, wage_type, wage_rate, status, notes, 
                                              aadhar_no, pan_no, bank_name, account_no, ifsc_code) 
@@ -5107,7 +5129,7 @@ def employee_add():
         
     res = db.execute("SELECT MAX(CAST(sr_no AS INTEGER)) FROM employees").fetchone()[0]
     next_sr = (res or 0) + 1
-    return render_template('employee_add.html', next_sr=next_sr)
+    return render_template('employee_add.html', next_sr=next_sr, roles=roles)
 
 @app.route('/employee_edit/<int:emp_id>', methods=['GET', 'POST'])
 def employee_edit(emp_id):
@@ -5116,18 +5138,72 @@ def employee_edit(emp_id):
     if not record:
         flash('Employee record not found or has been deleted.', 'danger')
         return redirect(url_for('employees'))
+    roles = db.execute("SELECT role_name FROM employee_roles ORDER BY role_name").fetchall()
     if request.method == 'POST':
         f = request.form
         role = f.get('role', '').strip()
         if not role:
             flash('role is needed', 'danger')
-            return render_template('employee_edit.html', record=record)
+            return render_template('employee_edit.html', record=record, roles=roles)
             
         db.execute('''UPDATE employees SET sr_no=?, name=?, role=?, phone=?, address=?, join_date=?, wage_type=?, wage_rate=?, status=?, notes=?,
                                            aadhar_no=?, pan_no=?, bank_name=?, account_no=?, ifsc_code=? WHERE id=?''',
             (f.get('sr_no'), f.get('name'), role, f.get('phone'), f.get('address'), f.get('joining_date'),
              f.get('wage_type'), f.get('wage_rate', 0), f.get('status'), f.get('notes'),
              f.get('aadhar_no'), f.get('pan_no'), f.get('bank_name'), f.get('account_no'), f.get('ifsc_code'), emp_id))
+        db.commit()
+        flash('Employee updated!', 'success')
+        return redirect(url_for('employees'))
+    return render_template('employee_edit.html', record=record, roles=roles)
+
+# ── EMPLOYEE ROLE MANAGEMENT ──────────────────────────────────────────────────
+@app.route('/employee_roles', methods=['GET', 'POST'])
+def employee_roles():
+    db = get_db()
+    if request.method == 'POST':
+        role_name = request.form.get('role_name', '').strip()
+        description = request.form.get('description', '').strip()
+        
+        if not role_name:
+            flash('Role Name is required!', 'danger')
+        else:
+            # Check duplicate
+            dup = db.execute("SELECT id FROM employee_roles WHERE LOWER(role_name) = LOWER(?)", (role_name,)).fetchone()
+            if dup:
+                flash(f"Role '{role_name}' already exists!", 'danger')
+            else:
+                db.execute("INSERT INTO employee_roles (role_name, description) VALUES (?, ?)", (role_name, description))
+                db.commit()
+                flash(f"Role '{role_name}' successfully added!", 'success')
+                return redirect(url_for('employee_roles'))
+                
+    roles = db.execute("SELECT * FROM employee_roles ORDER BY role_name").fetchall()
+    return render_template('employee_roles.html', roles=roles)
+
+@app.route('/employee_roles/delete/<int:role_id>', methods=['POST'])
+def employee_role_delete(role_id):
+    db = get_db()
+    role = db.execute("SELECT * FROM employee_roles WHERE id = ?", (role_id,)).fetchone()
+    if not role:
+        flash("Role not found.", 'danger')
+        return redirect(url_for('employee_roles'))
+        
+    # Check if role is in use
+    in_use = db.execute("SELECT COUNT(*) FROM employees WHERE LOWER(role) = LOWER(?)", (role['role_name'],)).fetchone()[0]
+    if in_use > 0:
+        flash(f"Cannot delete role '{role['role_name']}' because it is assigned to {in_use} employee(s).", 'danger')
+        return redirect(url_for('employee_roles'))
+        
+    # Prevent deleting critical default roles
+    default_roles = {'manager', 'veterinarian', 'handler', 'cleaner', 'feeder', 'laborer', 'other'}
+    if role['role_name'].lower() in default_roles:
+        flash(f"Cannot delete system default role '{role['role_name']}'.", 'danger')
+        return redirect(url_for('employee_roles'))
+        
+    db.execute("DELETE FROM employee_roles WHERE id = ?", (role_id,))
+    db.commit()
+    flash(f"Role '{role['role_name']}' deleted successfully.", 'success')
+    return redirect(url_for('employee_roles'))ank_name'), f.get('account_no'), f.get('ifsc_code'), emp_id))
         db.commit()
         flash('Employee updated!', 'success')
         return redirect(url_for('employees'))

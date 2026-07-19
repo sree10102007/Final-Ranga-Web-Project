@@ -325,6 +325,34 @@ def migrate():
     except Exception as e:
         print(f"Error creating indexes on goat_weights: {e}")
 
+    # --- 13. EMPLOYEE ROLES ---
+    print("Checking employee_roles table...")
+    cursor.execute('''CREATE TABLE IF NOT EXISTS employee_roles (
+        id SERIAL PRIMARY KEY,
+        role_name TEXT UNIQUE NOT NULL,
+        description TEXT
+    )''')
+    cursor.execute("SELECT COUNT(*) FROM employee_roles")
+    if cursor.fetchone()[0] == 0:
+        default_roles = [
+            ('Manager', 'Manages farm operations and staff coordination'),
+            ('Veterinarian', 'Animal health, breeding assistance, and veterinary care'),
+            ('Handler', 'General animal handling, moving, and care'),
+            ('Cleaner', 'Cleaning pens, maintaining hygiene and sanitation'),
+            ('Feeder', 'Preparing and distributing feed and supplements'),
+            ('Laborer', 'General physical labor on the farm'),
+            ('Other', 'Miscellaneous roles and assignments')
+        ]
+        for r_name, r_desc in default_roles:
+            cursor.execute("INSERT INTO employee_roles (role_name, description) VALUES (%s, %s)", (r_name, r_desc))
+        print("Seeded default employee roles.")
+
+    # --- 14. HISTORICAL ATTENDANCE STATUS MIGRATION ---
+    print("Migrating historical attendance records...")
+    cursor.execute("UPDATE attendance SET status = 'P' WHERE status = 'Present'")
+    cursor.execute("UPDATE attendance SET status = 'L' WHERE status IN ('Leave', 'On Leave')")
+    cursor.execute("UPDATE attendance SET status = 'A' WHERE status = 'Absent'")
+
     print("Database migration successfully completed.")
     conn.close()
 

@@ -158,13 +158,14 @@
 
     <!-- HR MANAGEMENT MENU -->
 
-    {% set hr_ep = ['employees','employee_add','employee_edit','employee_detail','attendance_view','attendance_summary','salary_calculate'] %}
+    {% set hr_ep = ['employees','employee_add','employee_edit','employee_detail','attendance_view','attendance_summary','salary_calculate','employee_roles','employee_role_edit'] %}
     <button class="nav-group-header {% if request.endpoint in hr_ep %}open{% endif %}" data-onclick="toggleGroup(this)">
       <span class="group-icon"><i class="bi bi-people"></i></span> HR Management
       <span class="chevron"><i class="bi bi-chevron-right"></i></span>
     </button>
     <div class="nav-group-items {% if request.endpoint in hr_ep %}show{% endif %}">
       <a href="{{ url_for('employees') }}" class="sidebar-link {% if request.endpoint in ['employees','employee_add','employee_edit','employee_detail'] %}active{% endif %}"><span class="link-icon"><i class="bi bi-person-lines-fill"></i></span> Employees</a>
+      <a href="{{ url_for('employee_roles') }}" class="sidebar-link {% if request.endpoint in ['employee_roles','employee_role_edit'] %}active{% endif %}"><span class="link-icon"><i class="bi bi-person-badge"></i></span> Manage Roles</a>
       <a href="{{ url_for('attendance_view') }}" class="sidebar-link {% if request.endpoint in ['attendance_view','attendance_summary'] %}active{% endif %}"><span class="link-icon"><i class="bi bi-calendar-check"></i></span> Attendance</a>
       <a href="{{ url_for('salary_calculate') }}" class="sidebar-link {% if request.endpoint == 'salary_calculate' %}active{% endif %}"><span class="link-icon"><i class="bi bi-calculator"></i></span> Salary Calculation</a>
     </div>
