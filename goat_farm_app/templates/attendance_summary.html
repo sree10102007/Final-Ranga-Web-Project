@@ -334,12 +334,12 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% set ns = namespace(total_present=0, total_absent=0, total_leave=0, pct_sum=0) %}
+                    {% set ns = namespace(total_present=0.0, total_absent=0.0, total_leave=0.0, pct_sum=0) %}
                     {% for row in data %}
-                        {% set present_days = row.present|int %}
-                        {% set leave_days = row.leave|int %}
-                        {% set absent_days = total_working - present_days - leave_days %}
-                        {% if absent_days < 0 %}{% set absent_days = 0 %}{% endif %}
+                        {% set present_days = row.present|float %}
+                        {% set leave_days = row.leave|float %}
+                        {% set absent_days = row.absent|float %}
+                        {% if absent_days < 0 %}{% set absent_days = 0.0 %}{% endif %}
                         
                         {% set att_pct = 0.0 %}
                         {% if total_working > 0 %}
@@ -355,9 +355,9 @@
                             <td class="text-center py-3">{{ loop.index }}</td>
                             <td class="text-start py-3 fw-bold text-dark">{{ row.name }}</td>
                             <td class="text-center py-3">{{ total_working }}</td>
-                            <td class="text-center py-3"><span class="badge bg-success-subtle text-success px-2.5 py-1 border border-success-subtle rounded-pill">{{ present_days }}</span></td>
-                            <td class="text-center py-3"><span class="badge bg-danger-subtle text-danger px-2.5 py-1 border border-danger-subtle rounded-pill">{{ absent_days }}</span></td>
-                            <td class="text-center py-3"><span class="badge bg-info-subtle text-info px-2.5 py-1 border border-info-subtle rounded-pill">{{ leave_days }}</span></td>
+                            <td class="text-center py-3"><span class="badge bg-success-subtle text-success px-2.5 py-1 border border-success-subtle rounded-pill">{{ "%.1f"|format(present_days) if present_days % 1 != 0 else present_days|int }}</span></td>
+                            <td class="text-center py-3"><span class="badge bg-danger-subtle text-danger px-2.5 py-1 border border-danger-subtle rounded-pill">{{ "%.1f"|format(absent_days) if absent_days % 1 != 0 else absent_days|int }}</span></td>
+                            <td class="text-center py-3"><span class="badge bg-info-subtle text-info px-2.5 py-1 border border-info-subtle rounded-pill">{{ "%.1f"|format(leave_days) if leave_days % 1 != 0 else leave_days|int }}</span></td>
                             <td class="text-end py-3 fw-bold text-dark">{{ "%.1f"|format(att_pct) }}%</td>
                         </tr>
                     {% else %}
@@ -377,9 +377,9 @@
                     <tr class="fw-bold bg-light text-dark align-middle print-summary-row">
                         <td colspan="2" class="text-start py-3">Total Summary</td>
                         <td class="text-center py-3">{{ total_working }}</td>
-                        <td class="text-center py-3 text-success">{{ ns.total_present }}</td>
-                        <td class="text-center py-3 text-danger">{{ ns.total_absent }}</td>
-                        <td class="text-center py-3 text-info">{{ ns.total_leave }}</td>
+                        <td class="text-center py-3 text-success">{{ "%.1f"|format(ns.total_present) if ns.total_present % 1 != 0 else ns.total_present|int }}</td>
+                        <td class="text-center py-3 text-danger">{{ "%.1f"|format(ns.total_absent) if ns.total_absent % 1 != 0 else ns.total_absent|int }}</td>
+                        <td class="text-center py-3 text-info">{{ "%.1f"|format(ns.total_leave) if ns.total_leave % 1 != 0 else ns.total_leave|int }}</td>
                         <td class="text-end py-3 text-success fs-6">{{ "%.1f"|format(avg_pct) }}%</td>
                     </tr>
                     {% endif %}

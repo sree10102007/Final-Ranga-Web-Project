@@ -1365,10 +1365,10 @@ def dashboard():
         FROM expenses 
         WHERE (status = 'Approved' OR status = 'Paid') 
           AND date BETWEEN ? AND ?
-          AND LOWER(COALESCE(category, '')) NOT LIKE '%labor%' 
-          AND LOWER(COALESCE(category, '')) NOT LIKE '%labour%'
-          AND LOWER(COALESCE(category, '')) NOT LIKE '%purchase%'
-          AND LOWER(COALESCE(category, '')) NOT LIKE '%salary%'
+          AND LOWER(COALESCE(category, '')) NOT LIKE '%%labor%%' 
+          AND LOWER(COALESCE(category, '')) NOT LIKE '%%labour%%'
+          AND LOWER(COALESCE(category, '')) NOT LIKE '%%purchase%%'
+          AND LOWER(COALESCE(category, '')) NOT LIKE '%%salary%%'
     """, (start_date, end_date)).fetchone()[0] or 0.0
     
     expense = exp_goat + exp_feed + exp_med + exp_vac + exp_salary + exp_maint + exp_gen + exp_equip
@@ -5448,7 +5448,7 @@ def salary_calculate():
     
     # Query attendance strictly for the selected period
     data = db.execute('''SELECT e.id, e.name, e.role, e.wage_type, e.wage_rate, e.sr_no,
-        SUM(CASE WHEN a.status IN ('P', 'Present') THEN 1 ELSE 0 END) as present_days
+        SUM(CASE WHEN a.status IN ('P', 'Present') THEN 1.0 WHEN a.status = 'H' THEN 0.5 ELSE 0.0 END) as present_days
         FROM employees e
         LEFT JOIN attendance a ON e.id=a.employee_id AND a.date BETWEEN ? AND ?
         GROUP BY e.id ORDER BY CAST(e.sr_no AS INTEGER) ASC''', (start_date, end_date)).fetchall()
@@ -6162,7 +6162,7 @@ def salary_report():
         month_str = f"{year}-{month}"
 
     data = db.execute('''SELECT e.id, e.name, e.role, e.wage_type, e.wage_rate, e.sr_no,
-        SUM(CASE WHEN a.status IN ('P', 'Present') THEN 1 ELSE 0 END) as present_days
+        SUM(CASE WHEN a.status IN ('P', 'Present') THEN 1.0 WHEN a.status = 'H' THEN 0.5 ELSE 0.0 END) as present_days
         FROM employees e
         LEFT JOIN attendance a ON e.id=a.employee_id
             AND TO_CHAR(a.date, 'MM') = ? AND TO_CHAR(a.date, 'YYYY') = ?
