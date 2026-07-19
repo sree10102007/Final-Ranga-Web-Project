@@ -381,7 +381,10 @@ def handle_csrf_error(e):
     app.logger.warning(f"CSRF Validation Failed: {e.description}")
     if request.path.startswith('/api/') or request.headers.get('Accept') == 'application/json':
         return jsonify({'success': False, 'error': f'CSRF token validation failed: {e.description}'}), 400
-    return render_template('csrf_error.html', reason=e.description), 400
+    # Flash a friendly message and redirect back to the referring page
+    flash('Your session has expired or the form token was invalid. Please try again.', 'warning')
+    referrer = request.referrer or url_for('dashboard')
+    return redirect(referrer)
 
 @app.errorhandler(403)
 def forbidden_error(error):
@@ -402,10 +405,6 @@ def internal_error(error):
     app.logger.error(f'Server Error: {error}', exc_info=True)
     if request.path.startswith('/api/') or request.headers.get('Accept') == 'application/json':
         return jsonify({'success': False, 'error': 'Internal Server Error'}), 500
-    
-    # In development mode, display original error/traceback
-    if app.config.get('DEBUG'):
-        raise error
     return render_template('500.html'), 500
 
 
