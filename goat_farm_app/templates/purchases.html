@@ -100,6 +100,7 @@
                             <span class="badge bg-success-subtle text-success me-2">₹{{ g.price }}</span>
                             <a href="{{ url_for('purchase_edit', id=g.id) }}" class="btn btn-sm btn-light border" title="Edit"><i class="bi bi-pencil"></i></a>
                             <form action="{{ url_for('purchase_delete', id=g.id) }}" method="POST" class="d-inline m-0" data-confirm="Delete this purchase?">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                 <button type="submit" class="btn btn-sm btn-light border text-danger" title="Delete"><i class="bi bi-trash"></i></button>
                             </form>
                         </div>
@@ -132,6 +133,7 @@
                             <span class="badge bg-warning-subtle text-warning me-2">₹{{ f.cost }}</span>
                             <a href="{{ url_for('feed_purchase_edit', id=f.id) }}" class="btn btn-sm btn-light border" title="Edit"><i class="bi bi-pencil"></i></a>
                             <form action="{{ url_for('feed_purchase_delete', id=f.id) }}" method="POST" class="d-inline m-0" data-confirm="Delete this feed purchase?">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                 <button type="submit" class="btn btn-sm btn-light border text-danger" title="Delete"><i class="bi bi-trash"></i></button>
                             </form>
                         </div>
@@ -164,6 +166,7 @@
                             <span class="badge bg-info-subtle text-info me-2">₹{{ m.cost }}</span>
                             <a href="{{ url_for('med_purchase_edit', id=m.id) }}" class="btn btn-sm btn-light border" title="Edit"><i class="bi bi-pencil"></i></a>
                             <form action="{{ url_for('med_purchase_delete', id=m.id) }}" method="POST" class="d-inline m-0" data-confirm="Delete this medicine purchase?">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                 <button type="submit" class="btn btn-sm btn-light border text-danger" title="Delete"><i class="bi bi-trash"></i></button>
                             </form>
                         </div>
@@ -196,6 +199,7 @@
                             <span class="badge me-2" data-style="background: #f3e5f5; color: #7b1fa2;">₹{{ v.cost }}</span>
                             <a href="{{ url_for('vac_purchase_edit', id=v.id) }}" class="btn btn-sm btn-light border" title="Edit"><i class="bi bi-pencil"></i></a>
                             <form action="{{ url_for('vac_purchase_delete', id=v.id) }}" method="POST" class="d-inline m-0" data-confirm="Delete this vaccine purchase?">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                 <button type="submit" class="btn btn-sm btn-light border text-danger" title="Delete"><i class="bi bi-trash"></i></button>
                             </form>
                         </div>

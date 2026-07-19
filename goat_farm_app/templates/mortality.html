@@ -50,6 +50,7 @@
                         <td>
                             <a href="{{ url_for('mortality_edit', id=r['id']) }}" class="btn btn-sm btn-warning me-2"><i class="bi bi-pencil"></i></a>
                             <form method="POST" action="{{ url_for('mortality_delete', id=r['id']) }}" data-style="display:inline;" data-confirm="Delete this record?">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                 <button type="submit" class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></button>
                             </form>
                         </td>

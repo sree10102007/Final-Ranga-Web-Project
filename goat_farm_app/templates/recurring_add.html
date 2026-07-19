@@ -2,6 +2,7 @@
 {% block content %}
 <h3>Schedule Recurring Expense</h3>
 <form method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <div class="row mb-3">
         <div class="col-md-6">
             <label class="form-label">Category</label>

@@ -156,6 +156,7 @@
                                     <form action="{{ url_for('sales_delete', s_type=s_type, id=r.id) }}" 
                                           method="POST" class="m-0 d-inline" 
                                           data-confirm="WARNING: Are you sure you want to permanently delete this sales record? This will revert any linked ledger updates and goat statuses.">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                         <button type="submit" class="btn btn-sm btn-outline-danger border rounded-pill px-3 py-1.5 d-flex align-items-center gap-1" title="Delete Record">
                                             <i class="bi bi-trash-fill"></i> Delete
                                         </button>

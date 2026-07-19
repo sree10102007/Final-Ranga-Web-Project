@@ -91,6 +91,7 @@
                     <td class="text-end">
                         {% if s.balance > 0 %}
                         <form action="{{ url_for('pay_salary') }}" method="POST" class="d-inline-flex align-items-center gap-2">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <input type="hidden" name="employee_id" value="{{ s.id }}">
                             <input type="hidden" name="month" value="{{ month }}">
                             <input type="hidden" name="year" value="{{ year }}">

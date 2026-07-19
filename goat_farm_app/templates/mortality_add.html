@@ -10,6 +10,7 @@
         <div class="card border-0 shadow-sm rounded-4">
             <div class="card-body p-4 p-md-5">
                 <form method="POST" action="{{ url_for('mortality_add') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     
                     <h5 class="text-danger mb-3 border-bottom pb-2">Identification</h5>
                     <div class="row g-3 mb-4">

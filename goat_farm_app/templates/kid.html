@@ -76,6 +76,7 @@
                     <td class="text-end">
                         <a href="{{ url_for('kid_edit', id=record.id) }}" class="btn btn-sm btn-warning text-dark me-2" title="Edit"><i class="bi bi-pencil"></i></a>
                         <form action="{{ url_for('kid_delete', id=record.id) }}" method="POST" class="d-inline" data-confirm="Delete this kid record?">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <button type="submit" class="btn btn-sm btn-danger" title="Delete"><i class="bi bi-trash"></i></button>
                         </form>
                     </td>

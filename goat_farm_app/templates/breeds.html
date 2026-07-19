@@ -16,6 +16,7 @@
             </div>
             <div class="card-body">
                 <form method="POST" action="{{ url_for('breeds') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <div class="mb-3">
                         <label class="form-label fw-bold small text-muted">Breed Name <span class="text-danger">*</span></label>
                         <input type="text" name="breed_name" class="form-control" required placeholder="e.g. Boer">
@@ -48,6 +49,7 @@
                             <td class="text-muted small">{{ record.description }}</td>
                             <td class="text-end">
                                 <form action="{{ url_for('breed_delete', id=record.id) }}" method="POST" class="d-inline" data-confirm="Delete this breed?">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                     <button type="submit" class="btn btn-sm btn-danger" title="Delete"><i class="bi bi-trash"></i></button>
                                 </form>
                             </td>

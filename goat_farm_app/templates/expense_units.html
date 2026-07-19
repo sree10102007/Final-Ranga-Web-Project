@@ -23,6 +23,7 @@
             </div>
             <div class="card-body p-4">
                 <form method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <input type="hidden" name="action" value="add">
                     <div class="mb-3">
                         <label class="form-label small fw-bold text-dark">Unit Name <span class="text-danger">*</span></label>
@@ -63,6 +64,7 @@
                             </div>
                         </div>
                         <form action="{{ url_for('expense_unit_delete', uid=u.id) }}" method="post" class="d-inline" data-confirm="Delete this unit?">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <button type="submit" class="btn btn-outline-danger btn-sm rounded-circle p-1" data-style="width:30px;height:30px;" title="Delete">
                                 <i class="bi bi-trash" data-style="font-size:0.75rem;"></i>
                             </button>

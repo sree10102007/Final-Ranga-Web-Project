@@ -10,6 +10,7 @@
         <div class="card border-0 shadow-sm rounded-4 mb-5">
             <div class="card-body p-4 p-md-5">
                 <form method="POST" action="{{ url_for('master_add') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     
                     <!-- Section 1: Core ID -->
                     <h5 class="text-success border-bottom pb-2 mb-3">1. Identification & Status</h5>

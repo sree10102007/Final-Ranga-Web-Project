@@ -17,6 +17,7 @@
                 {% endwith %}
                 <div class="alert alert-info small">Check the backend console for your mock OTP!</div>
                 <form method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <div class="mb-4"><label>Enter 6-Digit OTP</label><input type="text" name="otp" class="form-control text-center fs-4" required></div>
                     <button class="btn btn-success w-100" type="submit">Verify & Register</button>
                 </form>

@@ -257,6 +257,7 @@
                             <td class="text-end">
                                 <a href="{{ url_for('feed_edit', id=record.id) }}" class="btn btn-sm btn-warning text-dark me-1" title="Edit"><i class="bi bi-pencil"></i></a>
                                 <form action="{{ url_for('feed_delete', id=record.id) }}" method="POST" class="d-inline" data-confirm="Are you sure you want to delete this feed log?">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                     <button type="submit" class="btn btn-sm btn-danger" title="Delete"><i class="bi bi-trash"></i></button>
                                 </form>
                             </td>
@@ -311,6 +312,7 @@
                             <td class="text-end">
                                 <a href="{{ url_for('medicine_inventory_edit', id=record.id) }}" class="btn btn-sm btn-warning text-dark me-1" title="Edit"><i class="bi bi-pencil"></i></a>
                                 <form action="{{ url_for('medicine_inventory_delete', id=record.id) }}" method="POST" class="d-inline" data-confirm="Are you sure you want to delete this medicine log?">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                     <button type="submit" class="btn btn-sm btn-danger" title="Delete"><i class="bi bi-trash"></i></button>
                                 </form>
                             </td>
@@ -365,6 +367,7 @@
                             <td class="text-end">
                                 <a href="{{ url_for('vaccine_inventory_edit', id=record.id) }}" class="btn btn-sm btn-warning text-dark me-1" title="Edit"><i class="bi bi-pencil"></i></a>
                                 <form action="{{ url_for('vaccine_inventory_delete', id=record.id) }}" method="POST" class="d-inline" data-confirm="Are you sure you want to delete this vaccine log?">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                     <button type="submit" class="btn btn-sm btn-danger" title="Delete"><i class="bi bi-trash"></i></button>
                                 </form>
                             </td>
@@ -399,6 +402,7 @@
 <div class="modal fade" id="giveFeedModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <form action="{{ url_for('consume_feed') }}" method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class="modal-content border-0 shadow-lg rounded-4">
                 <div class="modal-header bg-success text-white">
                     <h5 class="modal-title fw-bold"><i class="bi bi-basket3 me-2"></i>Give Feed to Batch</h5>
@@ -447,6 +451,7 @@
 <div class="modal fade" id="giveMedModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <form action="{{ url_for('consume_medicine') }}" method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class="modal-content border-0 shadow-lg rounded-4">
                 <div class="modal-header bg-primary text-white">
                     <h5 class="modal-title fw-bold"><i class="bi bi-capsule me-2"></i>Give Medicine to Batch</h5>
@@ -495,6 +500,7 @@
 <div class="modal fade" id="giveVacModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <form action="{{ url_for('consume_vaccine') }}" method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class="modal-content border-0 shadow-lg rounded-4">
                 <div class="modal-header bg-info text-white">
                     <h5 class="modal-title fw-bold"><i class="bi bi-patch-check me-2"></i>Give Vaccine to Batch</h5>

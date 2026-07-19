@@ -18,6 +18,7 @@
             </div>
             <div class="card-body p-4 p-md-5">
                 <form method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <div class="row g-4">
                         <div class="col-md-6">
                             <label class="form-label fw-bold text-muted small text-uppercase">Seller Name</label>
@@ -74,6 +75,7 @@
             <div class="modal-footer border-0 p-4 pt-0">
                 <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
                 <form method="POST" action="{{ url_for('purchase_delete', id=record.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <button type="submit" class="btn btn-danger rounded-pill px-4 fw-bold">Delete permanently</button>
                 </form>
             </div>

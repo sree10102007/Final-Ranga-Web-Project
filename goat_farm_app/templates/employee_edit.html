@@ -10,6 +10,7 @@
                 </div>
                 <div class="card-body">
                     <form method="POST" action="{{ url_for('employee_edit', emp_id=record.id) }}" novalidate>
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <div class="row mb-3">
                             <div class="col-md-3">
                                 <label class="form-label fw-bold" for="sr_no">Serial No. <span class="text-danger">*</span></label>

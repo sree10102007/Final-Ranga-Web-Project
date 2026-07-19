@@ -10,6 +10,7 @@
         <div class="card border-0 shadow-sm rounded-4">
             <div class="card-body p-4 p-md-5">
                 <form method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     
                     <h5 class="text-warning mb-3 border-bottom pb-2">Identification</h5>
                     <div class="row g-3 mb-4">
@@ -73,6 +74,7 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 <form method="POST" action="{{ url_for('mortality_delete', id=record['id']) }}" data-style="display:inline;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <button type="submit" class="btn btn-danger">Delete</button>
                 </form>
             </div>

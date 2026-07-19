@@ -83,6 +83,7 @@
                             <div class="d-flex justify-content-end gap-2">
                                 {% if u.is_locked %}
                                 <form action="{{ url_for('auth.unlock_user', user_id=u.id) }}" method="POST" class="d-inline">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                     <button type="submit" class="btn btn-outline-warning btn-sm rounded-pill px-3">
                                         <i class="bi bi-unlock-fill me-1"></i> Unlock
                                     </button>
@@ -91,6 +92,7 @@
                                 
                                 {% if u.id != session.user_id %}
                                 <form action="{{ url_for('auth.delete_user', user_id=u.id) }}" method="POST" class="d-inline">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                     <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3">
                                         <i class="bi bi-trash-fill me-1"></i> Delete
                                     </button>

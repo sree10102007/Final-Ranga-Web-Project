@@ -11,6 +11,7 @@
 <div class="card border-0">
     <div class="card-body p-4">
         <form method="POST" action="{{ url_for('feed_add') }}" class="row g-4">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             
             <div class="col-md-6">
                 <label class="form-label fw-bold small text-muted">FEED NAME <span class="text-danger">*</span></label>

@@ -10,6 +10,7 @@
                 </div>
                 <div class="card-body">
                     <form method="POST" action="{{ url_for('employee_add') }}" novalidate>
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <!-- Serial Number - auto-incremented -->
                         <div class="row mb-3">
                             <div class="col-md-3">

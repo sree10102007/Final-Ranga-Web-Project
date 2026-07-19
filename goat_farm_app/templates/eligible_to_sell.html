@@ -11,6 +11,7 @@
         </div>
         <div class="d-flex gap-2">
             <form method="POST" action="{{ url_for('populate_eligible') }}" class="d-inline">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <button type="submit" class="btn btn-success" title="Auto-populate with goats > 25kg">
                     <i class="bi bi-plus-circle"></i> Auto Populate List
                 </button>
@@ -82,6 +83,7 @@
                             <i class="bi bi-cash-coin"></i>
                         </a>
                         <form method="POST" action="{{ url_for('remove_eligible', tag_id=goat['tag_id']) }}" class="d-inline" data-confirm="Remove this goat from eligible list?">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <button type="submit" class="btn btn-sm btn-outline-danger" title="Remove from List">
                                 <i class="bi bi-trash"></i>
                             </button>
@@ -112,6 +114,7 @@
         <small class="text-muted d-block mt-2">Goats must weigh more than 25 kg and have an Active status.</small>
         
         <form method="POST" action="{{ url_for('populate_eligible') }}" class="d-inline mt-4">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button type="submit" class="btn btn-success">
                 <i class="bi bi-plus-circle"></i> Auto Populate Eligible Goats
             </button>

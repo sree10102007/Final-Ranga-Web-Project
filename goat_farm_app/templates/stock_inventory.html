@@ -178,6 +178,7 @@
 <div class="modal fade" id="quickBuyModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <form action="{{ url_for('buy_stock') }}" method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class="modal-content border-0 shadow-lg rounded-4">
                 <div class="modal-header bg-success text-white">
                     <h5 class="modal-title fw-bold" id="buyModalTitle"><i class="bi bi-cart-plus me-2"></i>Buy & Add Stock</h5>
@@ -253,6 +254,7 @@
 <div class="modal fade" id="limitModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <form action="{{ url_for('update_stock_limit') }}" method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class="modal-content border-0 shadow-lg rounded-4">
                 <div class="modal-header text-white">
                     <h5 class="modal-title fw-bold"><i class="bi bi-bell-fill me-2"></i>Set Reminder Threshold</h5>

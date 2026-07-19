@@ -164,6 +164,7 @@
                                     <form action="{% if r.sub_type %}{{ url_for('voucher_delete', v_type=v_type, sub_type=r.sub_type, id=r.id) }}{% else %}{{ url_for('voucher_delete', v_type=v_type, id=r.id) }}{% endif %}" 
                                           method="POST" class="m-0 d-inline" 
                                           data-confirm="WARNING: Are you sure you want to permanently delete this Voucher? This will reverse any linked ledger changes.">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                         <button type="submit" class="btn btn-sm btn-outline-danger border rounded-pill px-3 py-1.5 d-flex align-items-center gap-1" title="Delete Voucher">
                                             <i class="bi bi-trash-fill"></i> Delete
                                         </button>

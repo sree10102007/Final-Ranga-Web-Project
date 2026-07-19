@@ -54,6 +54,7 @@
                                 <i class="bi bi-file-earmark-pdf"></i> Invoice
                             </a>
                             <form method="POST" action="{{ url_for('sales_delete', id=r['id']) }}" data-style="display:inline;" data-confirm="Delete this sale record?">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                 <button type="submit" class="btn btn-sm btn-danger" title="Delete"><i class="bi bi-trash"></i></button>
                             </form>
                         </td>

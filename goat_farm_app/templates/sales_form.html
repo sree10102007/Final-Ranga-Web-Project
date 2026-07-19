@@ -27,6 +27,7 @@
         <div class="card border-0 shadow-sm rounded-4">
             <div class="card-body p-4 p-md-5">
                 <form method="POST" action="{% if record %}{{ url_for('sales_edit', s_type=s_type, id=record.id) }}{% else %}{{ url_for('sales_add', s_type=s_type) }}{% endif %}" id="salesForm">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     
                     <!-- Invoice Header Details -->
                     <h5 class="text-success border-bottom pb-2 mb-3 fw-bold">INVOICE DETAILS</h5>

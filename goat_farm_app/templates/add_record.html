@@ -9,6 +9,7 @@
                     <a href="{{ url_for('records') }}" class="btn btn-sm btn-outline-secondary">Cancel</a>
                 </div>
                 <form method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <div class="mb-3">
                         <label class="form-label text-muted">Tag Number *</label>
                         <input type="text" name="tag_number" class="form-control border-primary" required>
