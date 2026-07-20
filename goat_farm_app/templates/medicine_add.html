@@ -22,12 +22,29 @@
                     {% endfor %}
                 </datalist>
             </div>
-            
+
             <div class="col-md-6">
                 <label class="form-label fw-bold small text-muted">CONSULTATION DATE <span class="text-danger">*</span></label>
                 <input type="date" name="consultation_date" class="form-control" required id="todayDate">
             </div>
-            
+
+            <div class="col-md-6">
+                <label class="form-label fw-bold small text-muted">DOCTOR / VET NAME</label>
+                <div class="input-group">
+                    <select name="doctor_name" class="form-select" id="doctorSelect">
+                        <option value="">-- Select Doctor --</option>
+                        {% for doc in doctors %}
+                        <option value="{{ doc.doctor_name }}">{{ doc.doctor_name }}</option>
+                        {% endfor %}
+                        <option value="__other__">✏️ Type manually...</option>
+                    </select>
+                    <a href="{{ url_for('doctor_add') }}" class="btn btn-outline-secondary" title="Add new doctor" target="_blank">
+                        <i class="bi bi-plus-lg"></i> Add Doctor
+                    </a>
+                </div>
+                <input type="text" name="doctor_name_manual" id="doctorManual" class="form-control mt-2 d-none" placeholder="Enter doctor name manually">
+            </div>
+
             <div class="col-md-6">
                 <label class="form-label fw-bold small text-muted">MEDICINE NAME <span class="text-danger">*</span></label>
                 <input type="text" name="medicine_name" class="form-control" required placeholder="e.g. Antibiotic XYZ">
@@ -58,5 +75,21 @@
 
 <script nonce="{{ csp_nonce }}">
 document.getElementById('todayDate').valueAsDate = new Date();
+
+// Doctor select toggle
+document.getElementById('doctorSelect').addEventListener('change', function() {
+    const manual = document.getElementById('doctorManual');
+    if (this.value === '__other__') {
+        manual.classList.remove('d-none');
+        manual.required = true;
+        manual.name = 'doctor_name';
+        this.name = 'doctor_name_dropdown_unused';
+    } else {
+        manual.classList.add('d-none');
+        manual.required = false;
+        manual.name = 'doctor_name_manual';
+        this.name = 'doctor_name';
+    }
+});
 </script>
 {% endblock %}

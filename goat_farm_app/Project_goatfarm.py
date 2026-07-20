@@ -936,6 +936,10 @@ def init_db():
             conn.execute("ALTER TABLE vaccine_records ADD COLUMN IF NOT EXISTS next_due_date DATE")
         except sqlite3.OperationalError:
             pass
+        try:
+            conn.execute("ALTER TABLE vaccine_records ADD COLUMN IF NOT EXISTS doctor_name TEXT")
+        except sqlite3.OperationalError:
+            pass
         conn.execute('''
             CREATE TABLE IF NOT EXISTS doctor_details (
                 id SERIAL PRIMARY KEY,
@@ -3218,19 +3222,21 @@ def vaccine_add():
             INSERT INTO vaccine_records (
                 sr_no, tag_no, vaccine_date, vaccine_name, amount_spent, 
                 additional_vaccines, additional_medicines, required_vaccines, 
-                required_medicines, notes, next_due_date
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                required_medicines, notes, next_due_date, doctor_name
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', (
             f.get('sr_no'), f.get('tag_no'), f.get('vaccine_date'), f.get('vaccine_name'), 
             f.get('amount_spent') or 0.0, f.get('additional_vaccines'), f.get('additional_medicines'),
-            f.get('required_vaccines'), f.get('required_medicines'), f.get('notes'), f.get('next_due_date')
+            f.get('required_vaccines'), f.get('required_medicines'), f.get('notes'), f.get('next_due_date'),
+            f.get('doctor_name') or None
         ))
         db.commit()
         flash('Vaccine record added successfully!', 'success')
         return redirect(url_for('vaccine'))
-    
+
     goats = db.execute('SELECT tag_no FROM master_records ORDER BY tag_no ASC').fetchall()
-    return render_template('vaccine_add.html', goats=goats)
+    doctors = db.execute('SELECT doctor_name FROM doctor_details ORDER BY doctor_name ASC').fetchall()
+    return render_template('vaccine_add.html', goats=goats, doctors=doctors)
 
 @app.route('/vaccine')
 def vaccine():
