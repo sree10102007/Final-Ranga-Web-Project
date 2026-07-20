@@ -255,8 +255,12 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label small text-muted fw-bold">Scheduled Reminder Date</label>
-                        <input type="date" name="reminder_date" id="reminder_date_picker" class="form-control" required>
+                        <label class="form-label small text-muted fw-bold">Remind in How Many Days?</label>
+                        <div class="input-group">
+                            <input type="number" name="reminder_days" id="reminder_days_input" class="form-control" placeholder="e.g. 30" min="1" max="3650" required>
+                            <span class="input-group-text bg-light text-muted">days from today</span>
+                        </div>
+                        <div class="form-text text-muted mt-1">The reminder will trigger on: <strong id="computed_reminder_date">-</strong></div>
                     </div>
                 </div>
                 <div class="modal-footer border-0">
@@ -270,11 +274,22 @@
 
 <script nonce="{{ csp_nonce }}">
     document.addEventListener("DOMContentLoaded", function() {
-        const today = new Date();
-        const yyyy = today.getFullYear();
-        const mm = String(today.getMonth() + 1).padStart(2, '0');
-        const dd = String(today.getDate()).padStart(2, '0');
-        document.getElementById('reminder_date_picker').value = `${yyyy}-${mm}-${dd}`;
+        const daysInput = document.getElementById('reminder_days_input');
+        const computedLabel = document.getElementById('computed_reminder_date');
+        function updateComputedDate() {
+            const days = parseInt(daysInput.value);
+            if (!isNaN(days) && days > 0) {
+                const d = new Date();
+                d.setDate(d.getDate() + days);
+                const yyyy = d.getFullYear();
+                const mm = String(d.getMonth() + 1).padStart(2, '0');
+                const dd = String(d.getDate()).padStart(2, '0');
+                computedLabel.textContent = `${yyyy}-${mm}-${dd}`;
+            } else {
+                computedLabel.textContent = '-';
+            }
+        }
+        daysInput.addEventListener('input', updateComputedDate);
     });
 </script>
 {% endblock %}

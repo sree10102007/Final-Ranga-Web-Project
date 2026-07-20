@@ -7197,14 +7197,14 @@ def add_batch_reminder():
     batch_name = request.form.get('batch_name')
     reminder_type = request.form.get('reminder_type')
     item_name = request.form.get('item_name')
-    reminder_date = request.form.get('reminder_date')
+    reminder_days = int(request.form.get('reminder_days') or 1)
+    reminder_date = (datetime.now().date() + timedelta(days=reminder_days)).strftime('%Y-%m-%d')
     db.execute('''
         INSERT INTO batch_reminders (batch_name, reminder_type, item_name, reminder_date, is_completed)
         VALUES (?, ?, ?, ?, 0)
     ''', (batch_name, reminder_type, item_name, reminder_date))
     db.commit()
-    
-    flash(f'{reminder_type} reminder for {batch_name} set for {reminder_date} successfully.', 'success')
+    flash(f'{reminder_type} reminder for {batch_name} set for {reminder_date} ({reminder_days} days from today).', 'success')
     return redirect(url_for('goat_batches'))
 
 @app.route('/delete_batch_reminder/<int:id>', methods=['POST'])
