@@ -300,55 +300,44 @@
         const rawText = document.getElementById('goat-weights-data').textContent;
         const data = JSON.parse(rawText);
         
-        // Collect all unique dates across all goats
-        let uniqueDates = [];
-        data.forEach(function(g) {
-            if (g.history) {
-                g.history.forEach(function(h) {
-                    if (h.recorded_date && !uniqueDates.includes(h.recorded_date)) {
-                        uniqueDates.push(h.recorded_date);
-                    }
-                });
-            }
-        });
-        
-        // Sort dates chronologically
-        uniqueDates.sort(function(a, b) {
-            return new Date(a) - new Date(b);
-        });
-        
-        // Build CSV Header
-        let csv = "Tag Number,Color";
-        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-        uniqueDates.forEach(function(dateStr, idx) {
-            const d = new Date(dateStr);
-            const day = String(d.getDate()).padStart(2, '0');
-            const month = months[d.getMonth()];
-            const year = d.getFullYear();
-            csv += `,${day} ${month} ${year} - ${idx + 1}`;
-        });
-        csv += "\n";
+        // Build CSV Header as requested: goatid,color,male/female,Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec
+        const headers = ["goatid", "color", "male/female", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        let csv = headers.join(",") + "\n";
         
         // Build Rows
         data.forEach(function(g) {
-            let row = `"${g.tag_no}","${g.color}"`;
+            let genderVal = g.gender || '';
+            if (genderVal === 'M') genderVal = 'Male';
+            if (genderVal === 'F') genderVal = 'Female';
             
-            // Map of date -> weight
-            let dateWeightMap = {};
-            if (g.history) {
+            let rowParts = [
+                `"${(g.tag_no || '').replace(/"/g, '""')}"`,
+                `"${(g.color || '').replace(/"/g, '""')}"`,
+                `"${genderVal.replace(/"/g, '""')}"`
+            ];
+            
+            // Map month index (0 = Jan, 11 = Dec) -> weight entered
+            let monthWeights = Array(12).fill("");
+            
+            if (g.history && g.history.length > 0) {
                 g.history.forEach(function(h) {
-                    dateWeightMap[h.recorded_date] = h.weight_kg;
+                    if (h.recorded_date && h.weight_kg !== undefined && h.weight_kg !== null && h.weight_kg !== '') {
+                        const parts = h.recorded_date.split('-');
+                        if (parts.length >= 2) {
+                            const monthIdx = parseInt(parts[1], 10) - 1; // Month index 0-11
+                            if (monthIdx >= 0 && monthIdx <= 11) {
+                                monthWeights[monthIdx] = h.weight_kg;
+                            }
+                        }
+                    }
                 });
             }
             
-            uniqueDates.forEach(function(dateStr) {
-                if (dateWeightMap[dateStr] !== undefined) {
-                    row += `,${dateWeightMap[dateStr]}`;
-                } else {
-                    row += ",";
-                }
-            });
-            csv += row + "\n";
+            for (let i = 0; i < 12; i++) {
+                rowParts.push(monthWeights[i] !== "" ? monthWeights[i] : "");
+            }
+            
+            csv += rowParts.join(",") + "\n";
         });
         
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
