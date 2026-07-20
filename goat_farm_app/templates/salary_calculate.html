@@ -44,13 +44,21 @@
             </div>
             <div class="col-md-4 col-12">
                 <div class="d-flex gap-2">
-                    <button type="button" onclick="if(confirm('Are you sure you want to roll back the last salary payment?')) { document.getElementById('rollback-form').submit(); }" class="btn btn-warning w-50 py-2 fw-600">Restore</button>
-                    <button type="submit" class="btn btn-success w-50 py-2 fw-bold text-nowrap">Calculate</button>
+                    <button type="button" onclick="if(confirm('Are you sure you want to roll back the last salary payment?')) { document.getElementById('rollback-form').submit(); }" class="btn btn-warning w-50 py-2 fw-600">
+                        <i class="bi bi-arrow-counterclockwise me-1"></i> Restore
+                    </button>
+                    <button type="submit" class="btn btn-success w-50 py-2 fw-bold text-nowrap">
+                        <i class="bi bi-calculator me-1"></i> Calculate
+                    </button>
                 </div>
             </div>
         </form>
         <form id="rollback-form" action="{{ url_for('rollback_salary_payment') }}" method="POST" style="display:none;">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="month" value="{{ month }}">
+            <input type="hidden" name="year" value="{{ year }}">
+            <input type="hidden" name="start_day" value="{{ start_day }}">
+            <input type="hidden" name="end_day" value="{{ end_day }}">
         </form>
     </div>
 </div>
@@ -92,28 +100,46 @@
                     <td class="text-success fw-bold">₹{{ "%.2f"|format(s.paid) }}</td>
                     <td class="text-danger fw-bold">₹{{ "%.2f"|format(s.balance) }}</td>
                     <td class="text-end">
-                        {% if s.balance > 0 %}
-                        <form action="{{ url_for('pay_salary') }}" method="POST" class="d-inline-flex align-items-center gap-2">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                            <input type="hidden" name="employee_id" value="{{ s.id }}">
-                            <input type="hidden" name="month" value="{{ month }}">
-                            <input type="hidden" name="year" value="{{ year }}">
-                            <input type="hidden" name="payment_date" value="{{ today_date }}">
-                            <input type="hidden" name="payment_mode" value="Cash">
-                            <input type="hidden" name="notes" value="Salary payment for {{ month }}/{{ year }}">
-                            
-                            <div class="input-group input-group-sm" data-style="max-width: 150px;">
-                                <span class="input-group-text bg-light text-muted">₹</span>
-                                <input type="number" step="0.01" name="amount" class="form-control" 
-                                       value="{{ "%.2f"|format(s.balance) }}" required max="{{ "%.2f"|format(s.balance) }}">
-                            </div>
-                            <button type="submit" class="btn btn-sm btn-success fw-bold text-nowrap">
-                                <i class="bi bi-check-lg"></i> Pay
-                            </button>
-                        </form>
-                        {% else %}
-                        <span class="badge bg-success py-2 px-3 fs-6 rounded-pill"><i class="bi bi-check-circle-fill me-1"></i>Paid</span>
-                        {% endif %}
+                        <div class="d-inline-flex align-items-center gap-2">
+                            {% if s.balance > 0 %}
+                            <form action="{{ url_for('pay_salary') }}" method="POST" class="d-inline-flex align-items-center gap-2">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <input type="hidden" name="employee_id" value="{{ s.id }}">
+                                <input type="hidden" name="month" value="{{ month }}">
+                                <input type="hidden" name="year" value="{{ year }}">
+                                <input type="hidden" name="start_day" value="{{ start_day }}">
+                                <input type="hidden" name="end_day" value="{{ end_day }}">
+                                <input type="hidden" name="payment_date" value="{{ today_date }}">
+                                <input type="hidden" name="payment_mode" value="Cash">
+                                <input type="hidden" name="notes" value="Salary payment for {{ month }}/{{ year }}">
+                                
+                                <div class="input-group input-group-sm" data-style="max-width: 130px;">
+                                    <span class="input-group-text bg-light text-muted">₹</span>
+                                    <input type="number" step="0.01" name="amount" class="form-control" 
+                                           value="{{ "%.2f"|format(s.balance) }}" required max="{{ "%.2f"|format(s.balance) }}">
+                                </div>
+                                <button type="submit" class="btn btn-sm btn-success fw-bold text-nowrap">
+                                    <i class="bi bi-check-lg"></i> Pay
+                                </button>
+                            </form>
+                            {% else %}
+                            <span class="badge bg-success py-2 px-3 fs-6 rounded-pill"><i class="bi bi-check-circle-fill me-1"></i>Paid</span>
+                            {% endif %}
+
+                            {% if s.paid > 0 %}
+                            <form action="{{ url_for('rollback_salary_payment') }}" method="POST" class="d-inline" data-confirm="Restore/roll back payment of ₹{{ '%.2f'|format(s.paid) }} for {{ s.name }}?">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <input type="hidden" name="employee_id" value="{{ s.id }}">
+                                <input type="hidden" name="month" value="{{ month }}">
+                                <input type="hidden" name="year" value="{{ year }}">
+                                <input type="hidden" name="start_day" value="{{ start_day }}">
+                                <input type="hidden" name="end_day" value="{{ end_day }}">
+                                <button type="submit" class="btn btn-sm btn-outline-warning rounded-pill px-2.5 py-1 small fw-bold" title="Restore last payment for this employee">
+                                    <i class="bi bi-arrow-counterclockwise"></i> Restore
+                                </button>
+                            </form>
+                            {% endif %}
+                        </div>
                     </td>
                 </tr>
                 {% else %}

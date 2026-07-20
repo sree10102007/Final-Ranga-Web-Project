@@ -5612,40 +5612,60 @@ def pay_salary():
     date = request.form.get('payment_date') or datetime.now().strftime('%Y-%m-%d')
     method = request.form.get('payment_mode') or 'Cash'
     
-    month = int(request.form.get('month', datetime.now().month))
-    year = int(request.form.get('year', datetime.now().year))
+    month = request.form.get('month', datetime.now().strftime('%m'))
+    year = request.form.get('year', str(datetime.now().year))
+    start_day = request.form.get('start_day')
+    end_day = request.form.get('end_day')
     
     db.execute('''INSERT INTO salary_payments (employee_id, month, year, net_salary, paid_date, payment_mode) 
                   VALUES (?, ?, ?, ?, ?, ?)''',
-               (emp_id, month, year, amount, date, method))
+               (emp_id, int(month), int(year), amount, date, method))
     
     # Also insert into expenses to reflect in P&L
     emp = db.execute('SELECT name FROM employees WHERE id=?', (emp_id,)).fetchone()
+    emp_name = emp['name'] if emp else ''
     db.execute('''INSERT INTO expenses (date, category, amount, description, status) 
                   VALUES (?, 'Labor', ?, ?, 'Approved')''',
-               (date, amount, f"Salary payment for {emp['name']} ({month}/{year})"))
+               (date, amount, f"Salary payment for {emp_name} ({month}/{year})"))
                
     db.commit()
     flash('Salary paid successfully.', 'success')
-    return redirect(url_for('salary_calculate'))
+    return redirect(url_for('salary_calculate', month=month, year=year, start_day=start_day, end_day=end_day))
 
 @app.route('/rollback_salary_payment', methods=['POST'])
 def rollback_salary_payment():
     if 'user_id' not in session:
         return redirect(url_for('auth.login'))
     db = get_db()
-    last_payment = db.execute('SELECT * FROM salary_payments ORDER BY id DESC LIMIT 1').fetchone()
+    
+    emp_id = request.form.get('employee_id')
+    month = request.form.get('month')
+    year = request.form.get('year')
+    start_day = request.form.get('start_day')
+    end_day = request.form.get('end_day')
+    
+    if emp_id:
+        last_payment = db.execute('SELECT * FROM salary_payments WHERE employee_id=? ORDER BY id DESC LIMIT 1', (emp_id,)).fetchone()
+    else:
+        last_payment = db.execute('SELECT * FROM salary_payments ORDER BY id DESC LIMIT 1').fetchone()
+        
     if last_payment:
         emp = db.execute('SELECT name FROM employees WHERE id=?', (last_payment['employee_id'],)).fetchone()
         emp_name = emp['name'] if emp else 'Unknown'
-        desc_like = f"Salary payment for {emp_name} ({last_payment['month']}/{last_payment['year']})"
-        db.execute("DELETE FROM expenses WHERE category='Labor' AND description=?", (desc_like,))
+        desc_like = f"%Salary payment for {emp_name}%"
+        
+        db.execute("DELETE FROM expenses WHERE (category='Labor' OR category='Salary') AND (description LIKE ? OR amount = ?)", 
+                   (desc_like, last_payment['net_salary']))
         db.execute('DELETE FROM salary_payments WHERE id=?', (last_payment['id'],))
         db.commit()
-        flash(f"Rolled back last payment of ₹{last_payment['net_salary']} for {emp_name}.", "success")
+        
+        res_m = f"{int(last_payment['month']):02d}" if last_payment['month'] else month
+        res_y = last_payment['year'] or year
+        flash(f"Rolled back salary payment of ₹{last_payment['net_salary']} for {emp_name}.", "success")
+        return redirect(url_for('salary_calculate', month=res_m, year=res_y, start_day=start_day, end_day=end_day))
     else:
         flash("No salary payments found to roll back.", "warning")
-    return redirect(url_for('salary_calculate'))
+        return redirect(url_for('salary_calculate', month=month, year=year, start_day=start_day, end_day=end_day))
 
 # ── WAGES ──────────────────────────────────────────────────────────────────────
 @app.route('/wages_list')
