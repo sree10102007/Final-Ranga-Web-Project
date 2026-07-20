@@ -830,8 +830,38 @@ def init_db():
                 service_due_date DATE
             )
         ''')
-        add_column("equipment", "assigned_employee", "TEXT")
-        add_column("equipment", "service_due_date", "DATE")
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS asset_categories (
+                id SERIAL PRIMARY KEY,
+                category_name TEXT UNIQUE NOT NULL
+            )
+        ''')
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS asset_conditions (
+                id SERIAL PRIMARY KEY,
+                condition_name TEXT UNIQUE NOT NULL
+            )
+        ''')
+
+        # Insert default categories if none exist
+        cat_cnt = conn.execute("SELECT COUNT(*) FROM asset_categories").fetchone()[0]
+        if cat_cnt == 0:
+            def_cats = ['Equipment', 'Machinery', 'Tool', 'Vehicle', 'Infrastructure', 'Material', 'Electrical', 'Fencing', 'Others']
+            for c in def_cats:
+                try:
+                    conn.execute("INSERT INTO asset_categories (category_name) VALUES (?)", (c,))
+                except Exception:
+                    pass
+
+        # Insert default conditions if none exist
+        cond_cnt = conn.execute("SELECT COUNT(*) FROM asset_conditions").fetchone()[0]
+        if cond_cnt == 0:
+            def_conds = ['Good', 'Excellent', 'Fair', 'Needs Repair', 'In Service', 'Out of Service', 'Damaged', 'Scrapped']
+            for c in def_conds:
+                try:
+                    conn.execute("INSERT INTO asset_conditions (condition_name) VALUES (?)", (c,))
+                except Exception:
+                    pass
 
         conn.execute('''
             CREATE TABLE IF NOT EXISTS medicine_history (
@@ -6163,25 +6193,49 @@ def equipment():
     if name_filter:
         q += " AND name LIKE ?"; p.append(f'%{name_filter}%')
     if type_filter:
-        q += " AND type LIKE ?"; p.append(f'%{type_filter}%')
+        q += " AND type = ?"; p.append(type_filter)
     if status_filter:
-        q += " AND status=?"; p.append(status_filter)
+        q += " AND status = ?"; p.append(status_filter)
         
     records = db.execute(q, p).fetchall()
-    return render_template('equipment.html', records=records, name_filter=name_filter, type_filter=type_filter, status_filter=status_filter)
+    categories = db.execute("SELECT * FROM asset_categories ORDER BY category_name ASC").fetchall()
+    conditions = db.execute("SELECT * FROM asset_conditions ORDER BY condition_name ASC").fetchall()
+    
+    return render_template('equipment.html', records=records, name_filter=name_filter, type_filter=type_filter, status_filter=status_filter, categories=categories, conditions=conditions)
 
 @app.route('/equipment_add', methods=['GET', 'POST'])
 def equipment_add():
+    db = get_db()
     if request.method == 'POST':
         f = request.form
-        db = get_db()
+        cat = (f.get('type') or '').strip()
+        if cat == '__custom__':
+            cat = (f.get('type_custom') or '').strip()
+            
+        cond = (f.get('condition_status') or '').strip()
+        if cond == '__custom__':
+            cond = (f.get('condition_custom') or '').strip()
+            
+        if cat:
+            ex_cat = db.execute("SELECT 1 FROM asset_categories WHERE category_name = ?", (cat,)).fetchone()
+            if not ex_cat:
+                db.execute("INSERT INTO asset_categories (category_name) VALUES (?)", (cat,))
+
+        if cond:
+            ex_cond = db.execute("SELECT 1 FROM asset_conditions WHERE condition_name = ?", (cond,)).fetchone()
+            if not ex_cond:
+                db.execute("INSERT INTO asset_conditions (condition_name) VALUES (?)", (cond,))
+
         db.execute('INSERT INTO equipment (name, type, purchase_date, purchase_cost, supplier, status, notes, assigned_employee, service_due_date) VALUES (?,?,?,?,?,?,?,?,?)',
-            (f.get('equipment_name'), f.get('type'), f.get('purchase_date'), float(f.get('purchase_cost') or 0.0),
-             f.get('supplier'), f.get('condition_status'), f.get('notes'), f.get('assigned_employee'), f.get('service_due_date')))
+            (f.get('equipment_name'), cat, f.get('purchase_date') or None, float(f.get('purchase_cost') or 0.0),
+             f.get('supplier'), cond, f.get('notes'), f.get('assigned_employee'), f.get('service_due_date') or None))
         db.commit()
-        flash('Asset / Material added!', 'success')
+        flash('Asset / Material added successfully!', 'success')
         return redirect(url_for('equipment'))
-    return render_template('equipment_add.html')
+        
+    categories = db.execute("SELECT * FROM asset_categories ORDER BY category_name ASC").fetchall()
+    conditions = db.execute("SELECT * FROM asset_conditions ORDER BY condition_name ASC").fetchall()
+    return render_template('equipment_add.html', categories=categories, conditions=conditions)
 
 @app.route('/equipment_edit/<int:id>', methods=['GET', 'POST'])
 def equipment_edit(id):
@@ -6192,14 +6246,79 @@ def equipment_edit(id):
         return redirect(url_for('equipment'))
     if request.method == 'POST':
         f = request.form
+        cat = (f.get('type') or '').strip()
+        if cat == '__custom__':
+            cat = (f.get('type_custom') or '').strip()
+            
+        cond = (f.get('condition_status') or '').strip()
+        if cond == '__custom__':
+            cond = (f.get('condition_custom') or '').strip()
+            
+        if cat:
+            ex_cat = db.execute("SELECT 1 FROM asset_categories WHERE category_name = ?", (cat,)).fetchone()
+            if not ex_cat:
+                db.execute("INSERT INTO asset_categories (category_name) VALUES (?)", (cat,))
+
+        if cond:
+            ex_cond = db.execute("SELECT 1 FROM asset_conditions WHERE condition_name = ?", (cond,)).fetchone()
+            if not ex_cond:
+                db.execute("INSERT INTO asset_conditions (condition_name) VALUES (?)", (cond,))
+
         db.execute('UPDATE equipment SET name=?, type=?, purchase_date=?, purchase_cost=?, supplier=?, status=?, notes=?, assigned_employee=?, service_due_date=? WHERE id=?',
-            (f.get('equipment_name'), f.get('type'), f.get('purchase_date'), float(f.get('purchase_cost') or 0.0),
-             f.get('supplier'), f.get('condition_status'), f.get('notes'), f.get('assigned_employee'), f.get('service_due_date'), id))
+            (f.get('equipment_name'), cat, f.get('purchase_date') or None, float(f.get('purchase_cost') or 0.0),
+             f.get('supplier'), cond, f.get('notes'), f.get('assigned_employee'), f.get('service_due_date') or None, id))
         db.commit()
-        flash('Asset / Material updated!', 'success')
+        flash('Asset / Material updated successfully!', 'success')
         return redirect(url_for('equipment'))
+        
     record = db.execute('SELECT * FROM equipment WHERE id=?', (id,)).fetchone()
-    return render_template('equipment_edit.html', record=record)
+    categories = db.execute("SELECT * FROM asset_categories ORDER BY category_name ASC").fetchall()
+    conditions = db.execute("SELECT * FROM asset_conditions ORDER BY condition_name ASC").fetchall()
+    return render_template('equipment_edit.html', record=record, categories=categories, conditions=conditions)
+
+@app.route('/add_asset_category', methods=['POST'])
+def add_asset_category():
+    db = get_db()
+    cat_name = (request.form.get('category_name') or '').strip()
+    if cat_name:
+        ex = db.execute("SELECT 1 FROM asset_categories WHERE category_name = ?", (cat_name,)).fetchone()
+        if not ex:
+            db.execute("INSERT INTO asset_categories (category_name) VALUES (?)", (cat_name,))
+            db.commit()
+            flash(f'Category "{cat_name}" created successfully!', 'success')
+        else:
+            flash(f'Category "{cat_name}" already exists.', 'info')
+    return redirect(url_for('equipment'))
+
+@app.route('/delete_asset_category/<int:id>', methods=['POST'])
+def delete_asset_category(id):
+    db = get_db()
+    db.execute("DELETE FROM asset_categories WHERE id = ?", (id,))
+    db.commit()
+    flash('Category deleted successfully.', 'success')
+    return redirect(url_for('equipment'))
+
+@app.route('/add_asset_condition', methods=['POST'])
+def add_asset_condition():
+    db = get_db()
+    cond_name = (request.form.get('condition_name') or '').strip()
+    if cond_name:
+        ex = db.execute("SELECT 1 FROM asset_conditions WHERE condition_name = ?", (cond_name,)).fetchone()
+        if not ex:
+            db.execute("INSERT INTO asset_conditions (condition_name) VALUES (?)", (cond_name,))
+            db.commit()
+            flash(f'Condition "{cond_name}" created successfully!', 'success')
+        else:
+            flash(f'Condition "{cond_name}" already exists.', 'info')
+    return redirect(url_for('equipment'))
+
+@app.route('/delete_asset_condition/<int:id>', methods=['POST'])
+def delete_asset_condition(id):
+    db = get_db()
+    db.execute("DELETE FROM asset_conditions WHERE id = ?", (id,))
+    db.commit()
+    flash('Condition deleted successfully.', 'success')
+    return redirect(url_for('equipment'))
 
 @app.route('/equipment_delete/<int:id>', methods=['POST'])
 def equipment_delete(id):

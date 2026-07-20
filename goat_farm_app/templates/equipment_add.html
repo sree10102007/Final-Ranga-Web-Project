@@ -8,10 +8,10 @@
     <p class="text-muted mb-0">Record new farm assets, machinery, tools, or materials.</p>
 </div>
 
-<div class="card border-0">
+<div class="card border-0 shadow-sm rounded-4">
     <div class="card-body p-4">
         <form method="POST" action="{{ url_for('equipment_add') }}" class="row g-4">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             
             <div class="col-md-6">
                 <label class="form-label fw-bold small text-muted">ASSET / MATERIAL NAME <span class="text-danger">*</span></label>
@@ -19,16 +19,32 @@
             </div>
 
             <div class="col-md-6">
-                <label class="form-label fw-bold small text-muted">CATEGORY</label>
-                <input type="text" name="type" class="form-control" required placeholder="e.g. Equipment, Tool, Vehicle">
+                <label class="form-label fw-bold small text-muted">CATEGORY <span class="text-danger">*</span></label>
+                <select name="type" id="categorySelect" class="form-select" required data-onchange="toggleCustomCategory()">
+                    <option value="" disabled selected>-- Select Category --</option>
+                    {% for cat in categories %}
+                    <option value="{{ cat.category_name }}">{{ cat.category_name }}</option>
+                    {% endfor %}
+                    <option value="__custom__" class="text-success fw-bold">+ Add New Category...</option>
+                </select>
+                <input type="text" name="type_custom" id="customCategoryInput" class="form-control mt-2 d-none" placeholder="Type new category name...">
             </div>
 
             <div class="col-md-6">
-                <label class="form-label fw-bold small text-muted">CONDITION</label>
-                <select name="condition_status" class="form-select">
-                    <option value="Good">Good</option>
-                    <option value="Needs Repair">Needs Repair</option>
+                <label class="form-label fw-bold small text-muted">CONDITION <span class="text-danger">*</span></label>
+                <select name="condition_status" id="conditionSelect" class="form-select" required data-onchange="toggleCustomCondition()">
+                    <option value="" disabled selected>-- Select Condition --</option>
+                    {% for cond in conditions %}
+                    <option value="{{ cond.condition_name }}">{{ cond.condition_name }}</option>
+                    {% endfor %}
+                    <option value="__custom__" class="text-success fw-bold">+ Add New Condition...</option>
                 </select>
+                <input type="text" name="condition_custom" id="customConditionInput" class="form-control mt-2 d-none" placeholder="Type new condition name...">
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label fw-bold small text-muted">SUPPLIER</label>
+                <input type="text" name="supplier" class="form-control" placeholder="Supplier Name">
             </div>
             
             <div class="col-md-4">
@@ -57,10 +73,38 @@
             </div>
             
             <div class="col-12 mt-4">
-                <button type="submit" class="btn btn-success px-5 py-2 fw-bold">Save Asset / Material</button>
+                <button type="submit" class="btn btn-success px-5 py-2 fw-bold shadow-sm">Save Asset / Material</button>
                 <a href="{{ url_for('equipment') }}" class="btn btn-light px-4 py-2 ms-2">Cancel</a>
             </div>
         </form>
     </div>
 </div>
+
+<script nonce="{{ csp_nonce }}">
+    function toggleCustomCategory() {
+        const sel = document.getElementById('categorySelect');
+        const inp = document.getElementById('customCategoryInput');
+        if (sel.value === '__custom__') {
+            inp.classList.remove('d-none');
+            inp.required = true;
+            inp.focus();
+        } else {
+            inp.classList.add('d-none');
+            inp.required = false;
+        }
+    }
+
+    function toggleCustomCondition() {
+        const sel = document.getElementById('conditionSelect');
+        const inp = document.getElementById('customConditionInput');
+        if (sel.value === '__custom__') {
+            inp.classList.remove('d-none');
+            inp.required = true;
+            inp.focus();
+        } else {
+            inp.classList.add('d-none');
+            inp.required = false;
+        }
+    }
+</script>
 {% endblock %}

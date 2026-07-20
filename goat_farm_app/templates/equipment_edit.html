@@ -8,10 +8,10 @@
     <p class="text-muted mb-0">Update details for an existing asset or material record.</p>
 </div>
 
-<div class="card border-0">
+<div class="card border-0 shadow-sm rounded-4">
     <div class="card-body p-4">
         <form method="POST" action="{{ url_for('equipment_edit', id=record.id) }}" class="row g-4">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             
             <div class="col-md-6">
                 <label class="form-label fw-bold small text-muted">ASSET / MATERIAL NAME <span class="text-danger">*</span></label>
@@ -19,53 +19,106 @@
             </div>
 
             <div class="col-md-6">
-                <label class="form-label fw-bold small text-muted">CATEGORY</label>
-                <input type="text" name="type" class="form-control" required placeholder="e.g. Equipment, Tool, Vehicle" value="{{ record.type or '' }}">
+                <label class="form-label fw-bold small text-muted">CATEGORY <span class="text-danger">*</span></label>
+                <select name="type" id="categorySelect" class="form-select" required data-onchange="toggleCustomCategory()">
+                    <option value="" disabled>-- Select Category --</option>
+                    {% set cat_matched = false %}
+                    {% for cat in categories %}
+                    {% if cat.category_name == record.type %}
+                        {% set cat_matched = true %}
+                    {% endif %}
+                    <option value="{{ cat.category_name }}" {% if record.type == cat.category_name %}selected{% endif %}>{{ cat.category_name }}</option>
+                    {% endfor %}
+                    {% if record.type and not cat_matched %}
+                    <option value="{{ record.type }}" selected>{{ record.type }}</option>
+                    {% endif %}
+                    <option value="__custom__" class="text-success fw-bold">+ Add New Category...</option>
+                </select>
+                <input type="text" name="type_custom" id="customCategoryInput" class="form-control mt-2 d-none" placeholder="Type new category name...">
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label fw-bold small text-muted">CONDITION <span class="text-danger">*</span></label>
+                <select name="condition_status" id="conditionSelect" class="form-select" required data-onchange="toggleCustomCondition()">
+                    <option value="" disabled>-- Select Condition --</option>
+                    {% set cond_matched = false %}
+                    {% for cond in conditions %}
+                    {% if cond.condition_name == record.status %}
+                        {% set cond_matched = true %}
+                    {% endif %}
+                    <option value="{{ cond.condition_name }}" {% if record.status == cond.condition_name %}selected{% endif %}>{{ cond.condition_name }}</option>
+                    {% endfor %}
+                    {% if record.status and not cond_matched %}
+                    <option value="{{ record.status }}" selected>{{ record.status }}</option>
+                    {% endif %}
+                    <option value="__custom__" class="text-success fw-bold">+ Add New Condition...</option>
+                </select>
+                <input type="text" name="condition_custom" id="customConditionInput" class="form-control mt-2 d-none" placeholder="Type new condition name...">
             </div>
 
             <div class="col-md-6">
                 <label class="form-label fw-bold small text-muted">SUPPLIER</label>
                 <input type="text" name="supplier" class="form-control" value="{{ record.supplier or '' }}">
             </div>
-
-            <div class="col-md-6">
-                <label class="form-label fw-bold small text-muted">CONDITION</label>
-                <select name="condition_status" class="form-select">
-                    <option value="Good" {% if record.status == 'Good' %}selected{% endif %}>Good</option>
-                    <option value="Needs Repair" {% if record.status == 'Needs Repair' %}selected{% endif %}>Needs Repair</option>
-                </select>
-            </div>
             
             <div class="col-md-4">
                 <label class="form-label fw-bold small text-muted">PURCHASE DATE</label>
-                <input type="date" name="purchase_date" class="form-control" value="{{ record.purchase_date }}">
+                <input type="date" name="purchase_date" class="form-control" value="{{ record.purchase_date or '' }}">
             </div>
             
             <div class="col-md-4">
                 <label class="form-label fw-bold small text-muted">PURCHASE COST (₹)</label>
-                <input type="number" step="0.01" name="purchase_cost" class="form-control" value="{{ record.purchase_cost }}">
+                <input type="number" step="0.01" name="purchase_cost" class="form-control" value="{{ record.purchase_cost or '' }}">
             </div>
 
             <div class="col-md-4">
                 <label class="form-label fw-bold small text-muted">NEXT SERVICE DUE DATE</label>
-                <input type="date" name="service_due_date" class="form-control" value="{{ record.service_due_date }}">
+                <input type="date" name="service_due_date" class="form-control" value="{{ record.service_due_date or '' }}">
             </div>
 
             <div class="col-md-6">
                 <label class="form-label fw-bold small text-muted">ASSIGNED TO</label>
-                <input type="text" name="assigned_employee" class="form-control" value="{{ record.assigned_employee }}">
+                <input type="text" name="assigned_employee" class="form-control" value="{{ record.assigned_employee or '' }}">
             </div>
             
             <div class="col-12">
                 <label class="form-label fw-bold small text-muted">NOTES</label>
-                <textarea name="notes" class="form-control" rows="3">{{ record.notes }}</textarea>
+                <textarea name="notes" class="form-control" rows="3">{{ record.notes or '' }}</textarea>
             </div>
             
             <div class="col-12 mt-4">
-                <button type="submit" class="btn btn-primary px-5 py-2 fw-bold">Update Asset / Material</button>
+                <button type="submit" class="btn btn-primary px-5 py-2 fw-bold shadow-sm">Update Asset / Material</button>
                 <a href="{{ url_for('equipment') }}" class="btn btn-light px-4 py-2 ms-2">Cancel</a>
             </div>
         </form>
     </div>
 </div>
+
+<script nonce="{{ csp_nonce }}">
+    function toggleCustomCategory() {
+        const sel = document.getElementById('categorySelect');
+        const inp = document.getElementById('customCategoryInput');
+        if (sel.value === '__custom__') {
+            inp.classList.remove('d-none');
+            inp.required = true;
+            inp.focus();
+        } else {
+            inp.classList.add('d-none');
+            inp.required = false;
+        }
+    }
+
+    function toggleCustomCondition() {
+        const sel = document.getElementById('conditionSelect');
+        const inp = document.getElementById('customConditionInput');
+        if (sel.value === '__custom__') {
+            inp.classList.remove('d-none');
+            inp.required = true;
+            inp.focus();
+        } else {
+            inp.classList.add('d-none');
+            inp.required = false;
+        }
+    }
+</script>
 {% endblock %}

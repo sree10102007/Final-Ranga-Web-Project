@@ -8,23 +8,42 @@
         <h2 class="fw-800 text-dark mb-1">Godown & Materials</h2>
         <p class="text-muted mb-0">Track all capital assets, equipment, tools, machinery, and other purchases in the godown.</p>
     </div>
-    <a href="{{ url_for('equipment_add') }}" class="btn btn-success shadow-sm rounded-pill px-4 py-2">
-        <i class="bi bi-plus-circle me-2"></i>Add Asset
-    </a>
+    <div class="d-flex gap-2">
+        <button type="button" class="btn btn-outline-secondary shadow-sm rounded-pill px-3 py-2 fw-semibold" data-bs-toggle="modal" data-bs-target="#settingsModal">
+            <i class="bi bi-gear me-1"></i> Manage Categories & Conditions
+        </button>
+        <a href="{{ url_for('equipment_add') }}" class="btn btn-success shadow-sm rounded-pill px-4 py-2 fw-semibold">
+            <i class="bi bi-plus-circle me-1"></i> Add Asset
+        </a>
+    </div>
 </div>
 
 <div class="card border-0 mb-4 shadow-sm rounded-4">
     <div class="card-body p-4">
         <form method="GET" action="{{ url_for('equipment') }}" class="row g-3 align-items-end">
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <label class="form-label small fw-bold text-muted">Category Filter</label>
-                <input type="text" name="type" class="form-control border-0 bg-light rounded-3" placeholder="Type category..." value="{{ type_filter or '' }}">
+                <select name="type" class="form-select border-0 bg-light rounded-3">
+                    <option value="">All Categories</option>
+                    {% for cat in categories %}
+                    <option value="{{ cat.category_name }}" {% if type_filter == cat.category_name %}selected{% endif %}>{{ cat.category_name }}</option>
+                    {% endfor %}
+                </select>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
+                <label class="form-label small fw-bold text-muted">Condition Filter</label>
+                <select name="status" class="form-select border-0 bg-light rounded-3">
+                    <option value="">All Conditions</option>
+                    {% for cond in conditions %}
+                    <option value="{{ cond.condition_name }}" {% if status_filter == cond.condition_name %}selected{% endif %}>{{ cond.condition_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
                 <label class="form-label small fw-bold text-muted">Search Asset Name</label>
                 <input type="text" name="name" class="form-control border-0 bg-light rounded-3" placeholder="Type asset name..." value="{{ name_filter or '' }}">
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <button type="submit" class="btn btn-success w-100 rounded-3 py-2 fw-semibold">
                     <i class="bi bi-filter me-1"></i> Apply Filters
                 </button>
@@ -42,7 +61,7 @@
                     <th class="py-3">Category</th>
                     <th class="py-3">Purchase Date</th>
                     <th class="py-3 text-end" data-style="width: 160px;">Purchase Cost (Price)</th>
-                    <th class="py-3 text-center" data-style="width: 140px;">Condition Status</th>
+                    <th class="py-3 text-center" data-style="width: 150px;">Condition Status</th>
                     <th class="py-3">Supplier</th>
                     <th class="py-3 text-center" data-style="width: 180px;">Actions</th>
                 </tr>
@@ -55,17 +74,22 @@
                         <div class="small text-muted">ID: #{{ record.id }}</div>
                     </td>
                     <td class="py-3">
-                        <span class="badge bg-success-subtle text-success px-2 py-1.5 rounded-pill small fw-bold">{{ record.type or 'N/A' }}</span>
+                        <span class="badge bg-success-subtle text-success px-2 py-1.5 rounded-pill small fw-bold">{{ record.type or 'Uncategorized' }}</span>
                     </td>
                     <td class="py-3 text-muted">{{ record.purchase_date or 'N/A' }}</td>
                     <td class="py-3 text-end fw-bold text-dark fs-6">
                         ₹{{ "%.2f"|format(record.purchase_cost or 0.0) }}
                     </td>
                     <td class="py-3 text-center">
-                        {% if record.status == 'Good' %}
-                            <span class="badge bg-success px-2 py-1.5 rounded-pill">Good</span>
+                        {% set st = record.status or '' %}
+                        {% if st in ['Good', 'Excellent', 'In Service'] %}
+                            <span class="badge bg-success px-2.5 py-1.5 rounded-pill">{{ st }}</span>
+                        {% elif st in ['Needs Repair', 'Fair', 'Maintenance Due'] %}
+                            <span class="badge bg-warning text-dark px-2.5 py-1.5 rounded-pill">{{ st }}</span>
+                        {% elif st in ['Damaged', 'Out of Service', 'Scrapped'] %}
+                            <span class="badge bg-danger px-2.5 py-1.5 rounded-pill">{{ st }}</span>
                         {% else %}
-                            <span class="badge bg-warning text-dark px-2 py-1.5 rounded-pill">Needs Repair</span>
+                            <span class="badge bg-secondary px-2.5 py-1.5 rounded-pill">{{ st or 'N/A' }}</span>
                         {% endif %}
                     </td>
                     <td class="py-3 text-muted">{{ record.supplier or 'N/A' }}</td>
@@ -78,7 +102,7 @@
                                 <i class="bi bi-pencil"></i>
                             </a>
                             <form action="{{ url_for('equipment_delete', id=record.id) }}" method="POST" class="d-inline" data-confirm="Are you sure you want to delete this asset record?">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                 <button type="submit" class="btn btn-outline-danger btn-sm rounded-circle p-1.5" data-style="width: 32px; height: 32px;" title="Delete Asset">
                                     <i class="bi bi-trash"></i>
                                 </button>
@@ -97,6 +121,112 @@
                 {% endfor %}
             </tbody>
         </table>
+    </div>
+</div>
+
+<!-- Modal for Managing Asset Categories & Conditions -->
+<div class="modal fade" id="settingsModal" tabindex="-1" aria-labelledby="settingsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow rounded-4">
+            <div class="modal-header border-bottom-0 pb-0">
+                <h5 class="modal-title fw-bold text-dark" id="settingsModalLabel">
+                    <i class="bi bi-sliders text-success me-2"></i>Manage Asset Categories & Conditions
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <ul class="nav nav-tabs border-bottom mb-4" id="settingsTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active fw-bold" id="cats-tab" data-bs-toggle="tab" data-bs-target="#cats-pane" type="button" role="tab">Categories</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link fw-bold" id="conds-tab" data-bs-toggle="tab" data-bs-target="#conds-pane" type="button" role="tab">Conditions</button>
+                    </li>
+                </ul>
+                <div class="tab-content" id="settingsTabsContent">
+                    <!-- Categories Tab -->
+                    <div class="tab-pane fade show active" id="cats-pane" role="tabpanel">
+                        <form method="POST" action="{{ url_for('add_asset_category') }}" class="row g-2 mb-4">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <div class="col-8">
+                                <input type="text" name="category_name" class="form-control" placeholder="e.g. Solar Systems, Irrigation, Hardware" required>
+                            </div>
+                            <div class="col-4">
+                                <button type="submit" class="btn btn-success w-100 fw-bold"><i class="bi bi-plus-lg me-1"></i> Add Category</button>
+                            </div>
+                        </form>
+
+                        <div class="table-responsive" style="max-height: 250px;">
+                            <table class="table table-sm align-middle">
+                                <thead>
+                                    <tr class="table-light">
+                                        <th>Category Name</th>
+                                        <th class="text-end">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for c in categories %}
+                                    <tr>
+                                        <td class="fw-semibold">{{ c.category_name }}</td>
+                                        <td class="text-end">
+                                            <form method="POST" action="{{ url_for('delete_asset_category', id=c.id) }}" class="d-inline" data-confirm="Delete category '{{ c.category_name }}'?">
+                                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger py-0 px-2"><i class="bi bi-trash"></i></button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    {% else %}
+                                    <tr><td colspan="2" class="text-muted text-center py-2">No categories created yet.</td></tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Conditions Tab -->
+                    <div class="tab-pane fade" id="conds-pane" role="tabpanel">
+                        <form method="POST" action="{{ url_for('add_asset_condition') }}" class="row g-2 mb-4">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <div class="col-8">
+                                <input type="text" name="condition_name" class="form-control" placeholder="e.g. Heavy Duty, Needs Servicing, Retired" required>
+                            </div>
+                            <div class="col-4">
+                                <button type="submit" class="btn btn-success w-100 fw-bold"><i class="bi bi-plus-lg me-1"></i> Add Condition</button>
+                            </div>
+                        </form>
+
+                        <div class="table-responsive" style="max-height: 250px;">
+                            <table class="table table-sm align-middle">
+                                <thead>
+                                    <tr class="table-light">
+                                        <th>Condition Name</th>
+                                        <th class="text-end">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for cond in conditions %}
+                                    <tr>
+                                        <td class="fw-semibold">{{ cond.condition_name }}</td>
+                                        <td class="text-end">
+                                            <form method="POST" action="{{ url_for('delete_asset_condition', id=cond.id) }}" class="d-inline" data-confirm="Delete condition '{{ cond.condition_name }}'?">
+                                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger py-0 px-2"><i class="bi bi-trash"></i></button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    {% else %}
+                                    <tr><td colspan="2" class="text-muted text-center py-2">No conditions created yet.</td></tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-top-0 pt-0">
+                <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}
