@@ -2654,31 +2654,51 @@ def mortality_add():
     db = get_db()
     if request.method == 'POST':
         f = request.form
-        db = get_db()
-        db.execute('''
-            INSERT INTO mortality_records (
-                sr_no, tag_id, breed, breed_percent, gender, birth_date, expired_date, 
-                total_age_month, weight_kgs, insurance_inform_date, insurance_claim_date,
-                current_value, claim_amount, cause_of_death
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (
-            f.get('sr_no'), f.get('tag_id'), f.get('breed'), f.get('breed_percent'), f.get('gender'),
-            f.get('birth_date'), f.get('expired_date'), f.get('total_age_month'), f.get('weight_kgs'), 
-            f.get('insurance_inform_date'), f.get('insurance_claim_date'), f.get('current_value'), 
-            f.get('claim_amount'), f.get('cause_of_death')
-        ))
+        tag_id = (f.get('tag_id') or '').strip()
         
-        # LOGIC FIX: Update status in master_records
-        db.execute("UPDATE master_records SET status = 'Expired', mortality_date = ?, mortality_reason = ? WHERE tag_no = ?",
-                   (f.get('expired_date'), f.get('cause_of_death'), f.get('tag_id')))
+        # Check if record for this tag already exists in mortality_records to avoid duplicates
+        existing = db.execute('SELECT id FROM mortality_records WHERE tag_id = ?', (tag_id,)).fetchone() if tag_id else None
+        if existing:
+            db.execute('''
+                UPDATE mortality_records SET 
+                sr_no = ?, breed = ?, breed_percent = ?, gender = ?, birth_date = ?,
+                expired_date = ?, total_age_month = ?, weight_kgs = ?, insurance_inform_date = ?,
+                insurance_claim_date = ?, current_value = ?, claim_amount = ?, cause_of_death = ?
+                WHERE id = ?
+            ''', (
+                f.get('sr_no'), f.get('breed'), f.get('breed_percent'), f.get('gender'),
+                f.get('birth_date') or None, f.get('expired_date') or None, f.get('total_age_month'), f.get('weight_kgs'), 
+                f.get('insurance_inform_date') or None, f.get('insurance_claim_date') or None, f.get('current_value'), 
+                f.get('claim_amount'), f.get('cause_of_death'), existing['id']
+            ))
+        else:
+            db.execute('''
+                INSERT INTO mortality_records (
+                    sr_no, tag_id, breed, breed_percent, gender, birth_date, expired_date, 
+                    total_age_month, weight_kgs, insurance_inform_date, insurance_claim_date,
+                    current_value, claim_amount, cause_of_death
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                f.get('sr_no'), tag_id, f.get('breed'), f.get('breed_percent'), f.get('gender'),
+                f.get('birth_date') or None, f.get('expired_date') or None, f.get('total_age_month'), f.get('weight_kgs'), 
+                f.get('insurance_inform_date') or None, f.get('insurance_claim_date') or None, f.get('current_value'), 
+                f.get('claim_amount'), f.get('cause_of_death')
+            ))
+        
+        # Update status in master_records
+        if tag_id:
+            db.execute("UPDATE master_records SET status = 'Expired', mortality_date = ?, mortality_reason = ? WHERE tag_no = ?",
+                       (f.get('expired_date') or None, f.get('cause_of_death'), tag_id))
         
         db.commit()
-        flash('Mortality record added successfully!', 'success')
+        flash('Mortality record saved successfully!', 'success')
         return redirect(url_for('mortality'))
+    
     db = get_db()
     res = db.execute('SELECT MAX(CAST(sr_no AS INTEGER)) FROM mortality_records').fetchone()[0]
     next_sr = (res or 0) + 1
-    return render_template('mortality_add.html', next_sr=next_sr)
+    goats = db.execute("SELECT tag_no FROM master_records WHERE status = 'Active' ORDER BY tag_no ASC").fetchall()
+    return render_template('mortality_add.html', next_sr=next_sr, goats=goats)
 
 @app.route('/mortality')
 def mortality():
@@ -7006,11 +7026,16 @@ def inject_user_admin_status():
 def api_goat_lookup(tag_id):
     db = get_db()
     exclude_sr_no = request.args.get('exclude_sr_no')
-    goat = db.execute('SELECT breed, breed_percent, gender, weight_kg, status FROM master_records WHERE tag_no = ?', (tag_id,)).fetchone()
+    goat = db.execute('SELECT tag_no, breed, breed_percent, gender, weight_kg, status, dob, purchase_amount FROM master_records WHERE tag_no = ?', (tag_id,)).fetchone()
     if not goat:
-        return jsonify({'found': False})
+        kid = db.execute('SELECT kid_id as tag_no, breed, breed_percent, gender, birth_weight as weight_kg, birth_date as dob, insurance_amount as purchase_amount FROM kid_records WHERE kid_id = ?', (tag_id,)).fetchone()
+        if kid:
+            goat = kid
+        else:
+            return jsonify({'found': False})
     
-    already_sold = goat['status'] == 'Sold'
+    g = dict(goat)
+    already_sold = g.get('status') == 'Sold'
     if already_sold and exclude_sr_no:
         was_sold_here = db.execute('SELECT 1 FROM sales_records WHERE tag_id = ? AND sr_no = ?', (tag_id, exclude_sr_no)).fetchone()
         if was_sold_here:
@@ -7018,13 +7043,17 @@ def api_goat_lookup(tag_id):
             
     return jsonify({
         'found': True,
-        'breed': goat['breed'],
-        'breed_percent': goat['breed_percent'],
-        'gender': goat['gender'],
-        'weight_kg': goat['weight_kg'],
-        'status': goat['status'],
+        'tag_no': g.get('tag_no'),
+        'breed': g.get('breed') or '',
+        'breed_percent': g.get('breed_percent') or '',
+        'gender': g.get('gender') or '',
+        'weight_kg': g.get('weight_kg') or '',
+        'dob': g.get('dob') or '',
+        'birth_date': g.get('dob') or '',
+        'purchase_amount': g.get('purchase_amount') or 0.0,
+        'status': g.get('status') or 'Active',
         'already_sold': already_sold,
-        'already_expired': goat['status'] == 'Expired'
+        'already_expired': g.get('status') == 'Expired'
     })
 
 @app.route('/api/notifications')

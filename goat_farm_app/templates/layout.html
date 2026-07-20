@@ -420,7 +420,7 @@
 
     // Run immediately for static forms
     function setDates() {
-      const skipNames = ['selling_date', 'mortality_date', 'insurance_inform_date', 'insurance_claim_date'];
+      const skipNames = ['selling_date', 'mortality_date', 'insurance_inform_date', 'insurance_claim_date', 'expired_date', 'birth_date'];
       document.querySelectorAll('input[type="date"]').forEach(function(input) {
         // Exclude specific lifecycle dates from auto-setting to today's date
         if (input.classList.contains('no-auto-date') || 

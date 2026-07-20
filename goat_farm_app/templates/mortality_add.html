@@ -10,36 +10,80 @@
         <div class="card border-0 shadow-sm rounded-4">
             <div class="card-body p-4 p-md-5">
                 <form method="POST" action="{{ url_for('mortality_add') }}">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     
                     <h5 class="text-danger mb-3 border-bottom pb-2">Identification</h5>
                     <div class="row g-3 mb-4">
-                        <div class="col-md-2"><label class="form-label text-muted">Sr#</label><input type="text" class="form-control" name="sr_no" value="{{ next_sr }}"></div>
-                        <div class="col-md-4"><label class="form-label text-muted">Tag ID *</label><input type="text" class="form-control border-danger" name="tag_id" required></div>
-                        <div class="col-md-3"><label class="form-label text-muted">Breed</label><input type="text" class="form-control" name="breed"></div>
-                        <div class="col-md-3"><label class="form-label text-muted">Breed %</label><input type="text" class="form-control" name="breed_percent"></div>
+                        <div class="col-md-2">
+                            <label class="form-label text-muted">Sr#</label>
+                            <input type="text" class="form-control" name="sr_no" value="{{ next_sr }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label text-muted">Tag ID *</label>
+                            <input type="text" class="form-control border-danger" name="tag_id" id="mortality_tag_id" list="goatTagsList" placeholder="Enter or select Tag ID" required data-onchange="lookupMortalityGoat()">
+                            <datalist id="goatTagsList">
+                                {% for g in goats %}
+                                <option value="{{ g.tag_no }}">
+                                {% endfor %}
+                            </datalist>
+                            <div id="mortality_tag_feedback" class="form-text small mt-1"></div>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label text-muted">Breed</label>
+                            <input type="text" class="form-control" name="breed" id="mortality_breed">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label text-muted">Breed %</label>
+                            <input type="text" class="form-control" name="breed_percent" id="mortality_breed_percent">
+                        </div>
                     </div>
 
                     <h5 class="text-danger mb-3 border-bottom pb-2">Life Info</h5>
                     <div class="row g-3 mb-4">
                         <div class="col-md-2">
                             <label class="form-label text-muted">Gender</label>
-                            <select class="form-select" name="gender">
-                                <option value=""></option><option value="M">Male</option><option value="F">Female</option>
+                            <select class="form-select" name="gender" id="mortality_gender">
+                                <option value=""></option>
+                                <option value="M">Male</option>
+                                <option value="F">Female</option>
                             </select>
                         </div>
-                        <div class="col-md-3"><label class="form-label text-muted">Birth Date</label><input type="date" class="form-control" name="birth_date"></div>
-                        <div class="col-md-3"><label class="form-label text-muted">Expired Date</label><input type="date" class="form-control border-danger" name="expired_date"></div>
-                        <div class="col-md-2"><label class="form-label text-muted">Age (Months)</label><input type="text" class="form-control" name="total_age_month" placeholder="e.g. 14"></div>
-                        <div class="col-md-2"><label class="form-label text-muted">Weight (KGS)</label><input type="number" step="0.01" class="form-control" name="weight_kgs"></div>
+                        <div class="col-md-3">
+                            <label class="form-label text-muted">Birth Date</label>
+                            <input type="date" class="form-control no-auto-date" data-no-auto-date="true" name="birth_date" id="mortality_birth_date" data-onchange="calculateMortalityAge()">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label text-muted">Expired Date *</label>
+                            <input type="date" class="form-control border-danger no-auto-date" data-no-auto-date="true" name="expired_date" id="mortality_expired_date" required data-onchange="calculateMortalityAge()">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label text-muted">Age (Months)</label>
+                            <input type="text" class="form-control" name="total_age_month" id="mortality_age_month" placeholder="e.g. 14">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label text-muted">Weight (KGS)</label>
+                            <input type="number" step="0.01" class="form-control" name="weight_kgs" id="mortality_weight">
+                        </div>
                     </div>
 
                     <h5 class="text-danger mb-3 border-bottom pb-2">Insurance & Financials</h5>
                     <div class="row g-3 mb-4">
-                        <div class="col-md-3"><label class="form-label text-muted">Current Value (₹)</label><input type="number" step="0.01" class="form-control" name="current_value"></div>
-                        <div class="col-md-3"><label class="form-label text-muted">Insurance Inform Date</label><input type="date" class="form-control" name="insurance_inform_date"></div>
-                        <div class="col-md-3"><label class="form-label text-muted">Insurance Claim Date</label><input type="date" class="form-control" name="insurance_claim_date"></div>
-                        <div class="col-md-3"><label class="form-label text-muted">Claim Amount (₹)</label><input type="number" step="0.01" class="form-control" name="claim_amount"></div>
+                        <div class="col-md-3">
+                            <label class="form-label text-muted">Current Value (₹)</label>
+                            <input type="number" step="0.01" class="form-control" name="current_value" id="mortality_value">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label text-muted">Insurance Inform Date</label>
+                            <input type="date" class="form-control no-auto-date" data-no-auto-date="true" name="insurance_inform_date">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label text-muted">Insurance Claim Date</label>
+                            <input type="date" class="form-control no-auto-date" data-no-auto-date="true" name="insurance_claim_date">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label text-muted">Claim Amount (₹)</label>
+                            <input type="number" step="0.01" class="form-control" name="claim_amount">
+                        </div>
                     </div>
                     
                     <h5 class="text-danger mb-3 border-bottom pb-2">Cause Of Death</h5>
@@ -58,4 +102,77 @@
         </div>
     </div>
 </div>
+
+<script nonce="{{ csp_nonce }}">
+    function resetMortalityFields() {
+        document.getElementById('mortality_breed').value = '';
+        document.getElementById('mortality_breed_percent').value = '';
+        document.getElementById('mortality_gender').value = '';
+        document.getElementById('mortality_birth_date').value = '';
+        document.getElementById('mortality_age_month').value = '';
+        document.getElementById('mortality_weight').value = '';
+        document.getElementById('mortality_value').value = '';
+        document.getElementById('mortality_tag_feedback').innerHTML = '';
+    }
+
+    function calculateMortalityAge() {
+        const birthStr = document.getElementById('mortality_birth_date').value;
+        const expStr = document.getElementById('mortality_expired_date').value || new Date().toISOString().split('T')[0];
+        if (birthStr && expStr) {
+            const bDate = new Date(birthStr);
+            const eDate = new Date(expStr);
+            if (!isNaN(bDate) && !isNaN(eDate) && eDate >= bDate) {
+                const months = (eDate.getFullYear() - bDate.getFullYear()) * 12 + (eDate.getMonth() - bDate.getMonth());
+                document.getElementById('mortality_age_month').value = Math.max(0, months);
+            }
+        }
+    }
+
+    function lookupMortalityGoat() {
+        const tagId = document.getElementById('mortality_tag_id').value.trim();
+        const feedback = document.getElementById('mortality_tag_feedback');
+        if (!tagId) {
+            resetMortalityFields();
+            return;
+        }
+
+        fetch('/api/goat_lookup/' + encodeURIComponent(tagId))
+            .then(res => res.json())
+            .then(data => {
+                if (data.found) {
+                    document.getElementById('mortality_breed').value = data.breed || '';
+                    document.getElementById('mortality_breed_percent').value = data.breed_percent || '';
+                    document.getElementById('mortality_gender').value = data.gender || '';
+                    if (data.dob) {
+                        document.getElementById('mortality_birth_date').value = data.dob;
+                    }
+                    if (data.weight_kg) {
+                        document.getElementById('mortality_weight').value = data.weight_kg;
+                    }
+                    if (data.purchase_amount) {
+                        document.getElementById('mortality_value').value = data.purchase_amount;
+                    }
+                    calculateMortalityAge();
+                    feedback.innerHTML = '<span class="text-success"><i class="bi bi-check-circle-fill"></i> Goat details loaded for Tag ' + data.tag_no + '</span>';
+                } else {
+                    resetMortalityFields();
+                    feedback.innerHTML = '<span class="text-muted"><i class="bi bi-info-circle"></i> New Tag ID — enter details manually.</span>';
+                }
+            })
+            .catch(() => {
+                feedback.innerHTML = '';
+            });
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const expDate = document.getElementById('mortality_expired_date');
+        if (!expDate.value) {
+            const d = new Date();
+            const yyyy = d.getFullYear();
+            const mm = String(d.getMonth() + 1).padStart(2, '0');
+            const dd = String(d.getDate()).padStart(2, '0');
+            expDate.value = `${yyyy}-${mm}-${dd}`;
+        }
+    });
+</script>
 {% endblock %}
