@@ -1302,10 +1302,9 @@ def dashboard():
     search_q = request.args.get('search', '')
     
     if not start_date or not end_date:
-        # Default to current year to match P&L default
-        current_year = datetime.now().year
-        start_date = f"{current_year}-01-01"
-        end_date = f"{current_year}-12-31"
+        # Default to lifetime range
+        start_date = "1970-01-01"
+        end_date = "2099-12-31"
         
     # 1. Dashboard Metrics
     total_goats = db.execute("SELECT COUNT(*) FROM master_records WHERE status = 'Active'").fetchone()[0] or 0
