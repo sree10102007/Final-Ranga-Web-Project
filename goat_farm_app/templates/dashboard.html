@@ -20,6 +20,15 @@
             <h2 class="fw-800 text-dark mb-1">Farm Overview</h2>
             <p class="text-muted mb-0">At-a-glance summary of your farm's performance and inventory.</p>
         </div>
+        <div class="d-flex align-items-center bg-white shadow-sm rounded-pill px-3.5 py-2 border border-success border-opacity-25">
+            <div class="bg-success bg-opacity-10 rounded-circle me-3 d-flex align-items-center justify-content-center" style="width: 42px; height: 42px;">
+                <i class="bi bi-clock-history text-success fs-5"></i>
+            </div>
+            <div>
+                <div class="fw-bold text-dark lh-sm fs-6" id="ist-live-clock">--:--:-- --</div>
+                <div class="text-muted small lh-sm fw-semibold" id="ist-live-date" style="font-size: 0.75rem;">Loading IST Time...</div>
+            </div>
+        </div>
     </div>
 
     <!-- Consolidated Search and Date Filter -->
@@ -174,5 +183,45 @@
         </div>
     </div>
 </div>
-</div>
+
+<script nonce="{{ csp_nonce }}">
+    function updateISTClock() {
+        const now = new Date();
+        
+        // Format Date in Indian Standard Time (IST)
+        const dateOptions = {
+            timeZone: 'Asia/Kolkata',
+            weekday: 'short',
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric'
+        };
+        const dateStr = now.toLocaleDateString('en-IN', dateOptions);
+
+        // Format Time in IST with 12-hour AM/PM format
+        const timeOptions = {
+            timeZone: 'Asia/Kolkata',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: true
+        };
+        const timeStr = now.toLocaleTimeString('en-IN', timeOptions);
+
+        const clockEl = document.getElementById('ist-live-clock');
+        const dateEl = document.getElementById('ist-live-date');
+
+        if (clockEl) {
+            clockEl.textContent = timeStr + ' (IST)';
+        }
+        if (dateEl) {
+            dateEl.textContent = dateStr;
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        updateISTClock();
+        setInterval(updateISTClock, 1000);
+    });
+</script>
 {% endblock %}
