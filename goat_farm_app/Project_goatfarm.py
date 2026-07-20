@@ -7438,7 +7438,7 @@ def goat_weights():
 
         where_sql = " AND ".join(where_clauses)
         history = db.execute(
-            f"SELECT weight, unit, recorded_date, recorded_by FROM goat_weights WHERE {where_sql} ORDER BY recorded_date ASC, id ASC",
+            f"SELECT id, weight, unit, recorded_date, recorded_by FROM goat_weights WHERE {where_sql} ORDER BY recorded_date ASC, id ASC",
             tuple(params)
         ).fetchall()
 
@@ -7460,6 +7460,7 @@ def goat_weights():
             if hasattr(rd, 'strftime'):
                 rd = rd.strftime('%Y-%m-%d')
             history_list.append({
+                'id':           h['id'],
                 'weight_kg':    h['weight'],
                 'unit':         h['unit'] or 'kg',
                 'recorded_date': rd,
@@ -7675,7 +7676,28 @@ def get_goat_weights_summary():
             'latest_recorded_date': latest_date
         })
         
-    return jsonify({'success': True, 'summary': result})
+@app.route('/delete_goat_weight/<int:id>', methods=['POST'])
+def delete_goat_weight(id):
+    if 'user_id' not in session:
+        return redirect(url_for('auth.login'))
+    db = get_db()
+    
+    entry = db.execute("SELECT goat_tag_no FROM goat_weights WHERE id = ?", (id,)).fetchone()
+    if entry:
+        tag_no = entry['goat_tag_no']
+        db.execute("DELETE FROM goat_weights WHERE id = ?", (id,))
+        
+        # Sync current weight_kg in master_records with latest remaining weight record
+        latest = db.execute("SELECT weight FROM goat_weights WHERE goat_tag_no = ? ORDER BY recorded_date DESC, id DESC LIMIT 1", (tag_no,)).fetchone()
+        if latest:
+            db.execute("UPDATE master_records SET weight_kg = ? WHERE tag_no = ?", (latest['weight'], tag_no))
+            
+        db.commit()
+        flash("Goat weight record deleted successfully.", "success")
+    else:
+        flash("Weight record not found.", "warning")
+        
+    return redirect(url_for('goat_weights'))
 
 if __name__ == '__main__':
     # Default to production-safe settings when running directly.
