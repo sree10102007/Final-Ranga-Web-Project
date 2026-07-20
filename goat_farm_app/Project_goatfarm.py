@@ -2936,9 +2936,11 @@ def buy_stock():
         else:
             alert_limit = 0.0
 
+    target_url = request.form.get('redirect_to') or request.referrer or url_for('stock_inventory')
+
     if not item_name or qty <= 0 or cost <= 0:
         flash('Invalid purchase details! Please fill all fields with correct numbers.', 'danger')
-        return redirect(url_for('feed'))
+        return redirect(target_url)
         
     if item_type == 'feed':
         cursor = db.execute('''
@@ -3005,7 +3007,7 @@ def buy_stock():
     
     db.commit()
     flash(f'{item_type.capitalize()} purchase of {qty} {unit} recorded and marked in Expenses successfully!', 'success')
-    return redirect(url_for('feed'))
+    return redirect(target_url)
 
 @app.route('/consume_feed', methods=['POST'])
 def consume_feed():

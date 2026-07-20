@@ -48,12 +48,15 @@
                 <p class="text-muted mb-0">Monitor current farm stock levels, buy supplies, and record agricultural cash flow expenses.</p>
             </div>
         </div>
-        <div class="d-flex gap-2">
-            <a href="{{ url_for('feed') }}" class="btn btn-success rounded-pill px-4 py-2 fw-semibold">
-                <i class="bi bi-people me-1"></i>Batch Allocation Center
+        <div class="d-flex gap-2 flex-wrap">
+            <button type="button" class="btn btn-success rounded-pill px-4 py-2 fw-semibold shadow-sm" data-onclick="openBuyModal('feed', '', '')">
+                <i class="bi bi-plus-circle-fill me-1"></i>+ Add / Restock Item
+            </button>
+            <a href="{{ url_for('feed') }}" class="btn btn-outline-success rounded-pill px-4 py-2 fw-semibold">
+                <i class="bi bi-people me-1"></i>Batch Allocation
             </a>
-            <a href="{{ url_for('vouchers') }}" class="btn btn-outline-success rounded-pill px-4 py-2 fw-semibold">
-                <i class="bi bi-cart-plus me-1"></i>Buy New Item
+            <a href="{{ url_for('vouchers') }}" class="btn btn-outline-secondary rounded-pill px-3 py-2 fw-semibold" title="Create Purchase Voucher">
+                <i class="bi bi-receipt me-1"></i>Vouchers
             </a>
         </div>
     </div>
@@ -81,14 +84,15 @@
                         </span>
                         <span class="fs-4 fw-bold text-success">{{ "%.2f"|format(stock.closing_stock) }} <small class="fs-6 text-muted">{{ stock.unit }}</small></span>
                     </div>
-                    <div class="d-flex align-items-center gap-2">
+                    <div class="d-flex align-items-center gap-1">
                         {% if stock.closing_stock <= 0 %}
-                            <span class="badge-no-stock">No Stock</span>
+                            <span class="badge-no-stock me-1">No Stock</span>
                         {% elif stock.alert_level > 0 and stock.closing_stock <= stock.alert_level %}
-                            <span class="badge bg-warning text-dark px-2.5 py-1.5 rounded-pill small fw-bold" data-style="font-size: 0.75rem;"><i class="bi bi-exclamation-triangle-fill me-1"></i>Low</span>
+                            <span class="badge bg-warning text-dark px-2 py-1 rounded-pill me-1 small fw-bold" data-style="font-size: 0.75rem;"><i class="bi bi-exclamation-triangle-fill me-1"></i>Low</span>
                         {% endif %}
-                        <button class="btn btn-sm btn-outline-secondary rounded-pill px-2.5" title="Set Reminder Threshold" data-onclick="openLimitModal('feed', '{{ feed_name }}', '{{ stock.alert_level }}', '{{ stock.unit }}')"><i class="bi bi-bell"></i></button>
-                        <a href="{{ url_for('voucher_add', v_type='feed', feed_name=feed_name, unit=stock.unit) }}" class="btn btn-sm btn-success rounded-pill px-3">Buy</a>
+                        <button class="btn btn-sm btn-outline-secondary rounded-pill px-2" title="Set Reminder Threshold" data-onclick="openLimitModal('feed', '{{ feed_name }}', '{{ stock.alert_level }}', '{{ stock.unit }}')"><i class="bi bi-bell"></i></button>
+                        <button class="btn btn-sm btn-success rounded-pill px-2.5 fw-semibold" title="Add stock to {{ feed_name }}" data-onclick="openBuyModal('feed', '{{ feed_name }}', '{{ stock.unit }}')"><i class="bi bi-plus-lg me-1"></i>+ Stock</button>
+                        <a href="{{ url_for('voucher_add', v_type='feed', feed_name=feed_name, unit=stock.unit) }}" class="btn btn-sm btn-outline-success rounded-pill px-2" title="Full Purchase Voucher"><i class="bi bi-receipt"></i></a>
                     </div>
                 </div>
                 {% else %}
@@ -118,14 +122,15 @@
                         </span>
                         <span class="fs-4 fw-bold text-primary">{{ "%.2f"|format(stock.closing_stock) }} <small class="fs-6 text-muted">{{ stock.unit }}</small></span>
                     </div>
-                    <div class="d-flex align-items-center gap-2">
+                    <div class="d-flex align-items-center gap-1">
                         {% if stock.closing_stock <= 0 %}
-                            <span class="badge-no-stock">No Stock</span>
+                            <span class="badge-no-stock me-1">No Stock</span>
                         {% elif stock.alert_level > 0 and stock.closing_stock <= stock.alert_level %}
-                            <span class="badge bg-warning text-dark px-2.5 py-1.5 rounded-pill small fw-bold" data-style="font-size: 0.75rem;"><i class="bi bi-exclamation-triangle-fill me-1"></i>Low</span>
+                            <span class="badge bg-warning text-dark px-2 py-1 rounded-pill me-1 small fw-bold" data-style="font-size: 0.75rem;"><i class="bi bi-exclamation-triangle-fill me-1"></i>Low</span>
                         {% endif %}
-                        <button class="btn btn-sm btn-outline-secondary rounded-pill px-2.5" title="Set Reminder Threshold" data-onclick="openLimitModal('medicine', '{{ med_name }}', '{{ stock.alert_level }}', '{{ stock.unit }}')"><i class="bi bi-bell"></i></button>
-                        <a href="{{ url_for('voucher_add', v_type='health', sub_type='medicine', health_name=med_name, dose_unit=stock.unit) }}" class="btn btn-sm btn-primary rounded-pill px-3">Buy</a>
+                        <button class="btn btn-sm btn-outline-secondary rounded-pill px-2" title="Set Reminder Threshold" data-onclick="openLimitModal('medicine', '{{ med_name }}', '{{ stock.alert_level }}', '{{ stock.unit }}')"><i class="bi bi-bell"></i></button>
+                        <button class="btn btn-sm btn-primary rounded-pill px-2.5 fw-semibold" title="Add stock to {{ med_name }}" data-onclick="openBuyModal('medicine', '{{ med_name }}', '{{ stock.unit }}')"><i class="bi bi-plus-lg me-1"></i>+ Stock</button>
+                        <a href="{{ url_for('voucher_add', v_type='health', sub_type='medicine', health_name=med_name, dose_unit=stock.unit) }}" class="btn btn-sm btn-outline-primary rounded-pill px-2" title="Full Purchase Voucher"><i class="bi bi-receipt"></i></a>
                     </div>
                 </div>
                 {% else %}
@@ -155,14 +160,15 @@
                         </span>
                         <span class="fs-4 fw-bold text-info">{{ "%.2f"|format(stock.closing_stock) }} <small class="fs-6 text-muted">{{ stock.unit }}</small></span>
                     </div>
-                    <div class="d-flex align-items-center gap-2">
+                    <div class="d-flex align-items-center gap-1">
                         {% if stock.closing_stock <= 0 %}
-                            <span class="badge-no-stock">No Stock</span>
+                            <span class="badge-no-stock me-1">No Stock</span>
                         {% elif stock.alert_level > 0 and stock.closing_stock <= stock.alert_level %}
-                            <span class="badge bg-warning text-dark px-2.5 py-1.5 rounded-pill small fw-bold" data-style="font-size: 0.75rem;"><i class="bi bi-exclamation-triangle-fill me-1"></i>Low</span>
+                            <span class="badge bg-warning text-dark px-2 py-1 rounded-pill me-1 small fw-bold" data-style="font-size: 0.75rem;"><i class="bi bi-exclamation-triangle-fill me-1"></i>Low</span>
                         {% endif %}
-                        <button class="btn btn-sm btn-outline-secondary rounded-pill px-2.5" title="Set Reminder Threshold" data-onclick="openLimitModal('vaccine', '{{ vac_name }}', '{{ stock.alert_level }}', '{{ stock.unit }}')"><i class="bi bi-bell"></i></button>
-                        <a href="{{ url_for('voucher_add', v_type='health', sub_type='vaccine', health_name=vac_name, unit=stock.unit) }}" class="btn btn-sm btn-info text-white rounded-pill px-3">Buy</a>
+                        <button class="btn btn-sm btn-outline-secondary rounded-pill px-2" title="Set Reminder Threshold" data-onclick="openLimitModal('vaccine', '{{ vac_name }}', '{{ stock.alert_level }}', '{{ stock.unit }}')"><i class="bi bi-bell"></i></button>
+                        <button class="btn btn-sm btn-info text-white rounded-pill px-2.5 fw-semibold" title="Add stock to {{ vac_name }}" data-onclick="openBuyModal('vaccine', '{{ vac_name }}', '{{ stock.unit }}')"><i class="bi bi-plus-lg me-1"></i>+ Stock</button>
+                        <a href="{{ url_for('voucher_add', v_type='health', sub_type='vaccine', health_name=vac_name, unit=stock.unit) }}" class="btn btn-sm btn-outline-info rounded-pill px-2" title="Full Purchase Voucher"><i class="bi bi-receipt"></i></a>
                     </div>
                 </div>
                 {% else %}
@@ -181,13 +187,13 @@
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class="modal-content border-0 shadow-lg rounded-4">
                 <div class="modal-header bg-success text-white">
-                    <h5 class="modal-title fw-bold" id="buyModalTitle"><i class="bi bi-cart-plus me-2"></i>Buy & Add Stock</h5>
+                    <h5 class="modal-title fw-bold" id="buyModalTitle"><i class="bi bi-cart-plus me-2"></i>Add Stock to Inventory</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body p-4">
                     
                     <div class="mb-3">
-                        <label class="form-label small text-muted fw-bold">Stock Item Type</label>
+                        <label class="form-label small text-muted fw-bold">Stock Item Category</label>
                         <select name="item_type" id="buy_item_type" class="form-select" data-onchange="updateBuyUnit()" required>
                             <option value="feed">Feed Stock (KG)</option>
                             <option value="medicine">Medicine Stock (Doses)</option>
@@ -196,8 +202,12 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label small text-muted fw-bold">Item Name</label>
-                        <input type="text" name="item_name" id="buy_item_name" class="form-control" placeholder="e.g. Corn, Paracetamol, ET Vaccine" required>
+                        <label class="form-label small text-muted fw-bold">Item Name (Select Existing or Type New)</label>
+                        <input type="text" name="item_name" id="buy_item_name" class="form-control" list="existing_stock_list" placeholder="Select existing stock or type new item name..." required data-onchange="onItemNameChange(this.value)">
+                        <datalist id="existing_stock_list">
+                            <!-- Dynamic existing items -->
+                        </datalist>
+                        <div class="form-text text-muted" data-style="font-size: 0.8rem;">Select an existing item from stock list or enter a brand new name.</div>
                     </div>
                     
                     <div class="mb-3">
@@ -230,7 +240,7 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label small text-muted fw-bold">Purchase Date</label>
+                        <label class="form-label small text-muted fw-bold">Purchase / Stock Date</label>
                         <input type="date" name="purchase_date" id="purchase_date" class="form-control" required>
                     </div>
 
@@ -243,7 +253,7 @@
                 </div>
                 <div class="modal-footer border-0">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-success px-4">Buy & Log Expense</button>
+                    <button type="submit" class="btn btn-success px-4">Add Stock & Log Expense</button>
                 </div>
             </div>
         </form>
@@ -291,6 +301,12 @@
         return `${year}-${month}-${day}`;
     }
 
+    const EXISTING_STOCKS = {
+        feed: {{ feed_stocks|tojson|safe if feed_stocks else '{}' }},
+        medicine: {{ med_stocks|tojson|safe if med_stocks else '{}' }},
+        vaccine: {{ vac_stocks|tojson|safe if vac_stocks else '{}' }}
+    };
+
     const UNIT_OPTIONS = {
         feed: [
             { value: 'KG', label: 'Kilograms (KG)' },
@@ -315,6 +331,33 @@
             { value: 'Bottles', label: 'Bottles' }
         ]
     };
+
+    function populateExistingDatalist(type) {
+        const datalist = document.getElementById('existing_stock_list');
+        datalist.innerHTML = '';
+        const stocks = EXISTING_STOCKS[type] || {};
+        for (const [itemName, info] of Object.entries(stocks)) {
+            const opt = document.createElement('option');
+            opt.value = itemName;
+            opt.label = `Current Stock: ${parseFloat(info.closing_stock).toFixed(2)} ${info.unit}`;
+            datalist.appendChild(opt);
+        }
+    }
+
+    function onItemNameChange(val) {
+        const type = document.getElementById('buy_item_type').value;
+        const stocks = EXISTING_STOCKS[type] || {};
+        if (stocks[val]) {
+            const item = stocks[val];
+            if (item.unit) {
+                populateUnits(type, item.unit);
+            }
+            if (item.alert_level !== undefined && item.alert_level !== null) {
+                const alertInput = document.querySelector('#quickBuyModal input[name="alert_limit"]');
+                if (alertInput) alertInput.value = item.alert_level > 0 ? item.alert_level : '';
+            }
+        }
+    }
 
     function populateUnits(type, selectedValue) {
         const select = document.getElementById('buy_unit_select');
@@ -389,20 +432,24 @@
 
     function openBuyModal(type, name, unit) {
         document.getElementById('buy_item_type').value = type;
-        document.getElementById('buy_item_name').value = name;
+        populateExistingDatalist(type);
+        document.getElementById('buy_item_name').value = name || '';
+        if (name) {
+            onItemNameChange(name);
+        }
         populateUnits(type, unit);
         
         const header = document.querySelector('#quickBuyModal .modal-header');
         header.className = "modal-header text-white";
         if(type === 'feed') {
             header.classList.add('bg-success');
-            document.getElementById('buyModalTitle').innerHTML = '<i class="bi bi-basket3-fill me-2"></i>Buy Feed';
+            document.getElementById('buyModalTitle').innerHTML = '<i class="bi bi-basket3-fill me-2"></i>Add Feed Stock';
         } else if(type === 'medicine') {
             header.classList.add('bg-primary');
-            document.getElementById('buyModalTitle').innerHTML = '<i class="bi bi-capsule me-2"></i>Buy Medicine';
+            document.getElementById('buyModalTitle').innerHTML = '<i class="bi bi-capsule me-2"></i>Add Medicine Stock';
         } else {
             header.classList.add('bg-info');
-            document.getElementById('buyModalTitle').innerHTML = '<i class="bi bi-patch-check me-2"></i>Buy Vaccine';
+            document.getElementById('buyModalTitle').innerHTML = '<i class="bi bi-patch-check me-2"></i>Add Vaccine Stock';
         }
         
         const myModal = new bootstrap.Modal(document.getElementById('quickBuyModal'));
@@ -432,11 +479,12 @@
     function updateBuyUnit() {
         const type = document.getElementById('buy_item_type').value;
         populateUnits(type);
+        populateExistingDatalist(type);
     }
 
     document.addEventListener("DOMContentLoaded", function() {
         document.getElementById('purchase_date').value = getTodayString();
-        populateUnits('feed'); // Initialize default units for Feed on page load
+        updateBuyUnit(); // Initialize datalist & default units on page load
     });
 </script>
 {% endblock %}
