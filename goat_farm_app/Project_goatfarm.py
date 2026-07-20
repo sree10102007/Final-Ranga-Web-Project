@@ -747,6 +747,7 @@ def init_db():
         add_column("kid_records", "insurance_company", "TEXT")
         add_column("kid_records", "insurance_expiry", "DATE")
         add_column("kid_records", "insurance_amount", "REAL")
+        add_column("master_records", "insurance_amount", "REAL")
 
         try:
             conn.execute("ALTER TABLE master_records ADD COLUMN IF NOT EXISTS kit_status TEXT DEFAULT 'No'")
@@ -1334,7 +1335,20 @@ def dashboard():
         ) t
     ''', (start_date, end_date)).fetchone()[0] or 0.0
     
-    income = goat_sales + other_sales + ins_claims
+    # Insurance cover amount (new profit/credit side item)
+    ins_cover_master = db.execute('''
+        SELECT SUM(insurance_amount) FROM master_records 
+        WHERE insurance_amount > 0 AND COALESCE(insurance_date, purchase_date, '2026-01-01') BETWEEN ? AND ?
+    ''', (start_date, end_date)).fetchone()[0] or 0.0
+    
+    ins_cover_kids = db.execute('''
+        SELECT SUM(insurance_amount) FROM kid_records 
+        WHERE insurance_amount > 0 AND COALESCE(birth_date, '2026-01-01') BETWEEN ? AND ?
+    ''', (start_date, end_date)).fetchone()[0] or 0.0
+    
+    ins_cover_total = ins_cover_master + ins_cover_kids
+    
+    income = goat_sales + other_sales + ins_claims + ins_cover_total
     
     # Detailed expense calculation for dashboard
     # 1. Purchases (Goats, Feed, Med, Vac, Equipment)
@@ -1839,8 +1853,8 @@ def master_add():
                 medicine_period, feed, feed_amount, mating_date, mating_goat_no, goat_week_period,
                 delivery_date, new_goat_gender, new_goat_color, birth_weight, selling_date,
                 selling_weight, selling_price, mortality_date, mortality_weight, mortality_reason,
-                insurance_claim_amount, insurance_inform_date, insurance_claim_date, kit_status, dob
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                insurance_claim_amount, insurance_inform_date, insurance_claim_date, kit_status, dob, insurance_amount
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', (
             f.get('si_no'), f.get('tag_no'), f.get('breed'), f.get('breed_percent'), f.get('status'),
             f.get('sold'), f.get('expired'), f.get('gender'), f.get('purchase_date'), f.get('color'),
@@ -1850,7 +1864,8 @@ def master_add():
             f.get('delivery_date'), f.get('new_goat_gender'), f.get('new_goat_color'), f.get('birth_weight'),
             f.get('selling_date') or None, f.get('selling_weight'), f.get('selling_price'), f.get('mortality_date') or None,
             f.get('mortality_weight'), f.get('mortality_reason'), f.get('insurance_claim_amount'),
-            f.get('insurance_inform_date') or None, f.get('insurance_claim_date') or None, 1 if f.get('kit_status') else 0, dob_str
+            f.get('insurance_inform_date') or None, f.get('insurance_claim_date') or None, 1 if f.get('kit_status') else 0, dob_str,
+            f.get('insurance_amount')
         ))
         # Log initial weight in weight history if provided
         initial_weight = f.get('weight_kg')
@@ -3161,13 +3176,13 @@ def kid_add():
             INSERT INTO kid_records (
                 s_no, kid_id, breed, breed_percent, gender, color, 
                 litter_size, birth_date, age_month, birth_weight, mother_id, father_id,
-                insurance_policy_no, insurance_company, insurance_expiry
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                insurance_policy_no, insurance_company, insurance_expiry, insurance_amount
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', (
             f.get('s_no'), f.get('kid_id'), f.get('breed'), f.get('breed_percent'), f.get('gender'),
             f.get('color'), f.get('litter_size'), f.get('birth_date'), f.get('age_month'), f.get('birth_weight'),
             f.get('mother_id'), f.get('father_id'), f.get('insurance_policy_no'), f.get('insurance_company'),
-            f.get('insurance_expiry')
+            f.get('insurance_expiry'), f.get('insurance_amount')
         ))
         db.commit()
         flash('Kid record added successfully!', 'success')
@@ -3362,7 +3377,7 @@ def master_edit(id):
             selling_date = ?, selling_weight = ?, selling_price = ?, mortality_date = ?,
             mortality_weight = ?, mortality_reason = ?, insurance_claim_amount = ?,
             insurance_inform_date = ?, insurance_claim_date = ?, kit_status = ?, dob = ?,
-            weight_alert_seen = ? WHERE id = ?
+            weight_alert_seen = ?, insurance_amount = ? WHERE id = ?
         ''', (
             f.get('si_no'), f.get('tag_no'), f.get('breed'), f.get('breed_percent'), f.get('status'),
             f.get('sold'), f.get('expired'), f.get('gender'), f.get('purchase_date'), f.get('color'),
@@ -3373,7 +3388,7 @@ def master_edit(id):
             f.get('selling_date') or None, f.get('selling_weight'), f.get('selling_price'), f.get('mortality_date') or None,
             f.get('mortality_weight'), f.get('mortality_reason'), f.get('insurance_claim_amount'),
             f.get('insurance_inform_date') or None, f.get('insurance_claim_date') or None, 1 if f.get('kit_status') else 0, dob_str,
-            weight_alert_seen, id
+            weight_alert_seen, f.get('insurance_amount'), id
         ))
 
         # Log weight change into goat_weight_logs if the weight has changed
@@ -3823,12 +3838,12 @@ def kid_edit(id):
             UPDATE kid_records SET 
             s_no = ?, kid_id = ?, breed = ?, breed_percent = ?, gender = ?, color = ?,
             litter_size = ?, birth_date = ?, age_month = ?, birth_weight = ?, mother_id = ?, father_id = ?,
-            insurance_policy_no = ?, insurance_company = ?, insurance_expiry = ? WHERE id = ?
+            insurance_policy_no = ?, insurance_company = ?, insurance_expiry = ?, insurance_amount = ? WHERE id = ?
         ''', (
             f.get('s_no'), f.get('kid_id'), f.get('breed'), f.get('breed_percent'), f.get('gender'), f.get('color'),
             f.get('litter_size'), f.get('birth_date'), f.get('age_month'), f.get('birth_weight'),
             f.get('mother_id'), f.get('father_id'), f.get('insurance_policy_no'), f.get('insurance_company'),
-            f.get('insurance_expiry'), id
+            f.get('insurance_expiry'), f.get('insurance_amount'), id
         ))
         db.commit()
         flash('Kid record updated successfully!', 'success')
@@ -6419,6 +6434,35 @@ def pnl():
         if acct not in income_map:
             income_map[acct] = [0.0] * 12
         income_map[acct][m] += float(ic['amount'] or 0.0)
+
+    # Insurance Amount (from master_records and kid_records)
+    insurance_amounts_master = db.execute('''
+        SELECT COALESCE(insurance_date, purchase_date, '2026-01-01') AS entry_date, insurance_amount AS amount
+        FROM master_records
+        WHERE insurance_amount > 0
+          AND COALESCE(insurance_date, purchase_date, '2026-01-01') BETWEEN ? AND ?
+    ''', (start_date, end_date)).fetchall()
+    for row in insurance_amounts_master:
+        m = get_month_idx(row['entry_date'])
+        if m is not None:
+            acct = 'Insurance Amount'
+            if acct not in income_map:
+                income_map[acct] = [0.0] * 12
+            income_map[acct][m] += float(row['amount'] or 0.0)
+
+    insurance_amounts_kids = db.execute('''
+        SELECT COALESCE(birth_date, '2026-01-01') AS entry_date, insurance_amount AS amount
+        FROM kid_records
+        WHERE insurance_amount > 0
+          AND COALESCE(birth_date, '2026-01-01') BETWEEN ? AND ?
+    ''', (start_date, end_date)).fetchall()
+    for row in insurance_amounts_kids:
+        m = get_month_idx(row['entry_date'])
+        if m is not None:
+            acct = 'Insurance Amount'
+            if acct not in income_map:
+                income_map[acct] = [0.0] * 12
+            income_map[acct][m] += float(row['amount'] or 0.0)
 
     income_rows = []
     for name, monthly in sorted(income_map.items()):

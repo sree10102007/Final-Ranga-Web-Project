@@ -96,6 +96,11 @@
                 <input type="date" name="insurance_expiry" class="form-control">
             </div>
             
+            <div class="col-md-4">
+                <label class="form-label fw-bold small text-muted">INSURANCE AMOUNT (₹)</label>
+                <input type="number" step="0.01" name="insurance_amount" class="form-control" placeholder="Insurance Amount">
+            </div>
+            
             <div class="col-12 mt-4 border-top pt-4">
                 <button type="submit" class="btn btn-success px-5 py-2 fw-bold">Save Kid Record</button>
                 <a href="{{ url_for('kid') }}" class="btn btn-light px-4 py-2 ms-2">Cancel</a>
