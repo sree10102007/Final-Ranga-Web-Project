@@ -3,11 +3,14 @@
 {% block page_title %}Salary Calculation{% endblock %}
 
 {% block content %}
-<div class="page-header mb-4 d-flex justify-content-between align-items-center">
+<div class="page-header mb-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
     <div>
         <h2 class="fw-800 text-dark mb-1">Salary Calculation</h2>
         <p class="text-muted mb-0">Auto-calculate employee salaries based on monthly attendance and wages.</p>
     </div>
+    <button id="downloadSalaryCsvBtn" class="btn btn-outline-success shadow-sm rounded-pill fw-bold px-3 py-2">
+        <i class="bi bi-file-earmark-spreadsheet me-1"></i> Download CSV
+    </button>
 </div>
 
 <div class="card border-0 mb-4 shadow-sm rounded-4">
@@ -183,5 +186,81 @@ function updateRowSalary(input) {
         amountInput.max = balance.toFixed(2);
     }
 }
+
+function downloadSalaryCSV() {
+    const salariesData = {{ salaries|tojson }};
+    const month = "{{ month }}";
+    const year = "{{ year }}";
+    const totalDays = "{{ total_days }}";
+
+    const headers = [
+        "Sr#",
+        "Employee Name",
+        "Role",
+        "Present Days",
+        "Total Days",
+        "Wage Type",
+        "Wage Rate (INR)",
+        "Computed Salary (INR)",
+        "Paid Amount (INR)",
+        "Balance Due (INR)"
+    ];
+
+    let csv = headers.join(",") + "\n";
+
+    let totalComputed = 0;
+    let totalPaid = 0;
+    let totalBalance = 0;
+
+    salariesData.forEach(function(s, idx) {
+        const srNo = idx + 1;
+        const empName = `"${(s.name || '').replace(/"/g, '""')}"`;
+        const role = `"${(s.role || '').replace(/"/g, '""')}"`;
+        const present = s.present || 0;
+        const wageType = `"${(s.wage_type || '').replace(/"/g, '""')}"`;
+        const wageRate = (s.wage_rate || 0).toFixed(2);
+        const computed = (s.computed || 0).toFixed(2);
+        const paid = (s.paid || 0).toFixed(2);
+        const balance = (s.balance || 0).toFixed(2);
+
+        totalComputed += (s.computed || 0);
+        totalPaid += (s.paid || 0);
+        totalBalance += (s.balance || 0);
+
+        const row = [srNo, empName, role, present, totalDays, wageType, wageRate, computed, paid, balance];
+        csv += row.join(",") + "\n";
+    });
+
+    const summaryRow = [
+        "Total",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        totalComputed.toFixed(2),
+        totalPaid.toFixed(2),
+        totalBalance.toFixed(2)
+    ];
+    csv += summaryRow.join(",") + "\n";
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `Salary_Calculation_${month}_${year}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const dlBtn = document.getElementById('downloadSalaryCsvBtn');
+    if (dlBtn) {
+        dlBtn.addEventListener('click', downloadSalaryCSV);
+    }
+});
 </script>
 {% endblock %}
