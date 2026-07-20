@@ -5582,7 +5582,7 @@ def rollback_salary_payment():
         emp = db.execute('SELECT name FROM employees WHERE id=?', (last_payment['employee_id'],)).fetchone()
         emp_name = emp['name'] if emp else 'Unknown'
         desc_like = f"Salary payment for {emp_name} ({last_payment['month']}/{last_payment['year']})"
-        db.execute('DELETE FROM expenses WHERE category="Labor" AND description=?', (desc_like,))
+        db.execute("DELETE FROM expenses WHERE category='Labor' AND description=?", (desc_like,))
         db.execute('DELETE FROM salary_payments WHERE id=?', (last_payment['id'],))
         db.commit()
         flash(f"Rolled back last payment of ₹{last_payment['net_salary']} for {emp_name}.", "success")
