@@ -20,18 +20,6 @@
             <h2 class="fw-800 text-dark mb-1">Farm Overview</h2>
             <p class="text-muted mb-0">At-a-glance summary of your farm's performance and inventory.</p>
         </div>
-        <div class="card border-0 shadow-sm rounded-4 px-3.5 py-2.5 bg-white d-inline-flex flex-row align-items-center gap-3 border-start border-4 border-success ms-auto ms-md-0">
-            <div class="bg-success text-white rounded-3 p-2 d-flex align-items-center justify-content-center shadow-sm" style="width: 44px; height: 44px;">
-                <i class="bi bi-clock-history fs-4"></i>
-            </div>
-            <div>
-                <div class="d-flex align-items-center gap-2">
-                    <span class="fw-800 text-dark fs-5 font-monospace" id="ist-live-clock" style="letter-spacing: 0.5px;">--:--:-- --</span>
-                    <span class="badge bg-success text-white fw-bold px-2.5 py-1 rounded-pill" style="font-size: 0.7rem; letter-spacing: 0.5px;">LIVE IST</span>
-                </div>
-                <div class="text-muted small fw-bold text-uppercase" id="ist-live-date" style="font-size: 0.75rem; letter-spacing: 0.5px;">Loading Date...</div>
-            </div>
-        </div>
     </div>
 
     <!-- Consolidated Search and Date Filter -->
@@ -187,44 +175,4 @@
     </div>
 </div>
 
-<script nonce="{{ csp_nonce }}">
-    function updateISTClock() {
-        const now = new Date();
-        
-        // Format Date in Indian Standard Time (IST)
-        const dateOptions = {
-            timeZone: 'Asia/Kolkata',
-            weekday: 'short',
-            day: '2-digit',
-            month: 'short',
-            year: 'numeric'
-        };
-        const dateStr = now.toLocaleDateString('en-IN', dateOptions);
-
-        // Format Time in IST with 12-hour AM/PM format
-        const timeOptions = {
-            timeZone: 'Asia/Kolkata',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-            hour12: true
-        };
-        const timeStr = now.toLocaleTimeString('en-IN', timeOptions);
-
-        const clockEl = document.getElementById('ist-live-clock');
-        const dateEl = document.getElementById('ist-live-date');
-
-        if (clockEl) {
-            clockEl.textContent = timeStr;
-        }
-        if (dateEl) {
-            dateEl.textContent = dateStr;
-        }
-    }
-
-    document.addEventListener("DOMContentLoaded", function() {
-        updateISTClock();
-        setInterval(updateISTClock, 1000);
-    });
-</script>
 {% endblock %}
