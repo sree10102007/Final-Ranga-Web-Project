@@ -5572,6 +5572,24 @@ def pay_salary():
     flash('Salary paid successfully.', 'success')
     return redirect(url_for('salary_calculate'))
 
+@app.route('/rollback_salary_payment', methods=['POST'])
+def rollback_salary_payment():
+    if 'user_id' not in session:
+        return redirect(url_for('auth.login'))
+    db = get_db()
+    last_payment = db.execute('SELECT * FROM salary_payments ORDER BY id DESC LIMIT 1').fetchone()
+    if last_payment:
+        emp = db.execute('SELECT name FROM employees WHERE id=?', (last_payment['employee_id'],)).fetchone()
+        emp_name = emp['name'] if emp else 'Unknown'
+        desc_like = f"Salary payment for {emp_name} ({last_payment['month']}/{last_payment['year']})"
+        db.execute('DELETE FROM expenses WHERE category="Labor" AND description=?', (desc_like,))
+        db.execute('DELETE FROM salary_payments WHERE id=?', (last_payment['id'],))
+        db.commit()
+        flash(f"Rolled back last payment of ₹{last_payment['net_salary']} for {emp_name}.", "success")
+    else:
+        flash("No salary payments found to roll back.", "warning")
+    return redirect(url_for('salary_calculate'))
+
 # ── WAGES ──────────────────────────────────────────────────────────────────────
 @app.route('/wages_list')
 def wages_list():

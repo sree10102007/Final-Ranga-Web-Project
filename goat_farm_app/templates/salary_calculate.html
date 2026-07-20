@@ -44,10 +44,13 @@
             </div>
             <div class="col-md-4 col-12">
                 <div class="d-flex gap-2">
-                    <a href="{{ url_for('salary_calculate') }}" class="btn btn-light w-50 py-2 fw-600">Reset</a>
+                    <button type="button" onclick="if(confirm('Are you sure you want to roll back the last salary payment?')) { document.getElementById('rollback-form').submit(); }" class="btn btn-warning w-50 py-2 fw-600">Restore</button>
                     <button type="submit" class="btn btn-success w-50 py-2 fw-bold text-nowrap">Calculate</button>
                 </div>
             </div>
+        </form>
+        <form id="rollback-form" action="{{ url_for('rollback_salary_payment') }}" method="POST" style="display:none;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         </form>
     </div>
 </div>
