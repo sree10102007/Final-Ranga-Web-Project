@@ -6587,7 +6587,14 @@ def pnl():
             ) latest ON v.id = latest.max_id
         """, (target_date,)).fetchone()[0] or 0.0
 
-        return feed_val + med_val + vac_val
+        goat_val = db.execute("""
+            SELECT SUM(COALESCE(purchase_amount, 0))
+            FROM master_records
+            WHERE (status IS NULL OR status = '' OR status = 'Active' OR status = 'In Stock')
+              AND purchase_date <= ?
+        """, (target_date,)).fetchone()[0] or 0.0
+
+        return feed_val + med_val + vac_val + goat_val
 
     # Safe Date parser — returns 0-based month index (0=Jan…11=Dec)
     def get_month_idx(date_val):
@@ -6865,6 +6872,109 @@ def pnl():
 
     months_headers = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
 
+    # ── AVAILABLE STOCK INVENTORY & VALUATION BREAKDOWN ───────────────────────
+    available_stock_items = []
+    
+    # 1. Feeds
+    feed_stock_rows = db.execute("""
+        SELECT f.feed_name, f.closing_stock, f.unit, f.cost_per_unit
+        FROM feed_inventory f
+        INNER JOIN (
+            SELECT feed_name, MAX(id) as max_id
+            FROM feed_inventory
+            WHERE purchase_date <= ?
+            GROUP BY feed_name
+        ) latest ON f.id = latest.max_id
+        WHERE f.closing_stock > 0
+        ORDER BY f.feed_name
+    """, (end_date,)).fetchall()
+    for r in feed_stock_rows:
+        qty = float(r['closing_stock'] or 0)
+        cpu = float(r['cost_per_unit'] or 0)
+        available_stock_items.append({
+            'category': 'Feed Stock',
+            'name': r['feed_name'],
+            'quantity': qty,
+            'unit': r['unit'] or 'kg',
+            'unit_price': cpu,
+            'total_value': qty * cpu
+        })
+
+    # 2. Medicines
+    med_stock_rows = db.execute("""
+        SELECT m.medicine_name, m.closing_stock, m.unit, m.cost_per_unit
+        FROM medicine_inventory m
+        INNER JOIN (
+            SELECT medicine_name, MAX(id) as max_id
+            FROM medicine_inventory
+            WHERE purchase_date <= ?
+            GROUP BY medicine_name
+        ) latest ON m.id = latest.max_id
+        WHERE m.closing_stock > 0
+        ORDER BY m.medicine_name
+    """, (end_date,)).fetchall()
+    for r in med_stock_rows:
+        qty = float(r['closing_stock'] or 0)
+        cpu = float(r['cost_per_unit'] or 0)
+        available_stock_items.append({
+            'category': 'Medicine Stock',
+            'name': r['medicine_name'],
+            'quantity': qty,
+            'unit': r['unit'] or 'Doses',
+            'unit_price': cpu,
+            'total_value': qty * cpu
+        })
+
+    # 3. Vaccines
+    vac_stock_rows = db.execute("""
+        SELECT v.vaccine_name, v.closing_stock, v.unit, v.cost_per_unit
+        FROM vaccine_inventory v
+        INNER JOIN (
+            SELECT vaccine_name, MAX(id) as max_id
+            FROM vaccine_inventory
+            WHERE purchase_date <= ?
+            GROUP BY vaccine_name
+        ) latest ON v.id = latest.max_id
+        WHERE v.closing_stock > 0
+        ORDER BY v.vaccine_name
+    """, (end_date,)).fetchall()
+    for r in vac_stock_rows:
+        qty = float(r['closing_stock'] or 0)
+        cpu = float(r['cost_per_unit'] or 0)
+        available_stock_items.append({
+            'category': 'Vaccine Stock',
+            'name': r['vaccine_name'],
+            'quantity': qty,
+            'unit': r['unit'] or 'Doses',
+            'unit_price': cpu,
+            'total_value': qty * cpu
+        })
+
+    # 4. Livestock (Goats grouped by breed and gender)
+    goat_stock_rows = db.execute("""
+        SELECT breed, gender, COUNT(*) as goat_count, AVG(COALESCE(purchase_amount, 0)) as avg_cost, SUM(COALESCE(purchase_amount, 0)) as total_val
+        FROM master_records
+        WHERE (status IS NULL OR status = '' OR status = 'Active' OR status = 'In Stock')
+          AND purchase_date <= ?
+        GROUP BY breed, gender
+        ORDER BY breed, gender
+    """, (end_date,)).fetchall()
+    for r in goat_stock_rows:
+        b_name = f"{r['breed'] or 'Standard'} ({r['gender'] or 'Goat'})"
+        cnt = float(r['goat_count'] or 0)
+        avg_p = float(r['avg_cost'] or 0)
+        tot_v = float(r['total_val'] or 0)
+        available_stock_items.append({
+            'category': 'Livestock (Goats)',
+            'name': f"Livestock: {b_name}",
+            'quantity': cnt,
+            'unit': 'Heads',
+            'unit_price': avg_p,
+            'total_value': tot_v
+        })
+
+    total_available_stock_value = sum(item['total_value'] for item in available_stock_items)
+
     return render_template('pnl.html',
                            selected_year=selected_year,
                            filter_type=filter_type,
@@ -6876,6 +6986,8 @@ def pnl():
                            manual_closing=manual_closing,
                            computed_opening=get_stock_val(start_date),
                            computed_closing=get_stock_val(end_date),
+                           available_stock_items=available_stock_items,
+                           total_available_stock_value=total_available_stock_value,
                            months_headers=months_headers,
                            pnl_data=pnl_data,
                            income_rows=income_rows,
@@ -6973,7 +7085,23 @@ def api_pnl_drilldown():
                 'detail': f"Closing Stock: {r['closing_stock']} @ ₹{r['cost_per_unit']}/unit",
                 'amount': r['closing_stock'] * r['cost_per_unit']
             })
-        transactions.sort(key=lambda x: x['date'], reverse=True)
+
+        # Fetch goats inventory
+        goat_rows = db.execute("""
+            SELECT tag_no, breed, gender, weight_kg, purchase_amount, purchase_date
+            FROM master_records
+            WHERE (status IS NULL OR status = '' OR status = 'Active' OR status = 'In Stock')
+              AND purchase_date <= ?
+        """, (target_date,)).fetchall()
+        for r in goat_rows:
+            transactions.append({
+                'date': r['purchase_date'] or target_date,
+                'reference': f"Goat Tag #{r['tag_no']}",
+                'detail': f"{r['breed'] or 'Breed'} ({r['gender'] or 'Goat'}), {r['weight_kg'] or 0}kg",
+                'amount': float(r['purchase_amount'] or 0)
+            })
+
+        transactions.sort(key=lambda x: str(x['date']), reverse=True)
         return jsonify({'success': True, 'transactions': transactions})
 
     # 2. General Ledger / Transaction aggregation & filtration

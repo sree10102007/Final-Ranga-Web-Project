@@ -287,37 +287,51 @@
                 </thead>
                 <tbody>
                     {# Setup variables to balance the Debit and Credit accounts #}
-                    {% set cogs_len = 0 %}
-                    {% set exp_len = expense_rows|length %}
-                    {% set net_val = pnl_data.net_earnings.full_year %}
+                    {% set op_stock = (manual_opening|float if manual_opening else computed_opening) if include_stock else 0.0 %}
+                    {% set cl_stock = (manual_closing|float if manual_closing else computed_closing) if include_stock else 0.0 %}
+                    
+                    {% set raw_inc = pnl_data.total_income.full_year %}
+                    {% set raw_exp = pnl_data.total_expenses.full_year %}
+                    
+                    {% set tot_credit_val = raw_inc + cl_stock %}
+                    {% set tot_debit_val = raw_exp + op_stock %}
+                    
+                    {% set net_val = tot_credit_val - tot_debit_val %}
                     {% set has_profit = 1 if net_val >= 0 else 0 %}
                     {% set has_loss = 1 if net_val < 0 else 0 %}
 
-                    {% set debit_len = cogs_len + exp_len + has_profit %}
-                    {% set credit_len = (income_rows|length) + has_loss %}
+                    {% set op_stock_row = 1 if include_stock and op_stock > 0 else 0 %}
+                    {% set cl_stock_row = 1 if include_stock and cl_stock > 0 else 0 %}
 
-                    {% if debit_len > credit_len %}
-                        {% set max_rows = debit_len %}
-                    {% else %}
-                        {% set max_rows = credit_len %}
-                    {% endif %}
+                    {% set debit_len = op_stock_row + (expense_rows|length) + has_profit %}
+                    {% set credit_len = (income_rows|length) + cl_stock_row + has_loss %}
+
+                    {% set max_rows = debit_len if debit_len > credit_len else credit_len %}
 
                     {% for i in range(max_rows) %}
                         <tr>
-                            {# ── DEBIT SIDE (Expenses) ── #}
-                            {% if i < exp_len %}
+                            {# ── DEBIT SIDE (Expenses & Opening Stock) ── #}
+                            {% if op_stock_row and i == 0 %}
+                                {# Opening Stock Row #}
+                                <td class="col-particulars interactive-cell" onclick="viewDrilldown('Opening Stock')">
+                                    <span class="me-2"><i class="bi bi-box-arrow-in-right text-warning"></i></span> Opening Stock Valuation
+                                </td>
+                                <td class="col-amount border-center-divider">
+                                    {{ "%.2f"|format(op_stock) }}
+                                </td>
+                            {% elif i - op_stock_row < (expense_rows|length) and i - op_stock_row >= 0 %}
                                 {# Expense Rows #}
-                                {% set exp_item = expense_rows[i] %}
+                                {% set exp_item = expense_rows[i - op_stock_row] %}
                                 <td class="col-particulars interactive-cell" onclick="viewDrilldown('{{ exp_item.name }}')">
                                     <span class="me-2"><i class="bi bi-folder-fill text-muted"></i></span> {{ exp_item.name }}
                                 </td>
                                 <td class="col-amount border-center-divider">
                                     {{ "%.2f"|format(exp_item.full_year) }}
                                 </td>
-                            {% elif i == exp_len and has_profit %}
+                            {% elif i == (op_stock_row + (expense_rows|length)) and has_profit %}
                                 {# Net Profit #}
                                 <td class="col-particulars text-success fw-bold">
-                                    <span class="me-2"><i class="bi bi-plus-circle-fill text-success"></i></span> Net Profit c/o (to P&L A/C)
+                                    <span class="me-2"><i class="bi bi-plus-circle-fill text-success"></i></span> Net Profit c/o (to P&amp;L A/C)
                                 </td>
                                 <td class="col-amount text-success fw-bold border-center-divider">
                                     {{ "%.2f"|format(net_val) }}
@@ -328,8 +342,8 @@
                                 <td class="col-amount border-center-divider"></td>
                             {% endif %}
 
-                            {# ── CREDIT SIDE (Income) ── #}
-                            {% if i < income_rows|length %}
+                            {# ── CREDIT SIDE (Income & Closing Stock) ── #}
+                            {% if i < (income_rows|length) %}
                                 {# Income Rows #}
                                 {% set inc_item = income_rows[i] %}
                                 <td class="col-particulars interactive-cell" onclick="viewDrilldown('{{ inc_item.name }}')">
@@ -338,10 +352,18 @@
                                 <td class="col-amount">
                                     {{ "%.2f"|format(inc_item.full_year) }}
                                 </td>
-                            {% elif i == income_rows|length and has_loss %}
+                            {% elif cl_stock_row and i == (income_rows|length) %}
+                                {# Closing Stock Row #}
+                                <td class="col-particulars interactive-cell" onclick="viewDrilldown('Closing Stock')">
+                                    <span class="me-2"><i class="bi bi-box-arrow-left text-success"></i></span> Closing Stock Valuation
+                                </td>
+                                <td class="col-amount">
+                                    {{ "%.2f"|format(cl_stock) }}
+                                </td>
+                            {% elif i == ((income_rows|length) + cl_stock_row) and has_loss %}
                                 {# Net Loss #}
                                 <td class="col-particulars text-danger fw-bold">
-                                    <span class="me-2"><i class="bi bi-dash-circle-fill text-danger"></i></span> Gross Loss c/o (to P&L A/C)
+                                    <span class="me-2"><i class="bi bi-dash-circle-fill text-danger"></i></span> Gross Loss c/o (to P&amp;L A/C)
                                 </td>
                                 <td class="col-amount text-danger fw-bold">
                                     {{ "%.2f"|format(net_val|abs) }}
@@ -355,11 +377,7 @@
                     {% endfor %}
 
                     {# Balance totals #}
-                    {% if net_val >= 0 %}
-                        {% set total_balanced = pnl_data.total_income.full_year %}
-                    {% else %}
-                        {% set total_balanced = pnl_data.total_expenses.full_year %}
-                    {% endif %}
+                    {% set total_balanced = tot_credit_val if net_val >= 0 else tot_debit_val %}
 
                     <tr class="row-grand-total">
                         <td class="col-particulars text-uppercase fw-bold">Total</td>
@@ -368,6 +386,75 @@
                         <td class="col-amount">{{ "%.2f"|format(total_balanced) }}</td>
                     </tr>
                 </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Available Stock Inventory & Valuation Card -->
+    <div class="corporate-container mt-4" id="available-stock-view">
+        <div class="brand-header-bar py-3 px-4 bg-dark text-white d-flex align-items-center justify-content-between flex-wrap gap-2">
+            <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-box-seam-fill text-warning fs-4"></i>
+                <div>
+                    <h5 class="fw-bold mb-0 text-white">Available Stock Inventory &amp; Valuation</h5>
+                    <small class="text-white-50">Live farm inventory quantities, unit prices (₹), and current asset valuations</small>
+                </div>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <span class="badge bg-primary rounded-pill px-3 py-2 fs-6 fw-bold">
+                    Total Stock Value: ₹{{ "%.2f"|format(total_available_stock_value) }}
+                </span>
+                <button type="button" class="btn btn-sm btn-outline-light rounded-pill px-3 fw-bold" onclick="viewDrilldown('Closing Stock')">
+                    <i class="bi bi-zoom-in me-1"></i>View Full Inventory Drilldown
+                </button>
+            </div>
+        </div>
+        
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 text-start">
+                <thead class="table-light text-uppercase small text-muted border-bottom">
+                    <tr>
+                        <th class="ps-4" style="width: 22%;">Category</th>
+                        <th style="width: 30%;">Item / Stock Name</th>
+                        <th class="text-center" style="width: 16%;">Available Quantity</th>
+                        <th class="text-end" style="width: 16%;">Unit Price (₹/Unit)</th>
+                        <th class="text-end pe-4" style="width: 16%;">Stock Valuation (₹)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in available_stock_items %}
+                    <tr>
+                        <td class="ps-4">
+                            {% if 'Feed' in item.category %}
+                            <span class="badge bg-success-subtle text-success rounded-pill px-2.5 py-1 fw-bold"><i class="bi bi-basket me-1"></i>{{ item.category }}</span>
+                            {% elif 'Medicine' in item.category %}
+                            <span class="badge bg-info-subtle text-info rounded-pill px-2.5 py-1 fw-bold"><i class="bi bi-capsule me-1"></i>{{ item.category }}</span>
+                            {% elif 'Vaccine' in item.category %}
+                            <span class="badge bg-primary-subtle text-primary rounded-pill px-2.5 py-1 fw-bold"><i class="bi bi-shield-plus me-1"></i>{{ item.category }}</span>
+                            {% else %}
+                            <span class="badge bg-warning-subtle text-dark rounded-pill px-2.5 py-1 fw-bold"><i class="bi bi-heart-pulse-fill me-1"></i>{{ item.category }}</span>
+                            {% endif %}
+                        </td>
+                        <td class="fw-semibold text-dark">{{ item.name }}</td>
+                        <td class="text-center font-monospace fw-bold fs-6">
+                            {{ "%.1f"|format(item.quantity) if item.unit == 'Heads' else "%.2f"|format(item.quantity) }} <span class="small text-muted fw-normal">{{ item.unit }}</span>
+                        </td>
+                        <td class="text-end font-monospace text-muted">₹{{ "%.2f"|format(item.unit_price) }}</td>
+                        <td class="text-end pe-4 font-monospace fw-bold text-success">₹{{ "%.2f"|format(item.total_value) }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center py-4 text-muted">No stock inventory recorded for this date.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot class="table-light fw-bold border-top">
+                    <tr>
+                        <td colspan="3" class="ps-4 text-uppercase text-muted">Total Live Stock Inventory Valuation</td>
+                        <td class="text-end text-muted">Total:</td>
+                        <td class="text-end pe-4 font-monospace fs-6 text-primary">₹{{ "%.2f"|format(total_available_stock_value) }}</td>
+                    </tr>
+                </tfoot>
             </table>
         </div>
     </div>
