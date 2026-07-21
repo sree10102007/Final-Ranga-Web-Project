@@ -3424,21 +3424,37 @@ def master_edit(id):
             flash(f'Error: A record with tag number "{tag_no}" already exists in master records.', 'danger')
             return redirect(url_for('master_edit', id=id))
             
-        # Calculate DOB from entered Age
+        # Calculate DOB from entered Age safely
         try:
             from datetime import timedelta
             age_years = int(f.get('age_years') or 0)
+        except (ValueError, TypeError):
+            age_years = 0
+
+        try:
             age_months = int(f.get('age_months') or 0)
+        except (ValueError, TypeError):
+            age_months = 0
+
+        try:
             age_days = int(f.get('age_days') or 0)
+        except (ValueError, TypeError):
+            age_days = 0
+
+        try:
             total_days = age_years * 365 + age_months * 30 + age_days
             dob_date = datetime.now().date() - timedelta(days=total_days)
             dob_str = dob_date.strftime('%Y-%m-%d')
         except Exception:
             dob_str = None
 
-        # Check if weight crossed 25 kg threshold to reset the seen flag
+        # Check if weight crossed 25 kg threshold to reset the seen flag safely
         old_record = db.execute('SELECT weight_kg, weight_alert_seen FROM master_records WHERE id = ?', (id,)).fetchone()
-        new_weight = float(f.get('weight_kg') or 0)
+        try:
+            new_weight = float(f.get('weight_kg') or 0)
+        except (ValueError, TypeError):
+            new_weight = 0.0
+
         weight_alert_seen = old_record['weight_alert_seen'] if old_record else 0
         if old_record and (old_record['weight_kg'] is None or old_record['weight_kg'] < 25) and new_weight >= 25:
             weight_alert_seen = 0
