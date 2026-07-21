@@ -34,12 +34,12 @@
                         <div class="form-text small text-muted">Changing the name will automatically update all linked ledger accounts.</div>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label small fw-bold text-dark">Group Type <span class="text-danger">*</span></label>
+                        <label class="form-label small fw-bold text-dark">Group Type (P&amp;L Allocation Side) <span class="text-danger">*</span></label>
                         <select name="group_type" class="form-select rounded-3">
-                            <option value="Expense" {% if group.group_type == 'Expense' %}selected{% endif %}>Expense</option>
-                            <option value="Income" {% if group.group_type == 'Income' %}selected{% endif %}>Income</option>
+                            <option value="Expense" {% if group.group_type == 'Expense' %}selected{% endif %}>Debit Side (Expense / Expenditure)</option>
+                            <option value="Income" {% if group.group_type == 'Income' %}selected{% endif %}>Credit Side (Income / Revenue)</option>
                         </select>
-                        <div class="form-text small text-muted">Determines which side of the P&amp;L this group appears on.</div>
+                        <div class="form-text small text-muted">Determines whether accounts under this group appear on the Debit or Credit side of the P&amp;L statement.</div>
                     </div>
                     <div class="mb-4">
                         <label class="form-label small fw-bold text-dark">Description</label>

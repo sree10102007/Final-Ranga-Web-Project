@@ -6547,39 +6547,73 @@ def pnl():
         end_date = custom_to
     now = datetime.now()
 
-    # ── INCOME SECTION ───────────────────────────────────────────────────────────
-    # Build a ledger name lookup: pnl_category text -> canonical ledger_name from expense_ledgers
-    ledger_name_by_text = {}
+    # ── DYNAMIC PNL ALLOCATION ENGINE (DEBIT / CREDIT SIDE BY GROUP_TYPE) ────────
+    groups_rows = db.execute("SELECT group_name, group_type FROM ledger_groups").fetchall()
+    group_type_by_name = {r['group_name']: r['group_type'] for r in groups_rows}
+
     all_ledgers = db.execute("SELECT id, ledger_name, ledger_group FROM expense_ledgers").fetchall()
-    for ldr in all_ledgers:
-        ledger_name_by_text[ldr['ledger_name'].strip().lower()] = ldr['ledger_name']
-        ledger_name_by_text[str(ldr['id'])] = ldr['ledger_name']
+    ledger_info_by_id = {ldr['id']: ldr for ldr in all_ledgers}
+    ledger_info_by_name = {ldr['ledger_name'].strip().lower(): ldr for ldr in all_ledgers}
 
-    def resolve_ledger_name(pnl_cat, fallback):
-        """Resolve pnl_category to canonical ledger account name."""
-        if pnl_cat:
-            key = pnl_cat.strip().lower()
-            if key in ledger_name_by_text:
-                return ledger_name_by_text[key]
-            # Return the raw value if it looks like a real name (not a generic group)
-            if pnl_cat.strip():
-                return pnl_cat.strip()
-        return fallback
+    def get_account_side_and_name(particular_id=None, particular_name=None, pnl_cat=None, fallback_name='General', default_type='Expense'):
+        acct = fallback_name
+        grp_name = None
+        grp_type = None
 
-    income_map = {}  # acct_name -> [12 monthly floats]
+        if particular_id and particular_id in ledger_info_by_id:
+            ldr = ledger_info_by_id[particular_id]
+            acct = ldr['ledger_name']
+            grp_name = ldr['ledger_group']
+        elif particular_name and particular_name.strip().lower() in ledger_info_by_name:
+            ldr = ledger_info_by_name[particular_name.strip().lower()]
+            acct = ldr['ledger_name']
+            grp_name = ldr['ledger_group']
+        elif pnl_cat and pnl_cat.strip().lower() in ledger_info_by_name:
+            ldr = ledger_info_by_name[pnl_cat.strip().lower()]
+            acct = ldr['ledger_name']
+            grp_name = ldr['ledger_group']
+        elif pnl_cat and pnl_cat.strip() in group_type_by_name:
+            grp_name = pnl_cat.strip()
+            acct = fallback_name or grp_name
+        elif particular_name and particular_name.strip():
+            acct = particular_name.strip()
+        elif pnl_cat and pnl_cat.strip():
+            acct = pnl_cat.strip()
 
+        if grp_name and grp_name in group_type_by_name:
+            grp_type = group_type_by_name[grp_name]
+
+        if not grp_type:
+            if pnl_cat:
+                cat_l = pnl_cat.lower()
+                if 'income' in cat_l or 'sale' in cat_l or 'revenue' in cat_l:
+                    grp_type = 'Income'
+                else:
+                    grp_type = 'Expense'
+            else:
+                grp_type = default_type
+
+        return grp_type, acct
+
+    income_map = {}   # Credit side: acct_name -> [12 monthly floats]
+    expense_map = {}  # Debit side:  acct_name -> [12 monthly floats]
+
+    def add_to_pnl_map(side, acct_name, month_idx, amount):
+        target_map = income_map if side == 'Income' else expense_map
+        if acct_name not in target_map:
+            target_map[acct_name] = [0.0] * 12
+        target_map[acct_name][month_idx] += float(amount or 0.0)
+
+    # 1. Sales Records (Goat Sales & Other Sales)
     goat_sales = db.execute(
         "SELECT date_of_sale, sold_price, pnl_category FROM sales_records WHERE date_of_sale BETWEEN ? AND ?",
         (start_date, end_date)
     ).fetchall()
     for s in goat_sales:
         m = get_month_idx(s['date_of_sale'])
-        if m is None:
-            continue
-        acct = resolve_ledger_name(s['pnl_category'], 'Goat Sales')
-        if acct not in income_map:
-            income_map[acct] = [0.0] * 12
-        income_map[acct][m] += float(s['sold_price'] or 0.0)
+        if m is not None:
+            side, acct = get_account_side_and_name(pnl_cat=s['pnl_category'], fallback_name='Goat Sales', default_type='Income')
+            add_to_pnl_map(side, acct, m, s['sold_price'])
 
     other_sales = db.execute(
         "SELECT date_of_sale, total_amount, pnl_category FROM other_sales_records WHERE date_of_sale BETWEEN ? AND ?",
@@ -6587,14 +6621,11 @@ def pnl():
     ).fetchall()
     for s in other_sales:
         m = get_month_idx(s['date_of_sale'])
-        if m is None:
-            continue
-        acct = resolve_ledger_name(s['pnl_category'], 'Other Sales')
-        if acct not in income_map:
-            income_map[acct] = [0.0] * 12
-        income_map[acct][m] += float(s['total_amount'] or 0.0)
+        if m is not None:
+            side, acct = get_account_side_and_name(pnl_cat=s['pnl_category'], fallback_name='Other Sales', default_type='Income')
+            add_to_pnl_map(side, acct, m, s['total_amount'])
 
-    # Insurance Claims (Union of master_records and mortality_records to capture all claims)
+    # 2. Insurance Claims & Insurance Amounts
     insurance_claims = db.execute('''
         WITH AllClaims AS (
             SELECT tag_no, COALESCE(insurance_claim_date, mortality_date, purchase_date, '2026-01-01') AS claim_date, insurance_claim_amount AS amount
@@ -6612,14 +6643,10 @@ def pnl():
     ''', (start_date, end_date)).fetchall()
     for ic in insurance_claims:
         m = get_month_idx(ic['claim_date'])
-        if m is None:
-            continue
-        acct = 'Insurance Claim'
-        if acct not in income_map:
-            income_map[acct] = [0.0] * 12
-        income_map[acct][m] += float(ic['amount'] or 0.0)
+        if m is not None:
+            side, acct = get_account_side_and_name(fallback_name='Insurance Claim', default_type='Income')
+            add_to_pnl_map(side, acct, m, ic['amount'])
 
-    # Insurance Amount (from master_records and kid_records)
     insurance_amounts_master = db.execute('''
         SELECT COALESCE(insurance_date, purchase_date, '2026-01-01') AS entry_date, insurance_amount AS amount
         FROM master_records
@@ -6629,10 +6656,8 @@ def pnl():
     for row in insurance_amounts_master:
         m = get_month_idx(row['entry_date'])
         if m is not None:
-            acct = 'Insurance Amount'
-            if acct not in income_map:
-                income_map[acct] = [0.0] * 12
-            income_map[acct][m] += float(row['amount'] or 0.0)
+            side, acct = get_account_side_and_name(fallback_name='Insurance Amount', default_type='Income')
+            add_to_pnl_map(side, acct, m, row['amount'])
 
     insurance_amounts_kids = db.execute('''
         SELECT COALESCE(birth_date, '2026-01-01') AS entry_date, insurance_amount AS amount
@@ -6643,32 +6668,10 @@ def pnl():
     for row in insurance_amounts_kids:
         m = get_month_idx(row['entry_date'])
         if m is not None:
-            acct = 'Insurance Amount'
-            if acct not in income_map:
-                income_map[acct] = [0.0] * 12
-            income_map[acct][m] += float(row['amount'] or 0.0)
+            side, acct = get_account_side_and_name(fallback_name='Insurance Amount', default_type='Income')
+            add_to_pnl_map(side, acct, m, row['amount'])
 
-    income_rows = []
-    for name, monthly in sorted(income_map.items()):
-        fy = sum(monthly)
-        if fy != 0.0:
-            income_rows.append({'name': name, 'monthly': monthly, 'full_year': fy})
-
-    total_income_monthly = [sum(r['monthly'][i] for r in income_rows) for i in range(12)]
-    total_income_fy = sum(total_income_monthly)
-
-    # ── COGS / PURCHASES (Removed) ───────────────────────────────────────────────
-    cogs_monthly = [0.0] * 12
-    cogs_fy = 0.0
-    cogs_row = {'name': 'Cost of Goods Sold', 'monthly': cogs_monthly, 'full_year': cogs_fy}
-
-    # ── EXPENSE SECTION ──────────────────────────────────────────────────────────
-    # Build a lookup: expense_ledger id -> ledger_name (for particular_id resolution)
-    ledger_name_by_id = {ldr['id']: ldr['ledger_name'] for ldr in all_ledgers}
-
-    expense_map = {}  # acct_name -> [12 monthly floats]
-
-    # 1. Goat Purchases
+    # 3. Goat Purchases
     purchases_tags = set()
     rows = db.execute(
         "SELECT tag_id, purchase_date, price, particular_id, particular_name, pnl_category FROM purchases WHERE purchase_date BETWEEN ? AND ?",
@@ -6677,14 +6680,8 @@ def pnl():
     for r in rows:
         m = get_month_idx(r['purchase_date'])
         if m is not None:
-            p_id = r['particular_id']
-            if p_id and p_id in ledger_name_by_id:
-                acct = ledger_name_by_id[p_id]
-            else:
-                acct = resolve_ledger_name(r['particular_name'] or r['pnl_category'] or 'Livestock Purchase', 'Goat Purchases')
-            if acct not in expense_map:
-                expense_map[acct] = [0.0] * 12
-            expense_map[acct][m] += float(r['price'] or 0.0)
+            side, acct = get_account_side_and_name(particular_id=r['particular_id'], particular_name=r['particular_name'], pnl_cat=r['pnl_category'], fallback_name='Goat Purchases', default_type='Expense')
+            add_to_pnl_map(side, acct, m, r['price'])
         if r['tag_id']:
             purchases_tags.add(str(r['tag_id']).strip())
 
@@ -6696,12 +6693,10 @@ def pnl():
         if str(r['tag_no']).strip() not in purchases_tags:
             m = get_month_idx(r['purchase_date'])
             if m is not None:
-                acct = 'Goat Purchases'
-                if acct not in expense_map:
-                    expense_map[acct] = [0.0] * 12
-                expense_map[acct][m] += float(r['purchase_amount'] or 0.0)
+                side, acct = get_account_side_and_name(fallback_name='Goat Purchases', default_type='Expense')
+                add_to_pnl_map(side, acct, m, r['purchase_amount'])
 
-    # 2. Feed, Medicine, and Vaccine Purchases
+    # 4. Feed, Medicine, and Vaccine Purchases
     for table, date_col, amt_col, fallback in [
         ('feed_purchases',     'purchase_date', 'cost', 'Feed Purchases'),
         ('medicine_purchases', 'purchase_date', 'cost', 'Medicine Purchases'),
@@ -6714,16 +6709,10 @@ def pnl():
         for r in p_rows:
             m = get_month_idx(r[date_col])
             if m is not None:
-                p_id = r.get('particular_id')
-                if p_id and p_id in ledger_name_by_id:
-                    acct = ledger_name_by_id[p_id]
-                else:
-                    acct = resolve_ledger_name(r.get('particular_name') or r.get('pnl_category') or fallback, fallback)
-                if acct not in expense_map:
-                    expense_map[acct] = [0.0] * 12
-                expense_map[acct][m] += float(r[amt_col] or 0.0)
+                side, acct = get_account_side_and_name(particular_id=r.get('particular_id'), particular_name=r.get('particular_name'), pnl_cat=r.get('pnl_category'), fallback_name=fallback, default_type='Expense')
+                add_to_pnl_map(side, acct, m, r[amt_col])
 
-    # 3. Equipment Purchases
+    # 5. Equipment Purchases
     equip_p = db.execute(
         "SELECT purchase_date, purchase_cost, pnl_category FROM equipment WHERE purchase_date BETWEEN ? AND ?",
         (start_date, end_date)
@@ -6731,12 +6720,10 @@ def pnl():
     for r in equip_p:
         m = get_month_idx(r['purchase_date'])
         if m is not None:
-            acct = resolve_ledger_name(r['pnl_category'] or 'Equipment Purchases', 'Equipment Purchases')
-            if acct not in expense_map:
-                expense_map[acct] = [0.0] * 12
-            expense_map[acct][m] += float(r['purchase_cost'] or 0.0)
+            side, acct = get_account_side_and_name(pnl_cat=r['pnl_category'], fallback_name='Equipment Purchases', default_type='Expense')
+            add_to_pnl_map(side, acct, m, r['purchase_cost'])
 
-    # 4. Other general vouchers
+    # 6. Other general vouchers
     ovs = db.execute("""
         SELECT ov.voucher_date, ov.particular_name, ov.amount, ov.pnl_category, ov.particular_id
         FROM other_vouchers ov
@@ -6745,30 +6732,34 @@ def pnl():
 
     for ov in ovs:
         m = get_month_idx(ov['voucher_date'])
-        if m is None:
-            continue
-        amt = float(ov['amount'] or 0.0)
-        p_id = ov['particular_id']
-        if p_id and p_id in ledger_name_by_id:
-            acct = ledger_name_by_id[p_id]
-        else:
-            acct = resolve_ledger_name(ov['particular_name'] or ov['pnl_category'], 'General Expense')
-        if acct not in expense_map:
-            expense_map[acct] = [0.0] * 12
-        expense_map[acct][m] += amt
+        if m is not None:
+            side, acct = get_account_side_and_name(particular_id=ov['particular_id'], particular_name=ov['particular_name'], pnl_cat=ov['pnl_category'], fallback_name='General Expense', default_type='Expense')
+            add_to_pnl_map(side, acct, m, ov['amount'])
 
+    # 7. Staff Salaries
     salaries_q = db.execute(
         "SELECT paid_date, net_salary FROM salary_payments WHERE paid_date BETWEEN ? AND ?",
         (start_date, end_date)
     ).fetchall()
     for s in salaries_q:
         m = get_month_idx(s['paid_date'])
-        if m is None:
-            continue
-        acct = 'Salary Payments'
-        if acct not in expense_map:
-            expense_map[acct] = [0.0] * 12
-        expense_map[acct][m] += float(s['net_salary'] or 0.0)
+        if m is not None:
+            side, acct = get_account_side_and_name(fallback_name='Salary Payments', default_type='Expense')
+            add_to_pnl_map(side, acct, m, s['net_salary'])
+
+    income_rows = []
+    for name, monthly in sorted(income_map.items()):
+        fy = sum(monthly)
+        if fy != 0.0:
+            income_rows.append({'name': name, 'monthly': monthly, 'full_year': fy})
+
+    total_income_monthly = [sum(r['monthly'][i] for r in income_rows) for i in range(12)]
+    total_income_fy = sum(total_income_monthly)
+
+    # ── COGS / PURCHASES (Zeroed) ────────────────────────────────────────────────
+    cogs_monthly = [0.0] * 12
+    cogs_fy = 0.0
+    cogs_row = {'name': 'Cost of Goods Sold', 'monthly': cogs_monthly, 'full_year': cogs_fy}
 
     expense_rows = []
     for name, monthly in sorted(expense_map.items()):
@@ -6942,6 +6933,9 @@ def api_pnl_drilldown():
             pnl_cat_strip = (pnl_category or '').strip()
             if pnl_cat_strip in ledger_groups_dict:
                 return pnl_cat_strip, (fallback_ledger_name or 'General Ledger'), (fallback_particular_name or 'General')
+            if pnl_cat_strip.lower() in ledgers_by_name:
+                l_info = ledgers_by_name[pnl_cat_strip.lower()]
+                return l_info['ledger_group'], l_info['ledger_name'], (fallback_particular_name or fallback_ledger_name or 'General')
             default_group = 'Direct Expenses'
             if pnl_category:
                 pnl_cat_lower = pnl_category.lower()
