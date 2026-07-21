@@ -1364,8 +1364,16 @@ def dashboard():
     total_kids = db.execute("SELECT COUNT(*) FROM kid_records").fetchone()[0] or 0
     total_employees = db.execute("SELECT COUNT(*) FROM employees WHERE status = 'Active'").fetchone()[0] or 0
     
-    # Income = sales + other sales + insurance claims
+    # Income = sales + master records sales + other sales + insurance claims
     goat_sales = db.execute("SELECT SUM(sold_price) FROM sales_records WHERE date_of_sale BETWEEN ? AND ?", (start_date, end_date)).fetchone()[0] or 0.0
+    master_goat_sales = db.execute("""
+        SELECT SUM(selling_price) 
+        FROM master_records 
+        WHERE status = 'Sold' AND selling_price > 0 
+          AND COALESCE(selling_date, '2026-01-01') BETWEEN ? AND ?
+    """, (start_date, end_date)).fetchone()[0] or 0.0
+    goat_sales += master_goat_sales
+
     other_sales = db.execute("SELECT SUM(total_amount) FROM other_sales_records WHERE date_of_sale BETWEEN ? AND ?", (start_date, end_date)).fetchone()[0] or 0.0
     
     ins_claims = db.execute('''
