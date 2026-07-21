@@ -38,6 +38,7 @@
                         <select name="group_type" class="form-select rounded-3">
                             <option value="Expense" {% if group.group_type == 'Expense' %}selected{% endif %}>Debit Side (Expense / Expenditure)</option>
                             <option value="Income" {% if group.group_type == 'Income' %}selected{% endif %}>Credit Side (Income / Revenue)</option>
+                            <option value="Liability" {% if group.group_type == 'Liability' %}selected{% endif %}>Credit Side (Liability / Payables)</option>
                         </select>
                         <div class="form-text small text-muted">Determines whether accounts under this group appear on the Debit or Credit side of the P&amp;L statement.</div>
                     </div>

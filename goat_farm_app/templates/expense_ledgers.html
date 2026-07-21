@@ -169,6 +169,7 @@
                             <select name="group_type" class="form-select rounded-3">
                                 <option value="Expense">Debit Side (Expense / Expenditure)</option>
                                 <option value="Income">Credit Side (Income / Revenue)</option>
+                                <option value="Liability">Credit Side (Liability / Payables)</option>
                             </select>
                             <div class="form-text small text-muted">Controls whether ledgers under this group appear on Debit or Credit side in P&amp;L.</div>
                         </div>
@@ -191,7 +192,7 @@
                     <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-collection me-2 text-primary"></i>All Ledger Groups ({{ groups|length }})</h6>
                 </div>
                 <div class="list-group list-group-flush">
-                    {% set default_groups = ['Direct Expenses', 'Indirect Expenses', 'Capital Account', 'Administrative Expenses', 'Selling Expenses', 'Direct Income', 'Indirect Income', 'Sales'] %}
+                    {% set default_groups = ['Direct Expenses', 'Indirect Expenses', 'Capital Account', 'Administrative Expenses', 'Selling Expenses', 'Direct Income', 'Indirect Income', 'Sales', 'Current Liabilities', 'Loans (Liability)'] %}
                     {% for g in groups %}
                     <div class="list-group-item px-4 py-3 border-bottom d-flex align-items-center justify-content-between">
                         <div>
@@ -200,7 +201,13 @@
                                 {% if g.group_name in default_groups %}
                                 <span class="badge bg-secondary-subtle text-secondary rounded-pill px-2.5 py-1 small fw-bold">System Default</span>
                                 {% endif %}
-                                <span class="badge {% if g.group_type == 'Income' %}bg-success-subtle text-success{% else %}bg-warning-subtle text-warning{% endif %} rounded-pill px-2.5 py-1 small fw-bold">{% if g.group_type == 'Income' %}<i class="bi bi-graph-up-arrow me-1"></i>Credit Side (Income){% else %}<i class="bi bi-folder-fill me-1"></i>Debit Side (Expense){% endif %}</span>
+                                {% if g.group_type == 'Income' %}
+                                <span class="badge bg-success-subtle text-success rounded-pill px-2.5 py-1 small fw-bold"><i class="bi bi-graph-up-arrow me-1"></i>Credit Side (Income)</span>
+                                {% elif g.group_type == 'Liability' %}
+                                <span class="badge bg-info-subtle text-info rounded-pill px-2.5 py-1 small fw-bold"><i class="bi bi-bank me-1"></i>Credit Side (Liability)</span>
+                                {% else %}
+                                <span class="badge bg-warning-subtle text-warning rounded-pill px-2.5 py-1 small fw-bold"><i class="bi bi-folder-fill me-1"></i>Debit Side (Expense)</span>
+                                {% endif %}
                                 <span class="badge bg-primary-subtle text-primary rounded-pill px-2 py-0.5 small fw-bold font-monospace">{{ g.ledger_count }} ledgers</span>
                             </div>
                             {% if g.description %}

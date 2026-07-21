@@ -2131,7 +2131,7 @@ def sales_add(s_type):
         SELECT el.id, el.ledger_name AS group_name, el.ledger_group
         FROM expense_ledgers el
         LEFT JOIN ledger_groups lg ON el.ledger_group = lg.group_name
-        WHERE lg.group_type = 'Income'
+        WHERE lg.group_type IN ('Income', 'Liability')
         ORDER BY el.ledger_name
     """).fetchall()
     today_str = datetime.now().strftime('%Y-%m-%d')
@@ -2260,7 +2260,7 @@ def sales_edit(s_type, id):
         SELECT el.id, el.ledger_name AS group_name, el.ledger_group
         FROM expense_ledgers el
         LEFT JOIN ledger_groups lg ON el.ledger_group = lg.group_name
-        WHERE lg.group_type = 'Income'
+        WHERE lg.group_type IN ('Income', 'Liability')
         ORDER BY el.ledger_name
     """).fetchall()
     today_str = datetime.now().strftime('%Y-%m-%d')
@@ -4445,7 +4445,7 @@ def voucher_add(v_type):
     """).fetchall()
     expense_units = db.execute('SELECT * FROM expense_units ORDER BY unit_name').fetchall()
     ledgers = db.execute('SELECT * FROM expense_ledgers ORDER BY ledger_name').fetchall()
-    ledger_groups = db.execute("SELECT * FROM ledger_groups WHERE group_type = 'Expense' ORDER BY group_name").fetchall()
+    ledger_groups = db.execute("SELECT * FROM ledger_groups WHERE group_type IN ('Expense', 'Liability') ORDER BY group_name").fetchall()
     return render_template('voucher_form.html', v_type=v_type, action='Add', record=record, today=today_str, particulars=particulars, expense_units=expense_units, ledgers=ledgers, ledger_groups=ledger_groups)
 
 @app.route('/vouchers/<v_type>/edit/<int:id>', methods=['GET', 'POST'])
@@ -4801,7 +4801,7 @@ def voucher_edit(v_type, id, sub_type=None):
     """).fetchall()
     expense_units = db.execute('SELECT * FROM expense_units ORDER BY unit_name').fetchall()
     ledgers = db.execute('SELECT * FROM expense_ledgers ORDER BY ledger_name').fetchall()
-    ledger_groups = db.execute("SELECT * FROM ledger_groups WHERE group_type = 'Expense' ORDER BY group_name").fetchall()
+    ledger_groups = db.execute("SELECT * FROM ledger_groups WHERE group_type IN ('Expense', 'Liability') ORDER BY group_name").fetchall()
     today_str = datetime.now().strftime('%Y-%m-%d')
     edit_date = record.get('voucher_date') if v_type == 'other' else record.get('purchase_date', '')
     return render_template('voucher_form.html', v_type=v_type, sub_type=sub_type, action='Edit', record=record, today=edit_date, particulars=particulars, expense_units=expense_units, ledgers=ledgers, ledger_groups=ledger_groups)
@@ -5897,7 +5897,7 @@ def expense_add():
     """).fetchall()
     expense_units = db.execute('SELECT * FROM expense_units ORDER BY unit_name').fetchall()
     ledgers = db.execute('SELECT * FROM expense_ledgers ORDER BY ledger_name').fetchall()
-    ledger_groups = db.execute("SELECT * FROM ledger_groups WHERE group_type = 'Expense' ORDER BY group_name").fetchall()
+    ledger_groups = db.execute("SELECT * FROM ledger_groups WHERE group_type IN ('Expense', 'Liability') ORDER BY group_name").fetchall()
     return render_template('expense_add.html', particulars=particulars, expense_units=expense_units, ledgers=ledgers, ledger_groups=ledger_groups, today=today_str)
 
 @app.route('/expense_approve/<int:expense_id>', methods=['POST'])
@@ -6010,7 +6010,7 @@ def expense_edit(expense_id):
     """).fetchall()
     expense_units = db.execute('SELECT * FROM expense_units ORDER BY unit_name').fetchall()
     ledgers = db.execute('SELECT * FROM expense_ledgers ORDER BY ledger_name').fetchall()
-    ledger_groups = db.execute("SELECT * FROM ledger_groups WHERE group_type = 'Expense' ORDER BY group_name").fetchall()
+    ledger_groups = db.execute("SELECT * FROM ledger_groups WHERE group_type IN ('Expense', 'Liability') ORDER BY group_name").fetchall()
     return render_template('expense_edit.html', record=record, particulars=particulars, expense_units=expense_units, ledgers=ledgers, ledger_groups=ledger_groups)
 
 # ── EXPENSES MASTER MODULE ────────────────────────────────────────────────────
@@ -6588,12 +6588,15 @@ def pnl():
                 cat_l = pnl_cat.lower()
                 if 'income' in cat_l or 'sale' in cat_l or 'revenue' in cat_l:
                     grp_type = 'Income'
+                elif 'liability' in cat_l or 'liabilities' in cat_l or 'payable' in cat_l:
+                    grp_type = 'Liability'
                 else:
                     grp_type = 'Expense'
             else:
                 grp_type = default_type
 
-        return grp_type, acct
+        side = 'Income' if grp_type in ('Income', 'Liability') else 'Expense'
+        return side, acct
 
     income_map = {}   # Credit side: acct_name -> [12 monthly floats]
     expense_map = {}  # Debit side:  acct_name -> [12 monthly floats]
