@@ -36,9 +36,13 @@
                     <div class="mb-3">
                         <label class="form-label small fw-bold text-dark">Group Type (P&amp;L Allocation Side) <span class="text-danger">*</span></label>
                         <select name="group_type" class="form-select rounded-3">
-                            <option value="Expense" {% if group.group_type == 'Expense' %}selected{% endif %}>Debit Side (Expense / Expenditure)</option>
-                            <option value="Income" {% if group.group_type == 'Income' %}selected{% endif %}>Credit Side (Income / Revenue)</option>
-                            <option value="Liability" {% if group.group_type == 'Liability' %}selected{% endif %}>Credit Side (Liability / Payables)</option>
+                            {% for gt in group_types %}
+                            <option value="{{ gt.type_name }}" {% if group.group_type == gt.type_name %}selected{% endif %}>{{ gt.type_name }} ({{ gt.pnl_side }} Side)</option>
+                            {% else %}
+                            <option value="Expense" {% if group.group_type == 'Expense' %}selected{% endif %}>Expense (Debit Side)</option>
+                            <option value="Income" {% if group.group_type == 'Income' %}selected{% endif %}>Income (Credit Side)</option>
+                            <option value="Liability" {% if group.group_type == 'Liability' %}selected{% endif %}>Liability (Credit Side)</option>
+                            {% endfor %}
                         </select>
                         <div class="form-text small text-muted">Determines whether accounts under this group appear on the Debit or Credit side of the P&amp;L statement.</div>
                     </div>

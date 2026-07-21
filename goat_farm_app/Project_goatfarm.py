@@ -1026,6 +1026,25 @@ def init_db():
 
         # ── EXPENSES MASTER TABLES ──────────────────────────────────────────────
         conn.execute('''
+            CREATE TABLE IF NOT EXISTS group_types (
+                id SERIAL PRIMARY KEY,
+                type_name TEXT UNIQUE NOT NULL,
+                pnl_side TEXT NOT NULL DEFAULT 'Debit',
+                description TEXT
+            )
+        ''')
+
+        try:
+            count = conn.execute('SELECT COUNT(*) FROM group_types').fetchone()[0]
+            if count == 0:
+                conn.execute("INSERT INTO group_types (type_name, pnl_side, description) VALUES ('Expense', 'Debit', 'Debit side expenses and operational expenditure')")
+                conn.execute("INSERT INTO group_types (type_name, pnl_side, description) VALUES ('Income', 'Credit', 'Credit side income and farm revenue')")
+                conn.execute("INSERT INTO group_types (type_name, pnl_side, description) VALUES ('Liability', 'Credit', 'Credit side liabilities, payables, and loans')")
+                conn.execute("INSERT INTO group_types (type_name, pnl_side, description) VALUES ('Asset', 'Debit', 'Debit side assets, inventory, and capital investments')")
+        except Exception:
+            pass
+
+        conn.execute('''
             CREATE TABLE IF NOT EXISTS ledger_groups (
                 id SERIAL PRIMARY KEY,
                 group_name TEXT UNIQUE NOT NULL,
@@ -6024,11 +6043,59 @@ def expenses_master():
     other_voucher_sum = db.execute('SELECT SUM(amount) FROM other_vouchers').fetchone()[0] or 0.0
     expense_count = db.execute("SELECT COUNT(*) FROM expenses").fetchone()[0] or 0
     expense_sum = db.execute("SELECT SUM(amount) FROM expenses WHERE status='Approved' OR status='Paid'").fetchone()[0] or 0.0
+    group_types = db.execute("SELECT * FROM group_types ORDER BY type_name").fetchall()
     return render_template('expenses_master.html',
         ledger_count=ledger_count, group_count=group_count,
         unit_count=unit_count, other_voucher_count=other_voucher_count,
         other_voucher_sum=other_voucher_sum, expense_count=expense_count,
-        expense_sum=expense_sum)
+        expense_sum=expense_sum, group_types=group_types)
+
+@app.route('/group_types', methods=['GET', 'POST'])
+def group_types():
+    if 'user_id' not in session:
+        return redirect(url_for('auth.login'))
+    db = get_db()
+    if request.method == 'POST':
+        tname = request.form.get('type_name', '').strip()
+        pside = request.form.get('pnl_side', 'Debit').strip()
+        tdesc = request.form.get('description', '').strip()
+        if tname and pside in ['Debit', 'Credit']:
+            try:
+                db.execute('INSERT INTO group_types (type_name, pnl_side, description) VALUES (?, ?, ?)', (tname, pside, tdesc))
+                db.commit()
+                flash(f'Group Type "{tname}" ({pside} Side) created successfully!', 'success')
+            except Exception:
+                flash('Group Type name already exists!', 'danger')
+        else:
+            flash('Valid Group Type name and P&L side (Debit/Credit) are required.', 'danger')
+        redirect_tab = request.form.get('redirect_tab', 'groups')
+        return redirect(url_for('expense_ledgers', tab=redirect_tab))
+    return redirect(url_for('expense_ledgers', tab='groups'))
+
+@app.route('/group_type_delete/<int:gtid>', methods=['POST'])
+def group_type_delete(gtid):
+    if 'user_id' not in session:
+        return redirect(url_for('auth.login'))
+    db = get_db()
+    gt = db.execute('SELECT * FROM group_types WHERE id=?', (gtid,)).fetchone()
+    if not gt:
+        flash('Group Type not found.', 'danger')
+        return redirect(url_for('expense_ledgers', tab='groups'))
+    
+    defaults = ['Expense', 'Income', 'Liability', 'Asset']
+    if gt['type_name'] in defaults:
+        flash('System default Group Types cannot be deleted.', 'warning')
+        return redirect(url_for('expense_ledgers', tab='groups'))
+        
+    in_use = db.execute('SELECT COUNT(*) FROM ledger_groups WHERE group_type=?', (gt['type_name'],)).fetchone()[0]
+    if in_use > 0:
+        flash(f'Cannot delete Group Type "{gt["type_name"]}" because it is currently assigned to {in_use} ledger group(s).', 'danger')
+        return redirect(url_for('expense_ledgers', tab='groups'))
+
+    db.execute('DELETE FROM group_types WHERE id=?', (gtid,))
+    db.commit()
+    flash(f'Group Type "{gt["type_name"]}" deleted.', 'success')
+    return redirect(url_for('expense_ledgers', tab='groups'))
 
 @app.route('/expense_ledgers', methods=['GET', 'POST'])
 def expense_ledgers():
@@ -6051,11 +6118,12 @@ def expense_ledgers():
         return redirect(url_for('expense_ledgers', tab='ledgers'))
     ledgers = db.execute('SELECT * FROM expense_ledgers ORDER BY ledger_group, ledger_name').fetchall()
     groups = [dict(g) for g in db.execute('SELECT * FROM ledger_groups ORDER BY group_name').fetchall()]
+    group_types = db.execute('SELECT * FROM group_types ORDER BY type_name').fetchall()
     for g in groups:
         g['ledger_count'] = sum(1 for l in ledgers if l['ledger_group'] == g['group_name'])
     group_names = {g['group_name'] for g in groups}
     unassigned_ledgers = [l for l in ledgers if l['ledger_group'] not in group_names or not l['ledger_group']]
-    return render_template('expense_ledgers.html', ledgers=ledgers, groups=groups, unassigned_ledgers=unassigned_ledgers)
+    return render_template('expense_ledgers.html', ledgers=ledgers, groups=groups, unassigned_ledgers=unassigned_ledgers, group_types=group_types)
 
 @app.route('/expense_ledger_edit/<int:lid>', methods=['GET', 'POST'])
 def expense_ledger_edit(lid):
@@ -6126,6 +6194,7 @@ def ledger_group_edit(gid):
         
     default_groups = ['Direct Expenses', 'Indirect Expenses', 'Capital Account', 'Administrative Expenses', 'Selling Expenses', 'Direct Income', 'Indirect Income', 'Sales']
     is_default = group['group_name'] in default_groups
+    group_types = db.execute('SELECT * FROM group_types ORDER BY type_name').fetchall()
 
     if request.method == 'POST':
         gname = request.form.get('group_name', '').strip()
@@ -6146,7 +6215,7 @@ def ledger_group_edit(gid):
             flash('Group name cannot be empty.', 'danger')
         return redirect(url_for('expense_ledgers', tab='groups'))
         
-    return render_template('ledger_group_edit.html', group=group, is_default=is_default)
+    return render_template('ledger_group_edit.html', group=group, is_default=is_default, group_types=group_types)
 
 @app.route('/ledger_group_delete/<int:gid>', methods=['POST'])
 def ledger_group_delete(gid):
@@ -6548,6 +6617,9 @@ def pnl():
     now = datetime.now()
 
     # ── DYNAMIC PNL ALLOCATION ENGINE (DEBIT / CREDIT SIDE BY GROUP_TYPE) ────────
+    gt_rows = db.execute("SELECT type_name, pnl_side FROM group_types").fetchall()
+    gt_side_map = {r['type_name']: r['pnl_side'] for r in gt_rows}
+
     groups_rows = db.execute("SELECT group_name, group_type FROM ledger_groups").fetchall()
     group_type_by_name = {r['group_name']: r['group_type'] for r in groups_rows}
 
@@ -6595,7 +6667,11 @@ def pnl():
             else:
                 grp_type = default_type
 
-        side = 'Income' if grp_type in ('Income', 'Liability') else 'Expense'
+        pnl_side = gt_side_map.get(grp_type)
+        if not pnl_side:
+            pnl_side = 'Credit' if grp_type in ('Income', 'Liability') else 'Debit'
+
+        side = 'Income' if pnl_side == 'Credit' else 'Expense'
         return side, acct
 
     income_map = {}   # Credit side: acct_name -> [12 monthly floats]

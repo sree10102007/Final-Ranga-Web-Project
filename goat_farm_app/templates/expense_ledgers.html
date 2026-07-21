@@ -165,11 +165,20 @@
                             <input type="text" name="group_name" class="form-control rounded-3" required placeholder="e.g. Operating Expenses">
                         </div>
                         <div class="mb-3">
-                            <label class="form-label small fw-bold text-dark">Group Type (P&amp;L Allocation Side) <span class="text-danger">*</span></label>
+                            <div class="d-flex align-items-center justify-content-between mb-1">
+                                <label class="form-label small fw-bold text-dark mb-0">Group Type (P&amp;L Allocation Side) <span class="text-danger">*</span></label>
+                                <button type="button" class="btn btn-link btn-sm p-0 text-primary fw-bold small text-decoration-none" data-bs-toggle="modal" data-bs-target="#createGroupTypeModal">
+                                    <i class="bi bi-plus-circle me-1"></i>New Type
+                                </button>
+                            </div>
                             <select name="group_type" class="form-select rounded-3">
-                                <option value="Expense">Debit Side (Expense / Expenditure)</option>
-                                <option value="Income">Credit Side (Income / Revenue)</option>
-                                <option value="Liability">Credit Side (Liability / Payables)</option>
+                                {% for gt in group_types %}
+                                <option value="{{ gt.type_name }}">{{ gt.type_name }} ({{ gt.pnl_side }} Side)</option>
+                                {% else %}
+                                <option value="Expense">Expense (Debit Side)</option>
+                                <option value="Income">Income (Credit Side)</option>
+                                <option value="Liability">Liability (Credit Side)</option>
+                                {% endfor %}
                             </select>
                             <div class="form-text small text-muted">Controls whether ledgers under this group appear on Debit or Credit side in P&amp;L.</div>
                         </div>
@@ -187,9 +196,12 @@
         
         <!-- List of Groups -->
         <div class="col-lg-8">
-            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-                <div class="card-header bg-white border-bottom p-4">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+                <div class="card-header bg-white border-bottom p-4 d-flex align-items-center justify-content-between flex-wrap gap-2">
                     <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-collection me-2 text-primary"></i>All Ledger Groups ({{ groups|length }})</h6>
+                    <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-3 fw-bold" data-bs-toggle="modal" data-bs-target="#createGroupTypeModal">
+                        <i class="bi bi-tag-fill me-1"></i>+ Create Group Type
+                    </button>
                 </div>
                 <div class="list-group list-group-flush">
                     {% set default_groups = ['Direct Expenses', 'Indirect Expenses', 'Capital Account', 'Administrative Expenses', 'Selling Expenses', 'Direct Income', 'Indirect Income', 'Sales', 'Current Liabilities', 'Loans (Liability)'] %}
@@ -201,13 +213,12 @@
                                 {% if g.group_name in default_groups %}
                                 <span class="badge bg-secondary-subtle text-secondary rounded-pill px-2.5 py-1 small fw-bold">System Default</span>
                                 {% endif %}
-                                {% if g.group_type == 'Income' %}
-                                <span class="badge bg-success-subtle text-success rounded-pill px-2.5 py-1 small fw-bold"><i class="bi bi-graph-up-arrow me-1"></i>Credit Side (Income)</span>
-                                {% elif g.group_type == 'Liability' %}
-                                <span class="badge bg-info-subtle text-info rounded-pill px-2.5 py-1 small fw-bold"><i class="bi bi-bank me-1"></i>Credit Side (Liability)</span>
-                                {% else %}
-                                <span class="badge bg-warning-subtle text-warning rounded-pill px-2.5 py-1 small fw-bold"><i class="bi bi-folder-fill me-1"></i>Debit Side (Expense)</span>
-                                {% endif %}
+                                
+                                {% set matched_gt = group_types | selectattr('type_name', 'equalto', g.group_type) | first %}
+                                {% set gt_side = matched_gt.pnl_side if matched_gt else ('Credit' if g.group_type in ['Income', 'Liability'] else 'Debit') %}
+                                <span class="badge {% if gt_side == 'Credit' %}bg-success-subtle text-success{% else %}bg-warning-subtle text-warning{% endif %} rounded-pill px-2.5 py-1 small fw-bold">
+                                    <i class="bi {% if gt_side == 'Credit' %}bi-graph-up-arrow{% else %}bi-folder-fill{% endif %} me-1"></i>{{ g.group_type or 'Expense' }} ({{ gt_side }} Side)
+                                </span>
                                 <span class="badge bg-primary-subtle text-primary rounded-pill px-2 py-0.5 small fw-bold font-monospace">{{ g.ledger_count }} ledgers</span>
                             </div>
                             {% if g.description %}
@@ -234,6 +245,47 @@
         </div>
     </div>
     {% endif %}
+
+<!-- Modal: Create New Group Type -->
+<div class="modal fade" id="createGroupTypeModal" tabindex="-1" aria-labelledby="createGroupTypeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 rounded-4 shadow">
+            <div class="modal-header bg-dark text-white rounded-top-4 p-4">
+                <h5 class="modal-title fw-bold" id="createGroupTypeModalLabel"><i class="bi bi-tag-fill me-2 text-primary"></i>Create New Group Type</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" action="{{ url_for('group_types') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="redirect_tab" value="groups">
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark">Group Type Name <span class="text-danger">*</span></label>
+                        <input type="text" name="type_name" class="form-control rounded-3" required placeholder="e.g. Direct Cost, Capital Reserve, Operating Revenue">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark">P&amp;L Allocation Side <span class="text-danger">*</span></label>
+                        <select name="pnl_side" class="form-select rounded-3" required>
+                            <option value="Debit">Debit Side (Expenses / Expenditure)</option>
+                            <option value="Credit">Credit Side (Income / Revenue / Liabilities)</option>
+                        </select>
+                        <div class="form-text small text-muted">Defines whether ledger accounts linked to groups of this type fall on the Debit or Credit side in P&amp;L reports.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark">Description</label>
+                        <textarea name="description" class="form-control rounded-3" rows="3" placeholder="Brief description of this group type..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer border-top-0 p-4 pt-0">
+                    <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm">
+                        <i class="bi bi-check2-circle me-2"></i>Save Group Type
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</div>
 
 
 </div>
