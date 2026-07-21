@@ -6706,7 +6706,7 @@ def pnl():
             target_map[acct_name] = [0.0] * 12
         target_map[acct_name][month_idx] += float(amount or 0.0)
 
-    # 1. Sales Records (Goat Sales & Other Sales)
+    # 1. Sales Records (Goat Sales, Master Records Goat Sales & Other Sales)
     goat_sales = db.execute(
         "SELECT date_of_sale, sold_price, pnl_category FROM sales_records WHERE date_of_sale BETWEEN ? AND ?",
         (start_date, end_date)
@@ -6716,6 +6716,19 @@ def pnl():
         if m is not None:
             side, acct = get_account_side_and_name(pnl_cat=s['pnl_category'], fallback_name='Goat Sales', default_type='Income')
             add_to_pnl_map(side, acct, m, s['sold_price'])
+
+    # Goat Sales from Master Records (when sold directly in master_records)
+    master_goat_sales = db.execute('''
+        SELECT COALESCE(selling_date, '2026-01-01') AS date_of_sale, selling_price
+        FROM master_records
+        WHERE status = 'Sold' AND selling_price > 0
+          AND COALESCE(selling_date, '2026-01-01') BETWEEN ? AND ?
+    ''', (start_date, end_date)).fetchall()
+    for s in master_goat_sales:
+        m = get_month_idx(s['date_of_sale'])
+        if m is not None:
+            side, acct = get_account_side_and_name(fallback_name='Goat Sales', default_type='Income')
+            add_to_pnl_map(side, acct, m, s['selling_price'])
 
     other_sales = db.execute(
         "SELECT date_of_sale, total_amount, pnl_category FROM other_sales_records WHERE date_of_sale BETWEEN ? AND ?",
