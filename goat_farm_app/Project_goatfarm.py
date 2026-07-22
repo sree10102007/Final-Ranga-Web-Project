@@ -3287,7 +3287,8 @@ def kid():
     records = []
     for r in records_raw:
         r_dict = dict(r)
-        r_dict['age_month'] = calculate_kid_age_months(r_dict.get('birth_date'))
+        if r_dict.get('age_month') is None or str(r_dict.get('age_month')).strip() == '':
+            r_dict['age_month'] = calculate_kid_age_months(r_dict.get('birth_date'))
         records.append(r_dict)
         
     return render_template('kid.html', records=records)
@@ -3950,7 +3951,8 @@ def kid_edit(id):
         return redirect(url_for('kid'))
     
     record_dict = dict(record)
-    record_dict['age_month'] = calculate_kid_age_months(record_dict.get('birth_date'))
+    if record_dict.get('age_month') is None or str(record_dict.get('age_month')).strip() == '':
+        record_dict['age_month'] = calculate_kid_age_months(record_dict.get('birth_date'))
     return render_template('kid_edit.html', record=record_dict)
 
 @app.route('/kid_delete/<int:id>', methods=['POST'])
