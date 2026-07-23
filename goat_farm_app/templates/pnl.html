@@ -250,6 +250,18 @@
             </div>
         </div>
 
+        {% if manual_period_name %}
+        <div class="alert alert-info border-0 rounded-0 mb-0 py-2.5 px-4 d-flex align-items-center justify-content-between small">
+            <div>
+                <i class="bi bi-info-circle-fill me-2 text-info"></i>
+                Stock valuation values applied from master config: <strong>{{ manual_period_name }}</strong>
+            </div>
+            <div>
+                <span class="badge bg-info-subtle text-info fw-bold">Manual Stock Applied</span>
+            </div>
+        </div>
+        {% endif %}
+
         <div class="table-responsive">
             <table class="table-pnl-matrix">
                 <thead>
@@ -288,8 +300,8 @@
                             {# ── DEBIT SIDE (Expenses & Opening Stock) ── #}
                             {% if op_stock_row and i == 0 %}
                                 {# Opening Stock Row #}
-                                <td class="col-particulars interactive-cell" onclick="viewDrilldown('Opening Stock')">
-                                    <span class="me-2"><i class="bi bi-box-arrow-in-right text-warning"></i></span> Opening Stock Valuation
+                                 <td class="col-particulars interactive-cell" onclick="viewDrilldown('Opening Stock')">
+                                    <span class="me-2"><i class="bi bi-box-arrow-in-right text-warning"></i></span> Opening Stock Valuation {% if manual_period_name %}({{ manual_period_name }}){% endif %}
                                 </td>
                                 <td class="col-amount border-center-divider">
                                     {{ "%.2f"|format(op_stock) }}
@@ -329,8 +341,8 @@
                                 </td>
                             {% elif cl_stock_row and i == (income_rows|length) %}
                                 {# Closing Stock Row #}
-                                <td class="col-particulars interactive-cell" onclick="viewDrilldown('Closing Stock')">
-                                    <span class="me-2"><i class="bi bi-box-arrow-left text-success"></i></span> Closing Stock Valuation
+                                 <td class="col-particulars interactive-cell" onclick="viewDrilldown('Closing Stock')">
+                                    <span class="me-2"><i class="bi bi-box-arrow-left text-success"></i></span> Closing Stock Valuation {% if manual_period_name %}({{ manual_period_name }}){% endif %}
                                 </td>
                                 <td class="col-amount">
                                     {{ "%.2f"|format(cl_stock) }}

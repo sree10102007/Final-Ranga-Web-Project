@@ -1,0 +1,125 @@
+{% extends 'layout.html' %}
+{% block title %}Stock Valuations - Expenses Master{% endblock %}
+{% block page_title %}STOCK VALUATIONS{% endblock %}
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
+    <div class="d-flex align-items-center gap-3">
+        <a href="{{ url_for('expenses_master') }}" class="btn btn-outline-secondary rounded-circle d-flex align-items-center justify-content-center" style="width:40px;height:40px;padding:0;">
+            <i class="bi bi-arrow-left fs-5"></i>
+        </a>
+        <div>
+            <h2 class="fw-bold mb-0 text-warning" style="color:#ea580c !important;">Stock Valuations</h2>
+            <p class="text-muted small mb-0">Configure opening &amp; closing stock values for specific periods (years, months, or custom date ranges) for P&amp;L reports</p>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Add Stock Valuation Form -->
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-header border-0 rounded-top-4 p-4 text-white" style="background: linear-gradient(135deg,#ea580c,#f97316);">
+                <h6 class="fw-bold mb-0"><i class="bi bi-plus-circle me-2"></i>Add Valuation Period</h6>
+            </div>
+            <div class="card-body p-4">
+                <form method="post">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="action" value="add">
+                    
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark">Period Name <span class="text-danger">*</span></label>
+                        <input type="text" name="period_name" class="form-control rounded-3" required placeholder="e.g. FY 2026, July 2026, Custom Range">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark">Start Date <span class="text-danger">*</span></label>
+                        <input type="date" name="from_date" class="form-control rounded-3" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark">End Date <span class="text-danger">*</span></label>
+                        <input type="date" name="to_date" class="form-control rounded-3" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark">Opening Stock Value (₹) <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-dark">₹</span>
+                            <input type="number" step="0.01" name="opening_stock" class="form-control" required placeholder="0.00">
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold text-dark">Closing Stock Value (₹) <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-dark">₹</span>
+                            <input type="number" step="0.01" name="closing_stock" class="form-control" required placeholder="0.00">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn w-100 rounded-pill fw-bold shadow-sm text-white" style="background:#ea580c;">
+                        <i class="bi bi-check2-circle me-2"></i>Save Stock Valuation
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stock Valuations List -->
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+            <div class="card-header bg-white border-bottom p-4">
+                <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-box-seam me-2" style="color:#ea580c;"></i>Configured Stock Valuations ({{ records|length }})</h6>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 text-start">
+                    <thead class="table-light text-uppercase small text-muted border-bottom">
+                        <tr>
+                            <th class="ps-4">Period</th>
+                            <th>Date Range</th>
+                            <th class="text-end">Opening Stock (₹)</th>
+                            <th class="text-end">Closing Stock (₹)</th>
+                            <th class="text-end pe-4">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for r in records %}
+                        <tr>
+                            <td class="ps-4">
+                                <span class="fw-bold text-dark">{{ r.period_name }}</span>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-dark border font-monospace small">
+                                    {{ r.from_date }} to {{ r.to_date }}
+                                </span>
+                            </td>
+                            <td class="text-end font-monospace fw-semibold text-warning" style="color:#ea580c !important;">
+                                ₹{{ "%.2f"|format(r.opening_stock) }}
+                            </td>
+                            <td class="text-end font-monospace fw-semibold text-success">
+                                ₹{{ "%.2f"|format(r.closing_stock) }}
+                            </td>
+                            <td class="text-end pe-4">
+                                <form action="{{ url_for('stock_valuation_delete', svid=r.id) }}" method="post" class="d-inline" data-confirm="Delete this stock valuation record?">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm rounded-circle p-1" style="width:30px;height:30px;" title="Delete">
+                                        <i class="bi bi-trash" style="font-size:0.75rem;"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center py-5 text-muted">
+                                <i class="bi bi-box-seam fs-1 d-block mb-3 opacity-25"></i>
+                                No stock valuations configured. Create your first valuation on the left.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

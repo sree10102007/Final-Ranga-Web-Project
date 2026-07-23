@@ -1097,6 +1097,18 @@ def init_db():
             )
         ''')
 
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS manual_stock_valuations (
+                id SERIAL PRIMARY KEY,
+                period_name TEXT NOT NULL,
+                from_date DATE NOT NULL,
+                to_date DATE NOT NULL,
+                opening_stock REAL NOT NULL DEFAULT 0,
+                closing_stock REAL NOT NULL DEFAULT 0
+            )
+        ''')
+
+
         # Seed default expense units if empty
         unit_count = conn.execute('SELECT COUNT(*) FROM expense_units').fetchone()[0]
         if unit_count == 0:
@@ -6296,6 +6308,47 @@ def expense_unit_delete(uid):
     flash('Unit deleted.', 'success')
     return redirect(url_for('expense_units_view'))
 
+@app.route('/stock_valuations', methods=['GET', 'POST'])
+def stock_valuations():
+    if 'user_id' not in session:
+        return redirect(url_for('auth.login'))
+    db = get_db()
+    if request.method == 'POST':
+        action = request.form.get('action', 'add')
+        if action == 'add':
+            pname = request.form.get('period_name', '').strip()
+            fdate = request.form.get('from_date', '').strip()
+            tdate = request.form.get('to_date', '').strip()
+            opstock = float(request.form.get('opening_stock', 0.0) or 0.0)
+            clstock = float(request.form.get('closing_stock', 0.0) or 0.0)
+            
+            if pname and fdate and tdate:
+                try:
+                    db.execute('''
+                        INSERT INTO manual_stock_valuations (period_name, from_date, to_date, opening_stock, closing_stock)
+                        VALUES (?, ?, ?, ?, ?)
+                    ''', (pname, fdate, tdate, opstock, clstock))
+                    db.commit()
+                    flash(f'Stock Valuation for "{pname}" added successfully!', 'success')
+                except Exception as e:
+                    flash(f'Error adding stock valuation: {str(e)}', 'danger')
+            else:
+                flash('Period Name, Start Date, and End Date are required.', 'danger')
+        return redirect(url_for('stock_valuations'))
+        
+    records = db.execute('SELECT * FROM manual_stock_valuations ORDER BY from_date DESC').fetchall()
+    return render_template('stock_valuations.html', records=records)
+
+@app.route('/stock_valuation_delete/<int:svid>', methods=['POST'])
+def stock_valuation_delete(svid):
+    if 'user_id' not in session:
+        return redirect(url_for('auth.login'))
+    db = get_db()
+    db.execute('DELETE FROM manual_stock_valuations WHERE id=?', (svid,))
+    db.commit()
+    flash('Stock Valuation record deleted successfully.', 'success')
+    return redirect(url_for('stock_valuations'))
+
 @app.route('/equipment')
 def equipment():
     db = get_db()
@@ -6648,6 +6701,26 @@ def pnl():
         start_date = custom_from
         end_date = custom_to
     now = datetime.now()
+
+    # Look for manual stock valuation matching the filtered period
+    manual_stock_rec = db.execute('''
+        SELECT * FROM manual_stock_valuations 
+        WHERE (from_date = ? AND to_date = ?)
+           OR (from_date <= ? AND to_date >= ?)
+        ORDER BY (CASE WHEN from_date = ? AND to_date = ? THEN 1 ELSE 0 END) DESC, from_date DESC
+        LIMIT 1
+    ''', (start_date, end_date, start_date, end_date, start_date, end_date)).fetchone()
+
+    if manual_stock_rec:
+        include_stock = '1'
+        manual_opening = manual_stock_rec['opening_stock']
+        manual_closing = manual_stock_rec['closing_stock']
+        manual_period_name = manual_stock_rec['period_name']
+    else:
+        include_stock = '0'
+        manual_opening = 0.0
+        manual_closing = 0.0
+        manual_period_name = None
 
     # ── DYNAMIC PNL ALLOCATION ENGINE (DEBIT / CREDIT SIDE BY GROUP_TYPE) ────────
     gt_rows = db.execute("SELECT type_name, pnl_side FROM group_types").fetchall()
@@ -7023,6 +7096,7 @@ def pnl():
                            include_stock=(include_stock == '1'),
                            manual_opening=manual_opening,
                            manual_closing=manual_closing,
+                           manual_period_name=manual_period_name,
                            computed_opening=get_stock_val(start_date),
                            computed_closing=get_stock_val(end_date),
                            available_stock_items=available_stock_items,
