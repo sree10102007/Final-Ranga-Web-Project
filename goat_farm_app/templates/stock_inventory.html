@@ -90,8 +90,8 @@
                         {% elif stock.alert_level > 0 and stock.closing_stock <= stock.alert_level %}
                             <span class="badge bg-warning text-dark px-2 py-1 rounded-pill me-1 small fw-bold" style="font-size: 0.75rem;"><i class="bi bi-exclamation-triangle-fill me-1"></i>Low</span>
                         {% endif %}
-                        <button class="btn btn-sm btn-outline-secondary rounded-pill px-2" title="Set Reminder Threshold" onclick="openLimitModal('feed', '{{ feed_name|replace("\'", "\\\'") }}', '{{ stock.alert_level }}', '{{ stock.unit|replace("\'", "\\\'") }}')"><i class="bi bi-bell"></i></button>
-                        <button class="btn btn-sm btn-success rounded-pill px-2 fw-semibold" title="Add stock to {{ feed_name }}" onclick="openBuyModal('feed', '{{ feed_name|replace("\'", "\\\'") }}', '{{ stock.unit|replace("\'", "\\\'") }}')"><i class="bi bi-plus-lg me-1"></i>+ Stock</button>
+                        <button class="btn btn-sm btn-outline-secondary rounded-pill px-2" title="Set Reminder Threshold" data-type="feed" data-name="{{ feed_name }}" data-limit="{{ stock.alert_level }}" data-unit="{{ stock.unit }}" onclick="openLimitModal(this.dataset.type, this.dataset.name, this.dataset.limit, this.dataset.unit)"><i class="bi bi-bell"></i></button>
+                        <button class="btn btn-sm btn-success rounded-pill px-2 fw-semibold" title="Add stock to {{ feed_name }}" data-type="feed" data-name="{{ feed_name }}" data-unit="{{ stock.unit }}" onclick="openBuyModal(this.dataset.type, this.dataset.name, this.dataset.unit)"><i class="bi bi-plus-lg me-1"></i>+ Stock</button>
                         <a href="{{ url_for('voucher_add', v_type='feed', feed_name=feed_name, unit=stock.unit) }}" class="btn btn-sm btn-outline-success rounded-pill px-2" title="Full Purchase Voucher"><i class="bi bi-receipt"></i></a>
                     </div>
                 </div>
@@ -128,8 +128,8 @@
                         {% elif stock.alert_level > 0 and stock.closing_stock <= stock.alert_level %}
                             <span class="badge bg-warning text-dark px-2 py-1 rounded-pill me-1 small fw-bold" style="font-size: 0.75rem;"><i class="bi bi-exclamation-triangle-fill me-1"></i>Low</span>
                         {% endif %}
-                        <button class="btn btn-sm btn-outline-secondary rounded-pill px-2" title="Set Reminder Threshold" onclick="openLimitModal('medicine', '{{ med_name|replace("\'", "\\\'") }}', '{{ stock.alert_level }}', '{{ stock.unit|replace("\'", "\\\'") }}')"><i class="bi bi-bell"></i></button>
-                        <button class="btn btn-sm btn-primary rounded-pill px-2 fw-semibold" title="Add stock to {{ med_name }}" onclick="openBuyModal('medicine', '{{ med_name|replace("\'", "\\\'") }}', '{{ stock.unit|replace("\'", "\\\'") }}')"><i class="bi bi-plus-lg me-1"></i>+ Stock</button>
+                        <button class="btn btn-sm btn-outline-secondary rounded-pill px-2" title="Set Reminder Threshold" data-type="medicine" data-name="{{ med_name }}" data-limit="{{ stock.alert_level }}" data-unit="{{ stock.unit }}" onclick="openLimitModal(this.dataset.type, this.dataset.name, this.dataset.limit, this.dataset.unit)"><i class="bi bi-bell"></i></button>
+                        <button class="btn btn-sm btn-primary rounded-pill px-2 fw-semibold" title="Add stock to {{ med_name }}" data-type="medicine" data-name="{{ med_name }}" data-unit="{{ stock.unit }}" onclick="openBuyModal(this.dataset.type, this.dataset.name, this.dataset.unit)"><i class="bi bi-plus-lg me-1"></i>+ Stock</button>
                         <a href="{{ url_for('voucher_add', v_type='health', sub_type='medicine', health_name=med_name, dose_unit=stock.unit) }}" class="btn btn-sm btn-outline-primary rounded-pill px-2" title="Full Purchase Voucher"><i class="bi bi-receipt"></i></a>
                     </div>
                 </div>
@@ -166,8 +166,8 @@
                         {% elif stock.alert_level > 0 and stock.closing_stock <= stock.alert_level %}
                             <span class="badge bg-warning text-dark px-2 py-1 rounded-pill me-1 small fw-bold" style="font-size: 0.75rem;"><i class="bi bi-exclamation-triangle-fill me-1"></i>Low</span>
                         {% endif %}
-                        <button class="btn btn-sm btn-outline-secondary rounded-pill px-2" title="Set Reminder Threshold" onclick="openLimitModal('vaccine', '{{ vac_name|replace("\'", "\\\'") }}', '{{ stock.alert_level }}', '{{ stock.unit|replace("\'", "\\\'") }}')"><i class="bi bi-bell"></i></button>
-                        <button class="btn btn-sm btn-info text-white rounded-pill px-2 fw-semibold" title="Add stock to {{ vac_name }}" onclick="openBuyModal('vaccine', '{{ vac_name|replace("\'", "\\\'") }}', '{{ stock.unit|replace("\'", "\\\'") }}')"><i class="bi bi-plus-lg me-1"></i>+ Stock</button>
+                        <button class="btn btn-sm btn-outline-secondary rounded-pill px-2" title="Set Reminder Threshold" data-type="vaccine" data-name="{{ vac_name }}" data-limit="{{ stock.alert_level }}" data-unit="{{ stock.unit }}" onclick="openLimitModal(this.dataset.type, this.dataset.name, this.dataset.limit, this.dataset.unit)"><i class="bi bi-bell"></i></button>
+                        <button class="btn btn-sm btn-info text-white rounded-pill px-2 fw-semibold" title="Add stock to {{ vac_name }}" data-type="vaccine" data-name="{{ vac_name }}" data-unit="{{ stock.unit }}" onclick="openBuyModal(this.dataset.type, this.dataset.name, this.dataset.unit)"><i class="bi bi-plus-lg me-1"></i>+ Stock</button>
                         <a href="{{ url_for('voucher_add', v_type='health', sub_type='vaccine', health_name=vac_name, unit=stock.unit) }}" class="btn btn-sm btn-outline-info rounded-pill px-2" title="Full Purchase Voucher"><i class="bi bi-receipt"></i></a>
                     </div>
                 </div>
@@ -292,6 +292,14 @@
     </div>
 </div>
 
+<script id="stocks-data" type="application/json" nonce="{{ csp_nonce }}">
+{
+    "feed": {{ (feed_stocks or {})|tojson|safe }},
+    "medicine": {{ (med_stocks or {})|tojson|safe }},
+    "vaccine": {{ (vac_stocks or {})|tojson|safe }}
+}
+</script>
+
 <script nonce="{{ csp_nonce }}">
     function getTodayString() {
         const d = new Date();
@@ -301,11 +309,7 @@
         return `${year}-${month}-${day}`;
     }
 
-    const EXISTING_STOCKS = {
-        feed: {{ (feed_stocks or {})|tojson|safe }},
-        medicine: {{ (med_stocks or {})|tojson|safe }},
-        vaccine: {{ (vac_stocks or {})|tojson|safe }}
-    };
+    const EXISTING_STOCKS = JSON.parse(document.getElementById('stocks-data').textContent || '{}');
 
     const UNIT_OPTIONS = {
         feed: [
