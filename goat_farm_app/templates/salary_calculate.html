@@ -90,9 +90,9 @@
                     <td class="text-muted">{{ s.role }}</td>
                     <td>
                         <input type="number" class="form-control form-control-sm fw-bold border-success text-center px-1 d-inline-block" 
-                               value="{{ s.present }}" min="0" max="{{ total_days }}" data-style="width: 70px;"
+                               value="{{ s.present }}" min="0" max="{{ total_days }}" style="width: 70px;"
                                data-wage-type="{{ s.wage_type }}" data-wage-rate="{{ s.wage_rate }}" data-paid="{{ s.paid }}"
-                               data-oninput="updateRowSalary(this)">
+                               oninput="updateRowSalary(this)">
                         <span class="small text-muted ms-1">/ {{ total_days }} days</span>
                     </td>
                     <td>
@@ -116,7 +116,7 @@
                                 <input type="hidden" name="payment_mode" value="Cash">
                                 <input type="hidden" name="notes" value="Salary payment for {{ month }}/{{ year }}">
                                 
-                                <div class="input-group input-group-sm" data-style="max-width: 130px;">
+                                <div class="input-group input-group-sm" style="max-width: 130px;">
                                     <span class="input-group-text bg-light text-muted">₹</span>
                                     <input type="number" step="0.01" name="amount" class="form-control" 
                                            value="{{ "%.2f"|format(s.balance) }}" required max="{{ "%.2f"|format(s.balance) }}">
@@ -130,14 +130,14 @@
                             {% endif %}
 
                             {% if s.paid > 0 %}
-                            <form action="{{ url_for('rollback_salary_payment') }}" method="POST" class="d-inline" data-confirm="Restore/roll back payment of ₹{{ '%.2f'|format(s.paid) }} for {{ s.name }}?">
+                            <form action="{{ url_for('rollback_salary_payment') }}" method="POST" class="d-inline" onsubmit="return confirm('Restore/roll back payment of ₹{{ \'%.2f\'|format(s.paid) }} for {{ s.name }}?');">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                 <input type="hidden" name="employee_id" value="{{ s.id }}">
                                 <input type="hidden" name="month" value="{{ month }}">
                                 <input type="hidden" name="year" value="{{ year }}">
                                 <input type="hidden" name="start_day" value="{{ start_day }}">
                                 <input type="hidden" name="end_day" value="{{ end_day }}">
-                                <button type="submit" class="btn btn-sm btn-outline-warning rounded-pill px-2.5 py-1 small fw-bold" title="Restore last payment for this employee">
+                                <button type="submit" class="btn btn-sm btn-outline-warning rounded-pill px-2 py-1 small fw-bold" title="Restore last payment for this employee">
                                     <i class="bi bi-arrow-counterclockwise"></i> Restore
                                 </button>
                             </form>
@@ -160,7 +160,7 @@ function updateRowSalary(input) {
     const wageType = input.getAttribute('data-wage-type');
     const wageRate = parseFloat(input.getAttribute('data-wage-rate')) || 0;
     const paid = parseFloat(input.getAttribute('data-paid')) || 0;
-    const totalDays = parseFloat("{{ total_days }}") || 30;
+    const totalDays = (parseFloat("{{ total_days }}") > 0) ? parseFloat("{{ total_days }}") : 30;
     const present = parseFloat(input.value) || 0;
     
     let computed = 0.0;
@@ -188,7 +188,7 @@ function updateRowSalary(input) {
 }
 
 function downloadSalaryCSV() {
-    const salariesData = {{ salaries|tojson }};
+    const salariesData = {{ salaries|tojson|safe }};
     const month = "{{ month }}";
     const year = "{{ year }}";
     const totalDays = "{{ total_days }}";
