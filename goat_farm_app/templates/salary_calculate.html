@@ -155,6 +155,10 @@
     </div>
 </div>
 
+<script id="salaries-data" type="application/json" nonce="{{ csp_nonce }}">
+    {{ salaries|tojson|safe }}
+</script>
+
 <script nonce="{{ csp_nonce }}">
 function updateRowSalary(input) {
     const wageType = input.getAttribute('data-wage-type');
@@ -188,7 +192,7 @@ function updateRowSalary(input) {
 }
 
 function downloadSalaryCSV() {
-    const salariesData = {{ salaries|tojson|safe }};
+    const salariesData = JSON.parse(document.getElementById('salaries-data').textContent || '[]');
     const month = "{{ month }}";
     const year = "{{ year }}";
     const totalDays = "{{ total_days }}";
