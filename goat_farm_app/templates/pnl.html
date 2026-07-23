@@ -541,6 +541,14 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
+    // Detailed Ledger Button
+    const detailedLedgerBtn = document.getElementById('detailedLedgerBtn');
+    if (detailedLedgerBtn) {
+        detailedLedgerBtn.addEventListener('click', function() {
+            viewDrilldown('All');
+        });
+    }
+
     // Modal print button
     const modalPrintLedgerBtn = document.getElementById('modalPrintLedgerBtn');
     if (modalPrintLedgerBtn) {
