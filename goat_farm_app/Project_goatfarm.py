@@ -6572,9 +6572,9 @@ def pnl():
     selected_month = request.args.get('month') or request.form.get('month') or str(datetime.now().month)
     custom_from = request.args.get('from_date') or request.form.get('from_date') or datetime.now().strftime('%Y-%m-%d')
     custom_to = request.args.get('to_date') or request.form.get('to_date') or datetime.now().strftime('%Y-%m-%d')
-    include_stock = '1' if ('include_stock' in request.form or request.args.get('include_stock') == '1') else '0'
-    manual_opening = request.args.get('opening_stock', '') or request.form.get('opening_stock', '')
-    manual_closing = request.args.get('closing_stock', '') or request.form.get('closing_stock', '')
+    include_stock = '0'
+    manual_opening = ''
+    manual_closing = ''
 
     import calendar
     from datetime import timedelta

@@ -210,31 +210,6 @@
                         <label class="form-label small fw-bold text-uppercase text-muted mb-1">To Date</label>
                         <input type="date" name="to_date" id="toDateInput" class="form-control form-control-sm rounded-pill text-dark px-3" value="{{ custom_to }}">
                     </div>
-
-                    <div class="col-md-3 col-12 d-flex align-items-center mt-md-4 mt-3">
-                        <div class="form-check form-switch mb-0 d-flex align-items-center gap-2">
-                            <input class="form-check-input cursor-pointer" style="width: 2.2em; height: 1.1em;" type="checkbox" name="include_stock" id="includeStock" {% if include_stock %}checked{% endif %}>
-                            <label class="form-check-label small fw-bold text-muted cursor-pointer mb-0" for="includeStock">Stock Valuation</label>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Stock Valuation Inputs Row -->
-                <div class="row g-3 align-items-center border-top pt-3 mt-2" id="stockInputsContainer" {% if not include_stock %}style="display: none;"{% endif %}>
-                    <div class="col-md-6 col-12">
-                        <label class="form-label small fw-bold text-uppercase text-muted mb-1">Opening Stock Valuation (₹)</label>
-                        <div class="input-group input-group-sm">
-                            <span class="input-group-text bg-light text-dark">₹</span>
-                            <input type="number" step="0.01" name="opening_stock" class="form-control" placeholder="{{ '%.2f'|format(computed_opening) }}" value="{{ manual_opening }}">
-                        </div>
-                    </div>
-                    <div class="col-md-6 col-12">
-                        <label class="form-label small fw-bold text-uppercase text-muted mb-1">Closing Stock Valuation (₹)</label>
-                        <div class="input-group input-group-sm">
-                            <span class="input-group-text bg-light text-dark">₹</span>
-                            <input type="number" step="0.01" name="closing_stock" class="form-control" placeholder="{{ '%.2f'|format(computed_closing) }}" value="{{ manual_closing }}">
-                        </div>
-                    </div>
                 </div>
 
                 <!-- Actions Row -->
@@ -404,9 +379,6 @@
                 <span class="badge bg-primary rounded-pill px-3 py-2 fs-6 fw-bold">
                     Total Stock Value: ₹{{ "%.2f"|format(total_available_stock_value) }}
                 </span>
-                <button type="button" class="btn btn-sm btn-outline-light rounded-pill px-3 fw-bold" onclick="viewDrilldown('Closing Stock')">
-                    <i class="bi bi-zoom-in me-1"></i>View Full Inventory Drilldown
-                </button>
             </div>
         </div>
         
@@ -514,18 +486,6 @@
 
 <script nonce="{{ csp_nonce }}">
 document.addEventListener("DOMContentLoaded", function() {
-    // Toggle manual stock valuation inputs visibility
-    const includeStock = document.getElementById('includeStock');
-    const stockInputsContainer = document.getElementById('stockInputsContainer');
-    if (includeStock && stockInputsContainer) {
-        includeStock.addEventListener('change', function() {
-            if (this.checked) {
-                stockInputsContainer.style.display = 'flex';
-            } else {
-                stockInputsContainer.style.display = 'none';
-            }
-        });
-    }
 
     // Toggle filter inputs visibility based on Filter Type selection
     const filterTypeSelect = document.getElementById('filterTypeSelect');
