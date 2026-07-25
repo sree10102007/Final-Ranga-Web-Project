@@ -6783,9 +6783,9 @@ def pnl():
         if prev_closing is not None:
             manual_opening = prev_closing
         else:
-            manual_opening = get_stock_val(start_date) # Default to computed opening
+            manual_opening = 0.0
             
-        manual_closing = get_stock_val(end_date) # Default to computed closing
+        manual_closing = 0.0
         manual_period_name = None
 
     # ── DYNAMIC PNL ALLOCATION ENGINE (DEBIT / CREDIT SIDE BY GROUP_TYPE) ────────
