@@ -71,6 +71,32 @@
     .farm-toast .btn-close:hover {
         filter: grayscale(0) opacity(1);
     }
+
+    /* Sticky Horizontal Scrollbar styles */
+    .sticky-scrollbar-container {
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border-top: 1px solid rgba(0, 0, 0, 0.05);
+      box-shadow: 0 -3px 12px rgba(0, 0, 0, 0.05);
+      border-radius: 4px 4px 0 0;
+      transition: opacity 0.2s ease-in-out;
+    }
+    .sticky-scrollbar-container::-webkit-scrollbar {
+      height: 12px;
+    }
+    .sticky-scrollbar-container::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 4px 4px 0 0;
+    }
+    .sticky-scrollbar-container::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 6px;
+      border: 2px solid #f1f5f9;
+    }
+    .sticky-scrollbar-container::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
   </style>
 </head>
 <body>
@@ -768,6 +794,94 @@ function showFeedbackToast(type, message) {
     setTimeout(() => { toastEl.remove(); }, 400);
   }, 4000);
 }
+
+// ── STICKY HORIZONTAL SCROLLBAR FOR TABLES ──────────────────────────
+(function() {
+  function initStickyScrollbars() {
+    const tables = document.querySelectorAll('.table-responsive');
+    tables.forEach(table => {
+      if (table.dataset.hasStickyScrollbar) {
+        if (table._updateStickyBar) table._updateStickyBar();
+        return;
+      }
+      table.dataset.hasStickyScrollbar = 'true';
+      
+      const stickyBar = document.createElement('div');
+      stickyBar.className = 'sticky-scrollbar-container';
+      stickyBar.style.position = 'fixed';
+      stickyBar.style.bottom = '0';
+      stickyBar.style.overflowX = 'auto';
+      stickyBar.style.overflowY = 'hidden';
+      stickyBar.style.zIndex = '1010';
+      stickyBar.style.display = 'none';
+      
+      const innerDummy = document.createElement('div');
+      innerDummy.style.height = '1px';
+      stickyBar.appendChild(innerDummy);
+      document.body.appendChild(stickyBar);
+      
+      let isSyncingTable = false;
+      let isSyncingBar = false;
+      
+      table.addEventListener('scroll', () => {
+        if (isSyncingBar) {
+          isSyncingBar = false;
+          return;
+        }
+        isSyncingTable = true;
+        stickyBar.scrollLeft = table.scrollLeft;
+      });
+      
+      stickyBar.addEventListener('scroll', () => {
+        if (isSyncingTable) {
+          isSyncingTable = false;
+          return;
+        }
+        isSyncingBar = true;
+        table.scrollLeft = stickyBar.scrollLeft;
+      });
+      
+      function updateStickyBar() {
+        const rect = table.getBoundingClientRect();
+        const viewportHeight = window.innerHeight;
+        const isScrollable = table.scrollWidth > table.clientWidth;
+        
+        // Show sticky scrollbar if table is scrollable, and it is in view but its bottom is below the screen
+        const showSticky = isScrollable && (rect.top < viewportHeight) && (rect.bottom > viewportHeight);
+        
+        if (showSticky) {
+          stickyBar.style.display = 'block';
+          stickyBar.style.left = rect.left + 'px';
+          stickyBar.style.width = rect.width + 'px';
+          innerDummy.style.width = table.scrollWidth + 'px';
+          
+          if (!isSyncingBar && !isSyncingTable) {
+            stickyBar.scrollLeft = table.scrollLeft;
+          }
+        } else {
+          stickyBar.style.display = 'none';
+        }
+      }
+      
+      table._updateStickyBar = updateStickyBar;
+      
+      window.addEventListener('scroll', updateStickyBar);
+      window.addEventListener('resize', updateStickyBar);
+      updateStickyBar();
+      
+      const observer = new MutationObserver(updateStickyBar);
+      observer.observe(table, { childList: true, subtree: true, attributes: true });
+    });
+  }
+  
+  document.addEventListener('DOMContentLoaded', initStickyScrollbars);
+  window.addEventListener('load', initStickyScrollbars);
+  
+  const bodyObserver = new MutationObserver(() => {
+    initStickyScrollbars();
+  });
+  bodyObserver.observe(document.body, { childList: true, subtree: true });
+})();
 </script>
 
 </body>
