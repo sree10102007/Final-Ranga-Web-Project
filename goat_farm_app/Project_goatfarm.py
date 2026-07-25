@@ -3470,7 +3470,7 @@ def master_edit(id):
             dob_str = None
 
         # Check if weight crossed 25 kg threshold to reset the seen flag safely
-        old_record = db.execute('SELECT weight_kg, weight_alert_seen FROM master_records WHERE id = ?', (id,)).fetchone()
+        old_record = db.execute('SELECT tag_no, weight_kg, weight_alert_seen FROM master_records WHERE id = ?', (id,)).fetchone()
         try:
             new_weight = float(f.get('weight_kg') or 0)
         except (ValueError, TypeError):
@@ -3479,6 +3479,33 @@ def master_edit(id):
         weight_alert_seen = old_record['weight_alert_seen'] if old_record else 0
         if old_record and (old_record['weight_kg'] is None or old_record['weight_kg'] < 25) and new_weight >= 25:
             weight_alert_seen = 0
+
+        # Handle tag_no change safely to prevent foreign key violations in child tables
+        old_tag_no = old_record['tag_no'] if old_record else None
+        new_tag_no = f.get('tag_no', '').strip()
+        where_clause_id = id
+
+        if old_tag_no and new_tag_no and old_tag_no != new_tag_no:
+            # 1. Insert a temporary record with the new tag_no to satisfy foreign keys
+            db.execute("INSERT INTO master_records (tag_no, status) VALUES (?, 'Active')", (new_tag_no,))
+            
+            # 2. Update child tables to point to the new tag_no
+            db.execute("UPDATE eligible_to_sell SET tag_id = ? WHERE tag_id = ?", (new_tag_no, old_tag_no))
+            db.execute("UPDATE eligible_to_sell SET tag_no = ? WHERE tag_no = ?", (new_tag_no, old_tag_no))
+            db.execute("UPDATE goat_weights SET goat_tag_no = ? WHERE goat_tag_no = ?", (new_tag_no, old_tag_no))
+            db.execute("UPDATE sales_records SET tag_id = ? WHERE tag_id = ?", (new_tag_no, old_tag_no))
+            db.execute("UPDATE goats_data SET tag_number = ? WHERE tag_number = ?", (new_tag_no, old_tag_no))
+            db.execute("UPDATE medicine_history SET tag_no = ? WHERE tag_no = ?", (new_tag_no, old_tag_no))
+            db.execute("UPDATE vaccine_records SET tag_no = ? WHERE tag_no = ?", (new_tag_no, old_tag_no))
+            db.execute("UPDATE mortality_records SET tag_id = ? WHERE tag_id = ?", (new_tag_no, old_tag_no))
+            
+            # 3. Delete the old parent record (which now has no referencing rows)
+            db.execute("DELETE FROM master_records WHERE id = ?", (id,))
+            
+            # 4. Find the ID of the new parent record to update it with all the form details
+            new_row = db.execute("SELECT id FROM master_records WHERE tag_no = ?", (new_tag_no,)).fetchone()
+            if new_row:
+                where_clause_id = new_row['id']
 
         db.execute('''
             UPDATE master_records SET 
@@ -3501,7 +3528,7 @@ def master_edit(id):
             f.get('selling_date') or None, f.get('selling_weight'), f.get('selling_price'), f.get('mortality_date') or None,
             f.get('mortality_weight'), f.get('mortality_reason'), f.get('insurance_claim_amount'),
             f.get('insurance_inform_date') or None, f.get('insurance_claim_date') or None, 1 if f.get('kit_status') else 0, dob_str,
-            weight_alert_seen, f.get('insurance_amount'), id
+            weight_alert_seen, f.get('insurance_amount'), where_clause_id
         ))
 
         # Log weight change into goat_weight_logs if the weight has changed
