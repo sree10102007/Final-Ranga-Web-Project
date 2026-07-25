@@ -223,11 +223,8 @@
         <!-- List of Groups -->
         <div class="col-lg-7 col-xl-7">
             <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
-                <div class="card-header bg-white border-bottom p-4 d-flex align-items-center justify-content-between flex-wrap gap-2">
+                <div class="card-header bg-white border-bottom p-4">
                     <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-collection me-2 text-primary"></i>All Ledger Groups ({{ groups|length }})</h6>
-                    <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-3 fw-bold" data-bs-toggle="modal" data-bs-target="#createGroupTypeModal">
-                        <i class="bi bi-tag-fill me-1"></i>+ Create Group Type
-                    </button>
                 </div>
                 <div class="list-group list-group-flush">
                     {% set default_groups = ['Direct Expenses', 'Indirect Expenses', 'Capital Account', 'Administrative Expenses', 'Selling Expenses', 'Direct Income', 'Indirect Income', 'Sales', 'Current Liabilities', 'Loans (Liability)'] %}
