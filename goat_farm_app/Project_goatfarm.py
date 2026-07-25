@@ -6658,11 +6658,22 @@ def pnl():
         return redirect(url_for('auth.login'))
         
     db = get_db()
-    filter_type = request.args.get('filter_type') or request.form.get('filter_type') or 'yearly'
-    selected_year = request.args.get('year') or request.form.get('year') or str(datetime.now().year)
-    selected_month = request.args.get('month') or request.form.get('month') or str(datetime.now().month)
-    custom_from = request.args.get('from_date') or request.form.get('from_date') or datetime.now().strftime('%Y-%m-%d')
-    custom_to = request.args.get('to_date') or request.form.get('to_date') or datetime.now().strftime('%Y-%m-%d')
+    
+    now = datetime.now()
+    if now.month >= 4:
+        default_from = f"{now.year}-04-01"
+        default_to = f"{now.year + 1}-03-31"
+    else:
+        default_from = f"{now.year - 1}-04-01"
+        default_to = f"{now.year}-03-31"
+        
+    default_fy_label = f"Financial Year ({datetime.strptime(default_from, '%Y-%m-%d').strftime('%d/%m/%Y')} to {datetime.strptime(default_to, '%Y-%m-%d').strftime('%d/%m/%Y')})"
+    
+    filter_type = request.args.get('filter_type') or request.form.get('filter_type') or 'custom'
+    selected_year = request.args.get('year') or request.form.get('year') or str(now.year)
+    selected_month = request.args.get('month') or request.form.get('month') or str(now.month)
+    custom_from = request.args.get('from_date') or request.form.get('from_date') or default_from
+    custom_to = request.args.get('to_date') or request.form.get('to_date') or default_to
     include_stock = '0'
     manual_opening = ''
     manual_closing = ''
@@ -7145,7 +7156,8 @@ def pnl():
                            expense_rows=expense_rows,
                            cogs_row=cogs_row,
                            from_date=start_date,
-                           to_date=end_date)
+                           to_date=end_date,
+                           default_fy_label=default_fy_label)
 
 
 @app.route('/api/pnl/drilldown')

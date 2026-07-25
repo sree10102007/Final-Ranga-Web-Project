@@ -157,14 +157,14 @@
     }
 </style>
 
-<div class="container py-4">
+<div class="container pt-2 pb-4">
     <!-- Header Page Title Centered as shown in reference -->
-    <div class="text-center mb-4">
+    <div class="text-center mb-2">
         <h4 class="fw-bold text-dark text-uppercase tracking-wider" style="letter-spacing: 1.5px;">Profit & Loss Statement</h4>
     </div>
 
     <!-- Filter Controls Toolbar -->
-    <div class="row mb-4 d-print-none">
+    <div class="row mb-3 d-print-none">
         <div class="col-12">
             <form method="POST" action="{{ url_for('pnl') }}" class="pnl-card p-4 bg-white shadow-sm rounded-3">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -175,7 +175,7 @@
                         <select name="filter_type" id="filterTypeSelect" class="form-select form-select-sm rounded-pill text-dark px-3">
                             <option value="yearly" {% if filter_type == 'yearly' %}selected{% endif %}>Yearly</option>
                             <option value="monthly" {% if filter_type == 'monthly' %}selected{% endif %}>Monthly</option>
-                            <option value="custom" {% if filter_type == 'custom' %}selected{% endif %}>Custom Date / Single Day</option>
+                            <option value="custom" {% if filter_type == 'custom' %}selected{% endif %}>{{ default_fy_label }}</option>
                         </select>
                     </div>
                     
