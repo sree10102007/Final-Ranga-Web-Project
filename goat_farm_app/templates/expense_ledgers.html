@@ -195,6 +195,13 @@
                             </select>
                             <div class="form-text small text-muted mt-1.5"><i class="bi bi-info-circle me-1"></i>Controls whether ledgers under this group appear on Debit or Credit side in P&amp;L.</div>
                         </div>
+
+                        <!-- Button for managing asset categories and conditions -->
+                        <div class="mb-4">
+                            <button type="button" class="btn btn-outline-success w-100 rounded-pill fw-bold py-2.5 shadow-sm" data-bs-toggle="modal" data-bs-target="#settingsModal">
+                                <i class="bi bi-sliders text-success me-2"></i>Manage Asset Categories & Conditions
+                            </button>
+                        </div>
                         
                         <div class="mb-4">
                             <label class="form-label fw-bold text-dark mb-1 fs-6">Description</label>
@@ -305,6 +312,112 @@
         </div>
     </div>
 </div>
+<!-- Modal for Managing Asset Categories & Conditions -->
+<div class="modal fade" id="settingsModal" tabindex="-1" aria-labelledby="settingsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow rounded-4">
+            <div class="modal-header border-bottom-0 pb-0">
+                <h5 class="modal-title fw-bold text-dark" id="settingsModalLabel">
+                    <i class="bi bi-sliders text-success me-2"></i>Manage Asset Categories & Conditions
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <ul class="nav nav-tabs border-bottom mb-4" id="settingsTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active fw-bold" id="cats-tab" data-bs-toggle="tab" data-bs-target="#cats-pane" type="button" role="tab">Categories</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link fw-bold" id="conds-tab" data-bs-toggle="tab" data-bs-target="#conds-pane" type="button" role="tab">Conditions</button>
+                    </li>
+                </ul>
+                <div class="tab-content" id="settingsTabsContent">
+                    <!-- Categories Tab -->
+                    <div class="tab-pane fade show active" id="cats-pane" role="tabpanel">
+                        <form method="POST" action="{{ url_for('add_asset_category') }}" class="row g-2 mb-4">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <div class="col-8">
+                                <input type="text" name="category_name" class="form-control" placeholder="e.g. Solar Systems, Irrigation, Hardware" required>
+                            </div>
+                            <div class="col-4">
+                                <button type="submit" class="btn btn-success w-100 fw-bold"><i class="bi bi-plus-lg me-1"></i> Add Category</button>
+                            </div>
+                        </form>
+
+                        <div class="table-responsive" style="max-height: 250px;">
+                            <table class="table table-sm align-middle">
+                                <thead>
+                                    <tr class="table-light">
+                                        <th>Category Name</th>
+                                        <th class="text-end">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for c in categories %}
+                                    <tr>
+                                        <td class="fw-semibold">{{ c.category_name }}</td>
+                                        <td class="text-end">
+                                            <form method="POST" action="{{ url_for('delete_asset_category', id=c.id) }}" class="d-inline" data-confirm="Delete category '{{ c.category_name }}'?">
+                                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger py-0 px-2"><i class="bi bi-trash"></i></button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    {% else %}
+                                    <tr><td colspan="2" class="text-muted text-center py-2">No categories created yet.</td></tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Conditions Tab -->
+                    <div class="tab-pane fade" id="conds-pane" role="tabpanel">
+                        <form method="POST" action="{{ url_for('add_asset_condition') }}" class="row g-2 mb-4">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <div class="col-8">
+                                <input type="text" name="condition_name" class="form-control" placeholder="e.g. Heavy Duty, Needs Servicing, Retired" required>
+                            </div>
+                            <div class="col-4">
+                                <button type="submit" class="btn btn-success w-100 fw-bold"><i class="bi bi-plus-lg me-1"></i> Add Condition</button>
+                            </div>
+                        </form>
+
+                        <div class="table-responsive" style="max-height: 250px;">
+                            <table class="table table-sm align-middle">
+                                <thead>
+                                    <tr class="table-light">
+                                        <th>Condition Name</th>
+                                        <th class="text-end">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for cond in conditions %}
+                                    <tr>
+                                        <td class="fw-semibold">{{ cond.condition_name }}</td>
+                                        <td class="text-end">
+                                            <form method="POST" action="{{ url_for('delete_asset_condition', id=cond.id) }}" class="d-inline" data-confirm="Delete condition '{{ cond.condition_name }}'?">
+                                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger py-0 px-2"><i class="bi bi-trash"></i></button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    {% else %}
+                                    <tr><td colspan="2" class="text-muted text-center py-2">No conditions created yet.</td></tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-top-0 pt-0">
+                <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <style>
 .hover-lift { transition: transform 0.2s ease, box-shadow 0.2s ease; }
 .hover-lift:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(37,99,235,0.25) !important; }

@@ -6190,7 +6190,11 @@ def expense_ledgers():
         g['ledger_count'] = sum(1 for l in ledgers if l['ledger_group'] == g['group_name'])
     group_names = {g['group_name'] for g in groups}
     unassigned_ledgers = [l for l in ledgers if l['ledger_group'] not in group_names or not l['ledger_group']]
-    return render_template('expense_ledgers.html', ledgers=ledgers, groups=groups, unassigned_ledgers=unassigned_ledgers, group_types=group_types)
+    
+    categories = db.execute("SELECT * FROM asset_categories ORDER BY category_name ASC").fetchall()
+    conditions = db.execute("SELECT * FROM asset_conditions ORDER BY condition_name ASC").fetchall()
+    
+    return render_template('expense_ledgers.html', ledgers=ledgers, groups=groups, unassigned_ledgers=unassigned_ledgers, group_types=group_types, categories=categories, conditions=conditions)
 
 @app.route('/expense_ledger_edit/<int:lid>', methods=['GET', 'POST'])
 def expense_ledger_edit(lid):
@@ -6485,7 +6489,7 @@ def add_asset_category():
             flash(f'Category "{cat_name}" created successfully!', 'success')
         else:
             flash(f'Category "{cat_name}" already exists.', 'info')
-    return redirect(url_for('equipment'))
+    return redirect(request.referrer or url_for('equipment'))
 
 @app.route('/delete_asset_category/<int:id>', methods=['POST'])
 def delete_asset_category(id):
@@ -6493,7 +6497,7 @@ def delete_asset_category(id):
     db.execute("DELETE FROM asset_categories WHERE id = ?", (id,))
     db.commit()
     flash('Category deleted successfully.', 'success')
-    return redirect(url_for('equipment'))
+    return redirect(request.referrer or url_for('equipment'))
 
 @app.route('/add_asset_condition', methods=['POST'])
 def add_asset_condition():
@@ -6507,7 +6511,7 @@ def add_asset_condition():
             flash(f'Condition "{cond_name}" created successfully!', 'success')
         else:
             flash(f'Condition "{cond_name}" already exists.', 'info')
-    return redirect(url_for('equipment'))
+    return redirect(request.referrer or url_for('equipment'))
 
 @app.route('/delete_asset_condition/<int:id>', methods=['POST'])
 def delete_asset_condition(id):
@@ -6515,7 +6519,7 @@ def delete_asset_condition(id):
     db.execute("DELETE FROM asset_conditions WHERE id = ?", (id,))
     db.commit()
     flash('Condition deleted successfully.', 'success')
-    return redirect(url_for('equipment'))
+    return redirect(request.referrer or url_for('equipment'))
 
 @app.route('/equipment_delete/<int:id>', methods=['POST'])
 def equipment_delete(id):
