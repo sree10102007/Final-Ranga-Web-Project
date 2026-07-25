@@ -2049,10 +2049,10 @@ def master():
     db = get_db()
     tag_search = request.args.get('tag_no', '')
     if tag_search:
-        records_raw = db.execute('SELECT * FROM master_records WHERE tag_no LIKE ? OR si_no LIKE ? ORDER BY id ASC', 
+        records_raw = db.execute('SELECT * FROM master_records WHERE tag_no LIKE ? OR si_no LIKE ? ORDER BY CASE WHEN si_no IS NULL OR si_no = \'\' THEN 999999 ELSE CAST(si_no AS INTEGER) END ASC, id ASC', 
              (f"%{tag_search}%", f"%{tag_search}%")).fetchall()
     else:
-        records_raw = db.execute('SELECT * FROM master_records ORDER BY id ASC').fetchall()
+        records_raw = db.execute('SELECT * FROM master_records ORDER BY CASE WHEN si_no IS NULL OR si_no = \'\' THEN 999999 ELSE CAST(si_no AS INTEGER) END ASC, id ASC').fetchall()
         
     records = []
     for r in records_raw:

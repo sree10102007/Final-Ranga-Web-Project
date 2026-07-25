@@ -50,7 +50,7 @@
                 <tbody>
                     {% for r in records %}
                     <tr>
-                        <td class="ps-4">{{ loop.index }}</td>
+                        <td class="ps-4">{{ r.si_no }}</td>
                         <td class="fw-bold"><span class="badge bg-success">{{ r.tag_no }}</span></td>
                         <td>
                             <span class="badge {% if r.status == 'Active' %}bg-primary{% elif r.status == 'Sold' %}bg-warning{% else %}bg-danger{% endif %}">
