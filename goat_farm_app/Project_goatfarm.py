@@ -3502,10 +3502,12 @@ def master_edit(id):
             # 3. Delete the old parent record (which now has no referencing rows)
             db.execute("DELETE FROM master_records WHERE id = ?", (id,))
             
-            # 4. Find the ID of the new parent record to update it with all the form details
+            # 4. Find the ID of the new parent record and update its ID to the original ID!
             new_row = db.execute("SELECT id FROM master_records WHERE tag_no = ?", (new_tag_no,)).fetchone()
             if new_row:
-                where_clause_id = new_row['id']
+                temp_id = new_row['id']
+                db.execute("UPDATE master_records SET id = ? WHERE id = ?", (id, temp_id))
+                where_clause_id = id
 
         db.execute('''
             UPDATE master_records SET 
