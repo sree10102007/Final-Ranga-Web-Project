@@ -7275,55 +7275,35 @@ def api_pnl_drilldown():
         transactions.sort(key=lambda x: str(x['date']), reverse=True)
         return jsonify({'success': True, 'transactions': transactions})
 
-    # 2. General Ledger / Transaction aggregation & filtration
     else:
         # Load lookup structures
         groups_rows = db.execute("SELECT group_name, group_type FROM ledger_groups").fetchall()
-        ledger_groups_dict = {r['group_name']: r['group_type'] for r in groups_rows}
+        group_type_by_name = {r['group_name']: r['group_type'] for r in groups_rows}
 
-        ledgers_rows = db.execute("SELECT id, ledger_name, ledger_group FROM expense_ledgers").fetchall()
-        ledgers_by_name = {r['ledger_name'].strip().lower(): {
-            'id': r['id'],
-            'ledger_name': r['ledger_name'],
-            'ledger_group': r['ledger_group']
-        } for r in ledgers_rows}
-        ledgers_by_id = {r['id']: {
-            'ledger_name': r['ledger_name'],
-            'ledger_group': r['ledger_group']
-        } for r in ledgers_rows}
+        all_ledgers = db.execute("SELECT id, ledger_name, ledger_group FROM expense_ledgers").fetchall()
+        ledger_info_by_id = {ldr['id']: ldr for ldr in all_ledgers}
+        ledger_info_by_name = {ldr['ledger_name'].strip().lower(): ldr for ldr in all_ledgers}
 
-        particulars_by_id = {}
-        for r in ledgers_rows:
-            particulars_by_id[r['id']] = {
-                'name': r['ledger_name'],
-                'ledger_name': r['ledger_name'],
-                'ledger_group': r['ledger_group'] or 'Direct Expenses'
-            }
-
-        def resolve_account_details(particular_id, pnl_category, fallback_ledger_name, fallback_particular_name):
-            if particular_id and particular_id in particulars_by_id:
-                p_info = particulars_by_id[particular_id]
-                return p_info['ledger_group'], p_info['ledger_name'], p_info['name']
-            l_name_search = (fallback_ledger_name or pnl_category or '').strip().lower()
-            if l_name_search in ledgers_by_name:
-                l_info = ledgers_by_name[l_name_search]
-                return l_info['ledger_group'], l_info['ledger_name'], (fallback_particular_name or fallback_ledger_name or 'General')
-            pnl_cat_strip = (pnl_category or '').strip()
-            if pnl_cat_strip in ledger_groups_dict:
-                return pnl_cat_strip, (fallback_ledger_name or 'General Ledger'), (fallback_particular_name or 'General')
-            if pnl_cat_strip.lower() in ledgers_by_name:
-                l_info = ledgers_by_name[pnl_cat_strip.lower()]
-                return l_info['ledger_group'], l_info['ledger_name'], (fallback_particular_name or fallback_ledger_name or 'General')
-            default_group = 'Direct Expenses'
-            if pnl_category:
-                pnl_cat_lower = pnl_category.lower()
-                if 'indirect' in pnl_cat_lower or 'admin' in pnl_cat_lower or 'selling' in pnl_cat_lower:
-                    default_group = 'Indirect Expenses'
-                elif 'sale' in pnl_cat_lower or 'revenue' in pnl_cat_lower:
-                    default_group = 'Sales'
-                elif 'income' in pnl_cat_lower:
-                    default_group = 'Direct Income' if 'direct' in pnl_cat_lower else 'Indirect Income'
-            return default_group, (fallback_ledger_name or 'General Ledger'), (fallback_particular_name or 'General')
+        def get_account_name(particular_id=None, particular_name=None, pnl_cat=None, fallback_name='General'):
+            acct = fallback_name
+            grp_name = None
+            if particular_id and particular_id in ledger_info_by_id:
+                ldr = ledger_info_by_id[particular_id]
+                acct = ldr['ledger_name']
+            elif particular_name and particular_name.strip().lower() in ledger_info_by_name:
+                ldr = ledger_info_by_name[particular_name.strip().lower()]
+                acct = ldr['ledger_name']
+            elif pnl_cat and pnl_cat.strip().lower() in ledger_info_by_name:
+                ldr = ledger_info_by_name[pnl_cat.strip().lower()]
+                acct = ldr['ledger_name']
+            elif pnl_cat and pnl_cat.strip() in group_type_by_name:
+                grp_name = pnl_cat.strip()
+                acct = fallback_name or grp_name
+            elif particular_name and particular_name.strip():
+                acct = particular_name.strip()
+            elif pnl_cat and pnl_cat.strip():
+                acct = pnl_cat.strip()
+            return acct
 
         # 1. Staff Salary
         rows = db.execute("""
@@ -7334,69 +7314,103 @@ def api_pnl_drilldown():
             ORDER BY date DESC
         """, (from_date, to_date)).fetchall()
         for r in rows:
-            g, l, p = resolve_account_details(None, 'Direct Expenses', 'Staff Salary / Payments (HR)', 'Salary Payments')
-            if category == 'All' or category in (g, l, p):
-                transactions.append({'date': r['date'], 'reference': f"Salary: {r['reference']}", 'detail': f"HR Payroll - paid via {r['detail']}", 'amount': r['amount'], 'category': l, 'type': 'expense'})
+            acct = get_account_name(fallback_name='Salary Payments')
+            if category == 'All' or acct == category:
+                transactions.append({'date': r['date'], 'reference': f"Salary: {r['reference']}", 'detail': f"HR Payroll - paid via {r['detail']}", 'amount': r['amount'], 'category': acct, 'type': 'expense'})
 
         # 2. Goat purchases
         rows = db.execute("SELECT id, seller_name AS detail, purchase_date AS date, price AS amount, pnl_category, tag_id, particular_id FROM purchases WHERE purchase_date BETWEEN ? AND ?", (from_date, to_date)).fetchall()
         for r in rows:
             r_cat = r['pnl_category'] or 'Purchase'
-            g, l, p = resolve_account_details(r['particular_id'], r_cat, 'Purchase', 'Goat Purchases')
-            if category == 'All' or category in (g, l, p):
-                transactions.append({'date': r['date'], 'reference': f"Goat: {r['tag_id']}", 'detail': f"Purchased from {r['detail']}", 'amount': r['amount'], 'category': l, 'type': 'expense'})
+            acct = get_account_name(particular_id=r['particular_id'], pnl_cat=r_cat, fallback_name='Goat Purchases')
+            if category == 'All' or acct == category:
+                transactions.append({'date': r['date'], 'reference': f"Goat: {r['tag_id']}", 'detail': f"Purchased from {r['detail']}", 'amount': r['amount'], 'category': acct, 'type': 'expense'})
+        
+        # Include direct purchases from master_records
+        master_purchases = db.execute(
+            "SELECT tag_no, purchase_date, purchase_amount FROM master_records WHERE purchase_date BETWEEN ? AND ? AND purchase_amount > 0",
+            (from_date, to_date)
+        ).fetchall()
+        purchases_tags = {str(r['tag_id']).strip() for r in rows if r['tag_id']}
+        for mp in master_purchases:
+            if str(mp['tag_no']).strip() not in purchases_tags:
+                acct = get_account_name(fallback_name='Goat Purchases')
+                if category == 'All' or acct == category:
+                    transactions.append({
+                        'date': mp['purchase_date'], 
+                        'reference': f"Goat Tag #{mp['tag_no']}", 
+                        'detail': f"Direct purchase of Goat Tag #{mp['tag_no']}", 
+                        'amount': mp['purchase_amount'], 
+                        'category': acct, 
+                        'type': 'expense'
+                    })
 
         # 3. Feed purchases
         rows = db.execute("SELECT id, supplier AS detail, purchase_date AS date, cost AS amount, pnl_category, feed_name, particular_id FROM feed_purchases WHERE purchase_date BETWEEN ? AND ?", (from_date, to_date)).fetchall()
         for r in rows:
             r_cat = r['pnl_category'] or 'Purchase'
-            g, l, p = resolve_account_details(r['particular_id'], r_cat, 'Purchase', 'Feed Purchases')
-            if category == 'All' or category in (g, l, p):
-                transactions.append({'date': r['date'], 'reference': f"Feed: {r['feed_name']}", 'detail': f"Supplier: {r['detail']}", 'amount': r['amount'], 'category': l, 'type': 'expense'})
+            acct = get_account_name(particular_id=r['particular_id'], pnl_cat=r_cat, fallback_name='Feed Purchases')
+            if category == 'All' or acct == category:
+                transactions.append({'date': r['date'], 'reference': f"Feed: {r['feed_name']}", 'detail': f"Supplier: {r['detail']}", 'amount': r['amount'], 'category': acct, 'type': 'expense'})
             
         # 4. Medicine purchases
         rows = db.execute("SELECT id, supplier AS detail, purchase_date AS date, cost AS amount, pnl_category, medicine_name, particular_id FROM medicine_purchases WHERE purchase_date BETWEEN ? AND ?", (from_date, to_date)).fetchall()
         for r in rows:
             r_cat = r['pnl_category'] or 'Purchase'
-            g, l, p = resolve_account_details(r['particular_id'], r_cat, 'Purchase', 'Medicine Purchases')
-            if category == 'All' or category in (g, l, p):
-                transactions.append({'date': r['date'], 'reference': f"Med: {r['medicine_name']}", 'detail': f"Supplier: {r['detail']}", 'amount': r['amount'], 'category': l, 'type': 'expense'})
+            acct = get_account_name(particular_id=r['particular_id'], pnl_cat=r_cat, fallback_name='Medicine Purchases')
+            if category == 'All' or acct == category:
+                transactions.append({'date': r['date'], 'reference': f"Med: {r['medicine_name']}", 'detail': f"Supplier: {r['detail']}", 'amount': r['amount'], 'category': acct, 'type': 'expense'})
             
         # 5. Vaccine purchases
         rows = db.execute("SELECT id, supplier AS detail, purchase_date AS date, cost AS amount, pnl_category, vaccine_name, particular_id FROM vaccine_purchases WHERE purchase_date BETWEEN ? AND ?", (from_date, to_date)).fetchall()
         for r in rows:
             r_cat = r['pnl_category'] or 'Purchase'
-            g, l, p = resolve_account_details(r['particular_id'], r_cat, 'Purchase', 'Vaccine Purchases')
-            if category == 'All' or category in (g, l, p):
-                transactions.append({'date': r['date'], 'reference': f"Vac: {r['vaccine_name']}", 'detail': f"Supplier: {r['detail']}", 'amount': r['amount'], 'category': l, 'type': 'expense'})
+            acct = get_account_name(particular_id=r['particular_id'], pnl_cat=r_cat, fallback_name='Vaccine Purchases')
+            if category == 'All' or acct == category:
+                transactions.append({'date': r['date'], 'reference': f"Vac: {r['vaccine_name']}", 'detail': f"Supplier: {r['detail']}", 'amount': r['amount'], 'category': acct, 'type': 'expense'})
             
         # 6. Equipment purchases
         rows = db.execute("SELECT id, name AS detail, purchase_date AS date, purchase_cost AS amount, pnl_category FROM equipment WHERE purchase_date BETWEEN ? AND ?", (from_date, to_date)).fetchall()
         for r in rows:
             r_cat = r['pnl_category'] or 'Purchase'
-            g, l, p = resolve_account_details(None, r_cat, 'Purchase', f"Asset: {r['detail']}")
-            if category == 'All' or category in (g, l, p):
-                transactions.append({'date': r['date'], 'reference': f"Asset: {r['detail']}", 'detail': f"Asset Purchase", 'amount': r['amount'] or 0.0, 'category': l, 'type': 'expense'})
+            acct = get_account_name(pnl_cat=r_cat, fallback_name='Equipment Purchases')
+            if category == 'All' or acct == category:
+                transactions.append({'date': r['date'], 'reference': f"Asset: {r['detail']}", 'detail': f"Asset Purchase", 'amount': r['amount'] or 0.0, 'category': acct, 'type': 'expense'})
 
         # 7. Goat sales
         rows = db.execute("SELECT tag_id AS reference, date_of_sale AS date, sold_price AS amount, pnl_category, buyer_name FROM sales_records WHERE date_of_sale BETWEEN ? AND ?", (from_date, to_date)).fetchall()
         for r in rows:
             r_cat = r['pnl_category'] or 'Sales'
-            g, l, p = resolve_account_details(None, r_cat, r_cat, 'Goat Sales')
-            if g == 'Direct Expenses' or g not in ledger_groups_dict:
-                g = 'Sales'
-            if category == 'All' or category in (g, l, p):
-                transactions.append({'date': r['date'], 'reference': f"Goat: {r['reference']}", 'detail': f"Sold to {r['buyer_name']}", 'amount': r['amount'], 'category': l, 'type': 'income'})
+            acct = get_account_name(pnl_cat=r_cat, fallback_name='Goat Sales')
+            if category == 'All' or acct == category:
+                transactions.append({'date': r['date'], 'reference': f"Goat: {r['reference']}", 'detail': f"Sold to {r['buyer_name']}", 'amount': r['amount'], 'category': acct, 'type': 'income'})
+
+        # Include direct sales from master_records
+        master_goat_sales = db.execute('''
+            SELECT COALESCE(selling_date, '2026-01-01') AS date_of_sale, selling_price, tag_no
+            FROM master_records
+            WHERE status = 'Sold' AND selling_price > 0
+              AND COALESCE(selling_date, '2026-01-01') BETWEEN ? AND ?
+        ''', (from_date, to_date)).fetchall()
+        for s in master_goat_sales:
+            acct = get_account_name(fallback_name='Goat Sales')
+            if category == 'All' or acct == category:
+                transactions.append({
+                    'date': s['date_of_sale'], 
+                    'reference': f"Goat: {s['tag_no']}", 
+                    'detail': f"Direct sale of Goat Tag #{s['tag_no']}", 
+                    'amount': s['selling_price'], 
+                    'category': acct, 
+                    'type': 'income'
+                })
             
         # 8. Other sales
         rows = db.execute("SELECT item_name AS reference, date_of_sale AS date, total_amount AS amount, pnl_category, buyer_name, notes FROM other_sales_records WHERE date_of_sale BETWEEN ? AND ?", (from_date, to_date)).fetchall()
         for r in rows:
             r_cat = r['pnl_category'] or 'Sales'
-            g, l, p = resolve_account_details(None, r_cat, r_cat, r['reference'])
-            if g == 'Direct Expenses' or g not in ledger_groups_dict:
-                g = 'Sales'
-            if category == 'All' or category in (g, l, p):
-                transactions.append({'date': r['date'], 'reference': r['reference'], 'detail': f"Sold to {r['buyer_name']} - {r['notes'] or ''}", 'amount': r['amount'], 'category': l, 'type': 'income'})
+            acct = get_account_name(pnl_cat=r_cat, fallback_name='Other Sales')
+            if category == 'All' or acct == category:
+                transactions.append({'date': r['date'], 'reference': r['reference'], 'detail': f"Sold to {r['buyer_name']} - {r['notes'] or ''}", 'amount': r['amount'], 'category': acct, 'type': 'income'})
 
         # 8b. Insurance claims
         rows = db.execute('''
@@ -7415,16 +7429,52 @@ def api_pnl_drilldown():
             GROUP BY tag_no, claim_date
         ''', (from_date, to_date)).fetchall()
         for r in rows:
-            g, l, p = resolve_account_details(None, 'Insurance Claim', 'Insurance Claim', 'Insurance Claim')
-            if g == 'Direct Expenses' or g not in ledger_groups_dict:
-                g = 'Indirect Income'
-            if category == 'All' or category in (g, l, p):
+            acct = get_account_name(fallback_name='Insurance Claim')
+            if category == 'All' or acct == category:
                 transactions.append({
                     'date': r['date'],
                     'reference': f"Goat: {r['reference']}",
                     'detail': f"Insurance Claim for Expired Goat",
                     'amount': r['amount'],
-                    'category': l,
+                    'category': acct,
+                    'type': 'income'
+                })
+
+        # Insurance amounts master
+        ins_master = db.execute('''
+            SELECT COALESCE(insurance_date, purchase_date, '2026-01-01') AS entry_date, insurance_amount AS amount, tag_no
+            FROM master_records
+            WHERE insurance_amount > 0
+              AND COALESCE(insurance_date, purchase_date, '2026-01-01') BETWEEN ? AND ?
+        ''', (from_date, to_date)).fetchall()
+        for row in ins_master:
+            acct = get_account_name(fallback_name='Insurance Amount')
+            if category == 'All' or acct == category:
+                transactions.append({
+                    'date': row['entry_date'],
+                    'reference': f"Goat: {row['tag_no']}",
+                    'detail': f"Direct insurance registration for Goat Tag #{row['tag_no']}",
+                    'amount': row['amount'],
+                    'category': acct,
+                    'type': 'income'
+                })
+
+        # Insurance amounts kids
+        ins_kids = db.execute('''
+            SELECT COALESCE(birth_date, '2026-01-01') AS entry_date, insurance_amount AS amount, kid_id
+            FROM kid_records
+            WHERE insurance_amount > 0
+              AND COALESCE(birth_date, '2026-01-01') BETWEEN ? AND ?
+        ''', (from_date, to_date)).fetchall()
+        for row in ins_kids:
+            acct = get_account_name(fallback_name='Insurance Amount')
+            if category == 'All' or acct == category:
+                transactions.append({
+                    'date': row['entry_date'],
+                    'reference': f"Kid: {row['kid_id']}",
+                    'detail': f"Insurance registration for Kid Tag #{row['kid_id']}",
+                    'amount': row['amount'],
+                    'category': acct,
                     'type': 'income'
                 })
 
@@ -7433,9 +7483,9 @@ def api_pnl_drilldown():
         for r in rows:
             if r['reference'] and ('labor' in r['reference'].lower() or 'labour' in r['reference'].lower()):
                 continue
-            g, l, p = resolve_account_details(r['particular_id'], r['pnl_category'], r['reference'], r['detail'] or r['reference'])
-            if category == 'All' or category in (g, l, p):
-                transactions.append({'date': r['date'], 'reference': r['reference'], 'detail': r['detail'] or 'General Expense', 'amount': r['amount'], 'category': l, 'type': 'expense'})
+            acct = get_account_name(particular_id=r['particular_id'], pnl_cat=r['pnl_category'], particular_name=r['reference'], fallback_name='General Expense')
+            if category == 'All' or acct == category:
+                transactions.append({'date': r['date'], 'reference': r['reference'], 'detail': r['detail'] or 'General Expense', 'amount': r['amount'], 'category': acct, 'type': 'expense'})
             
         transactions.sort(key=lambda x: x['date'], reverse=True)
         return jsonify({'success': True, 'transactions': transactions})
