@@ -34,7 +34,7 @@
                         <div class="form-text small text-muted">Changing the name will automatically update all linked ledger accounts.</div>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label small fw-bold text-dark">Group Type (P&amp;L Allocation Side) <span class="text-danger">*</span></label>
+                        <label class="form-label small fw-bold text-dark">Group Type <span class="text-danger">*</span></label>
                         <select name="group_type" class="form-select rounded-3">
                             {% for gt in group_types %}
                             <option value="{{ gt.type_name }}" {% if group.group_type == gt.type_name %}selected{% endif %}>{{ gt.type_name }} ({{ gt.pnl_side }} Side)</option>

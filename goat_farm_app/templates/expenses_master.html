@@ -77,7 +77,7 @@
                         <input type="text" name="group_name" class="form-control rounded-3" required placeholder="e.g. Operating Expenses or Direct Income">
                     </div>
                     <div class="mb-3">
-                        <label class="form-label small fw-bold text-dark">Group Type (P&amp;L Allocation Side) <span class="text-danger">*</span></label>
+                        <label class="form-label small fw-bold text-dark">Group Type <span class="text-danger">*</span></label>
                         <select name="group_type" class="form-select rounded-3">
                             {% for gt in group_types %}
                             <option value="{{ gt.type_name }}">{{ gt.type_name }} ({{ gt.pnl_side }} Side)</option>
