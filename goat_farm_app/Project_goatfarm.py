@@ -6760,15 +6760,32 @@ def pnl():
         LIMIT 1
     ''', (start_date, end_date, start_date, end_date, start_date, end_date)).fetchone()
 
+    # Calculate previous period's closing stock (to shift to opening stock)
+    try:
+        start_date_dt = datetime.strptime(start_date, '%Y-%m-%d')
+        prev_day = (start_date_dt - timedelta(days=1)).strftime('%Y-%m-%d')
+        prev_stock_rec = db.execute('''
+            SELECT closing_stock FROM manual_stock_valuations 
+            WHERE to_date = ?
+            LIMIT 1
+        ''', (prev_day,)).fetchone()
+        prev_closing = prev_stock_rec['closing_stock'] if prev_stock_rec else None
+    except Exception:
+        prev_closing = None
+
     if manual_stock_rec:
         include_stock = '1'
         manual_opening = manual_stock_rec['opening_stock']
         manual_closing = manual_stock_rec['closing_stock']
         manual_period_name = manual_stock_rec['period_name']
     else:
-        include_stock = '0'
-        manual_opening = 0.0
-        manual_closing = 0.0
+        include_stock = '1' # Force enable stock valuation inputs
+        if prev_closing is not None:
+            manual_opening = prev_closing
+        else:
+            manual_opening = get_stock_val(start_date) # Default to computed opening
+            
+        manual_closing = get_stock_val(end_date) # Default to computed closing
         manual_period_name = None
 
     # ── DYNAMIC PNL ALLOCATION ENGINE (DEBIT / CREDIT SIDE BY GROUP_TYPE) ────────
@@ -7489,6 +7506,41 @@ def api_pnl_drilldown():
             
         transactions.sort(key=lambda x: x['date'], reverse=True)
         return jsonify({'success': True, 'transactions': transactions})
+
+
+@app.route('/save_pnl_stock', methods=['POST'])
+def save_pnl_stock():
+    if 'user_id' not in session:
+        return redirect(url_for('auth.login'))
+    db = get_db()
+    from_date = request.form.get('from_date')
+    to_date = request.form.get('to_date')
+    opening_stock = float(request.form.get('opening_stock', 0.0) or 0.0)
+    closing_stock = float(request.form.get('closing_stock', 0.0) or 0.0)
+    
+    if not from_date or not to_date:
+        flash('Missing dates.', 'danger')
+        return redirect(url_for('pnl'))
+        
+    from_dt_str = datetime.strptime(from_date, '%Y-%m-%d').strftime('%d/%m/%Y')
+    to_dt_str = datetime.strptime(to_date, '%Y-%m-%d').strftime('%d/%m/%Y')
+    period_name = f"{from_dt_str} to {to_dt_str}"
+    
+    try:
+        existing = db.execute('SELECT id FROM manual_stock_valuations WHERE from_date = ? AND to_date = ?', (from_date, to_date)).fetchone()
+        if existing:
+            db.execute('UPDATE manual_stock_valuations SET opening_stock = ?, closing_stock = ?, period_name = ? WHERE id = ?', 
+                       (opening_stock, closing_stock, period_name, existing['id']))
+        else:
+            db.execute('INSERT INTO manual_stock_valuations (period_name, from_date, to_date, opening_stock, closing_stock) VALUES (?, ?, ?, ?, ?)',
+                       (period_name, from_date, to_date, opening_stock, closing_stock))
+        db.commit()
+        flash('Stock valuation saved successfully!', 'success')
+    except Exception as e:
+        db.rollback()
+        flash(f'Error saving stock: {str(e)}', 'danger')
+        
+    return redirect(url_for('pnl', from_date=from_date, to_date=to_date, filter_type='custom'))
 
 
 @app.route('/breeds', methods=['GET', 'POST'])

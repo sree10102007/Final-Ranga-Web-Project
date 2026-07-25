@@ -228,6 +228,8 @@
     </div>
 
     <!-- T-Format P&L Report Container -->
+    {% set op_stock = (manual_opening|float if manual_opening else computed_opening) if include_stock else 0.0 %}
+    {% set cl_stock = (manual_closing|float if manual_closing else computed_closing) if include_stock else 0.0 %}
     <div class="corporate-container" id="pnl-report-view">
         <!-- Brand Header Bar matching the image -->
         <div class="brand-header-bar">
@@ -238,6 +240,30 @@
             <div class="brand-header-badge">
                 Period: {{ from_date }} to {{ to_date }}
             </div>
+        </div>
+
+        <!-- Form to manually enter Opening and Closing Stock -->
+        <div class="bg-light border-bottom p-3 d-print-none">
+            <form method="POST" action="{{ url_for('save_pnl_stock') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="from_date" value="{{ from_date }}">
+                <input type="hidden" name="to_date" value="{{ to_date }}">
+                <div class="row g-3 align-items-center justify-content-between">
+                    <div class="col-md-5 col-12 d-flex align-items-center gap-2">
+                        <label class="form-label fw-bold text-dark mb-0 text-nowrap small"><i class="bi bi-box-arrow-in-right text-warning me-1"></i>Opening Stock (₹)</label>
+                        <input type="number" step="0.01" name="opening_stock" class="form-control form-control-sm rounded-3 fw-semibold text-dark" value="{{ "%.2f"|format(op_stock) }}">
+                    </div>
+                    <div class="col-md-5 col-12 d-flex align-items-center gap-2">
+                        <label class="form-label fw-bold text-dark mb-0 text-nowrap small"><i class="bi bi-box-arrow-left text-success me-1"></i>Closing Stock (₹)</label>
+                        <input type="number" step="0.01" name="closing_stock" class="form-control form-control-sm rounded-3 fw-semibold text-dark" value="{{ "%.2f"|format(cl_stock) }}">
+                    </div>
+                    <div class="col-md-2 col-12 text-end">
+                        <button type="submit" class="btn btn-sm btn-success rounded-pill px-3 fw-bold w-100 shadow-sm">
+                            <i class="bi bi-save me-1"></i> Save
+                        </button>
+                    </div>
+                </div>
+            </form>
         </div>
 
         {% if manual_period_name %}
@@ -264,8 +290,6 @@
                 </thead>
                 <tbody>
                     {# Setup variables to balance the Debit and Credit accounts #}
-                    {% set op_stock = (manual_opening|float if manual_opening else computed_opening) if include_stock else 0.0 %}
-                    {% set cl_stock = (manual_closing|float if manual_closing else computed_closing) if include_stock else 0.0 %}
                     
                     {% set raw_inc = pnl_data.total_income.full_year %}
                     {% set raw_exp = pnl_data.total_expenses.full_year %}
