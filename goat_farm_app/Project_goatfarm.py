@@ -6667,7 +6667,7 @@ def pnl():
         default_from = f"{now.year - 1}-04-01"
         default_to = f"{now.year}-03-31"
         
-    default_fy_label = f"Financial Year ({datetime.strptime(default_from, '%Y-%m-%d').strftime('%d/%m/%Y')} to {datetime.strptime(default_to, '%Y-%m-%d').strftime('%d/%m/%Y')})"
+    default_fy_label = f"{datetime.strptime(default_from, '%Y-%m-%d').strftime('%d/%m/%Y')} to {datetime.strptime(default_to, '%Y-%m-%d').strftime('%d/%m/%Y')}"
     
     filter_type = request.args.get('filter_type') or request.form.get('filter_type') or 'custom'
     selected_year = request.args.get('year') or request.form.get('year') or str(now.year)
