@@ -7185,7 +7185,9 @@ def api_pnl_drilldown():
                 'date': r['purchase_date'],
                 'reference': f"Feed: {r['feed_name']}",
                 'detail': f"Closing Stock: {r['closing_stock']} @ ₹{r['cost_per_unit']}/unit",
-                'amount': r['closing_stock'] * r['cost_per_unit']
+                'amount': r['closing_stock'] * r['cost_per_unit'],
+                'category': category,
+                'type': 'expense' if category == 'Opening Stock' else 'income'
             })
 
         # Fetch medicine inventory
@@ -7205,7 +7207,9 @@ def api_pnl_drilldown():
                 'date': r['purchase_date'],
                 'reference': f"Med: {r['medicine_name']}",
                 'detail': f"Closing Stock: {r['closing_stock']} @ ₹{r['cost_per_unit']}/unit",
-                'amount': r['closing_stock'] * r['cost_per_unit']
+                'amount': r['closing_stock'] * r['cost_per_unit'],
+                'category': category,
+                'type': 'expense' if category == 'Opening Stock' else 'income'
             })
 
         # Fetch vaccine inventory
@@ -7225,7 +7229,9 @@ def api_pnl_drilldown():
                 'date': r['purchase_date'],
                 'reference': f"Vac: {r['vaccine_name']}",
                 'detail': f"Closing Stock: {r['closing_stock']} @ ₹{r['cost_per_unit']}/unit",
-                'amount': r['closing_stock'] * r['cost_per_unit']
+                'amount': r['closing_stock'] * r['cost_per_unit'],
+                'category': category,
+                'type': 'expense' if category == 'Opening Stock' else 'income'
             })
 
         # Fetch goats inventory
@@ -7240,7 +7246,9 @@ def api_pnl_drilldown():
                 'date': r['purchase_date'] or target_date,
                 'reference': f"Goat Tag #{r['tag_no']}",
                 'detail': f"{r['breed'] or 'Breed'} ({r['gender'] or 'Goat'}), {r['weight_kg'] or 0}kg",
-                'amount': float(r['purchase_amount'] or 0)
+                'amount': float(r['purchase_amount'] or 0),
+                'category': category,
+                'type': 'expense' if category == 'Opening Stock' else 'income'
             })
 
         transactions.sort(key=lambda x: str(x['date']), reverse=True)

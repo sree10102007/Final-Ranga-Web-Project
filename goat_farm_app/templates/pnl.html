@@ -401,6 +401,28 @@
                     </button>
                 </div>
 
+                <!-- Summary Stats Bar -->
+                <div id="drilldownSummaryBar" class="row g-3 mb-4" style="display:none;">
+                    <div class="col-md-4">
+                        <div class="p-3 rounded-3 border bg-light shadow-sm text-center">
+                            <span class="d-block small text-muted text-uppercase fw-bold" style="font-size: 0.7rem;">Total Debits (Dr / Expenses)</span>
+                            <h5 id="drilldownTotalDebit" class="fw-bold mb-0 text-danger mt-1">₹0.00</h5>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 rounded-3 border bg-light shadow-sm text-center">
+                            <span class="d-block small text-muted text-uppercase fw-bold" style="font-size: 0.7rem;">Total Credits (Cr / Income)</span>
+                            <h5 id="drilldownTotalCredit" class="fw-bold mb-0 text-success mt-1">₹0.00</h5>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 rounded-3 border bg-light shadow-sm text-center">
+                            <span class="d-block small text-muted text-uppercase fw-bold" style="font-size: 0.7rem;">Net Balance</span>
+                            <h5 id="drilldownNetBalance" class="fw-bold mb-0 mt-1">₹0.00</h5>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Single Table View for standard categories -->
                 <div id="drilldownSingleContainer">
                     <div class="table-responsive" style="max-height: 450px; overflow-y: auto;">
@@ -502,11 +524,44 @@ function viewDrilldown(categoryName) {
     const table = document.getElementById('drilldownTable');
     const emptyState = document.getElementById('drilldownEmptyState');
     
+    // Header elements
+    const tableHead = table ? table.querySelector('thead') : null;
+    const summaryBar = document.getElementById('drilldownSummaryBar');
+    const totalDebitEl = document.getElementById('drilldownTotalDebit');
+    const totalCreditEl = document.getElementById('drilldownTotalCredit');
+    const netBalanceEl = document.getElementById('drilldownNetBalance');
+    
     if (title) title.innerHTML = `<i class="bi bi-zoom-in me-2"></i>Ledger Statement: ${categoryName}`;
     
-    if (content) content.innerHTML = `<tr><td colspan="4" class="text-center py-4"><span class="spinner-border spinner-border-sm me-2" role="status"></span>Loading transactions...</td></tr>`;
+    // Set table head headers dynamically
+    if (tableHead) {
+        if (categoryName === 'All') {
+            tableHead.innerHTML = `
+                <tr>
+                    <th style="width: 12%;">Date</th>
+                    <th style="width: 18%;">Account / Category</th>
+                    <th style="width: 15%;">Reference</th>
+                    <th style="width: 35%;">Particulars / Details</th>
+                    <th class="text-end" style="width: 10%;">Debit (Dr)</th>
+                    <th class="text-end" style="width: 10%;">Credit (Cr)</th>
+                </tr>
+            `;
+        } else {
+            tableHead.innerHTML = `
+                <tr>
+                    <th style="width: 15%;">Date</th>
+                    <th style="width: 25%;">Reference</th>
+                    <th style="width: 45%;">Particulars / Details</th>
+                    <th class="text-end" style="width: 15%;">Amount</th>
+                </tr>
+            `;
+        }
+    }
+    
+    if (content) content.innerHTML = `<tr><td colspan="6" class="text-center py-4"><span class="spinner-border spinner-border-sm me-2" role="status"></span>Loading transactions...</td></tr>`;
     if (table) table.style.display = 'table';
     if (emptyState) emptyState.style.display = 'none';
+    if (summaryBar) summaryBar.style.display = 'none';
     
     const myModal = new bootstrap.Modal(document.getElementById('drilldownModal'));
     myModal.show();
@@ -519,31 +574,76 @@ function viewDrilldown(categoryName) {
         .then(data => {
             if (data.success && data.transactions && data.transactions.length > 0) {
                 let html = '';
+                let totalDebit = 0;
+                let totalCredit = 0;
+                
                 data.transactions.forEach(t => {
-                    html += `
-                        <tr>
-                            <td><span class="badge bg-light text-dark font-monospace border" style="font-size: 0.75rem;">${t.date}</span></td>
-                            <td class="fw-bold text-dark" style="font-size: 0.85rem;">${t.reference}</td>
-                            <td class="text-muted small" style="font-size: 0.75rem;">${t.detail || ''}</td>
-                            <td class="text-end font-monospace fw-bold text-dark" style="font-size: 0.85rem;">₹${parseFloat(t.amount).toFixed(2)}</td>
-                        </tr>
-                    `;
+                    const amt = parseFloat(t.amount) || 0;
+                    const isExpense = t.type === 'expense';
+                    
+                    if (isExpense) {
+                        totalDebit += amt;
+                    } else {
+                        totalCredit += amt;
+                    }
+                    
+                    if (categoryName === 'All') {
+                        html += `
+                            <tr>
+                                <td><span class="badge bg-light text-dark font-monospace border" style="font-size: 0.75rem;">${t.date}</span></td>
+                                <td><span class="badge bg-info-subtle text-info-dark border border-info-subtle px-2 py-1 rounded" style="font-size: 0.75rem;">${t.category || 'General'}</span></td>
+                                <td class="fw-bold text-dark" style="font-size: 0.85rem;">${t.reference}</td>
+                                <td class="text-muted small" style="font-size: 0.75rem;">${t.detail || ''}</td>
+                                <td class="text-end font-monospace text-danger" style="font-size: 0.85rem;">${isExpense ? '₹' + amt.toFixed(2) : '-'}</td>
+                                <td class="text-end font-monospace text-success" style="font-size: 0.85rem;">${!isExpense ? '₹' + amt.toFixed(2) : '-'}</td>
+                            </tr>
+                        `;
+                    } else {
+                        const badgeColor = isExpense ? 'bg-danger-subtle text-danger' : 'bg-success-subtle text-success';
+                        const badgeText = isExpense ? 'Dr' : 'Cr';
+                        html += `
+                            <tr>
+                                <td><span class="badge bg-light text-dark font-monospace border" style="font-size: 0.75rem;">${t.date}</span></td>
+                                <td class="fw-bold text-dark" style="font-size: 0.85rem;">${t.reference}</td>
+                                <td class="text-muted small" style="font-size: 0.75rem;">${t.detail || ''}</td>
+                                <td class="text-end font-monospace fw-bold text-dark" style="font-size: 0.85rem;">
+                                    ₹${amt.toFixed(2)}
+                                    <span class="badge ${badgeColor} ms-1" style="font-size: 0.65rem;">${badgeText}</span>
+                                </td>
+                            </tr>
+                        `;
+                    }
                 });
+                
                 if (content) content.innerHTML = html;
+                
+                // Show summary
+                if (summaryBar) {
+                    summaryBar.style.display = 'flex';
+                    if (totalDebitEl) totalDebitEl.innerText = '₹' + totalDebit.toFixed(2);
+                    if (totalCreditEl) totalCreditEl.innerText = '₹' + totalCredit.toFixed(2);
+                    
+                    const net = totalCredit - totalDebit;
+                    if (netBalanceEl) {
+                        netBalanceEl.innerText = (net >= 0 ? '+' : '') + '₹' + net.toFixed(2);
+                        netBalanceEl.className = 'fw-bold mb-0 mt-1 ' + (net >= 0 ? 'text-success' : 'text-danger');
+                    }
+                }
             } else {
                 if (table) table.style.display = 'none';
                 if (emptyState) emptyState.style.display = 'block';
+                if (summaryBar) summaryBar.style.display = 'none';
             }
         })
         .catch(err => {
-            if (content) content.innerHTML = `<tr><td colspan="4" class="text-center text-danger py-4"><i class="bi bi-exclamation-triangle-fill me-2"></i>Failed to retrieve details.</td></tr>`;
+            if (content) content.innerHTML = `<tr><td colspan="6" class="text-center text-danger py-4"><i class="bi bi-exclamation-triangle-fill me-2"></i>Failed to retrieve details.</td></tr>`;
         });
 }
 
 function printDetailedLedger() {
     const fromDate = "{{ from_date }}";
     const toDate = "{{ to_date }}";
-    const selectedYear = "{{ selected_year }}";
+    const tableHeaderHtml = document.getElementById('drilldownTable').querySelector('thead').innerHTML;
     const contentHtml = document.getElementById('drilldownContent').innerHTML;
 
     const printWindow = window.open('', '_blank');
@@ -565,14 +665,9 @@ function printDetailedLedger() {
                 <h5>Detailed General Ledger Statement: ${currentCategoryName}</h5>
                 <div>Period: ${fromDate} to ${toDate}</div>
             </div>
-            <table class="table table-striped table-bordered">
+            <table class="table table-striped table-bordered align-middle">
                 <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Reference</th>
-                        <th>Details</th>
-                        <th class="text-end">Amount</th>
-                    </tr>
+                    ${tableHeaderHtml}
                 </thead>
                 <tbody>
                     ${contentHtml}
