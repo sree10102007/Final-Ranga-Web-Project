@@ -290,7 +290,7 @@
                             {# ── DEBIT SIDE (Expenses & Opening Stock) ── #}
                             {% if op_stock_row and i == 0 %}
                                 {# Opening Stock Row #}
-                                 <td class="col-particulars interactive-cell" onclick="viewDrilldown('Opening Stock')">
+                                 <td class="col-particulars interactive-cell" data-onclick="viewDrilldown('Opening Stock')">
                                     <span class="me-2"><i class="bi bi-box-arrow-in-right text-warning"></i></span> Opening Stock Valuation {% if manual_period_name %}({{ manual_period_name }}){% endif %}
                                 </td>
                                 <td class="col-amount border-center-divider">
@@ -299,7 +299,7 @@
                             {% elif i - op_stock_row < (expense_rows|length) and i - op_stock_row >= 0 %}
                                 {# Expense Rows #}
                                 {% set exp_item = expense_rows[i - op_stock_row] %}
-                                <td class="col-particulars interactive-cell" onclick="viewDrilldown('{{ exp_item.name }}')">
+                                <td class="col-particulars interactive-cell" data-onclick="viewDrilldown('{{ exp_item.name }}')">
                                     <span class="me-2"><i class="bi bi-folder-fill text-muted"></i></span> {{ exp_item.name }}
                                 </td>
                                 <td class="col-amount border-center-divider">
@@ -323,7 +323,7 @@
                             {% if i < (income_rows|length) %}
                                 {# Income Rows #}
                                 {% set inc_item = income_rows[i] %}
-                                <td class="col-particulars interactive-cell" onclick="viewDrilldown('{{ inc_item.name }}')">
+                                <td class="col-particulars interactive-cell" data-onclick="viewDrilldown('{{ inc_item.name }}')">
                                     <span class="me-2"><i class="bi bi-graph-up-arrow text-success"></i></span> {{ inc_item.name }}
                                 </td>
                                 <td class="col-amount">
@@ -331,7 +331,7 @@
                                 </td>
                             {% elif cl_stock_row and i == (income_rows|length) %}
                                 {# Closing Stock Row #}
-                                 <td class="col-particulars interactive-cell" onclick="viewDrilldown('Closing Stock')">
+                                 <td class="col-particulars interactive-cell" data-onclick="viewDrilldown('Closing Stock')">
                                     <span class="me-2"><i class="bi bi-box-arrow-left text-success"></i></span> Closing Stock Valuation {% if manual_period_name %}({{ manual_period_name }}){% endif %}
                                 </td>
                                 <td class="col-amount">
