@@ -192,6 +192,18 @@
                             </select>
                         </div>
 
+                        <!-- Linked Asset Category Dropdown -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-dark mb-1 fs-6">Linked Asset Category</label>
+                            <select name="linked_category" class="form-select form-select-lg rounded-3 fs-6">
+                                <option value="">-- None (No Link) --</option>
+                                {% for cat in categories %}
+                                <option value="{{ cat.category_name }}">{{ cat.category_name }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="form-text small text-muted mt-1.5"><i class="bi bi-info-circle me-1"></i>Link this ledger group to an asset category for Godown asset association.</div>
+                        </div>
+
                         <!-- Button for managing asset categories -->
                         <div class="mb-4">
                             <button type="button" class="btn btn-outline-success w-100 rounded-pill fw-bold py-2.5 shadow-sm" data-bs-toggle="modal" data-bs-target="#settingsModal">
@@ -240,6 +252,11 @@
                                     <i class="bi {% if gt_side == 'Credit' %}bi-graph-up-arrow{% else %}bi-folder-fill{% endif %} me-1"></i>{{ g.group_type or 'Expense' }} ({{ gt_side }} Side)
                                 </span>
                                 <span class="badge bg-primary-subtle text-primary rounded-pill px-2 py-0.5 small fw-bold font-monospace">{{ g.ledger_count }} ledgers</span>
+                                {% if g.linked_category %}
+                                <span class="badge bg-info-subtle text-info-dark border border-info-subtle px-2 py-0.5 rounded-pill small fw-bold">
+                                    <i class="bi bi-tag-fill me-1"></i>Linked: {{ g.linked_category }}
+                                </span>
+                                {% endif %}
                             </div>
                             {% if g.description %}
                             <div class="text-muted small mt-1">{{ g.description }}</div>

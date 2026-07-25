@@ -1049,11 +1049,13 @@ def init_db():
                 id SERIAL PRIMARY KEY,
                 group_name TEXT UNIQUE NOT NULL,
                 description TEXT,
-                group_type TEXT DEFAULT 'Expense'
+                group_type TEXT DEFAULT 'Expense',
+                linked_category TEXT
             )
         ''')
         
         add_column("ledger_groups", "group_type", "TEXT DEFAULT 'Expense'")
+        add_column("ledger_groups", "linked_category", "TEXT")
 
         # Ledger groups are created manually by the user — no system defaults seeded.
         try:
@@ -6241,9 +6243,10 @@ def ledger_groups():
             gname = request.form.get('group_name', '').strip()
             gdesc = request.form.get('description', '').strip()
             gtype = request.form.get('group_type', 'Expense').strip()
+            linked_cat = request.form.get('linked_category', '').strip() or None
             if gname:
                 try:
-                    db.execute('INSERT INTO ledger_groups (group_name, description, group_type) VALUES (?, ?, ?)', (gname, gdesc, gtype))
+                    db.execute('INSERT INTO ledger_groups (group_name, description, group_type, linked_category) VALUES (?, ?, ?, ?)', (gname, gdesc, gtype, linked_cat))
                     db.commit()
                     flash(f'Ledger Group "{gname}" created successfully!', 'success')
                 except Exception:
@@ -6266,15 +6269,17 @@ def ledger_group_edit(gid):
     default_groups = ['Direct Expenses', 'Indirect Expenses', 'Capital Account', 'Administrative Expenses', 'Selling Expenses', 'Direct Income', 'Indirect Income', 'Sales']
     is_default = group['group_name'] in default_groups
     group_types = db.execute('SELECT * FROM group_types ORDER BY type_name').fetchall()
+    categories = db.execute("SELECT * FROM asset_categories ORDER BY category_name ASC").fetchall()
 
     if request.method == 'POST':
         gname = request.form.get('group_name', '').strip()
         gdesc = request.form.get('description', '').strip()
         gtype = request.form.get('group_type', 'Expense').strip()
+        linked_cat = request.form.get('linked_category', '').strip() or None
         if gname:
             try:
                 old_name = group['group_name']
-                db.execute('UPDATE ledger_groups SET group_name=?, description=?, group_type=? WHERE id=?', (gname, gdesc, gtype, gid))
+                db.execute('UPDATE ledger_groups SET group_name=?, description=?, group_type=?, linked_category=? WHERE id=?', (gname, gdesc, gtype, linked_cat, gid))
                 # Propagate name change to expense_ledgers
                 if gname != old_name:
                     db.execute('UPDATE expense_ledgers SET ledger_group=? WHERE ledger_group=?', (gname, old_name))
@@ -6286,7 +6291,7 @@ def ledger_group_edit(gid):
             flash('Group name cannot be empty.', 'danger')
         return redirect(url_for('expense_ledgers', tab='groups'))
         
-    return render_template('ledger_group_edit.html', group=group, is_default=is_default, group_types=group_types)
+    return render_template('ledger_group_edit.html', group=group, is_default=is_default, group_types=group_types, categories=categories)
 
 @app.route('/ledger_group_delete/<int:gid>', methods=['POST'])
 def ledger_group_delete(gid):

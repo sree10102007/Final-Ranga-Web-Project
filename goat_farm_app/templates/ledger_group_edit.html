@@ -46,6 +46,16 @@
                         </select>
                         <div class="form-text small text-muted">Determines whether accounts under this group appear on the Debit or Credit side of the P&amp;L statement.</div>
                     </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark">Linked Asset Category</label>
+                        <select name="linked_category" class="form-select rounded-3">
+                            <option value="">-- None (No Link) --</option>
+                            {% for cat in categories %}
+                            <option value="{{ cat.category_name }}" {% if group.linked_category == cat.category_name %}selected{% endif %}>{{ cat.category_name }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="form-text small text-muted">Link this ledger group to an asset category for Godown asset association.</div>
+                    </div>
                     <div class="mb-4">
                         <label class="form-label small fw-bold text-dark">Description</label>
                         <textarea name="description" class="form-control rounded-3" rows="3">{{ group.description or '' }}</textarea>
