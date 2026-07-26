@@ -3125,6 +3125,57 @@ def delete_stock_item():
         
     return redirect(url_for('stock_inventory'))
 
+@app.route('/download_stock_csv')
+def download_stock_csv():
+    if 'user_id' not in session:
+        return redirect(url_for('auth.login'))
+    db = get_db()
+    
+    feeds = db.execute("SELECT feed_name AS name, 'Feed' AS type, purchased_qty, used_qty, wastage_qty, closing_stock, purchase_date AS date FROM feed_inventory").fetchall()
+    medicines = db.execute("SELECT medicine_name AS name, 'Medicine' AS type, purchased_qty, used_qty, wastage_qty, closing_stock, purchase_date AS date FROM medicine_inventory").fetchall()
+    vaccines = db.execute("SELECT vaccine_name AS name, 'Vaccine' AS type, purchased_qty, used_qty, wastage_qty, closing_stock, purchase_date AS date FROM vaccine_inventory").fetchall()
+    
+    all_records = []
+    for r in feeds:
+        all_records.append(dict(r))
+    for r in medicines:
+        all_records.append(dict(r))
+    for r in vaccines:
+        all_records.append(dict(r))
+        
+    all_records.sort(key=lambda x: x['date'] or '')
+    
+    import csv
+    from io import StringIO
+    from flask import Response
+    
+    si = StringIO()
+    cw = csv.writer(si)
+    cw.writerow(['S.no', 'date', 'item_type', 'item_name', 'purchase', 'consumption', 'closing(purchase - consumption)'])
+    
+    for i, r in enumerate(all_records, 1):
+        purchase = r['purchased_qty'] or 0.0
+        consumption = (r['used_qty'] or 0.0) + (r['wastage_qty'] or 0.0)
+        closing = r['closing_stock'] or 0.0
+        cw.writerow([
+            i,
+            r['date'] or '',
+            r['type'],
+            r['name'],
+            purchase,
+            consumption,
+            closing
+        ])
+        
+    output = si.getvalue()
+    filename = "stock_inventory_ledger.csv"
+    
+    return Response(
+        output,
+        mimetype="text/csv",
+        headers={"Content-disposition": f"attachment; filename={filename}"}
+    )
+
 @app.route('/consume_feed', methods=['POST'])
 def consume_feed():
     db = get_db()
