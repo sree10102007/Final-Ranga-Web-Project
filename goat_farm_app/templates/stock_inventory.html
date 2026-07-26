@@ -92,6 +92,12 @@
                         <button class="btn btn-sm btn-outline-secondary rounded-pill px-2" title="Set Reminder Threshold" data-bs-toggle="modal" data-bs-target="#limitModal" data-type="feed" data-name="{{ feed_name }}" data-limit="{{ stock.alert_level }}" data-unit="{{ stock.unit }}" onclick="openLimitModal(this.dataset.type, this.dataset.name, this.dataset.limit, this.dataset.unit)"><i class="bi bi-bell"></i></button>
                         <button class="btn btn-sm btn-success rounded-pill px-2 fw-semibold" title="Add stock to {{ feed_name }}" data-bs-toggle="modal" data-bs-target="#quickBuyModal" data-type="feed" data-name="{{ feed_name }}" data-unit="{{ stock.unit }}" onclick="openBuyModal(this.dataset.type, this.dataset.name, this.dataset.unit)"><i class="bi bi-plus-lg me-1"></i>+ Stock</button>
                         <a href="{{ url_for('voucher_add', v_type='feed', feed_name=feed_name, unit=stock.unit) }}" class="btn btn-sm btn-outline-success rounded-pill px-2" title="Full Purchase Voucher"><i class="bi bi-receipt"></i></a>
+                        <form action="{{ url_for('delete_stock_item') }}" method="POST" class="d-inline" data-confirm="Are you sure you want to completely remove '{{ feed_name }}' and all its history from the inventory?">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <input type="hidden" name="item_type" value="feed">
+                            <input type="hidden" name="item_name" value="{{ feed_name }}">
+                            <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-2" title="Delete {{ feed_name }}"><i class="bi bi-trash"></i></button>
+                        </form>
                     </div>
                 </div>
                 {% else %}
@@ -130,6 +136,12 @@
                         <button class="btn btn-sm btn-outline-secondary rounded-pill px-2" title="Set Reminder Threshold" data-bs-toggle="modal" data-bs-target="#limitModal" data-type="medicine" data-name="{{ med_name }}" data-limit="{{ stock.alert_level }}" data-unit="{{ stock.unit }}" onclick="openLimitModal(this.dataset.type, this.dataset.name, this.dataset.limit, this.dataset.unit)"><i class="bi bi-bell"></i></button>
                         <button class="btn btn-sm btn-primary rounded-pill px-2 fw-semibold" title="Add stock to {{ med_name }}" data-bs-toggle="modal" data-bs-target="#quickBuyModal" data-type="medicine" data-name="{{ med_name }}" data-unit="{{ stock.unit }}" onclick="openBuyModal(this.dataset.type, this.dataset.name, this.dataset.unit)"><i class="bi bi-plus-lg me-1"></i>+ Stock</button>
                         <a href="{{ url_for('voucher_add', v_type='health', sub_type='medicine', health_name=med_name, dose_unit=stock.unit) }}" class="btn btn-sm btn-outline-primary rounded-pill px-2" title="Full Purchase Voucher"><i class="bi bi-receipt"></i></a>
+                        <form action="{{ url_for('delete_stock_item') }}" method="POST" class="d-inline" data-confirm="Are you sure you want to completely remove '{{ med_name }}' and all its history from the inventory?">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <input type="hidden" name="item_type" value="medicine">
+                            <input type="hidden" name="item_name" value="{{ med_name }}">
+                            <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-2" title="Delete {{ med_name }}"><i class="bi bi-trash"></i></button>
+                        </form>
                     </div>
                 </div>
                 {% else %}
@@ -168,6 +180,12 @@
                         <button class="btn btn-sm btn-outline-secondary rounded-pill px-2" title="Set Reminder Threshold" data-bs-toggle="modal" data-bs-target="#limitModal" data-type="vaccine" data-name="{{ vac_name }}" data-limit="{{ stock.alert_level }}" data-unit="{{ stock.unit }}" onclick="openLimitModal(this.dataset.type, this.dataset.name, this.dataset.limit, this.dataset.unit)"><i class="bi bi-bell"></i></button>
                         <button class="btn btn-sm btn-info text-white rounded-pill px-2 fw-semibold" title="Add stock to {{ vac_name }}" data-bs-toggle="modal" data-bs-target="#quickBuyModal" data-type="vaccine" data-name="{{ vac_name }}" data-unit="{{ stock.unit }}" onclick="openBuyModal(this.dataset.type, this.dataset.name, this.dataset.unit)"><i class="bi bi-plus-lg me-1"></i>+ Stock</button>
                         <a href="{{ url_for('voucher_add', v_type='health', sub_type='vaccine', health_name=vac_name, unit=stock.unit) }}" class="btn btn-sm btn-outline-info rounded-pill px-2" title="Full Purchase Voucher"><i class="bi bi-receipt"></i></a>
+                        <form action="{{ url_for('delete_stock_item') }}" method="POST" class="d-inline" data-confirm="Are you sure you want to completely remove '{{ vac_name }}' and all its history from the inventory?">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <input type="hidden" name="item_type" value="vaccine">
+                            <input type="hidden" name="item_name" value="{{ vac_name }}">
+                            <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-2" title="Delete {{ vac_name }}"><i class="bi bi-trash"></i></button>
+                        </form>
                     </div>
                 </div>
                 {% else %}

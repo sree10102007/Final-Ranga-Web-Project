@@ -3100,6 +3100,31 @@ def buy_stock():
     flash(f'{item_type.capitalize()} purchase of {qty} {unit} recorded and marked in Expenses successfully!', 'success')
     return redirect(target_url)
 
+@app.route('/delete_stock_item', methods=['POST'])
+def delete_stock_item():
+    if 'user_id' not in session:
+        return redirect(url_for('auth.login'))
+    db = get_db()
+    itype = request.form.get('item_type', '').strip()
+    iname = request.form.get('item_name', '').strip()
+    
+    if itype == 'feed':
+        db.execute("DELETE FROM feed_inventory WHERE feed_name = ?", (iname,))
+        db.commit()
+        flash(f'Feed item "{iname}" successfully removed from inventory.', 'success')
+    elif itype == 'medicine':
+        db.execute("DELETE FROM medicine_inventory WHERE medicine_name = ?", (iname,))
+        db.commit()
+        flash(f'Medicine item "{iname}" successfully removed from inventory.', 'success')
+    elif itype == 'vaccine':
+        db.execute("DELETE FROM vaccine_inventory WHERE vaccine_name = ?", (iname,))
+        db.commit()
+        flash(f'Vaccine item "{iname}" successfully removed from inventory.', 'success')
+    else:
+        flash('Invalid stock item type.', 'danger')
+        
+    return redirect(url_for('stock_inventory'))
+
 @app.route('/consume_feed', methods=['POST'])
 def consume_feed():
     db = get_db()
