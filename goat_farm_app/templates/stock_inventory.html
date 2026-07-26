@@ -456,7 +456,7 @@
         }
         
         const modalEl = document.getElementById('quickBuyModal');
-        const myModal = bootstrap.Modal.getOrCreateInstance(modalEl);
+        const myModal = new bootstrap.Modal(modalEl);
         myModal.show();
     }
 
@@ -477,7 +477,7 @@
         }
         
         const modalEl = document.getElementById('limitModal');
-        const myModal = bootstrap.Modal.getOrCreateInstance(modalEl);
+        const myModal = new bootstrap.Modal(modalEl);
         myModal.show();
     }
 
