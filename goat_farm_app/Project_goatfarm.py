@@ -6149,22 +6149,22 @@ def group_type_delete(gtid):
     gt = db.execute('SELECT * FROM group_types WHERE id=?', (gtid,)).fetchone()
     if not gt:
         flash('Group Type not found.', 'danger')
-        return redirect(url_for('expense_ledgers', tab='groups'))
+        return redirect(request.referrer or url_for('expense_ledgers', tab='groups'))
     
     defaults = ['Expense', 'Income', 'Liability', 'Asset']
     if gt['type_name'] in defaults:
         flash('System default Group Types cannot be deleted.', 'warning')
-        return redirect(url_for('expense_ledgers', tab='groups'))
+        return redirect(request.referrer or url_for('expense_ledgers', tab='groups'))
         
     in_use = db.execute('SELECT COUNT(*) FROM ledger_groups WHERE group_type=?', (gt['type_name'],)).fetchone()[0]
     if in_use > 0:
         flash(f'Cannot delete Group Type "{gt["type_name"]}" because it is currently assigned to {in_use} ledger group(s).', 'danger')
-        return redirect(url_for('expense_ledgers', tab='groups'))
+        return redirect(request.referrer or url_for('expense_ledgers', tab='groups'))
 
     db.execute('DELETE FROM group_types WHERE id=?', (gtid,))
     db.commit()
     flash(f'Group Type "{gt["type_name"]}" deleted.', 'success')
-    return redirect(url_for('expense_ledgers', tab='groups'))
+    return redirect(request.referrer or url_for('expense_ledgers', tab='groups'))
 
 @app.route('/expense_ledgers', methods=['GET', 'POST'])
 def expense_ledgers():

@@ -22,40 +22,92 @@
 
 <!-- Modal: Quick Create Group Type -->
 <div class="modal fade" id="createGroupTypeModal" tabindex="-1" aria-labelledby="createGroupTypeModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 rounded-4 shadow">
             <div class="modal-header bg-dark text-white rounded-top-4 p-4">
-                <h5 class="modal-title fw-bold" id="createGroupTypeModalLabel"><i class="bi bi-tag-fill me-2 text-primary"></i>Create New Group Type</h5>
+                <h5 class="modal-title fw-bold" id="createGroupTypeModalLabel"><i class="bi bi-tag-fill me-2 text-primary"></i>Manage Group Types</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form method="post" action="{{ url_for('group_types') }}">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <input type="hidden" name="redirect_tab" value="groups">
-                <div class="modal-body p-4">
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold text-dark">Group Type Name <span class="text-danger">*</span></label>
-                        <input type="text" name="type_name" class="form-control rounded-3" required placeholder="e.g. Direct Cost, Capital Reserve, Operating Revenue">
+            <div class="modal-body p-4">
+                <div class="row g-4">
+                    <!-- Left Column: Add Form -->
+                    <div class="col-md-5 border-end pe-md-4">
+                        <h6 class="fw-bold mb-3 text-dark"><i class="bi bi-plus-circle-fill text-success me-2"></i>Add Group Type</h6>
+                        <form method="post" action="{{ url_for('group_types') }}">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <input type="hidden" name="redirect_tab" value="groups">
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-dark">Group Type Name <span class="text-danger">*</span></label>
+                                <input type="text" name="type_name" class="form-control rounded-3" required placeholder="e.g. Direct Cost">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-dark">P&amp;L Allocation Side <span class="text-danger">*</span></label>
+                                <select name="pnl_side" class="form-select rounded-3" required>
+                                    <option value="Debit">Debit Side (Expenses)</option>
+                                    <option value="Credit">Credit Side (Income/Liabilities)</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-dark">Description</label>
+                                <textarea name="description" class="form-control rounded-3" rows="2" placeholder="Brief description..."></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100 rounded-pill fw-bold py-2 shadow-sm">
+                                <i class="bi bi-check2-circle me-2"></i>Save Group Type
+                            </button>
+                        </form>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold text-dark">P&amp;L Allocation Side <span class="text-danger">*</span></label>
-                        <select name="pnl_side" class="form-select rounded-3" required>
-                            <option value="Debit">Debit Side (Expenses / Expenditure)</option>
-                            <option value="Credit">Credit Side (Income / Revenue / Liabilities)</option>
-                        </select>
-                        <div class="form-text small text-muted">Defines whether ledger accounts linked to groups of this type fall on the Debit or Credit side in P&amp;L reports.</div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold text-dark">Description</label>
-                        <textarea name="description" class="form-control rounded-3" rows="3" placeholder="Brief description of this group type..."></textarea>
+                    <!-- Right Column: List and Delete -->
+                    <div class="col-md-7 ps-md-4">
+                        <h6 class="fw-bold mb-3 text-dark"><i class="bi bi-collection-play-fill text-primary me-2"></i>Existing Group Types</h6>
+                        <div class="table-responsive" style="max-height: 280px;">
+                            <table class="table table-sm align-middle">
+                                <thead>
+                                    <tr class="table-light">
+                                        <th>Type Name</th>
+                                        <th>P&amp;L Side</th>
+                                        <th class="text-end">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% set defaults = ['Expense', 'Income', 'Liability', 'Asset'] %}
+                                    {% for gt in group_types %}
+                                    <tr>
+                                        <td>
+                                            <span class="fw-semibold text-dark fs-6">{{ gt.type_name }}</span>
+                                            {% if gt.description %}
+                                            <div class="text-muted small" style="font-size: 0.75rem;">{{ gt.description }}</div>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <span class="badge {% if gt.pnl_side == 'Credit' %}bg-success-subtle text-success{% else %}bg-warning-subtle text-warning{% endif %} rounded-pill px-2 py-0.5 small fw-bold" style="font-size: 0.7rem;">
+                                                {{ gt.pnl_side }}
+                                            </span>
+                                        </td>
+                                        <td class="text-end">
+                                            {% if gt.type_name not in defaults %}
+                                            <form method="POST" action="{{ url_for('group_type_delete', gtid=gt.id) }}" class="d-inline" data-confirm="Are you sure you want to delete group type '{{ gt.type_name }}'?">
+                                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger py-0 px-2" title="Delete Group Type"><i class="bi bi-trash"></i></button>
+                                            </form>
+                                            {% else %}
+                                            <span class="text-muted small" style="font-size: 0.75rem;">System</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% else %}
+                                    <tr>
+                                        <td colspan="3" class="text-muted text-center py-2">No group types found.</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
-                <div class="modal-footer border-top-0 p-4 pt-0">
-                    <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm">
-                        <i class="bi bi-check2-circle me-2"></i>Save Group Type
-                    </button>
-                </div>
-            </form>
+            </div>
+            <div class="modal-footer border-top-0 p-3 bg-light rounded-bottom-4">
+                <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Close</button>
+            </div>
         </div>
     </div>
 </div>
