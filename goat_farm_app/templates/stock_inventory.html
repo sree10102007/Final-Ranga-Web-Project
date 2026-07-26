@@ -48,7 +48,7 @@
             </div>
         </div>
         <div class="d-flex gap-2 flex-wrap">
-            <button type="button" class="btn btn-success rounded-pill px-4 py-2 fw-semibold shadow-sm" onclick="openBuyModal('feed', '', '')">
+            <button type="button" class="btn btn-success rounded-pill px-4 py-2 fw-semibold shadow-sm" data-bs-toggle="modal" data-bs-target="#quickBuyModal" onclick="openBuyModal('feed', '', '')">
                 <i class="bi bi-plus-circle-fill me-1"></i>+ Add / Restock Item
             </button>
             <a href="{{ url_for('feed') }}" class="btn btn-outline-success rounded-pill px-4 py-2 fw-semibold">
@@ -89,8 +89,8 @@
                         {% elif stock.alert_level > 0 and stock.closing_stock <= stock.alert_level %}
                             <span class="badge bg-warning text-dark px-2 py-1 rounded-pill me-1 small fw-bold" style="font-size: 0.75rem;"><i class="bi bi-exclamation-triangle-fill me-1"></i>Low</span>
                         {% endif %}
-                        <button class="btn btn-sm btn-outline-secondary rounded-pill px-2" title="Set Reminder Threshold" data-type="feed" data-name="{{ feed_name }}" data-limit="{{ stock.alert_level }}" data-unit="{{ stock.unit }}" onclick="openLimitModal(this.dataset.type, this.dataset.name, this.dataset.limit, this.dataset.unit)"><i class="bi bi-bell"></i></button>
-                        <button class="btn btn-sm btn-success rounded-pill px-2 fw-semibold" title="Add stock to {{ feed_name }}" data-type="feed" data-name="{{ feed_name }}" data-unit="{{ stock.unit }}" onclick="openBuyModal(this.dataset.type, this.dataset.name, this.dataset.unit)"><i class="bi bi-plus-lg me-1"></i>+ Stock</button>
+                        <button class="btn btn-sm btn-outline-secondary rounded-pill px-2" title="Set Reminder Threshold" data-bs-toggle="modal" data-bs-target="#limitModal" data-type="feed" data-name="{{ feed_name }}" data-limit="{{ stock.alert_level }}" data-unit="{{ stock.unit }}" onclick="openLimitModal(this.dataset.type, this.dataset.name, this.dataset.limit, this.dataset.unit)"><i class="bi bi-bell"></i></button>
+                        <button class="btn btn-sm btn-success rounded-pill px-2 fw-semibold" title="Add stock to {{ feed_name }}" data-bs-toggle="modal" data-bs-target="#quickBuyModal" data-type="feed" data-name="{{ feed_name }}" data-unit="{{ stock.unit }}" onclick="openBuyModal(this.dataset.type, this.dataset.name, this.dataset.unit)"><i class="bi bi-plus-lg me-1"></i>+ Stock</button>
                         <a href="{{ url_for('voucher_add', v_type='feed', feed_name=feed_name, unit=stock.unit) }}" class="btn btn-sm btn-outline-success rounded-pill px-2" title="Full Purchase Voucher"><i class="bi bi-receipt"></i></a>
                     </div>
                 </div>
@@ -127,8 +127,8 @@
                         {% elif stock.alert_level > 0 and stock.closing_stock <= stock.alert_level %}
                             <span class="badge bg-warning text-dark px-2 py-1 rounded-pill me-1 small fw-bold" style="font-size: 0.75rem;"><i class="bi bi-exclamation-triangle-fill me-1"></i>Low</span>
                         {% endif %}
-                        <button class="btn btn-sm btn-outline-secondary rounded-pill px-2" title="Set Reminder Threshold" data-type="medicine" data-name="{{ med_name }}" data-limit="{{ stock.alert_level }}" data-unit="{{ stock.unit }}" onclick="openLimitModal(this.dataset.type, this.dataset.name, this.dataset.limit, this.dataset.unit)"><i class="bi bi-bell"></i></button>
-                        <button class="btn btn-sm btn-primary rounded-pill px-2 fw-semibold" title="Add stock to {{ med_name }}" data-type="medicine" data-name="{{ med_name }}" data-unit="{{ stock.unit }}" onclick="openBuyModal(this.dataset.type, this.dataset.name, this.dataset.unit)"><i class="bi bi-plus-lg me-1"></i>+ Stock</button>
+                        <button class="btn btn-sm btn-outline-secondary rounded-pill px-2" title="Set Reminder Threshold" data-bs-toggle="modal" data-bs-target="#limitModal" data-type="medicine" data-name="{{ med_name }}" data-limit="{{ stock.alert_level }}" data-unit="{{ stock.unit }}" onclick="openLimitModal(this.dataset.type, this.dataset.name, this.dataset.limit, this.dataset.unit)"><i class="bi bi-bell"></i></button>
+                        <button class="btn btn-sm btn-primary rounded-pill px-2 fw-semibold" title="Add stock to {{ med_name }}" data-bs-toggle="modal" data-bs-target="#quickBuyModal" data-type="medicine" data-name="{{ med_name }}" data-unit="{{ stock.unit }}" onclick="openBuyModal(this.dataset.type, this.dataset.name, this.dataset.unit)"><i class="bi bi-plus-lg me-1"></i>+ Stock</button>
                         <a href="{{ url_for('voucher_add', v_type='health', sub_type='medicine', health_name=med_name, dose_unit=stock.unit) }}" class="btn btn-sm btn-outline-primary rounded-pill px-2" title="Full Purchase Voucher"><i class="bi bi-receipt"></i></a>
                     </div>
                 </div>
@@ -165,8 +165,8 @@
                         {% elif stock.alert_level > 0 and stock.closing_stock <= stock.alert_level %}
                             <span class="badge bg-warning text-dark px-2 py-1 rounded-pill me-1 small fw-bold" style="font-size: 0.75rem;"><i class="bi bi-exclamation-triangle-fill me-1"></i>Low</span>
                         {% endif %}
-                        <button class="btn btn-sm btn-outline-secondary rounded-pill px-2" title="Set Reminder Threshold" data-type="vaccine" data-name="{{ vac_name }}" data-limit="{{ stock.alert_level }}" data-unit="{{ stock.unit }}" onclick="openLimitModal(this.dataset.type, this.dataset.name, this.dataset.limit, this.dataset.unit)"><i class="bi bi-bell"></i></button>
-                        <button class="btn btn-sm btn-info text-white rounded-pill px-2 fw-semibold" title="Add stock to {{ vac_name }}" data-type="vaccine" data-name="{{ vac_name }}" data-unit="{{ stock.unit }}" onclick="openBuyModal(this.dataset.type, this.dataset.name, this.dataset.unit)"><i class="bi bi-plus-lg me-1"></i>+ Stock</button>
+                        <button class="btn btn-sm btn-outline-secondary rounded-pill px-2" title="Set Reminder Threshold" data-bs-toggle="modal" data-bs-target="#limitModal" data-type="vaccine" data-name="{{ vac_name }}" data-limit="{{ stock.alert_level }}" data-unit="{{ stock.unit }}" onclick="openLimitModal(this.dataset.type, this.dataset.name, this.dataset.limit, this.dataset.unit)"><i class="bi bi-bell"></i></button>
+                        <button class="btn btn-sm btn-info text-white rounded-pill px-2 fw-semibold" title="Add stock to {{ vac_name }}" data-bs-toggle="modal" data-bs-target="#quickBuyModal" data-type="vaccine" data-name="{{ vac_name }}" data-unit="{{ stock.unit }}" onclick="openBuyModal(this.dataset.type, this.dataset.name, this.dataset.unit)"><i class="bi bi-plus-lg me-1"></i>+ Stock</button>
                         <a href="{{ url_for('voucher_add', v_type='health', sub_type='vaccine', health_name=vac_name, unit=stock.unit) }}" class="btn btn-sm btn-outline-info rounded-pill px-2" title="Full Purchase Voucher"><i class="bi bi-receipt"></i></a>
                     </div>
                 </div>
@@ -454,10 +454,6 @@
             header.classList.add('bg-info');
             document.getElementById('buyModalTitle').innerHTML = '<i class="bi bi-patch-check me-2"></i>Add Vaccine Stock';
         }
-        
-        const modalEl = document.getElementById('quickBuyModal');
-        const myModal = new bootstrap.Modal(modalEl);
-        myModal.show();
     }
 
     function openLimitModal(itemType, itemName, currentLimit, unit) {
@@ -475,10 +471,6 @@
         } else {
             header.classList.add('bg-info');
         }
-        
-        const modalEl = document.getElementById('limitModal');
-        const myModal = new bootstrap.Modal(modalEl);
-        myModal.show();
     }
 
     function updateBuyUnit() {
