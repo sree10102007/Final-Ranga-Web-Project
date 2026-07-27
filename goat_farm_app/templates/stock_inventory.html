@@ -331,29 +331,16 @@
 
     const EXISTING_STOCKS = JSON.parse(document.getElementById('stocks-data').textContent || '{}');
 
+    const EXPENSE_UNITS = [
+        {% for u in expense_units %}
+        { value: '{{ u.unit_name }}', label: '{{ u.unit_name }} ({{ u.unit_symbol or u.unit_name }})' },
+        {% endfor %}
+    ];
+
     const UNIT_OPTIONS = {
-        feed: [
-            { value: 'KG', label: 'Kilograms (KG)' },
-            { value: 'g', label: 'Grams (g)' },
-            { value: 'Bags', label: 'Bags' },
-            { value: 'Liters', label: 'Liters (L)' }
-        ],
-        medicine: [
-            { value: 'Doses', label: 'Doses' },
-            { value: 'ml', label: 'Milliliters (ml)' },
-            { value: 'Liters', label: 'Liters (L)' },
-            { value: 'Tablets', label: 'Tablets' },
-            { value: 'Capsules', label: 'Capsules' },
-            { value: 'Vials', label: 'Vials' },
-            { value: 'Bottles', label: 'Bottles' },
-            { value: 'Packets', label: 'Packets' }
-        ],
-        vaccine: [
-            { value: 'Doses', label: 'Doses' },
-            { value: 'ml', label: 'Milliliters (ml)' },
-            { value: 'Vials', label: 'Vials' },
-            { value: 'Bottles', label: 'Bottles' }
-        ]
+        feed: EXPENSE_UNITS,
+        medicine: EXPENSE_UNITS,
+        vaccine: EXPENSE_UNITS
     };
 
     function populateExistingDatalist(type) {

@@ -2986,13 +2986,16 @@ def stock_inventory():
                 'alert_level': last['alert_level'] or 0.0
             }
 
+    expense_units = db.execute("SELECT * FROM expense_units ORDER BY unit_name").fetchall()
+
     return render_template('stock_inventory.html',
                            feed_records=feed_records,
                            feed_stocks=feed_stocks,
                            medicine_records=medicine_records,
                            med_stocks=med_stocks,
                            vaccine_records=vaccine_records,
-                           vac_stocks=vac_stocks)
+                           vac_stocks=vac_stocks,
+                           expense_units=expense_units)
 
 @app.route('/buy_stock', methods=['POST'])
 def buy_stock():
