@@ -6303,12 +6303,63 @@ def expense_ledger_edit(lid):
 def expense_ledger_delete(lid):
     db = get_db()
     try:
+        # Fetch ledger before deleting so we know its name
+        ledger = db.execute('SELECT ledger_name, ledger_group FROM expense_ledgers WHERE id=?', (lid,)).fetchone()
+        if not ledger:
+            flash('Ledger not found.', 'danger')
+            return redirect(url_for('expense_ledgers', tab='ledgers'))
+
+        ledger_name = ledger['ledger_name']
+        ledger_group = ledger['ledger_group']  # fallback pnl_category
+
+        # ── UNLINK from all transaction tables so the PnL row disappears ──
+        # Tables that store particular_id (FK to expense_ledgers) and particular_name
+        unlink_tables_with_name = [
+            'purchases',
+            'feed_purchases',
+            'medicine_purchases',
+            'vaccine_purchases',
+        ]
+        for tbl in unlink_tables_with_name:
+            # Clear particular_id and particular_name; set pnl_category to the ledger's group
+            db.execute(
+                f"UPDATE {tbl} SET particular_id = NULL, particular_name = NULL, "
+                f"pnl_category = ? WHERE particular_id = ?",
+                (ledger_group, lid)
+            )
+            # Also catch rows linked only by name (no id FK)
+            db.execute(
+                f"UPDATE {tbl} SET particular_name = NULL, pnl_category = ? "
+                f"WHERE particular_id IS NULL AND LOWER(particular_name) = LOWER(?)",
+                (ledger_group, ledger_name)
+            )
+
+        # other_vouchers: has particular_id and particular_name
+        db.execute(
+            "UPDATE other_vouchers SET particular_id = NULL, particular_name = NULL, "
+            "pnl_category = ? WHERE particular_id = ?",
+            (ledger_group, lid)
+        )
+        db.execute(
+            "UPDATE other_vouchers SET particular_name = NULL, pnl_category = ? "
+            "WHERE particular_id IS NULL AND LOWER(particular_name) = LOWER(?)",
+            (ledger_group, ledger_name)
+        )
+
+        # expenses table: particular_id only (no particular_name column)
+        db.execute(
+            "UPDATE expenses SET particular_id = NULL, pnl_category = ? "
+            "WHERE particular_id = ?",
+            (ledger_group, lid)
+        )
+
+        # Now delete the ledger record itself
         db.execute('DELETE FROM expense_ledgers WHERE id=?', (lid,))
         db.commit()
-        flash('Ledger deleted.', 'success')
+        flash(f'Ledger "{ledger_name}" deleted and removed from P&L.', 'success')
     except Exception as e:
         db.rollback()
-        flash('Failed to delete ledger due to database constraints.', 'danger')
+        flash(f'Failed to delete ledger: {str(e)}', 'danger')
     return redirect(url_for('expense_ledgers', tab='ledgers'))
 
 @app.route('/ledger_groups', methods=['GET', 'POST'])
