@@ -6980,6 +6980,8 @@ def pnl():
     expense_map = {}  # Debit side:  acct_name -> [12 monthly floats]
 
     def add_to_pnl_map(side, acct_name, month_idx, amount):
+        if acct_name and ('mis purchase' in acct_name.strip().lower() or 'misc purchase' in acct_name.strip().lower()):
+            return
         target_map = income_map if side == 'Income' else expense_map
         if acct_name not in target_map:
             target_map[acct_name] = [0.0] * 12
@@ -7157,6 +7159,9 @@ def pnl():
 
     expense_rows = []
     for name, monthly in sorted(expense_map.items()):
+        name_lower = name.strip().lower()
+        if 'mis purchase' in name_lower or 'misc purchase' in name_lower:
+            continue
         fy = sum(monthly)
         if fy != 0.0:
             expense_rows.append({'name': name, 'monthly': monthly, 'full_year': fy})
@@ -7319,6 +7324,9 @@ def api_pnl_drilldown():
     
     if not from_date or not to_date or not category:
         return jsonify({'success': False, 'error': 'Missing parameters'}), 400
+        
+    if category and ('mis purchase' in category.strip().lower() or 'misc purchase' in category.strip().lower()):
+        return jsonify({'success': True, 'transactions': []})
         
     transactions = []
     
