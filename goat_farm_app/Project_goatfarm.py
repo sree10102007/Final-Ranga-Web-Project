@@ -1057,12 +1057,31 @@ def init_db():
         add_column("ledger_groups", "group_type", "TEXT DEFAULT 'Expense'")
         add_column("ledger_groups", "linked_category", "TEXT")
 
-        # Ledger groups are created manually by the user — no system defaults seeded.
-        try:
-            conn.execute('UPDATE expense_ledgers SET ledger_group = NULL')
-            conn.execute('DELETE FROM ledger_groups')
-        except Exception:
-            pass
+        # Seed standard default ledger groups if missing
+        default_ledger_groups = [
+            ('Direct Expenses', 'Direct operational expenses', 'Expense', None),
+            ('Indirect Expenses', 'Indirect and general expenses', 'Expense', None),
+            ('Administrative Expenses', 'Administrative overhead and office expenses', 'Expense', None),
+            ('Selling Expenses', 'Marketing, sales, and distribution expenses', 'Expense', None),
+            ('Capital Account', 'Capital and equity accounts', 'Liability', None),
+            ('Direct Income', 'Direct revenue from core operations', 'Income', None),
+            ('Indirect Income', 'Other non-operating income', 'Income', None),
+            ('Sales', 'Revenue from sales of livestock and produce', 'Income', None),
+            ('Current Assets', 'Liquid assets, cash, bank accounts, and receivables', 'Asset', None),
+            ('Fixed Assets', 'Property, equipment, machinery, and infrastructure', 'Asset', None),
+            ('Current Liabilities', 'Short-term obligations and payables', 'Liability', None)
+        ]
+
+        for gname, gdesc, gtype, lcat in default_ledger_groups:
+            try:
+                row = conn.execute('SELECT id FROM ledger_groups WHERE group_name = ?', (gname,)).fetchone()
+                if not row:
+                    conn.execute(
+                        'INSERT INTO ledger_groups (group_name, description, group_type, linked_category) VALUES (?, ?, ?, ?)',
+                        (gname, gdesc, gtype, lcat)
+                    )
+            except Exception:
+                pass
 
         conn.execute('''
             CREATE TABLE IF NOT EXISTS expense_ledgers (
@@ -1072,6 +1091,41 @@ def init_db():
                 description TEXT
             )
         ''')
+
+        # Re-link any orphan/unassigned expense ledgers to 'Direct Expenses'
+        try:
+            conn.execute('''
+                UPDATE expense_ledgers 
+                SET ledger_group = 'Direct Expenses' 
+                WHERE ledger_group IS NULL OR ledger_group = '' OR ledger_group NOT IN (SELECT group_name FROM ledger_groups)
+            ''')
+        except Exception:
+            pass
+
+        # Seed standard default ledger accounts if missing
+        default_ledgers = [
+            ('Feed Expenses', 'Direct Expenses', 'Purchase of feed, fodder, and nutrients'),
+            ('Medicine Expenses', 'Direct Expenses', 'Medicines, supplements, and health care'),
+            ('Vaccine Expenses', 'Direct Expenses', 'Vaccines and preventive medicine'),
+            ('Labor & Wages', 'Direct Expenses', 'Farm worker salaries and daily wages'),
+            ('Electricity Charges', 'Administrative Expenses', 'Power and electricity utility bills'),
+            ('Veterinary Fees', 'Direct Expenses', 'Doctor and veterinary consultation fees'),
+            ('Goat Sales', 'Sales', 'Income from goat sales'),
+            ('Manure Sales', 'Direct Income', 'Income from organic manure sales'),
+            ('Equipment & Machinery', 'Fixed Assets', 'Farm machinery and tools'),
+            ('Cash Account', 'Current Assets', 'Cash in hand')
+        ]
+
+        for lname, lgrp, ldesc in default_ledgers:
+            try:
+                row = conn.execute('SELECT id FROM expense_ledgers WHERE ledger_name = ?', (lname,)).fetchone()
+                if not row:
+                    conn.execute(
+                        'INSERT INTO expense_ledgers (ledger_name, ledger_group, description) VALUES (?, ?, ?)',
+                        (lname, lgrp, ldesc)
+                    )
+            except Exception:
+                pass
         conn.execute('DROP TABLE IF EXISTS expense_particulars CASCADE')
         conn.execute('''
             CREATE TABLE IF NOT EXISTS expense_units (
