@@ -130,20 +130,6 @@
                             </div>
                         </div>
 
-                        <!-- Row 6: Attachment -->
-                        <div class="mb-3">
-                            <label class="form-label text-muted small fw-bold">ATTACHMENT (BILL / RECEIPT FILE)</label>
-                            {% if record['bill_file'] %}
-                            <div class="d-flex align-items-center gap-2 mb-2 p-2 bg-light rounded-3">
-                                <i class="bi bi-file-earmark-pdf text-success"></i>
-                                <span class="small text-muted font-monospace">{{ record['bill_file'].split('/')[-1] }}</span>
-                                <a href="{{ record['bill_file'] }}" target="_blank" class="badge bg-success-subtle text-success text-decoration-none">View Current File</a>
-                            </div>
-                            {% endif %}
-                            <input type="file" name="attachment" class="form-control">
-                            <div class="form-text small text-muted">Upload a new file to replace the current attachment (PDF, JPEG, PNG formats).</div>
-                        </div>
-
                         <!-- Row 7: Notes -->
                         <div class="mb-4">
                             <label class="form-label text-muted small fw-bold">NOTES / DESCRIPTION</label>
