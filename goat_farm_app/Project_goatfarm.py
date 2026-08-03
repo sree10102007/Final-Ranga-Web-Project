@@ -1188,6 +1188,10 @@ def init_db():
             conn.execute("UPDATE medicine_purchases SET dose_unit = 'ML' WHERE (dose_unit = 'Bags' OR dose_unit IS NULL OR dose_unit = '') AND UPPER(medicine_name) LIKE '%LIQUID%'")
             conn.execute("UPDATE medicine_purchases SET dose_unit = 'Grams' WHERE (dose_unit = 'Bags' OR dose_unit IS NULL OR dose_unit = '') AND UPPER(medicine_name) LIKE '%POWDER%'")
             conn.execute("UPDATE medicine_purchases SET dose_unit = 'ML' WHERE dose_unit = 'Bags' OR dose_unit IS NULL OR dose_unit = ''")
+            
+            conn.execute("UPDATE feed_inventory SET opening_stock = purchased_qty WHERE opening_stock = 0 OR opening_stock IS NULL")
+            conn.execute("UPDATE medicine_inventory SET opening_stock = purchased_qty WHERE opening_stock = 0 OR opening_stock IS NULL")
+            conn.execute("UPDATE vaccine_inventory SET opening_stock = purchased_qty WHERE opening_stock = 0 OR opening_stock IS NULL")
         except Exception:
             pass
 
@@ -3109,7 +3113,7 @@ def buy_stock():
         purchase_id = cursor.lastrowid
         
         last = db.execute("SELECT closing_stock FROM feed_inventory WHERE feed_name = ? ORDER BY id DESC LIMIT 1", (item_name,)).fetchone()
-        opening = last['closing_stock'] if last else 0.0
+        opening = last['closing_stock'] if (last and last['closing_stock'] > 0) else qty
         closing = opening + qty
         cost_per_unit = cost / qty if qty > 0 else 0.0
         
@@ -3128,7 +3132,7 @@ def buy_stock():
         purchase_id = cursor.lastrowid
         
         last = db.execute("SELECT closing_stock FROM medicine_inventory WHERE medicine_name = ? ORDER BY id DESC LIMIT 1", (item_name,)).fetchone()
-        opening = last['closing_stock'] if last else 0.0
+        opening = last['closing_stock'] if (last and last['closing_stock'] > 0) else qty
         closing = opening + qty
         cost_per_unit = cost / qty if qty > 0 else 0.0
         
@@ -3147,7 +3151,7 @@ def buy_stock():
         purchase_id = cursor.lastrowid
         
         last = db.execute("SELECT closing_stock FROM vaccine_inventory WHERE vaccine_name = ? ORDER BY id DESC LIMIT 1", (item_name,)).fetchone()
-        opening = last['closing_stock'] if last else 0.0
+        opening = last['closing_stock'] if (last and last['closing_stock'] > 0) else qty
         closing = opening + qty
         cost_per_unit = cost / qty if qty > 0 else 0.0
         
