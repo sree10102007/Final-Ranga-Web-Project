@@ -237,16 +237,10 @@
                         <label class="form-label small text-muted fw-bold">Quantity & Unit</label>
                         <div class="input-group">
                             <input type="number" step="0.01" name="quantity" class="form-control" placeholder="0.00" required>
-                            <select class="form-select bg-light border" id="buy_unit_select" style="max-width: 140px;" onchange="handleUnitChange()">
+                            <select name="unit" class="form-select bg-light border" id="buy_unit_select" style="max-width: 140px;">
                                 <!-- Dynamic options loaded by populateUnits() -->
                             </select>
-                            <input type="hidden" name="unit" id="buy_unit_hidden" value="KG">
                         </div>
-                    </div>
-                    
-                    <div class="mb-3" id="custom_unit_div" style="display: none;">
-                        <label class="form-label small text-muted fw-bold">Specify Custom Unit</label>
-                        <input type="text" id="custom_unit_input" class="form-control" placeholder="e.g. Boxes, Bottles, ml" oninput="handleCustomUnitInput()">
                     </div>
                     
                     <div class="mb-3">
@@ -358,11 +352,6 @@
                         </select>
                     </div>
 
-                    <div class="mb-3" id="edit_custom_unit_div" style="display: none;">
-                        <label class="form-label small text-muted fw-bold">Specify Custom Unit</label>
-                        <input type="text" id="edit_custom_unit_input" class="form-control" placeholder="e.g. Strip, Can, Ampoule" oninput="handleEditCustomUnitInput()">
-                    </div>
-
                     <div class="mb-3">
                         <label class="form-label small text-muted fw-bold"><i class="bi bi-bell-fill text-warning me-1"></i>Reminder Threshold Limit</label>
                         <div class="input-group">
@@ -465,10 +454,7 @@
 
     function populateUnits(type, selectedValue) {
         const select = document.getElementById('buy_unit_select');
-        const customDiv = document.getElementById('custom_unit_div');
-        const customInput = document.getElementById('custom_unit_input');
-        const hiddenInput = document.getElementById('buy_unit_hidden');
-        
+        if (!select) return;
         select.innerHTML = '';
         
         const options = getExpenseMasterUnits();
@@ -479,47 +465,13 @@
             select.appendChild(el);
         });
         
-        // Add "Custom..." option
-        const customOpt = document.createElement('option');
-        customOpt.value = 'custom';
-        customOpt.textContent = 'Custom...';
-        select.appendChild(customOpt);
-        
         const targetValue = selectedValue || DEFAULT_UNITS[type] || 'KG';
-        
         const hasOption = options.some(opt => opt.value === targetValue);
         if (hasOption) {
             select.value = targetValue;
-            customDiv.style.display = 'none';
-            customInput.value = '';
-            hiddenInput.value = targetValue;
-        } else {
-            select.value = 'custom';
-            customDiv.style.display = 'block';
-            customInput.value = targetValue;
-            hiddenInput.value = targetValue;
+        } else if (options.length > 0) {
+            select.value = options[0].value;
         }
-    }
-
-    function handleUnitChange() {
-        const select = document.getElementById('buy_unit_select');
-        const customDiv = document.getElementById('custom_unit_div');
-        const customInput = document.getElementById('custom_unit_input');
-        const hiddenInput = document.getElementById('buy_unit_hidden');
-        
-        if (select.value === 'custom') {
-            customDiv.style.display = 'block';
-            hiddenInput.value = customInput.value || '';
-        } else {
-            customDiv.style.display = 'none';
-            hiddenInput.value = select.value;
-        }
-    }
-
-    function handleCustomUnitInput() {
-        const customInput = document.getElementById('custom_unit_input');
-        const hiddenInput = document.getElementById('buy_unit_hidden');
-        hiddenInput.value = customInput.value;
     }
 
     function openBuyModal(type, name, unit) {
@@ -593,8 +545,6 @@
 
     function populateEditUnits(selectedValue) {
         const select = document.getElementById('edit_unit_select');
-        const customDiv = document.getElementById('edit_custom_unit_div');
-        const customInput = document.getElementById('edit_custom_unit_input');
         if (!select) return;
         select.innerHTML = '';
         
@@ -605,24 +555,12 @@
             el.textContent = opt.label;
             select.appendChild(el);
         });
-        
-        const customOpt = document.createElement('option');
-        customOpt.value = 'custom';
-        customOpt.textContent = 'Custom...';
-        select.appendChild(customOpt);
 
         if (selectedValue && options.some(o => o.value.toLowerCase() === selectedValue.toLowerCase())) {
             const matched = options.find(o => o.value.toLowerCase() === selectedValue.toLowerCase());
             select.value = matched.value;
-            customDiv.style.display = 'none';
-            customInput.value = '';
-        } else if (selectedValue) {
-            select.value = 'custom';
-            customDiv.style.display = 'block';
-            customInput.value = selectedValue;
-        } else {
-            customDiv.style.display = 'none';
-            customInput.value = '';
+        } else if (options.length > 0) {
+            select.value = options[0].value;
         }
     }
 
@@ -654,23 +592,9 @@
 
     function handleEditUnitChange() {
         const select = document.getElementById('edit_unit_select');
-        const customDiv = document.getElementById('edit_custom_unit_div');
-        const customInput = document.getElementById('edit_custom_unit_input');
-        const val = select.value === 'custom' ? (customInput.value || '') : select.value;
-        
-        if (select.value === 'custom') {
-            customDiv.style.display = 'block';
-        } else {
-            customDiv.style.display = 'none';
-        }
+        const val = select.value;
         document.getElementById('edit_stock_unit_label').textContent = val;
         document.getElementById('edit_alert_unit_label').textContent = val;
-    }
-
-    function handleEditCustomUnitInput() {
-        const customInput = document.getElementById('edit_custom_unit_input');
-        document.getElementById('edit_stock_unit_label').textContent = customInput.value;
-        document.getElementById('edit_alert_unit_label').textContent = customInput.value;
     }
 
     function updateBuyUnit() {

@@ -278,20 +278,13 @@
                             </div>
                             <div class="col-md-3" id="field-dose-unit">
                                 <label class="form-label text-muted small fw-bold">DOSE UNIT (For Medicines)</label>
-                                <input type="text" name="dose_unit" class="form-control" list="dose_units_datalist" placeholder="e.g. ML, Doses, Grams, Bottles, Vials"
-                                       value="{% if record %}{{ record.dose_unit }}{% else %}ML{% endif %}">
-                                <datalist id="dose_units_datalist">
-                                    <option value="ML">
-                                    <option value="Doses">
-                                    <option value="Bottles">
-                                    <option value="Vials">
-                                    <option value="Grams">
-                                    <option value="KG">
-                                    <option value="Tablets">
-                                    <option value="Litres">
-                                    <option value="Bags">
-                                    <option value="Boxes">
-                                </datalist>
+                                <select name="dose_unit" class="form-select">
+                                    {% for u in expense_units %}
+                                    <option value="{{ u.unit_name }}" {% if record and record.dose_unit == u.unit_name %}selected{% elif not record and u.unit_name.upper() == 'ML' %}selected{% endif %}>
+                                        {{ u.unit_name }} ({{ u.unit_symbol or u.unit_name }})
+                                    </option>
+                                    {% endfor %}
+                                </select>
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label text-muted small fw-bold">TOTAL VOUCHER COST (₹)</label>
