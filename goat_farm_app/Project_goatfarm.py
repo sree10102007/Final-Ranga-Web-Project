@@ -1180,6 +1180,17 @@ def init_db():
                 except Exception:
                     pass
 
+        # Auto-correct medicine inventory records where unit was set to 'Bags' or missing
+        try:
+            conn.execute("UPDATE medicine_inventory SET unit = 'ML' WHERE (unit = 'Bags' OR unit IS NULL OR unit = '') AND UPPER(medicine_name) LIKE '%LIQUID%'")
+            conn.execute("UPDATE medicine_inventory SET unit = 'Grams' WHERE (unit = 'Bags' OR unit IS NULL OR unit = '') AND UPPER(medicine_name) LIKE '%POWDER%'")
+            conn.execute("UPDATE medicine_inventory SET unit = 'ML' WHERE unit = 'Bags' OR unit IS NULL OR unit = ''")
+            conn.execute("UPDATE medicine_purchases SET dose_unit = 'ML' WHERE (dose_unit = 'Bags' OR dose_unit IS NULL OR dose_unit = '') AND UPPER(medicine_name) LIKE '%LIQUID%'")
+            conn.execute("UPDATE medicine_purchases SET dose_unit = 'Grams' WHERE (dose_unit = 'Bags' OR dose_unit IS NULL OR dose_unit = '') AND UPPER(medicine_name) LIKE '%POWDER%'")
+            conn.execute("UPDATE medicine_purchases SET dose_unit = 'ML' WHERE dose_unit = 'Bags' OR dose_unit IS NULL OR dose_unit = ''")
+        except Exception:
+            pass
+
         # Expense ledgers (accounts) are created manually by the user — no system defaults seeded.
         # Check if admin user exists (robust against parallel worker race conditions)
         try:
@@ -3061,7 +3072,7 @@ def buy_stock():
     cost = float(f.get('cost') or 0)
     supplier = f.get('supplier', '').strip() or 'Market'
     date_str = f.get('purchase_date') or datetime.now().strftime('%Y-%m-%d')
-    unit = f.get('unit') or ('KG' if item_type == 'feed' else 'Doses')
+    unit = f.get('unit', '').strip() or ('KG' if item_type == 'feed' else ('ML' if item_type == 'medicine' else 'Doses'))
     
     # Process optional alert level setting from buy stock modal
     alert_limit = f.get('alert_limit')
@@ -3106,12 +3117,14 @@ def buy_stock():
             INSERT INTO feed_inventory (feed_name, opening_stock, purchased_qty, used_qty, wastage_qty, closing_stock, unit, cost_per_unit, total_cost, purchase_date, supplier, purchase_id, alert_level)
             VALUES (?, ?, ?, 0.0, 0.0, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', (item_name, opening, qty, closing, unit, cost_per_unit, cost, date_str, supplier, purchase_id, alert_limit))
+        db.execute("UPDATE feed_inventory SET unit = ? WHERE feed_name = ?", (unit, item_name))
+        db.execute("UPDATE feed_purchases SET unit = ? WHERE feed_name = ?", (unit, item_name))
         
     elif item_type == 'medicine':
         cursor = db.execute('''
             INSERT INTO medicine_purchases (medicine_name, dose_unit, quantity, cost, purchase_date, supplier)
             VALUES (?, ?, ?, ?, ?, ?)
-        ''', (item_name, 'ml', qty, cost, date_str, supplier))
+        ''', (item_name, unit, qty, cost, date_str, supplier))
         purchase_id = cursor.lastrowid
         
         last = db.execute("SELECT closing_stock FROM medicine_inventory WHERE medicine_name = ? ORDER BY id DESC LIMIT 1", (item_name,)).fetchone()
@@ -3123,6 +3136,8 @@ def buy_stock():
             INSERT INTO medicine_inventory (medicine_name, opening_stock, purchased_qty, used_qty, wastage_qty, closing_stock, unit, cost_per_unit, total_cost, purchase_date, supplier, purchase_id, alert_level)
             VALUES (?, ?, ?, 0.0, 0.0, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', (item_name, opening, qty, closing, unit, cost_per_unit, cost, date_str, supplier, purchase_id, alert_limit))
+        db.execute("UPDATE medicine_inventory SET unit = ? WHERE medicine_name = ?", (unit, item_name))
+        db.execute("UPDATE medicine_purchases SET dose_unit = ? WHERE medicine_name = ?", (unit, item_name))
         
     elif item_type == 'vaccine':
         cursor = db.execute('''
@@ -3140,6 +3155,7 @@ def buy_stock():
             INSERT INTO vaccine_inventory (vaccine_name, opening_stock, purchased_qty, used_qty, wastage_qty, closing_stock, unit, cost_per_unit, total_cost, purchase_date, supplier, purchase_id, alert_level)
             VALUES (?, ?, ?, 0.0, 0.0, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', (item_name, opening, qty, closing, unit, cost_per_unit, cost, date_str, supplier, purchase_id, alert_limit))
+        db.execute("UPDATE vaccine_inventory SET unit = ? WHERE vaccine_name = ?", (unit, item_name))
         
     # Logical expenses recording
     desc = f"Purchased {qty} {unit} of {item_name} from {supplier}"
@@ -8017,6 +8033,7 @@ def update_stock_limit():
     db = get_db()
     item_type = request.form.get('item_type')
     item_name = request.form.get('item_name')
+    unit = request.form.get('unit', '').strip()
     try:
         limit = float(request.form.get('limit') or 0)
     except ValueError:
@@ -8024,13 +8041,21 @@ def update_stock_limit():
     
     if item_type == 'feed':
         db.execute('UPDATE feed_inventory SET alert_level = ? WHERE feed_name = ?', (limit, item_name))
+        if unit:
+            db.execute('UPDATE feed_inventory SET unit = ? WHERE feed_name = ?', (unit, item_name))
+            db.execute('UPDATE feed_purchases SET unit = ? WHERE feed_name = ?', (unit, item_name))
     elif item_type == 'medicine':
         db.execute('UPDATE medicine_inventory SET alert_level = ? WHERE medicine_name = ?', (limit, item_name))
+        if unit:
+            db.execute('UPDATE medicine_inventory SET unit = ? WHERE medicine_name = ?', (unit, item_name))
+            db.execute('UPDATE medicine_purchases SET dose_unit = ? WHERE medicine_name = ?', (unit, item_name))
     elif item_type == 'vaccine':
         db.execute('UPDATE vaccine_inventory SET alert_level = ? WHERE vaccine_name = ?', (limit, item_name))
+        if unit:
+            db.execute('UPDATE vaccine_inventory SET unit = ? WHERE vaccine_name = ?', (unit, item_name))
         
     db.commit()
-    flash(f'Low stock limit for {item_name} set to {limit} successfully.', 'success')
+    flash(f'Stock settings for {item_name} updated successfully.', 'success')
     return redirect(url_for('stock_inventory'))
 
 @app.route('/add_batch_reminder', methods=['POST'])
