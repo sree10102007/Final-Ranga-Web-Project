@@ -4445,6 +4445,27 @@ def voucher_register(v_type):
                 'notes': r['notes'] or f"Bill Date: {r['bill_date'] or 'N/A'}"
             })
             
+    # Assign sequential serial numbers chronologically
+    if v_type == 'health':
+        meds = [r for r in records if r.get('sub_type') == 'medicine']
+        vacs = [r for r in records if r.get('sub_type') == 'vaccine']
+        
+        meds.sort(key=lambda x: (x['date'], x['id']))
+        for idx, r in enumerate(meds, start=1):
+            r['serial_no'] = idx
+            
+        vacs.sort(key=lambda x: (x['date'], x['id']))
+        for idx, r in enumerate(vacs, start=1):
+            r['serial_no'] = idx
+            
+        records.sort(key=lambda x: x['date'], reverse=True)
+    else:
+        records.sort(key=lambda x: (x['date'], x['id']))
+        for idx, r in enumerate(records, start=1):
+            r['serial_no'] = idx
+            
+        records.sort(key=lambda x: x['date'], reverse=True)
+
     # Group month-wise
     from collections import defaultdict
     grouped_records = defaultdict(list)
@@ -4457,6 +4478,7 @@ def voucher_register(v_type):
         grouped_records[month_str].append(r)
         
     return render_template('voucher_register.html', v_type=v_type, grouped_records=grouped_records)
+
 
 @app.route('/vouchers/<v_type>/add', methods=['GET', 'POST'])
 def voucher_add(v_type):
