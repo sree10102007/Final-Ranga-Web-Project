@@ -3204,9 +3204,9 @@ def download_stock_csv():
         return redirect(url_for('auth.login'))
     db = get_db()
     
-    feeds = db.execute("SELECT feed_name AS name, 'Feed' AS type, purchased_qty, used_qty, wastage_qty, closing_stock, purchase_date AS date FROM feed_inventory").fetchall()
-    medicines = db.execute("SELECT medicine_name AS name, 'Medicine' AS type, purchased_qty, used_qty, wastage_qty, closing_stock, purchase_date AS date FROM medicine_inventory").fetchall()
-    vaccines = db.execute("SELECT vaccine_name AS name, 'Vaccine' AS type, purchased_qty, used_qty, wastage_qty, closing_stock, purchase_date AS date FROM vaccine_inventory").fetchall()
+    feeds = db.execute("SELECT feed_name AS name, 'Feed' AS type, opening_stock, purchased_qty, used_qty, wastage_qty, closing_stock, unit, purchase_date AS date FROM feed_inventory").fetchall()
+    medicines = db.execute("SELECT medicine_name AS name, 'Medicine' AS type, opening_stock, purchased_qty, used_qty, wastage_qty, closing_stock, unit, purchase_date AS date FROM medicine_inventory").fetchall()
+    vaccines = db.execute("SELECT vaccine_name AS name, 'Vaccine' AS type, opening_stock, purchased_qty, used_qty, wastage_qty, closing_stock, unit, purchase_date AS date FROM vaccine_inventory").fetchall()
     
     all_records = []
     for r in feeds:
@@ -3224,17 +3224,21 @@ def download_stock_csv():
     
     si = StringIO()
     cw = csv.writer(si)
-    cw.writerow(['S.no', 'date', 'item_type', 'item_name', 'purchase', 'consumption', 'closing(purchase - consumption)'])
+    cw.writerow(['S.no', 'date', 'item_type', 'item_name', 'unit', 'opening_stock', 'purchase', 'consumption', 'closing_stock'])
     
     for i, r in enumerate(all_records, 1):
+        opening = r['opening_stock'] or 0.0
         purchase = r['purchased_qty'] or 0.0
         consumption = (r['used_qty'] or 0.0) + (r['wastage_qty'] or 0.0)
         closing = r['closing_stock'] or 0.0
+        unit = r['unit'] or ''
         cw.writerow([
             i,
             r['date'] or '',
             r['type'],
             r['name'],
+            unit,
+            opening,
             purchase,
             consumption,
             closing
