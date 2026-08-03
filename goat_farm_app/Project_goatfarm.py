@@ -6981,14 +6981,12 @@ def pnl():
         end_date = custom_to
     now = datetime.now()
 
-    # Look for manual stock valuation matching the filtered period
+    # Look for manual stock valuation matching the filtered period exactly
     manual_stock_rec = db.execute('''
         SELECT * FROM manual_stock_valuations 
-        WHERE (from_date = ? AND to_date = ?)
-           OR (from_date <= ? AND to_date >= ?)
-        ORDER BY (CASE WHEN from_date = ? AND to_date = ? THEN 1 ELSE 0 END) DESC, from_date DESC
+        WHERE from_date = ? AND to_date = ?
         LIMIT 1
-    ''', (start_date, end_date, start_date, end_date, start_date, end_date)).fetchone()
+    ''', (start_date, end_date)).fetchone()
 
     # Calculate previous period's closing stock (to shift to opening stock)
     try:
@@ -6996,7 +6994,8 @@ def pnl():
         prev_day = (start_date_dt - timedelta(days=1)).strftime('%Y-%m-%d')
         prev_stock_rec = db.execute('''
             SELECT closing_stock FROM manual_stock_valuations 
-            WHERE to_date = ?
+            WHERE to_date <= ?
+            ORDER BY to_date DESC
             LIMIT 1
         ''', (prev_day,)).fetchone()
         prev_closing = prev_stock_rec['closing_stock'] if prev_stock_rec else None
@@ -7013,9 +7012,9 @@ def pnl():
         if prev_closing is not None:
             manual_opening = prev_closing
         else:
-            manual_opening = 0.0
+            manual_opening = None
             
-        manual_closing = 0.0
+        manual_closing = None
         manual_period_name = None
 
     # ── DYNAMIC PNL ALLOCATION ENGINE (DEBIT / CREDIT SIDE BY GROUP_TYPE) ────────

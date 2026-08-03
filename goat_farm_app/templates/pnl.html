@@ -228,8 +228,8 @@
     </div>
 
     <!-- T-Format P&L Report Container -->
-    {% set op_stock = (manual_opening|float if manual_opening else computed_opening) if include_stock else 0.0 %}
-    {% set cl_stock = (manual_closing|float if manual_closing else computed_closing) if include_stock else 0.0 %}
+    {% set op_stock = (manual_opening|float if manual_opening is not none else computed_opening) if include_stock else 0.0 %}
+    {% set cl_stock = (manual_closing|float if manual_closing is not none else computed_closing) if include_stock else 0.0 %}
     <div class="corporate-container" id="pnl-report-view">
         <!-- Brand Header Bar matching the image -->
         <div class="brand-header-bar">
