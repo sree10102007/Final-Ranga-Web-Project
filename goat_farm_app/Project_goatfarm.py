@@ -8066,6 +8066,102 @@ def update_stock_limit():
     flash(f'Stock settings for {item_name} updated successfully.', 'success')
     return redirect(url_for('stock_inventory'))
 
+@app.route('/edit_stock_item', methods=['POST'])
+def edit_stock_item():
+    if 'user_id' not in session:
+        return redirect(url_for('auth.login'))
+    db = get_db()
+    f = request.form
+    item_type = f.get('item_type', '').strip()
+    old_name = f.get('old_item_name', '').strip()
+    new_name = f.get('item_name', '').strip()
+    unit = f.get('unit', '').strip()
+    
+    try:
+        closing_stock = float(f.get('closing_stock') or 0.0)
+    except ValueError:
+        closing_stock = 0.0
+        
+    try:
+        alert_limit = float(f.get('alert_limit') or 0.0)
+    except ValueError:
+        alert_limit = 0.0
+
+    if not old_name or not new_name:
+        flash('Item name cannot be empty!', 'danger')
+        return redirect(url_for('stock_inventory'))
+
+    if item_type == 'feed':
+        if old_name != new_name:
+            db.execute("UPDATE feed_inventory SET feed_name = ? WHERE feed_name = ?", (new_name, old_name))
+            db.execute("UPDATE feed_purchases SET feed_name = ? WHERE feed_name = ?", (new_name, old_name))
+            db.execute("UPDATE batch_reminders SET item_name = ? WHERE item_name = ?", (new_name, old_name))
+        
+        if unit:
+            db.execute("UPDATE feed_inventory SET unit = ? WHERE feed_name = ?", (unit, new_name))
+            db.execute("UPDATE feed_purchases SET unit = ? WHERE feed_name = ?", (unit, new_name))
+        db.execute("UPDATE feed_inventory SET alert_level = ? WHERE feed_name = ?", (alert_limit, new_name))
+        
+        last = db.execute("SELECT id FROM feed_inventory WHERE feed_name = ? ORDER BY id DESC LIMIT 1", (new_name,)).fetchone()
+        if last:
+            db.execute("UPDATE feed_inventory SET closing_stock = ? WHERE id = ?", (closing_stock, last['id']))
+        else:
+            date_str = datetime.now().strftime('%Y-%m-%d')
+            db.execute('''
+                INSERT INTO feed_inventory (feed_name, opening_stock, purchased_qty, used_qty, wastage_qty, closing_stock, unit, cost_per_unit, total_cost, purchase_date, supplier, alert_level)
+                VALUES (?, ?, 0.0, 0.0, 0.0, ?, ?, 0.0, 0.0, ?, 'Manual Adjustment', ?)
+            ''', (new_name, closing_stock, closing_stock, unit or 'KG', date_str, alert_limit))
+
+    elif item_type == 'medicine':
+        if old_name != new_name:
+            db.execute("UPDATE medicine_inventory SET medicine_name = ? WHERE medicine_name = ?", (new_name, old_name))
+            db.execute("UPDATE medicine_purchases SET medicine_name = ? WHERE medicine_name = ?", (new_name, old_name))
+            db.execute("UPDATE batch_reminders SET item_name = ? WHERE item_name = ?", (new_name, old_name))
+            
+        if unit:
+            db.execute("UPDATE medicine_inventory SET unit = ? WHERE medicine_name = ?", (unit, new_name))
+            db.execute("UPDATE medicine_purchases SET dose_unit = ? WHERE medicine_name = ?", (unit, new_name))
+        db.execute("UPDATE medicine_inventory SET alert_level = ? WHERE medicine_name = ?", (alert_limit, new_name))
+        
+        last = db.execute("SELECT id FROM medicine_inventory WHERE medicine_name = ? ORDER BY id DESC LIMIT 1", (new_name,)).fetchone()
+        if last:
+            db.execute("UPDATE medicine_inventory SET closing_stock = ? WHERE id = ?", (closing_stock, last['id']))
+        else:
+            date_str = datetime.now().strftime('%Y-%m-%d')
+            db.execute('''
+                INSERT INTO medicine_inventory (medicine_name, opening_stock, purchased_qty, used_qty, wastage_qty, closing_stock, unit, cost_per_unit, total_cost, purchase_date, supplier, alert_level)
+                VALUES (?, ?, 0.0, 0.0, 0.0, ?, ?, 0.0, 0.0, ?, 'Manual Adjustment', ?)
+            ''', (new_name, closing_stock, closing_stock, unit or 'ML', date_str, alert_limit))
+
+    elif item_type == 'vaccine':
+        if old_name != new_name:
+            db.execute("UPDATE vaccine_inventory SET vaccine_name = ? WHERE vaccine_name = ?", (new_name, old_name))
+            db.execute("UPDATE vaccine_purchases SET vaccine_name = ? WHERE vaccine_name = ?", (new_name, old_name))
+            db.execute("UPDATE batch_reminders SET item_name = ? WHERE item_name = ?", (new_name, old_name))
+            
+        if unit:
+            db.execute("UPDATE vaccine_inventory SET unit = ? WHERE vaccine_name = ?", (unit, new_name))
+        db.execute("UPDATE vaccine_inventory SET alert_level = ? WHERE vaccine_name = ?", (alert_limit, new_name))
+        
+        last = db.execute("SELECT id FROM vaccine_inventory WHERE vaccine_name = ? ORDER BY id DESC LIMIT 1", (new_name,)).fetchone()
+        if last:
+            db.execute("UPDATE vaccine_inventory SET closing_stock = ? WHERE id = ?", (closing_stock, last['id']))
+        else:
+            date_str = datetime.now().strftime('%Y-%m-%d')
+            db.execute('''
+                INSERT INTO vaccine_inventory (vaccine_name, opening_stock, purchased_qty, used_qty, wastage_qty, closing_stock, unit, cost_per_unit, total_cost, purchase_date, supplier, alert_level)
+                VALUES (?, ?, 0.0, 0.0, 0.0, ?, ?, 0.0, 0.0, ?, 'Manual Adjustment', ?)
+            ''', (new_name, closing_stock, closing_stock, unit or 'Doses', date_str, alert_limit))
+            
+    else:
+        flash('Invalid stock item type.', 'danger')
+        return redirect(url_for('stock_inventory'))
+
+    db.commit()
+    flash(f'Stock item "{new_name}" updated successfully.', 'success')
+    return redirect(url_for('stock_inventory'))
+
+
 @app.route('/add_batch_reminder', methods=['POST'])
 def add_batch_reminder():
     db = get_db()
