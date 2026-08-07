@@ -294,9 +294,22 @@
                     <div class="mb-3">
                         <label class="form-label small text-muted fw-bold">Units of measure in the expenses master</label>
                         <select name="unit" id="limit_unit_select" class="form-select mb-1">
-                            <!-- Populated dynamically from Expense Master units -->
+                            {% if expense_units %}
+                                {% for u in expense_units %}
+                                    <option value="{{ u.unit_name }}">{{ u.unit_name }}{% if u.unit_symbol and u.unit_symbol != u.unit_name %} ({{ u.unit_symbol }}){% endif %}</option>
+                                {% endfor %}
+                            {% else %}
+                                <option value="KG">KG (Kilograms)</option>
+                                <option value="ML">ML (Millilitres)</option>
+                                <option value="Doses">Doses</option>
+                                <option value="Bags">Bags</option>
+                                <option value="Grams">Grams (g)</option>
+                                <option value="Litres">Litres (L)</option>
+                            {% endif %}
                         </select>
-                        <div class="form-text text-muted" style="font-size: 0.8rem;">Change unit for this item (e.g. ML, Doses, KG). Updates all stock records for this item.</div>
+                        <div class="form-text text-muted" style="font-size: 0.8rem;">
+                            Units synced from <a href="{{ url_for('expense_units_view') }}" target="_blank" class="text-decoration-none fw-semibold"><i class="bi bi-rulers me-1"></i>Expenses Master</a>.
+                        </div>
                     </div>
 
                     <div class="mb-3">
@@ -347,9 +360,23 @@
                     
                     <div class="mb-3">
                         <label class="form-label small text-muted fw-bold">Units of measure in the expenses master</label>
-                        <select name="unit" id="edit_unit_select" class="form-select" onchange="handleEditUnitChange()">
-                            <!-- Populated dynamically from Expense Master units -->
+                        <select name="unit" id="edit_unit_select" class="form-select mb-1" onchange="handleEditUnitChange()">
+                            {% if expense_units %}
+                                {% for u in expense_units %}
+                                    <option value="{{ u.unit_name }}">{{ u.unit_name }}{% if u.unit_symbol and u.unit_symbol != u.unit_name %} ({{ u.unit_symbol }}){% endif %}</option>
+                                {% endfor %}
+                            {% else %}
+                                <option value="KG">KG (Kilograms)</option>
+                                <option value="ML">ML (Millilitres)</option>
+                                <option value="Doses">Doses</option>
+                                <option value="Bags">Bags</option>
+                                <option value="Grams">Grams (g)</option>
+                                <option value="Litres">Litres (L)</option>
+                            {% endif %}
                         </select>
+                        <div class="form-text text-muted" style="font-size: 0.8rem;">
+                            Units synced from <a href="{{ url_for('expense_units_view') }}" target="_blank" class="text-decoration-none fw-semibold"><i class="bi bi-rulers me-1"></i>Expenses Master</a>.
+                        </div>
                     </div>
 
                     <div class="mb-3">
@@ -556,9 +583,18 @@
             select.appendChild(el);
         });
 
-        if (selectedValue && options.some(o => o.value.toLowerCase() === selectedValue.toLowerCase())) {
-            const matched = options.find(o => o.value.toLowerCase() === selectedValue.toLowerCase());
-            select.value = matched.value;
+        if (selectedValue) {
+            const exists = options.some(o => o.value.toLowerCase() === selectedValue.toLowerCase());
+            if (exists) {
+                const matched = options.find(o => o.value.toLowerCase() === selectedValue.toLowerCase());
+                select.value = matched.value;
+            } else {
+                const opt = document.createElement('option');
+                opt.value = selectedValue;
+                opt.textContent = selectedValue;
+                select.appendChild(opt);
+                select.value = selectedValue;
+            }
         } else if (options.length > 0) {
             select.value = options[0].value;
         }
