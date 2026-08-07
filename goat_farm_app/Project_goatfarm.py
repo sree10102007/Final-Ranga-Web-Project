@@ -8123,6 +8123,8 @@ def edit_stock_item():
             db.execute("UPDATE feed_purchases SET unit = ? WHERE feed_name = ?", (unit, new_name))
         db.execute("UPDATE feed_inventory SET alert_level = ? WHERE feed_name = ?", (alert_limit, new_name))
         
+        # Reset closing_stock on past records so SUM() and latest stock query remain consistent
+        db.execute("UPDATE feed_inventory SET closing_stock = 0.0 WHERE feed_name = ?", (new_name,))
         last = db.execute("SELECT id FROM feed_inventory WHERE feed_name = ? ORDER BY id DESC LIMIT 1", (new_name,)).fetchone()
         if last:
             db.execute("UPDATE feed_inventory SET closing_stock = ? WHERE id = ?", (closing_stock, last['id']))
@@ -8144,6 +8146,7 @@ def edit_stock_item():
             db.execute("UPDATE medicine_purchases SET dose_unit = ? WHERE medicine_name = ?", (unit, new_name))
         db.execute("UPDATE medicine_inventory SET alert_level = ? WHERE medicine_name = ?", (alert_limit, new_name))
         
+        db.execute("UPDATE medicine_inventory SET closing_stock = 0.0 WHERE medicine_name = ?", (new_name,))
         last = db.execute("SELECT id FROM medicine_inventory WHERE medicine_name = ? ORDER BY id DESC LIMIT 1", (new_name,)).fetchone()
         if last:
             db.execute("UPDATE medicine_inventory SET closing_stock = ? WHERE id = ?", (closing_stock, last['id']))
@@ -8164,6 +8167,7 @@ def edit_stock_item():
             db.execute("UPDATE vaccine_inventory SET unit = ? WHERE vaccine_name = ?", (unit, new_name))
         db.execute("UPDATE vaccine_inventory SET alert_level = ? WHERE vaccine_name = ?", (alert_limit, new_name))
         
+        db.execute("UPDATE vaccine_inventory SET closing_stock = 0.0 WHERE vaccine_name = ?", (new_name,))
         last = db.execute("SELECT id FROM vaccine_inventory WHERE vaccine_name = ? ORDER BY id DESC LIMIT 1", (new_name,)).fetchone()
         if last:
             db.execute("UPDATE vaccine_inventory SET closing_stock = ? WHERE id = ?", (closing_stock, last['id']))
