@@ -94,6 +94,7 @@
                         {% endif %}
                         <button class="btn btn-sm btn-outline-secondary rounded-pill px-2" title="Set Reminder Threshold" data-bs-toggle="modal" data-bs-target="#limitModal" data-type="feed" data-name="{{ feed_name }}" data-limit="{{ stock.alert_level }}" data-unit="{{ stock.unit }}" onclick="openLimitModal(this.dataset.type, this.dataset.name, this.dataset.limit, this.dataset.unit)"><i class="bi bi-bell"></i></button>
                         <a href="{{ url_for('voucher_add', v_type='feed', feed_name=feed_name, unit=stock.unit) }}" class="btn btn-sm btn-outline-success rounded-pill px-2" title="Full Purchase Voucher"><i class="bi bi-receipt"></i></a>
+                        <button type="button" class="btn btn-sm btn-outline-warning rounded-pill px-2" title="Edit {{ feed_name }}" data-bs-toggle="modal" data-bs-target="#editStockModal" data-type="feed" data-name="{{ feed_name }}" data-stock="{{ stock.closing_stock }}" data-unit="{{ stock.unit }}" data-limit="{{ stock.alert_level }}" onclick="openEditStockModal(this.dataset.type, this.dataset.name, this.dataset.stock, this.dataset.unit, this.dataset.limit)"><i class="bi bi-pencil"></i></button>
                         <form action="{{ url_for('delete_stock_item') }}" method="POST" class="d-inline" data-confirm="Are you sure you want to completely remove '{{ feed_name }}' and all its history from the inventory?">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <input type="hidden" name="item_type" value="feed">
@@ -137,6 +138,7 @@
                         {% endif %}
                         <button class="btn btn-sm btn-outline-secondary rounded-pill px-2" title="Set Reminder Threshold" data-bs-toggle="modal" data-bs-target="#limitModal" data-type="medicine" data-name="{{ med_name }}" data-limit="{{ stock.alert_level }}" data-unit="{{ stock.unit }}" onclick="openLimitModal(this.dataset.type, this.dataset.name, this.dataset.limit, this.dataset.unit)"><i class="bi bi-bell"></i></button>
                         <a href="{{ url_for('voucher_add', v_type='health', sub_type='medicine', health_name=med_name, dose_unit=stock.unit) }}" class="btn btn-sm btn-outline-primary rounded-pill px-2" title="Full Purchase Voucher"><i class="bi bi-receipt"></i></a>
+                        <button type="button" class="btn btn-sm btn-outline-warning rounded-pill px-2" title="Edit {{ med_name }}" data-bs-toggle="modal" data-bs-target="#editStockModal" data-type="medicine" data-name="{{ med_name }}" data-stock="{{ stock.closing_stock }}" data-unit="{{ stock.unit }}" data-limit="{{ stock.alert_level }}" onclick="openEditStockModal(this.dataset.type, this.dataset.name, this.dataset.stock, this.dataset.unit, this.dataset.limit)"><i class="bi bi-pencil"></i></button>
                         <form action="{{ url_for('delete_stock_item') }}" method="POST" class="d-inline" data-confirm="Are you sure you want to completely remove '{{ med_name }}' and all its history from the inventory?">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <input type="hidden" name="item_type" value="medicine">
@@ -180,6 +182,7 @@
                         {% endif %}
                         <button class="btn btn-sm btn-outline-secondary rounded-pill px-2" title="Set Reminder Threshold" data-bs-toggle="modal" data-bs-target="#limitModal" data-type="vaccine" data-name="{{ vac_name }}" data-limit="{{ stock.alert_level }}" data-unit="{{ stock.unit }}" onclick="openLimitModal(this.dataset.type, this.dataset.name, this.dataset.limit, this.dataset.unit)"><i class="bi bi-bell"></i></button>
                         <a href="{{ url_for('voucher_add', v_type='health', sub_type='vaccine', health_name=vac_name, unit=stock.unit) }}" class="btn btn-sm btn-outline-info rounded-pill px-2" title="Full Purchase Voucher"><i class="bi bi-receipt"></i></a>
+                        <button type="button" class="btn btn-sm btn-outline-warning rounded-pill px-2" title="Edit {{ vac_name }}" data-bs-toggle="modal" data-bs-target="#editStockModal" data-type="vaccine" data-name="{{ vac_name }}" data-stock="{{ stock.closing_stock }}" data-unit="{{ stock.unit }}" data-limit="{{ stock.alert_level }}" onclick="openEditStockModal(this.dataset.type, this.dataset.name, this.dataset.stock, this.dataset.unit, this.dataset.limit)"><i class="bi bi-pencil"></i></button>
                         <form action="{{ url_for('delete_stock_item') }}" method="POST" class="d-inline" data-confirm="Are you sure you want to completely remove '{{ vac_name }}' and all its history from the inventory?">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <input type="hidden" name="item_type" value="vaccine">
@@ -598,8 +601,13 @@
         document.getElementById('edit_item_type').value = itemType;
         document.getElementById('edit_old_item_name').value = itemName;
         document.getElementById('edit_item_name').value = itemName;
-        document.getElementById('edit_closing_stock').value = parseFloat(closingStock) || 0.00;
-        document.getElementById('edit_alert_limit').value = parseFloat(alertLevel) || 0.00;
+        
+        const stockVal = parseFloat(closingStock);
+        document.getElementById('edit_closing_stock').value = !isNaN(stockVal) ? stockVal.toFixed(2) : '0.00';
+        
+        const alertVal = parseFloat(alertLevel);
+        document.getElementById('edit_alert_limit').value = !isNaN(alertVal) && alertVal > 0 ? alertVal.toFixed(2) : '';
+        
         document.getElementById('edit_stock_unit_label').textContent = unit || '';
         document.getElementById('edit_alert_unit_label').textContent = unit || '';
 
