@@ -3101,8 +3101,8 @@ def buy_stock():
 
     target_url = request.form.get('redirect_to') or request.referrer or url_for('stock_inventory')
 
-    if not item_name or qty <= 0 or cost <= 0:
-        flash('Invalid purchase details! Please fill all fields with correct numbers.', 'danger')
+    if not item_name or qty <= 0 or cost < 0:
+        flash('Invalid purchase details! Please fill item name and valid quantity.', 'danger')
         return redirect(target_url)
         
     if item_type == 'feed':
