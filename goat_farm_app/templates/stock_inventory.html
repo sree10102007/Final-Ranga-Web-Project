@@ -78,7 +78,7 @@
             </div>
         </div>
         <div class="d-flex gap-2 flex-wrap">
-            <button type="button" class="btn btn-success rounded-pill px-4 py-2 fw-semibold shadow-sm" data-bs-toggle="modal" data-bs-target="#quickBuyModal" onclick="openBuyModal('feed', '', '')">
+            <button type="button" class="btn btn-success rounded-pill px-4 py-2 fw-semibold shadow-sm" data-bs-toggle="modal" data-bs-target="#quickBuyModal" data-type="feed" onclick="openBuyModal(this)">
                 <i class="bi bi-plus-circle-fill me-1"></i>+ Add Stock Item
             </button>
             <a href="{{ url_for('feed') }}" class="btn btn-outline-success rounded-pill px-3 py-2 fw-semibold">
@@ -189,7 +189,7 @@
             <h5 class="fw-bold text-success mb-0"><i class="bi bi-basket3 me-2"></i>Feed Stock Items</h5>
             <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-2.5 py-1 small">{{ feed_stocks|length }} items</span>
         </div>
-        <button class="btn btn-sm btn-outline-success rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#quickBuyModal" onclick="openBuyModal('feed', '', '')">
+        <button type="button" class="btn btn-sm btn-outline-success rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#quickBuyModal" data-type="feed" onclick="openBuyModal(this)">
             <i class="bi bi-plus-lg me-1"></i>Add Feed Item
         </button>
     </div>
@@ -226,15 +226,15 @@
                 </div>
                 
                 <div class="d-flex align-items-center gap-1">
-                    <button type="button" class="btn btn-sm btn-outline-success rounded-pill px-2.5 fw-semibold" data-bs-toggle="modal" data-bs-target="#quickBuyModal" title="Restock {{ feed_name }}" onclick="openBuyModal('feed', '{{ feed_name|escape }}', '{{ stock.unit }}')">
+                    <button type="button" class="btn btn-sm btn-outline-success rounded-pill px-2.5 fw-semibold" data-bs-toggle="modal" data-bs-target="#quickBuyModal" data-type="feed" data-name="{{ feed_name }}" data-unit="{{ stock.unit }}" title="Restock {{ feed_name }}" onclick="openBuyModal(this)">
                         <i class="bi bi-cart-plus me-1"></i>Restock
                     </button>
                     
-                    <button type="button" class="btn btn-sm btn-outline-warning rounded-pill px-2.5 fw-semibold text-dark" data-bs-toggle="modal" data-bs-target="#editStockModal" title="Edit {{ feed_name }}" onclick="openEditStockModal('feed', '{{ feed_name|escape }}', '{{ stock.closing_stock }}', '{{ stock.unit }}', '{{ stock.alert_level }}')">
+                    <button type="button" class="btn btn-sm btn-outline-warning rounded-pill px-2.5 fw-semibold text-dark" data-bs-toggle="modal" data-bs-target="#editStockModal" data-type="feed" data-name="{{ feed_name }}" data-stock="{{ stock.closing_stock }}" data-unit="{{ stock.unit }}" data-limit="{{ stock.alert_level }}" title="Edit {{ feed_name }}" onclick="openEditStockModal(this)">
                         <i class="bi bi-pencil-square me-1"></i>Edit
                     </button>
 
-                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-2" data-bs-toggle="modal" data-bs-target="#limitModal" title="Set Alert Threshold" onclick="openLimitModal('feed', '{{ feed_name|escape }}', '{{ stock.alert_level }}', '{{ stock.unit }}')">
+                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-2" data-bs-toggle="modal" data-bs-target="#limitModal" data-type="feed" data-name="{{ feed_name }}" data-limit="{{ stock.alert_level }}" data-unit="{{ stock.unit }}" title="Set Alert Threshold" onclick="openLimitModal(this)">
                         <i class="bi bi-bell"></i>
                     </button>
 
@@ -264,7 +264,7 @@
             <h5 class="fw-bold text-primary mb-0"><i class="bi bi-capsule me-2"></i>Medicine Stock Items</h5>
             <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-2.5 py-1 small">{{ med_stocks|length }} items</span>
         </div>
-        <button class="btn btn-sm btn-outline-primary rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#quickBuyModal" onclick="openBuyModal('medicine', '', '')">
+        <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#quickBuyModal" data-type="medicine" onclick="openBuyModal(this)">
             <i class="bi bi-plus-lg me-1"></i>Add Medicine Item
         </button>
     </div>
@@ -301,15 +301,15 @@
                 </div>
                 
                 <div class="d-flex align-items-center gap-1">
-                    <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-2.5 fw-semibold" data-bs-toggle="modal" data-bs-target="#quickBuyModal" title="Restock {{ med_name }}" onclick="openBuyModal('medicine', '{{ med_name|escape }}', '{{ stock.unit }}')">
+                    <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-2.5 fw-semibold" data-bs-toggle="modal" data-bs-target="#quickBuyModal" data-type="medicine" data-name="{{ med_name }}" data-unit="{{ stock.unit }}" title="Restock {{ med_name }}" onclick="openBuyModal(this)">
                         <i class="bi bi-cart-plus me-1"></i>Restock
                     </button>
                     
-                    <button type="button" class="btn btn-sm btn-outline-warning rounded-pill px-2.5 fw-semibold text-dark" data-bs-toggle="modal" data-bs-target="#editStockModal" title="Edit {{ med_name }}" onclick="openEditStockModal('medicine', '{{ med_name|escape }}', '{{ stock.closing_stock }}', '{{ stock.unit }}', '{{ stock.alert_level }}')">
+                    <button type="button" class="btn btn-sm btn-outline-warning rounded-pill px-2.5 fw-semibold text-dark" data-bs-toggle="modal" data-bs-target="#editStockModal" data-type="medicine" data-name="{{ med_name }}" data-stock="{{ stock.closing_stock }}" data-unit="{{ stock.unit }}" data-limit="{{ stock.alert_level }}" title="Edit {{ med_name }}" onclick="openEditStockModal(this)">
                         <i class="bi bi-pencil-square me-1"></i>Edit
                     </button>
 
-                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-2" data-bs-toggle="modal" data-bs-target="#limitModal" title="Set Alert Threshold" onclick="openLimitModal('medicine', '{{ med_name|escape }}', '{{ stock.alert_level }}', '{{ stock.unit }}')">
+                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-2" data-bs-toggle="modal" data-bs-target="#limitModal" data-type="medicine" data-name="{{ med_name }}" data-limit="{{ stock.alert_level }}" data-unit="{{ stock.unit }}" title="Set Alert Threshold" onclick="openLimitModal(this)">
                         <i class="bi bi-bell"></i>
                     </button>
 
@@ -339,7 +339,7 @@
             <h5 class="fw-bold text-info mb-0"><i class="bi bi-patch-check me-2"></i>Vaccine Stock Items</h5>
             <span class="badge bg-info bg-opacity-10 text-info rounded-pill px-2.5 py-1 small">{{ vac_stocks|length }} items</span>
         </div>
-        <button class="btn btn-sm btn-outline-info rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#quickBuyModal" onclick="openBuyModal('vaccine', '', '')">
+        <button type="button" class="btn btn-sm btn-outline-info rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#quickBuyModal" data-type="vaccine" onclick="openBuyModal(this)">
             <i class="bi bi-plus-lg me-1"></i>Add Vaccine Item
         </button>
     </div>
@@ -376,15 +376,15 @@
                 </div>
                 
                 <div class="d-flex align-items-center gap-1">
-                    <button type="button" class="btn btn-sm btn-outline-info rounded-pill px-2.5 fw-semibold" data-bs-toggle="modal" data-bs-target="#quickBuyModal" title="Restock {{ vac_name }}" onclick="openBuyModal('vaccine', '{{ vac_name|escape }}', '{{ stock.unit }}')">
+                    <button type="button" class="btn btn-sm btn-outline-info rounded-pill px-2.5 fw-semibold" data-bs-toggle="modal" data-bs-target="#quickBuyModal" data-type="vaccine" data-name="{{ vac_name }}" data-unit="{{ stock.unit }}" title="Restock {{ vac_name }}" onclick="openBuyModal(this)">
                         <i class="bi bi-cart-plus me-1"></i>Restock
                     </button>
                     
-                    <button type="button" class="btn btn-sm btn-outline-warning rounded-pill px-2.5 fw-semibold text-dark" data-bs-toggle="modal" data-bs-target="#editStockModal" title="Edit {{ vac_name }}" onclick="openEditStockModal('vaccine', '{{ vac_name|escape }}', '{{ stock.closing_stock }}', '{{ stock.unit }}', '{{ stock.alert_level }}')">
+                    <button type="button" class="btn btn-sm btn-outline-warning rounded-pill px-2.5 fw-semibold text-dark" data-bs-toggle="modal" data-bs-target="#editStockModal" data-type="vaccine" data-name="{{ vac_name }}" data-stock="{{ stock.closing_stock }}" data-unit="{{ stock.unit }}" data-limit="{{ stock.alert_level }}" title="Edit {{ vac_name }}" onclick="openEditStockModal(this)">
                         <i class="bi bi-pencil-square me-1"></i>Edit
                     </button>
 
-                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-2" data-bs-toggle="modal" data-bs-target="#limitModal" title="Set Alert Threshold" onclick="openLimitModal('vaccine', '{{ vac_name|escape }}', '{{ stock.alert_level }}', '{{ stock.unit }}')">
+                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-2" data-bs-toggle="modal" data-bs-target="#limitModal" data-type="vaccine" data-name="{{ vac_name }}" data-limit="{{ stock.alert_level }}" data-unit="{{ stock.unit }}" title="Set Alert Threshold" onclick="openLimitModal(this)">
                         <i class="bi bi-bell"></i>
                     </button>
 
@@ -745,7 +745,19 @@
         }
     }
 
-    function openBuyModal(type, name, unit) {
+    function openBuyModal(btnOrType) {
+        let type = 'feed';
+        let name = '';
+        let unit = '';
+
+        if (typeof btnOrType === 'object' && btnOrType.dataset) {
+            type = btnOrType.dataset.type || 'feed';
+            name = btnOrType.dataset.name || '';
+            unit = btnOrType.dataset.unit || '';
+        } else if (typeof btnOrType === 'string') {
+            type = btnOrType;
+        }
+
         const typeSelect = document.getElementById('buy_item_type');
         if (typeSelect) typeSelect.value = type || 'feed';
         populateExistingDatalist(type || 'feed');
@@ -806,9 +818,21 @@
         }
     }
 
-    function openLimitModal(itemType, itemName, currentLimit, unit) {
-        document.getElementById('limit_item_type').value = itemType || '';
-        document.getElementById('limit_item_name').value = itemName || '';
+    function openLimitModal(btn) {
+        let itemType = '';
+        let itemName = '';
+        let currentLimit = '0';
+        let unit = '';
+
+        if (typeof btn === 'object' && btn.dataset) {
+            itemType = btn.dataset.type || '';
+            itemName = btn.dataset.name || '';
+            currentLimit = btn.dataset.limit || '0';
+            unit = btn.dataset.unit || '';
+        }
+
+        document.getElementById('limit_item_type').value = itemType;
+        document.getElementById('limit_item_name').value = itemName;
         document.getElementById('limit_val').value = parseFloat(currentLimit) || 0.00;
         document.getElementById('limit_unit_label').textContent = unit || '';
         
@@ -846,10 +870,24 @@
         }
     }
 
-    function openEditStockModal(itemType, itemName, closingStock, unit, alertLevel) {
-        document.getElementById('edit_item_type').value = itemType || '';
-        document.getElementById('edit_old_item_name').value = itemName || '';
-        document.getElementById('edit_item_name').value = itemName || '';
+    function openEditStockModal(btn) {
+        let itemType = '';
+        let itemName = '';
+        let closingStock = '0';
+        let unit = '';
+        let alertLevel = '0';
+
+        if (typeof btn === 'object' && btn.dataset) {
+            itemType = btn.dataset.type || '';
+            itemName = btn.dataset.name || '';
+            closingStock = btn.dataset.stock || '0';
+            unit = btn.dataset.unit || '';
+            alertLevel = btn.dataset.limit || '0';
+        }
+
+        document.getElementById('edit_item_type').value = itemType;
+        document.getElementById('edit_old_item_name').value = itemName;
+        document.getElementById('edit_item_name').value = itemName;
         
         const stockNum = parseFloat(closingStock);
         document.getElementById('edit_closing_stock').value = (!isNaN(stockNum)) ? stockNum : 0;
