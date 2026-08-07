@@ -8096,6 +8096,8 @@ def edit_stock_item():
     item_type = f.get('item_type', '').strip()
     old_name = f.get('old_item_name', '').strip()
     new_name = f.get('item_name', '').strip()
+    if not old_name and new_name:
+        old_name = new_name
     unit = f.get('unit', '').strip()
     
     try:
@@ -8108,7 +8110,7 @@ def edit_stock_item():
     except ValueError:
         alert_limit = 0.0
 
-    if not old_name or not new_name:
+    if not new_name:
         flash('Item name cannot be empty!', 'danger')
         return redirect(url_for('stock_inventory'))
 
