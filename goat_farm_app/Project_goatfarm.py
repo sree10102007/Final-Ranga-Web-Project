@@ -5675,40 +5675,43 @@ def attendance_summary():
     db = get_db()
     month = request.args.get('month', datetime.now().strftime('%m'))
     year = request.args.get('year', datetime.now().strftime('%Y'))
+    
+    try:
+        month_int = int(month)
+        year_int = int(year)
+    except ValueError:
+        month_int = datetime.now().month
+        year_int = datetime.now().year
+        month = f"{month_int:02d}"
+        year = str(year_int)
+
+    import calendar
+    last_day = calendar.monthrange(year_int, month_int)[1]
+    start_date = f"{year_int:04d}-{month_int:02d}-01"
+    end_date = f"{year_int:04d}-{month_int:02d}-{last_day:02d}"
+
     data = db.execute('''SELECT e.id, e.name, e.sr_no, 
         SUM(CASE WHEN a.status IN ('P', 'Present') THEN 1.0 WHEN a.status = 'H' THEN 0.5 ELSE 0.0 END) as present,
         SUM(CASE WHEN a.status IN ('L', 'Leave', 'On Leave') THEN 1.0 ELSE 0.0 END) as leave,
         SUM(CASE WHEN a.status IN ('A', 'Absent') THEN 1.0 WHEN a.status = 'H' THEN 0.5 ELSE 0.0 END) as absent
         FROM employees e
         LEFT JOIN attendance a ON e.id=a.employee_id
-            AND TO_CHAR(a.date, 'MM') = ? AND TO_CHAR(a.date, 'YYYY') = ?
-        GROUP BY e.id ORDER BY CAST(e.sr_no AS INTEGER) ASC''', (month, year)).fetchall()
+            AND a.date >= ? AND a.date <= ?
+        GROUP BY e.id, e.name, e.sr_no ORDER BY CAST(e.sr_no AS INTEGER) ASC''', (start_date, end_date)).fetchall()
     
     # Calculate total working days in this month/year dynamically
     try:
         working_days_row = db.execute('''
             SELECT COUNT(DISTINCT date) 
             FROM attendance 
-            WHERE TO_CHAR(date, 'MM') = ? AND TO_CHAR(date, 'YYYY') = ?
-        ''', (month, year)).fetchone()
+            WHERE date >= ? AND date <= ?
+        ''', (start_date, end_date)).fetchone()
         working_days = working_days_row[0] or 0 if working_days_row else 0
     except Exception:
-        try:
-            working_days_row = db.execute('''
-                SELECT COUNT(DISTINCT date) 
-                FROM attendance 
-                WHERE strftime('%m', date) = ? AND strftime('%Y', date) = ?
-            ''', (month, year)).fetchone()
-            working_days = working_days_row[0] or 0 if working_days_row else 0
-        except Exception:
-            working_days = 0
+        working_days = 0
             
     if working_days == 0:
-        import calendar
-        try:
-            working_days = calendar.monthrange(int(year), int(month))[1]
-        except Exception:
-            working_days = 30
+        working_days = last_day
             
     farm = db.execute('SELECT * FROM farm_info LIMIT 1').fetchone()
     return render_template('attendance_summary.html', data=data, month=month, year=year, farm=farm, working_days=working_days)
@@ -6617,6 +6620,37 @@ def stock_valuation_delete(svid):
     flash('Stock Valuation record deleted successfully.', 'success')
     return redirect(url_for('stock_valuations'))
 
+@app.route('/save_pnl_stock', methods=['POST'])
+def save_pnl_stock():
+    if 'user_id' not in session:
+        return redirect(url_for('auth.login'))
+    db = get_db()
+    from_date = request.form.get('from_date', '').strip()
+    to_date = request.form.get('to_date', '').strip()
+    op_stock = float(request.form.get('opening_stock', 0.0) or 0.0)
+    cl_stock = float(request.form.get('closing_stock', 0.0) or 0.0)
+    
+    if from_date and to_date:
+        period_name = f"FY {from_date} to {to_date}"
+        existing = db.execute('SELECT id FROM manual_stock_valuations WHERE from_date=? AND to_date=?', (from_date, to_date)).fetchone()
+        if existing:
+            db.execute('''
+                UPDATE manual_stock_valuations 
+                SET opening_stock=?, closing_stock=?
+                WHERE id=?
+            ''', (op_stock, cl_stock, existing['id']))
+        else:
+            db.execute('''
+                INSERT INTO manual_stock_valuations (period_name, from_date, to_date, opening_stock, closing_stock)
+                VALUES (?, ?, ?, ?, ?)
+            ''', (period_name, from_date, to_date, op_stock, cl_stock))
+        db.commit()
+        flash('Stock valuation for this period saved successfully!', 'success')
+    else:
+        flash('Invalid date range for stock valuation.', 'danger')
+        
+    return redirect(url_for('pnl', filter_type='custom', from_date=from_date, to_date=to_date))
+
 @app.route('/equipment')
 def equipment():
     db = get_db()
@@ -6918,7 +6952,7 @@ def pnl():
             INNER JOIN (
                 SELECT feed_name, MAX(id) as max_id
                 FROM feed_inventory
-                WHERE purchase_date <= ?
+                WHERE purchase_date <= ? OR purchase_date IS NULL OR purchase_date = ''
                 GROUP BY feed_name
             ) latest ON f.id = latest.max_id
         """, (target_date,)).fetchone()[0] or 0.0
@@ -6929,7 +6963,7 @@ def pnl():
             INNER JOIN (
                 SELECT medicine_name, MAX(id) as max_id
                 FROM medicine_inventory
-                WHERE purchase_date <= ?
+                WHERE purchase_date <= ? OR purchase_date IS NULL OR purchase_date = ''
                 GROUP BY medicine_name
             ) latest ON m.id = latest.max_id
         """, (target_date,)).fetchone()[0] or 0.0
@@ -6940,7 +6974,7 @@ def pnl():
             INNER JOIN (
                 SELECT vaccine_name, MAX(id) as max_id
                 FROM vaccine_inventory
-                WHERE purchase_date <= ?
+                WHERE purchase_date <= ? OR purchase_date IS NULL OR purchase_date = ''
                 GROUP BY vaccine_name
             ) latest ON v.id = latest.max_id
         """, (target_date,)).fetchone()[0] or 0.0
@@ -6949,7 +6983,7 @@ def pnl():
             SELECT SUM(COALESCE(purchase_amount, 0))
             FROM master_records
             WHERE (status IS NULL OR status = '' OR status = 'Active' OR status = 'In Stock')
-              AND purchase_date <= ?
+              AND (purchase_date <= ? OR purchase_date IS NULL OR purchase_date = '')
         """, (target_date,)).fetchone()[0] or 0.0
 
         return feed_val + med_val + vac_val + goat_val
