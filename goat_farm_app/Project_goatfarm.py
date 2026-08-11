@@ -6620,37 +6620,6 @@ def stock_valuation_delete(svid):
     flash('Stock Valuation record deleted successfully.', 'success')
     return redirect(url_for('stock_valuations'))
 
-@app.route('/save_pnl_stock', methods=['POST'])
-def save_pnl_stock():
-    if 'user_id' not in session:
-        return redirect(url_for('auth.login'))
-    db = get_db()
-    from_date = request.form.get('from_date', '').strip()
-    to_date = request.form.get('to_date', '').strip()
-    op_stock = float(request.form.get('opening_stock', 0.0) or 0.0)
-    cl_stock = float(request.form.get('closing_stock', 0.0) or 0.0)
-    
-    if from_date and to_date:
-        period_name = f"FY {from_date} to {to_date}"
-        existing = db.execute('SELECT id FROM manual_stock_valuations WHERE from_date=? AND to_date=?', (from_date, to_date)).fetchone()
-        if existing:
-            db.execute('''
-                UPDATE manual_stock_valuations 
-                SET opening_stock=?, closing_stock=?
-                WHERE id=?
-            ''', (op_stock, cl_stock, existing['id']))
-        else:
-            db.execute('''
-                INSERT INTO manual_stock_valuations (period_name, from_date, to_date, opening_stock, closing_stock)
-                VALUES (?, ?, ?, ?, ?)
-            ''', (period_name, from_date, to_date, op_stock, cl_stock))
-        db.commit()
-        flash('Stock valuation for this period saved successfully!', 'success')
-    else:
-        flash('Invalid date range for stock valuation.', 'danger')
-        
-    return redirect(url_for('pnl', filter_type='custom', from_date=from_date, to_date=to_date))
-
 @app.route('/equipment')
 def equipment():
     db = get_db()
@@ -6952,7 +6921,7 @@ def pnl():
             INNER JOIN (
                 SELECT feed_name, MAX(id) as max_id
                 FROM feed_inventory
-                WHERE purchase_date <= ? OR purchase_date IS NULL OR purchase_date = ''
+                WHERE purchase_date <= ?
                 GROUP BY feed_name
             ) latest ON f.id = latest.max_id
         """, (target_date,)).fetchone()[0] or 0.0
@@ -6963,7 +6932,7 @@ def pnl():
             INNER JOIN (
                 SELECT medicine_name, MAX(id) as max_id
                 FROM medicine_inventory
-                WHERE purchase_date <= ? OR purchase_date IS NULL OR purchase_date = ''
+                WHERE purchase_date <= ?
                 GROUP BY medicine_name
             ) latest ON m.id = latest.max_id
         """, (target_date,)).fetchone()[0] or 0.0
@@ -6974,7 +6943,7 @@ def pnl():
             INNER JOIN (
                 SELECT vaccine_name, MAX(id) as max_id
                 FROM vaccine_inventory
-                WHERE purchase_date <= ? OR purchase_date IS NULL OR purchase_date = ''
+                WHERE purchase_date <= ?
                 GROUP BY vaccine_name
             ) latest ON v.id = latest.max_id
         """, (target_date,)).fetchone()[0] or 0.0
@@ -6983,7 +6952,7 @@ def pnl():
             SELECT SUM(COALESCE(purchase_amount, 0))
             FROM master_records
             WHERE (status IS NULL OR status = '' OR status = 'Active' OR status = 'In Stock')
-              AND (purchase_date <= ? OR purchase_date IS NULL OR purchase_date = '')
+              AND purchase_date <= ?
         """, (target_date,)).fetchone()[0] or 0.0
 
         return feed_val + med_val + vac_val + goat_val
