@@ -7001,13 +7001,15 @@ def pnl():
             ORDER BY to_date DESC
             LIMIT 1
         ''', (prev_day,)).fetchone()
-        prev_closing = prev_stock_rec['closing_stock'] if prev_stock_rec else None
+        prev_closing = prev_stock_rec['closing_stock'] if (prev_stock_rec and prev_stock_rec['closing_stock'] is not None) else None
+        if prev_closing is None:
+            prev_closing = get_stock_val(prev_day)
     except Exception:
         prev_closing = None
 
     if manual_stock_rec:
         include_stock = '1'
-        manual_opening = manual_stock_rec['opening_stock']
+        manual_opening = manual_stock_rec['opening_stock'] if (manual_stock_rec['opening_stock'] is not None and float(manual_stock_rec['opening_stock'] or 0) > 0) else prev_closing
         manual_closing = manual_stock_rec['closing_stock']
         manual_period_name = manual_stock_rec['period_name']
     else:
