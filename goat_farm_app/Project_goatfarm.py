@@ -7009,16 +7009,12 @@ def pnl():
 
     if manual_stock_rec:
         include_stock = '1'
-        manual_opening = manual_stock_rec['opening_stock'] if (manual_stock_rec['opening_stock'] is not None and float(manual_stock_rec['opening_stock'] or 0) > 0) else prev_closing
+        manual_opening = prev_closing if prev_closing is not None else manual_stock_rec['opening_stock']
         manual_closing = manual_stock_rec['closing_stock']
         manual_period_name = manual_stock_rec['period_name']
     else:
         include_stock = '1' # Force enable stock valuation inputs
-        if prev_closing is not None:
-            manual_opening = prev_closing
-        else:
-            manual_opening = None
-            
+        manual_opening = prev_closing
         manual_closing = None
         manual_period_name = None
 
