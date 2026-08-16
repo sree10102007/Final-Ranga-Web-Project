@@ -721,44 +721,52 @@
 <!-- ========================================== -->
 <!-- JAVASCRIPT: DATA SOURCE & CARD PAGINATION -->
 <!-- ========================================== -->
+<script id="expense-units-data" type="application/json">
+[
+    {% if expense_units %}
+        {% for u in expense_units %}
+            {"name": {{ u.unit_name|tojson }}, "symbol": {{ (u.unit_symbol or u.unit_name)|tojson }}}{{ "," if not loop.last else "" }}
+        {% endfor %}
+    {% else %}
+        {"name": "KG", "symbol": "KG"},
+        {"name": "Grams", "symbol": "g"},
+        {"name": "Litre", "symbol": "L"},
+        {"name": "ML", "symbol": "ml"},
+        {"name": "Doses", "symbol": "Doses"},
+        {"name": "Vials", "symbol": "Vials"},
+        {"name": "Bottles", "symbol": "Bottles"},
+        {"name": "Bags", "symbol": "Bags"},
+        {"name": "Nos", "symbol": "Nos"}
+    {% endif %}
+]
+</script>
+
+<script id="stock-items-data" type="application/json">
+{
+    "feed": {
+        {% for name, s in feed_stocks.items() %}
+            {{ name|lower|tojson }}: {"name": {{ name|tojson }}, "unit": {{ (s.unit or '')|tojson }}, "alert_level": {{ s.alert_level or 0.0 }}, "stock": {{ s.closing_stock or 0.0 }}}{{ "," if not loop.last else "" }}
+        {% endfor %}
+    },
+    "medicine": {
+        {% for name, s in med_stocks.items() %}
+            {{ name|lower|tojson }}: {"name": {{ name|tojson }}, "unit": {{ (s.unit or '')|tojson }}, "alert_level": {{ s.alert_level or 0.0 }}, "stock": {{ s.closing_stock or 0.0 }}}{{ "," if not loop.last else "" }}
+        {% endfor %}
+    },
+    "vaccine": {
+        {% for name, s in vac_stocks.items() %}
+            {{ name|lower|tojson }}: {"name": {{ name|tojson }}, "unit": {{ (s.unit or '')|tojson }}, "alert_level": {{ s.alert_level or 0.0 }}, "stock": {{ s.closing_stock or 0.0 }}}{{ "," if not loop.last else "" }}
+        {% endfor %}
+    }
+}
+</script>
+
 <script>
     // 1. Shared Units of Measure from Expense Master
-    const EXPENSE_MASTER_UNITS = [
-        {% if expense_units %}
-            {% for u in expense_units %}
-                { name: "{{ u.unit_name }}", symbol: "{{ u.unit_symbol or u.unit_name }}" },
-            {% endfor %}
-        {% else %}
-            { name: "KG", symbol: "KG" },
-            { name: "Grams", symbol: "g" },
-            { name: "Litre", symbol: "L" },
-            { name: "ML", symbol: "ml" },
-            { name: "Doses", symbol: "Doses" },
-            { name: "Vials", symbol: "Vials" },
-            { name: "Bottles", symbol: "Bottles" },
-            { name: "Bags", symbol: "Bags" },
-            { name: "Nos", symbol: "Nos" }
-        {% endif %}
-    ];
+    const EXPENSE_MASTER_UNITS = JSON.parse(document.getElementById('expense-units-data')?.textContent || '[]');
 
     // Existing items data for Restock lookups
-    const STOCK_INVENTORY_ITEMS = {
-        feed: {
-            {% for name, s in feed_stocks.items() %}
-                "{{ name|lower }}": { name: "{{ name }}", unit: "{{ s.unit }}", alert_level: {{ s.alert_level or 0.0 }}, stock: {{ s.closing_stock or 0.0 }} },
-            {% endfor %}
-        },
-        medicine: {
-            {% for name, s in med_stocks.items() %}
-                "{{ name|lower }}": { name: "{{ name }}", unit: "{{ s.unit }}", alert_level: {{ s.alert_level or 0.0 }}, stock: {{ s.closing_stock or 0.0 }} },
-            {% endfor %}
-        },
-        vaccine: {
-            {% for name, s in vac_stocks.items() %}
-                "{{ name|lower }}": { name: "{{ name }}", unit: "{{ s.unit }}", alert_level: {{ s.alert_level or 0.0 }}, stock: {{ s.closing_stock or 0.0 }} },
-            {% endfor %}
-        }
-    };
+    const STOCK_INVENTORY_ITEMS = JSON.parse(document.getElementById('stock-items-data')?.textContent || '{}');
 
     // Helper: Fill unit select elements from Expense Master
     function fillUnitSelect(selectElementId, selectedValue) {
