@@ -677,7 +677,8 @@ def init_db():
                 cost_per_unit REAL DEFAULT 0,
                 total_cost REAL DEFAULT 0,
                 purchase_date DATE,
-                supplier TEXT
+                supplier TEXT,
+                alert_level REAL DEFAULT 0
             )
         ''')
         conn.execute('''
@@ -716,7 +717,19 @@ def init_db():
         ''')
         try:
             conn.execute('ALTER TABLE feed_inventory ADD COLUMN IF NOT EXISTS wastage_qty REAL DEFAULT 0')
-        except sqlite3.OperationalError:
+        except Exception:
+            pass
+        try:
+            conn.execute('ALTER TABLE feed_inventory ADD COLUMN IF NOT EXISTS alert_level REAL DEFAULT 0')
+        except Exception:
+            pass
+        try:
+            conn.execute('ALTER TABLE medicine_inventory ADD COLUMN IF NOT EXISTS alert_level REAL DEFAULT 0')
+        except Exception:
+            pass
+        try:
+            conn.execute('ALTER TABLE vaccine_inventory ADD COLUMN IF NOT EXISTS alert_level REAL DEFAULT 0')
+        except Exception:
             pass
         conn.execute('''
             CREATE TABLE IF NOT EXISTS kid_records (
@@ -3015,44 +3028,44 @@ def stock_inventory():
     
     # Fetch feed inventory
     feed_records = db.execute("SELECT * FROM feed_inventory ORDER BY id ASC").fetchall()
-    feed_names = db.execute("SELECT DISTINCT feed_name FROM feed_inventory").fetchall()
+    feed_names = db.execute("SELECT DISTINCT feed_name FROM feed_inventory WHERE feed_name IS NOT NULL AND TRIM(feed_name) != ''").fetchall()
     feed_stocks = {}
     for row in feed_names:
         name = row['feed_name']
-        last = db.execute("SELECT closing_stock, unit, alert_level FROM feed_inventory WHERE feed_name = ? ORDER BY id DESC LIMIT 1", (name,)).fetchone()
+        last = db.execute("SELECT closing_stock, unit, alert_level FROM feed_inventory WHERE LOWER(TRIM(feed_name)) = LOWER(TRIM(?)) ORDER BY id DESC LIMIT 1", (name,)).fetchone()
         if last:
             feed_stocks[name] = {
-                'closing_stock': last['closing_stock'],
+                'closing_stock': float(last['closing_stock']) if last['closing_stock'] is not None else 0.0,
                 'unit': last['unit'] or 'KG',
-                'alert_level': last['alert_level'] or 0.0
+                'alert_level': float(last['alert_level']) if last['alert_level'] is not None else 0.0
             }
             
     # Fetch medicine inventory
     medicine_records = db.execute("SELECT * FROM medicine_inventory ORDER BY id ASC").fetchall()
-    med_names = db.execute("SELECT DISTINCT medicine_name FROM medicine_inventory").fetchall()
+    med_names = db.execute("SELECT DISTINCT medicine_name FROM medicine_inventory WHERE medicine_name IS NOT NULL AND TRIM(medicine_name) != ''").fetchall()
     med_stocks = {}
     for row in med_names:
         name = row['medicine_name']
-        last = db.execute("SELECT closing_stock, unit, alert_level FROM medicine_inventory WHERE medicine_name = ? ORDER BY id DESC LIMIT 1", (name,)).fetchone()
+        last = db.execute("SELECT closing_stock, unit, alert_level FROM medicine_inventory WHERE LOWER(TRIM(medicine_name)) = LOWER(TRIM(?)) ORDER BY id DESC LIMIT 1", (name,)).fetchone()
         if last:
             med_stocks[name] = {
-                'closing_stock': last['closing_stock'],
+                'closing_stock': float(last['closing_stock']) if last['closing_stock'] is not None else 0.0,
                 'unit': last['unit'] or 'Doses',
-                'alert_level': last['alert_level'] or 0.0
+                'alert_level': float(last['alert_level']) if last['alert_level'] is not None else 0.0
             }
             
     # Fetch vaccine inventory
     vaccine_records = db.execute("SELECT * FROM vaccine_inventory ORDER BY id ASC").fetchall()
-    vac_names = db.execute("SELECT DISTINCT vaccine_name FROM vaccine_inventory").fetchall()
+    vac_names = db.execute("SELECT DISTINCT vaccine_name FROM vaccine_inventory WHERE vaccine_name IS NOT NULL AND TRIM(vaccine_name) != ''").fetchall()
     vac_stocks = {}
     for row in vac_names:
         name = row['vaccine_name']
-        last = db.execute("SELECT closing_stock, unit, alert_level FROM vaccine_inventory WHERE vaccine_name = ? ORDER BY id DESC LIMIT 1", (name,)).fetchone()
+        last = db.execute("SELECT closing_stock, unit, alert_level FROM vaccine_inventory WHERE LOWER(TRIM(vaccine_name)) = LOWER(TRIM(?)) ORDER BY id DESC LIMIT 1", (name,)).fetchone()
         if last:
             vac_stocks[name] = {
-                'closing_stock': last['closing_stock'],
+                'closing_stock': float(last['closing_stock']) if last['closing_stock'] is not None else 0.0,
                 'unit': last['unit'] or 'Doses',
-                'alert_level': last['alert_level'] or 0.0
+                'alert_level': float(last['alert_level']) if last['alert_level'] is not None else 0.0
             }
 
     expense_units = db.execute("SELECT * FROM expense_units ORDER BY unit_name").fetchall()
