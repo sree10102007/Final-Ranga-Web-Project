@@ -6,16 +6,28 @@
 <style>
     /* Card Styles */
     .inventory-card {
-        border: none;
+        border: 1px solid #e2e8f0;
         border-radius: 18px;
         background: #ffffff;
-        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.05);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
         transition: transform 0.2s ease, box-shadow 0.2s ease;
         overflow: hidden;
+        display: flex;
+        flex-direction: column;
     }
     
     .inventory-card:hover {
         box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Card Headers */
+    .card-header-custom {
+        padding: 16px 18px;
+        min-height: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
     }
 
     .card-header-feed {
@@ -33,8 +45,46 @@
         color: #ffffff;
     }
 
+    .card-header-icon {
+        width: 44px;
+        height: 44px;
+        min-width: 44px;
+        min-height: 44px;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.22);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        font-size: 1.25rem;
+        color: #ffffff;
+    }
+
+    .card-header-title-box {
+        min-width: 0;
+        flex: 1 1 auto;
+    }
+
+    .card-header-title-box h5 {
+        font-weight: 700;
+        font-size: 1.05rem;
+        line-height: 1.2;
+        margin: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .card-header-title-box small {
+        font-size: 0.78rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: block;
+    }
+
     .category-badge-chip {
-        font-size: 0.8rem;
+        font-size: 0.76rem;
         font-weight: 700;
         padding: 4px 12px;
         border-radius: 20px;
@@ -42,91 +92,221 @@
         backdrop-filter: blur(4px);
         color: #ffffff;
         border: 1px solid rgba(255, 255, 255, 0.3);
+        flex-shrink: 0;
+        white-space: nowrap;
     }
 
-    /* Stock List Items */
-    .stock-item-row {
-        border-radius: 12px;
-        background-color: #ffffff;
-        border: 1px solid #eef2f6;
-        transition: all 0.2s ease;
-    }
-
-    .stock-item-row:hover {
+    /* Controls Bar (Search + Add) */
+    .card-controls-bar {
+        padding: 12px 16px;
         background-color: #f8fafc;
-        border-color: #cbd5e1;
-        transform: translateX(2px);
-    }
-
-    .stock-val-pill {
-        min-width: 110px;
-        text-align: right;
-    }
-
-    /* Badges */
-    .badge-out-stock {
-        background-color: #fee2e2;
-        color: #b91c1c;
-        border: 1px solid #fecaca;
-        font-size: 0.72rem;
-        font-weight: 700;
-        padding: 3px 8px;
-        border-radius: 6px;
-    }
-
-    .badge-low-stock {
-        background-color: #fef3c7;
-        color: #b45309;
-        border: 1px solid #fde68a;
-        font-size: 0.72rem;
-        font-weight: 700;
-        padding: 3px 8px;
-        border-radius: 6px;
-    }
-
-    .badge-ok-stock {
-        background-color: #dcfce7;
-        color: #15803d;
-        border: 1px solid #bbf7d0;
-        font-size: 0.72rem;
-        font-weight: 700;
-        padding: 3px 8px;
-        border-radius: 6px;
-    }
-
-    /* Action Buttons */
-    .btn-action-icon {
-        width: 32px;
-        height: 32px;
-        padding: 0;
-        display: inline-flex;
+        border-bottom: 1px solid #e2e8f0;
+        display: flex;
         align-items: center;
-        justify-content: center;
-        border-radius: 8px;
-        font-size: 0.85rem;
-        transition: all 0.15s ease;
+        gap: 8px;
+        min-height: 58px;
     }
 
-    .btn-action-icon:hover {
-        transform: scale(1.08);
-    }
-
-    /* Pagination Bar */
-    .card-pagination {
-        font-size: 0.85rem;
-    }
-    
     .search-input-card {
         border-radius: 10px;
-        background-color: #f8fafc;
+        background-color: #ffffff;
         border: 1px solid #e2e8f0;
-        font-size: 0.85rem;
+        font-size: 0.84rem;
+        height: 36px;
     }
     
     .search-input-card:focus {
         background-color: #ffffff;
         border-color: #94a3b8;
         box-shadow: none;
+    }
+
+    /* Items List Container */
+    .card-items-container {
+        padding: 14px 16px;
+        min-height: 440px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    /* Stock List Items */
+    .stock-item-row {
+        border-radius: 12px;
+        background-color: #ffffff;
+        border: 1px solid #edf2f7;
+        padding: 10px 12px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        transition: all 0.2s ease;
+        min-height: 66px;
+    }
+
+    .stock-item-row:hover {
+        background-color: #f8fafc;
+        border-color: #cbd5e1;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+    }
+
+    .stock-info-col {
+        min-width: 0;
+        flex: 1 1 auto;
+    }
+
+    .stock-item-name {
+        font-size: 0.90rem;
+        font-weight: 700;
+        color: #1e293b;
+        max-width: 125px;
+        display: inline-block;
+        vertical-align: middle;
+    }
+
+    .stock-item-threshold {
+        font-size: 0.74rem;
+        color: #64748b;
+        line-height: 1.2;
+    }
+
+    .stock-val-pill {
+        min-width: 60px;
+        text-align: right;
+        flex-shrink: 0;
+    }
+
+    .stock-val-num {
+        font-size: 1.02rem;
+        font-weight: 800;
+        line-height: 1.1;
+    }
+
+    .stock-val-unit {
+        font-size: 0.68rem;
+        font-weight: 600;
+        color: #64748b;
+    }
+
+    /* Badges */
+    .badge-out-stock, .badge-low-stock, .badge-ok-stock {
+        font-size: 0.68rem;
+        font-weight: 700;
+        padding: 2px 6px;
+        border-radius: 5px;
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+        white-space: nowrap;
+        flex-shrink: 0;
+        vertical-align: middle;
+    }
+
+    .badge-out-stock {
+        background-color: #fee2e2;
+        color: #b91c1c;
+        border: 1px solid #fecaca;
+    }
+
+    .badge-low-stock {
+        background-color: #fef3c7;
+        color: #b45309;
+        border: 1px solid #fde68a;
+    }
+
+    .badge-ok-stock {
+        background-color: #dcfce7;
+        color: #15803d;
+        border: 1px solid #bbf7d0;
+    }
+
+    /* Action Buttons */
+    .stock-actions-group {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        flex-shrink: 0;
+    }
+
+    .stock-actions-group form {
+        margin: 0;
+        padding: 0;
+        display: inline-flex;
+    }
+
+    .btn-action-icon {
+        width: 29px;
+        height: 29px;
+        min-width: 29px;
+        min-height: 29px;
+        padding: 0;
+        margin: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 7px;
+        font-size: 0.80rem;
+        border: 1px solid #e2e8f0;
+        background-color: #f8fafc;
+        color: #475569;
+        transition: all 0.15s ease;
+        cursor: pointer;
+        line-height: 1;
+    }
+
+    .btn-action-icon:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.06);
+    }
+
+    .btn-action-restock { color: #10b981; border-color: #d1fae5; background: #f0fdf4; }
+    .btn-action-restock:hover { background: #10b981; color: #ffffff; border-color: #10b981; }
+
+    .btn-action-restock-med { color: #3b82f6; border-color: #dbeafe; background: #eff6ff; }
+    .btn-action-restock-med:hover { background: #3b82f6; color: #ffffff; border-color: #3b82f6; }
+
+    .btn-action-restock-vac { color: #06b6d4; border-color: #cffafe; background: #ecfeff; }
+    .btn-action-restock-vac:hover { background: #06b6d4; color: #ffffff; border-color: #06b6d4; }
+
+    .btn-action-edit { color: #f59e0b; border-color: #fef3c7; background: #fffbeb; }
+    .btn-action-edit:hover { background: #f59e0b; color: #ffffff; border-color: #f59e0b; }
+
+    .btn-action-alert { color: #64748b; border-color: #e2e8f0; background: #f8fafc; }
+    .btn-action-alert:hover { background: #64748b; color: #ffffff; border-color: #64748b; }
+
+    .btn-action-delete { color: #ef4444; border-color: #fee2e2; background: #fef2f2; }
+    .btn-action-delete:hover { background: #ef4444; color: #ffffff; border-color: #ef4444; }
+
+    /* Empty States */
+    .stock-empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        margin: auto 0;
+        padding: 36px 16px;
+    }
+
+    .empty-icon-circle {
+        width: 54px;
+        height: 54px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.45rem;
+    }
+
+    /* Pagination Bar */
+    .card-footer-pagination {
+        padding: 10px 16px;
+        background-color: #f8fafc;
+        border-top: 1px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 0.82rem;
+        min-height: 48px;
     }
 </style>
 
@@ -137,7 +317,7 @@
             <i class="bi bi-box-seam fs-2"></i>
         </div>
         <div>
-            <h3 class="fw-800 text-dark mb-0">Stock Inventory</h3>
+            <h3 class="fw-bold text-dark mb-0">Stock Inventory</h3>
             <p class="text-muted small mb-0">Centralized control for Feed, Medicine, and Vaccine inventories, measurement units, and threshold alerts.</p>
         </div>
     </div>
@@ -195,113 +375,113 @@
 {% endif %}
 
 <!-- 3 MAIN CARDS CONTAINER -->
-<div class="row g-4 mb-4">
+<div class="row g-4 mb-4 align-items-stretch">
     
     <!-- ========================================== -->
     <!-- CARD 1: FEED INVENTORY CARD -->
     <!-- ========================================== -->
-    <div class="col-12 col-xl-4 col-lg-6">
-        <div class="inventory-card h-100 d-flex flex-column border">
+    <div class="col-12 col-lg-4 d-flex">
+        <div class="inventory-card w-100">
             <!-- Card Header -->
-            <div class="card-header-feed p-3.5 d-flex align-items-center justify-content-between">
-                <div class="d-flex align-items-center gap-2.5">
-                    <div class="bg-white bg-opacity-20 p-2 rounded-3 text-white fs-4">
+            <div class="card-header-custom card-header-feed">
+                <div class="d-flex align-items-center gap-3 min-w-0">
+                    <div class="card-header-icon">
                         <i class="bi bi-basket3-fill"></i>
                     </div>
-                    <div>
-                        <h5 class="fw-800 text-white mb-0">Feed Inventory</h5>
+                    <div class="card-header-title-box">
+                        <h5 class="text-white mb-0">Feed Inventory</h5>
                         <small class="text-white-50">Grains, Fodder & Concentrates</small>
                     </div>
                 </div>
-                <div class="d-flex align-items-center gap-2">
-                    <span class="category-badge-chip" id="feed-count-badge">{{ total_feed }} Items</span>
-                </div>
+                <span class="category-badge-chip" id="feed-count-badge">{{ total_feed }} Items</span>
             </div>
 
             <!-- Card Controls (Search + Add) -->
-            <div class="p-3 bg-light border-bottom d-flex align-items-center gap-2">
+            <div class="card-controls-bar">
                 <div class="input-group input-group-sm flex-grow-1">
                     <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
                     <input type="text" id="search-feed" class="form-control search-input-card border-start-0 ps-0" placeholder="Search feed items..." onkeyup="paginateCategory('feed')">
                 </div>
-                <button type="button" class="btn btn-sm btn-success rounded-pill px-3 fw-semibold text-nowrap" data-bs-toggle="modal" data-bs-target="#quickBuyModal" onclick="openBuyModal(null, 'feed')">
-                    <i class="bi bi-plus-lg me-1"></i>Add
+                <button type="button" class="btn btn-sm btn-success rounded-pill px-3 fw-semibold text-nowrap d-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#quickBuyModal" onclick="openBuyModal(null, 'feed')">
+                    <i class="bi bi-plus-lg"></i> Add
                 </button>
             </div>
 
             <!-- Items List Container -->
-            <div class="p-3 flex-grow-1 d-flex flex-column gap-2" id="feed-list-container" style="min-height: 380px;">
+            <div class="card-items-container flex-grow-1" id="feed-list-container">
                 {% for feed_name, stock in feed_stocks.items() %}
                 {% set is_low = stock.alert_level > 0 and stock.closing_stock <= stock.alert_level %}
                 {% set is_out = stock.closing_stock <= 0 %}
-                <div class="stock-item-row p-3 d-flex align-items-center justify-content-between gap-2 feed-item-node"
+                <div class="stock-item-row feed-item-node"
                      data-name="{{ feed_name|lower }}"
                      data-stock="{{ stock.closing_stock }}"
                      data-unit="{{ stock.unit }}"
                      data-limit="{{ stock.alert_level }}">
                     
-                    <div class="flex-grow-1 min-w-0">
-                        <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
-                            <span class="fw-bold text-dark fs-6 text-truncate" title="{{ feed_name }}">{{ feed_name }}</span>
+                    <div class="stock-info-col">
+                        <div class="d-flex align-items-center gap-1.5 mb-0.5">
+                            <span class="stock-item-name text-truncate" title="{{ feed_name }}">{{ feed_name }}</span>
                             {% if is_out %}
                                 <span class="badge-out-stock">Out of Stock</span>
                             {% elif is_low %}
-                                <span class="badge-low-stock"><i class="bi bi-exclamation-circle-fill me-1"></i>Low</span>
+                                <span class="badge-low-stock"><i class="bi bi-exclamation-circle-fill"></i>Low</span>
                             {% else %}
                                 <span class="badge-ok-stock">OK</span>
                             {% endif %}
                         </div>
-                        <div class="text-muted small" style="font-size: 0.78rem;">
+                        <div class="stock-item-threshold">
                             Threshold: <span class="fw-semibold text-dark">{{ "%.1f"|format(stock.alert_level) if stock.alert_level else "0" }}</span> {{ stock.unit }}
                         </div>
                     </div>
 
-                    <!-- Quantity -->
-                    <div class="stock-val-pill pe-2">
-                        <div class="fs-5 fw-800 text-success mb-0">{{ "%.2f"|format(stock.closing_stock) }}</div>
-                        <div class="text-muted fw-semibold" style="font-size: 0.72rem;">{{ stock.unit }}</div>
-                    </div>
+                    <!-- Quantity & Actions -->
+                    <div class="d-flex align-items-center gap-2 flex-shrink-0">
+                        <div class="stock-val-pill">
+                            <div class="stock-val-num text-success">{{ "%.2f"|format(stock.closing_stock) }}</div>
+                            <div class="stock-val-unit">{{ stock.unit }}</div>
+                        </div>
 
-                    <!-- Controls -->
-                    <div class="d-flex align-items-center gap-1">
-                        <!-- Restock -->
-                        <button type="button" class="btn btn-light btn-action-icon text-success border" title="Restock {{ feed_name }}" onclick="openBuyModal(this, 'feed')" data-name="{{ feed_name }}" data-unit="{{ stock.unit }}">
-                            <i class="bi bi-cart-plus"></i>
-                        </button>
-                        <!-- Edit -->
-                        <button type="button" class="btn btn-light btn-action-icon text-warning border" title="Edit {{ feed_name }}" onclick="openEditModal(this, 'feed')" data-name="{{ feed_name }}" data-stock="{{ stock.closing_stock }}" data-unit="{{ stock.unit }}" data-limit="{{ stock.alert_level }}">
-                            <i class="bi bi-pencil"></i>
-                        </button>
-                        <!-- Threshold -->
-                        <button type="button" class="btn btn-light btn-action-icon text-secondary border" title="Set Alert Threshold" onclick="openThresholdModal(this, 'feed')" data-name="{{ feed_name }}" data-limit="{{ stock.alert_level }}" data-unit="{{ stock.unit }}">
-                            <i class="bi bi-bell"></i>
-                        </button>
-                        <!-- Delete -->
-                        <form action="{{ url_for('delete_stock_item') }}" method="POST" class="d-inline" data-confirm="Are you sure you want to completely delete '{{ feed_name }}' and all associated inventory records?">
-                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                            <input type="hidden" name="item_type" value="feed">
-                            <input type="hidden" name="item_name" value="{{ feed_name }}">
-                            <button type="submit" class="btn btn-light btn-action-icon text-danger border" title="Delete {{ feed_name }}">
-                                <i class="bi bi-trash"></i>
+                        <div class="stock-actions-group">
+                            <button type="button" class="btn-action-icon btn-action-restock" title="Restock {{ feed_name }}" onclick="openBuyModal(this, 'feed')" data-name="{{ feed_name }}" data-unit="{{ stock.unit }}">
+                                <i class="bi bi-cart-plus"></i>
                             </button>
-                        </form>
+                            <button type="button" class="btn-action-icon btn-action-edit" title="Edit {{ feed_name }}" onclick="openEditModal(this, 'feed')" data-name="{{ feed_name }}" data-stock="{{ stock.closing_stock }}" data-unit="{{ stock.unit }}" data-limit="{{ stock.alert_level }}">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button type="button" class="btn-action-icon btn-action-alert" title="Set Alert Threshold" onclick="openThresholdModal(this, 'feed')" data-name="{{ feed_name }}" data-limit="{{ stock.alert_level }}" data-unit="{{ stock.unit }}">
+                                <i class="bi bi-bell"></i>
+                            </button>
+                            <form action="{{ url_for('delete_stock_item') }}" method="POST" data-confirm="Are you sure you want to completely delete '{{ feed_name }}' and all associated inventory records?">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <input type="hidden" name="item_type" value="feed">
+                                <input type="hidden" name="item_name" value="{{ feed_name }}">
+                                <button type="submit" class="btn-action-icon btn-action-delete" title="Delete {{ feed_name }}">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </div>
                     </div>
                 </div>
                 {% else %}
-                <div class="text-muted text-center py-5 my-auto">
-                    <i class="bi bi-basket text-muted fs-1 d-block mb-2"></i>
-                    No feed items registered yet.<br>
-                    <button type="button" class="btn btn-sm btn-outline-success mt-2 rounded-pill" data-bs-toggle="modal" data-bs-target="#quickBuyModal" onclick="openBuyModal(null, 'feed')">+ Add First Feed</button>
+                <div class="stock-empty-state">
+                    <div class="empty-icon-circle bg-success bg-opacity-10 text-success mb-3">
+                        <i class="bi bi-basket3"></i>
+                    </div>
+                    <h6 class="fw-bold text-dark mb-1">No Feed Items Yet</h6>
+                    <p class="text-muted small text-center mb-3">Track grains, fodder, and nutritional supplements here.</p>
+                    <button type="button" class="btn btn-sm btn-success rounded-pill px-3 py-1.5 fw-semibold shadow-sm" data-bs-toggle="modal" data-bs-target="#quickBuyModal" onclick="openBuyModal(null, 'feed')">
+                        <i class="bi bi-plus-lg me-1"></i>Add First Feed Item
+                    </button>
                 </div>
                 {% endfor %}
-                <div id="feed-no-results" class="text-muted text-center py-5 d-none my-auto">
+                <div id="feed-no-results" class="stock-empty-state d-none">
                     <i class="bi bi-search fs-2 d-block mb-1 text-muted"></i>
-                    No matching feed items found.
+                    <span class="text-muted small">No matching feed items found.</span>
                 </div>
             </div>
 
             <!-- Card Pagination Footer -->
-            <div class="p-2.5 px-3 bg-light border-top d-flex align-items-center justify-content-between card-pagination" id="feed-pagination-bar">
+            <div class="card-footer-pagination" id="feed-pagination-bar">
                 <span class="text-muted small" id="feed-page-info">Showing 0-0</span>
                 <div class="btn-group btn-group-sm">
                     <button type="button" class="btn btn-outline-secondary" id="feed-prev-btn" onclick="changePage('feed', -1)"><i class="bi bi-chevron-left"></i></button>
@@ -315,108 +495,108 @@
     <!-- ========================================== -->
     <!-- CARD 2: MEDICINE INVENTORY CARD -->
     <!-- ========================================== -->
-    <div class="col-12 col-xl-4 col-lg-6">
-        <div class="inventory-card h-100 d-flex flex-column border">
+    <div class="col-12 col-lg-4 d-flex">
+        <div class="inventory-card w-100">
             <!-- Card Header -->
-            <div class="card-header-medicine p-3.5 d-flex align-items-center justify-content-between">
-                <div class="d-flex align-items-center gap-2.5">
-                    <div class="bg-white bg-opacity-20 p-2 rounded-3 text-white fs-4">
+            <div class="card-header-custom card-header-medicine">
+                <div class="d-flex align-items-center gap-3 min-w-0">
+                    <div class="card-header-icon">
                         <i class="bi bi-capsule"></i>
                     </div>
-                    <div>
-                        <h5 class="fw-800 text-white mb-0">Medicine Inventory</h5>
+                    <div class="card-header-title-box">
+                        <h5 class="text-white mb-0">Medicine Inventory</h5>
                         <small class="text-white-50">Antibiotics, Tonics & Tablets</small>
                     </div>
                 </div>
-                <div class="d-flex align-items-center gap-2">
-                    <span class="category-badge-chip" id="medicine-count-badge">{{ total_med }} Items</span>
-                </div>
+                <span class="category-badge-chip" id="medicine-count-badge">{{ total_med }} Items</span>
             </div>
 
             <!-- Card Controls (Search + Add) -->
-            <div class="p-3 bg-light border-bottom d-flex align-items-center gap-2">
+            <div class="card-controls-bar">
                 <div class="input-group input-group-sm flex-grow-1">
                     <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
                     <input type="text" id="search-medicine" class="form-control search-input-card border-start-0 ps-0" placeholder="Search medicine items..." onkeyup="paginateCategory('medicine')">
                 </div>
-                <button type="button" class="btn btn-sm btn-primary rounded-pill px-3 fw-semibold text-nowrap" data-bs-toggle="modal" data-bs-target="#quickBuyModal" onclick="openBuyModal(null, 'medicine')">
-                    <i class="bi bi-plus-lg me-1"></i>Add
+                <button type="button" class="btn btn-sm btn-primary rounded-pill px-3 fw-semibold text-nowrap d-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#quickBuyModal" onclick="openBuyModal(null, 'medicine')">
+                    <i class="bi bi-plus-lg"></i> Add
                 </button>
             </div>
 
             <!-- Items List Container -->
-            <div class="p-3 flex-grow-1 d-flex flex-column gap-2" id="medicine-list-container" style="min-height: 380px;">
+            <div class="card-items-container flex-grow-1" id="medicine-list-container">
                 {% for med_name, stock in med_stocks.items() %}
                 {% set is_low = stock.alert_level > 0 and stock.closing_stock <= stock.alert_level %}
                 {% set is_out = stock.closing_stock <= 0 %}
-                <div class="stock-item-row p-3 d-flex align-items-center justify-content-between gap-2 medicine-item-node"
+                <div class="stock-item-row medicine-item-node"
                      data-name="{{ med_name|lower }}"
                      data-stock="{{ stock.closing_stock }}"
                      data-unit="{{ stock.unit }}"
                      data-limit="{{ stock.alert_level }}">
                     
-                    <div class="flex-grow-1 min-w-0">
-                        <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
-                            <span class="fw-bold text-dark fs-6 text-truncate" title="{{ med_name }}">{{ med_name }}</span>
+                    <div class="stock-info-col">
+                        <div class="d-flex align-items-center gap-1.5 mb-0.5">
+                            <span class="stock-item-name text-truncate" title="{{ med_name }}">{{ med_name }}</span>
                             {% if is_out %}
                                 <span class="badge-out-stock">Out of Stock</span>
                             {% elif is_low %}
-                                <span class="badge-low-stock"><i class="bi bi-exclamation-circle-fill me-1"></i>Low</span>
+                                <span class="badge-low-stock"><i class="bi bi-exclamation-circle-fill"></i>Low</span>
                             {% else %}
                                 <span class="badge-ok-stock">OK</span>
                             {% endif %}
                         </div>
-                        <div class="text-muted small" style="font-size: 0.78rem;">
+                        <div class="stock-item-threshold">
                             Threshold: <span class="fw-semibold text-dark">{{ "%.1f"|format(stock.alert_level) if stock.alert_level else "0" }}</span> {{ stock.unit }}
                         </div>
                     </div>
 
-                    <!-- Quantity -->
-                    <div class="stock-val-pill pe-2">
-                        <div class="fs-5 fw-800 text-primary mb-0">{{ "%.2f"|format(stock.closing_stock) }}</div>
-                        <div class="text-muted fw-semibold" style="font-size: 0.72rem;">{{ stock.unit }}</div>
-                    </div>
+                    <!-- Quantity & Actions -->
+                    <div class="d-flex align-items-center gap-2 flex-shrink-0">
+                        <div class="stock-val-pill">
+                            <div class="stock-val-num text-primary">{{ "%.2f"|format(stock.closing_stock) }}</div>
+                            <div class="stock-val-unit">{{ stock.unit }}</div>
+                        </div>
 
-                    <!-- Controls -->
-                    <div class="d-flex align-items-center gap-1">
-                        <!-- Restock -->
-                        <button type="button" class="btn btn-light btn-action-icon text-primary border" title="Restock {{ med_name }}" onclick="openBuyModal(this, 'medicine')" data-name="{{ med_name }}" data-unit="{{ stock.unit }}">
-                            <i class="bi bi-cart-plus"></i>
-                        </button>
-                        <!-- Edit -->
-                        <button type="button" class="btn btn-light btn-action-icon text-warning border" title="Edit {{ med_name }}" onclick="openEditModal(this, 'medicine')" data-name="{{ med_name }}" data-stock="{{ stock.closing_stock }}" data-unit="{{ stock.unit }}" data-limit="{{ stock.alert_level }}">
-                            <i class="bi bi-pencil"></i>
-                        </button>
-                        <!-- Threshold -->
-                        <button type="button" class="btn btn-light btn-action-icon text-secondary border" title="Set Alert Threshold" onclick="openThresholdModal(this, 'medicine')" data-name="{{ med_name }}" data-limit="{{ stock.alert_level }}" data-unit="{{ stock.unit }}">
-                            <i class="bi bi-bell"></i>
-                        </button>
-                        <!-- Delete -->
-                        <form action="{{ url_for('delete_stock_item') }}" method="POST" class="d-inline" data-confirm="Are you sure you want to completely delete '{{ med_name }}' and all associated inventory records?">
-                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                            <input type="hidden" name="item_type" value="medicine">
-                            <input type="hidden" name="item_name" value="{{ med_name }}">
-                            <button type="submit" class="btn btn-light btn-action-icon text-danger border" title="Delete {{ med_name }}">
-                                <i class="bi bi-trash"></i>
+                        <div class="stock-actions-group">
+                            <button type="button" class="btn-action-icon btn-action-restock-med" title="Restock {{ med_name }}" onclick="openBuyModal(this, 'medicine')" data-name="{{ med_name }}" data-unit="{{ stock.unit }}">
+                                <i class="bi bi-cart-plus"></i>
                             </button>
-                        </form>
+                            <button type="button" class="btn-action-icon btn-action-edit" title="Edit {{ med_name }}" onclick="openEditModal(this, 'medicine')" data-name="{{ med_name }}" data-stock="{{ stock.closing_stock }}" data-unit="{{ stock.unit }}" data-limit="{{ stock.alert_level }}">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button type="button" class="btn-action-icon btn-action-alert" title="Set Alert Threshold" onclick="openThresholdModal(this, 'medicine')" data-name="{{ med_name }}" data-limit="{{ stock.alert_level }}" data-unit="{{ stock.unit }}">
+                                <i class="bi bi-bell"></i>
+                            </button>
+                            <form action="{{ url_for('delete_stock_item') }}" method="POST" data-confirm="Are you sure you want to completely delete '{{ med_name }}' and all associated inventory records?">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <input type="hidden" name="item_type" value="medicine">
+                                <input type="hidden" name="item_name" value="{{ med_name }}">
+                                <button type="submit" class="btn-action-icon btn-action-delete" title="Delete {{ med_name }}">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </div>
                     </div>
                 </div>
                 {% else %}
-                <div class="text-muted text-center py-5 my-auto">
-                    <i class="bi bi-capsule text-muted fs-1 d-block mb-2"></i>
-                    No medicine items registered yet.<br>
-                    <button type="button" class="btn btn-sm btn-outline-primary mt-2 rounded-pill" data-bs-toggle="modal" data-bs-target="#quickBuyModal" onclick="openBuyModal(null, 'medicine')">+ Add First Medicine</button>
+                <div class="stock-empty-state">
+                    <div class="empty-icon-circle bg-primary bg-opacity-10 text-primary mb-3">
+                        <i class="bi bi-capsule"></i>
+                    </div>
+                    <h6 class="fw-bold text-dark mb-1">No Medicine Items Yet</h6>
+                    <p class="text-muted small text-center mb-3">Track antibiotics, tonics, and treatments here.</p>
+                    <button type="button" class="btn btn-sm btn-primary rounded-pill px-3 py-1.5 fw-semibold shadow-sm" data-bs-toggle="modal" data-bs-target="#quickBuyModal" onclick="openBuyModal(null, 'medicine')">
+                        <i class="bi bi-plus-lg me-1"></i>Add First Medicine
+                    </button>
                 </div>
                 {% endfor %}
-                <div id="medicine-no-results" class="text-muted text-center py-5 d-none my-auto">
+                <div id="medicine-no-results" class="stock-empty-state d-none">
                     <i class="bi bi-search fs-2 d-block mb-1 text-muted"></i>
-                    No matching medicine items found.
+                    <span class="text-muted small">No matching medicine items found.</span>
                 </div>
             </div>
 
             <!-- Card Pagination Footer -->
-            <div class="p-2.5 px-3 bg-light border-top d-flex align-items-center justify-content-between card-pagination" id="medicine-pagination-bar">
+            <div class="card-footer-pagination" id="medicine-pagination-bar">
                 <span class="text-muted small" id="medicine-page-info">Showing 0-0</span>
                 <div class="btn-group btn-group-sm">
                     <button type="button" class="btn btn-outline-secondary" id="medicine-prev-btn" onclick="changePage('medicine', -1)"><i class="bi bi-chevron-left"></i></button>
@@ -430,108 +610,108 @@
     <!-- ========================================== -->
     <!-- CARD 3: VACCINE INVENTORY CARD -->
     <!-- ========================================== -->
-    <div class="col-12 col-xl-4 col-lg-12">
-        <div class="inventory-card h-100 d-flex flex-column border">
+    <div class="col-12 col-lg-4 d-flex">
+        <div class="inventory-card w-100">
             <!-- Card Header -->
-            <div class="card-header-vaccine p-3.5 d-flex align-items-center justify-content-between">
-                <div class="d-flex align-items-center gap-2.5">
-                    <div class="bg-white bg-opacity-20 p-2 rounded-3 text-white fs-4">
+            <div class="card-header-custom card-header-vaccine">
+                <div class="d-flex align-items-center gap-3 min-w-0">
+                    <div class="card-header-icon">
                         <i class="bi bi-patch-check-fill"></i>
                     </div>
-                    <div>
-                        <h5 class="fw-800 text-white mb-0">Vaccine Inventory</h5>
+                    <div class="card-header-title-box">
+                        <h5 class="text-white mb-0">Vaccine Inventory</h5>
                         <small class="text-white-50">PPR, ET, FMD & Injections</small>
                     </div>
                 </div>
-                <div class="d-flex align-items-center gap-2">
-                    <span class="category-badge-chip" id="vaccine-count-badge">{{ total_vac }} Items</span>
-                </div>
+                <span class="category-badge-chip" id="vaccine-count-badge">{{ total_vac }} Items</span>
             </div>
 
             <!-- Card Controls (Search + Add) -->
-            <div class="p-3 bg-light border-bottom d-flex align-items-center gap-2">
+            <div class="card-controls-bar">
                 <div class="input-group input-group-sm flex-grow-1">
                     <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
                     <input type="text" id="search-vaccine" class="form-control search-input-card border-start-0 ps-0" placeholder="Search vaccine items..." onkeyup="paginateCategory('vaccine')">
                 </div>
-                <button type="button" class="btn btn-sm btn-info text-white rounded-pill px-3 fw-semibold text-nowrap" data-bs-toggle="modal" data-bs-target="#quickBuyModal" onclick="openBuyModal(null, 'vaccine')">
-                    <i class="bi bi-plus-lg me-1"></i>Add
+                <button type="button" class="btn btn-sm btn-info text-white rounded-pill px-3 fw-semibold text-nowrap d-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#quickBuyModal" onclick="openBuyModal(null, 'vaccine')">
+                    <i class="bi bi-plus-lg"></i> Add
                 </button>
             </div>
 
             <!-- Items List Container -->
-            <div class="p-3 flex-grow-1 d-flex flex-column gap-2" id="vaccine-list-container" style="min-height: 380px;">
+            <div class="card-items-container flex-grow-1" id="vaccine-list-container">
                 {% for vac_name, stock in vac_stocks.items() %}
                 {% set is_low = stock.alert_level > 0 and stock.closing_stock <= stock.alert_level %}
                 {% set is_out = stock.closing_stock <= 0 %}
-                <div class="stock-item-row p-3 d-flex align-items-center justify-content-between gap-2 vaccine-item-node"
+                <div class="stock-item-row vaccine-item-node"
                      data-name="{{ vac_name|lower }}"
                      data-stock="{{ stock.closing_stock }}"
                      data-unit="{{ stock.unit }}"
                      data-limit="{{ stock.alert_level }}">
                     
-                    <div class="flex-grow-1 min-w-0">
-                        <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
-                            <span class="fw-bold text-dark fs-6 text-truncate" title="{{ vac_name }}">{{ vac_name }}</span>
+                    <div class="stock-info-col">
+                        <div class="d-flex align-items-center gap-1.5 mb-0.5">
+                            <span class="stock-item-name text-truncate" title="{{ vac_name }}">{{ vac_name }}</span>
                             {% if is_out %}
                                 <span class="badge-out-stock">Out of Stock</span>
                             {% elif is_low %}
-                                <span class="badge-low-stock"><i class="bi bi-exclamation-circle-fill me-1"></i>Low</span>
+                                <span class="badge-low-stock"><i class="bi bi-exclamation-circle-fill"></i>Low</span>
                             {% else %}
                                 <span class="badge-ok-stock">OK</span>
                             {% endif %}
                         </div>
-                        <div class="text-muted small" style="font-size: 0.78rem;">
+                        <div class="stock-item-threshold">
                             Threshold: <span class="fw-semibold text-dark">{{ "%.1f"|format(stock.alert_level) if stock.alert_level else "0" }}</span> {{ stock.unit }}
                         </div>
                     </div>
 
-                    <!-- Quantity -->
-                    <div class="stock-val-pill pe-2">
-                        <div class="fs-5 fw-800 text-info mb-0">{{ "%.2f"|format(stock.closing_stock) }}</div>
-                        <div class="text-muted fw-semibold" style="font-size: 0.72rem;">{{ stock.unit }}</div>
-                    </div>
+                    <!-- Quantity & Actions -->
+                    <div class="d-flex align-items-center gap-2 flex-shrink-0">
+                        <div class="stock-val-pill">
+                            <div class="stock-val-num text-info">{{ "%.2f"|format(stock.closing_stock) }}</div>
+                            <div class="stock-val-unit">{{ stock.unit }}</div>
+                        </div>
 
-                    <!-- Controls -->
-                    <div class="d-flex align-items-center gap-1">
-                        <!-- Restock -->
-                        <button type="button" class="btn btn-light btn-action-icon text-info border" title="Restock {{ vac_name }}" onclick="openBuyModal(this, 'vaccine')" data-name="{{ vac_name }}" data-unit="{{ stock.unit }}">
-                            <i class="bi bi-cart-plus"></i>
-                        </button>
-                        <!-- Edit -->
-                        <button type="button" class="btn btn-light btn-action-icon text-warning border" title="Edit {{ vac_name }}" onclick="openEditModal(this, 'vaccine')" data-name="{{ vac_name }}" data-stock="{{ stock.closing_stock }}" data-unit="{{ stock.unit }}" data-limit="{{ stock.alert_level }}">
-                            <i class="bi bi-pencil"></i>
-                        </button>
-                        <!-- Threshold -->
-                        <button type="button" class="btn btn-light btn-action-icon text-secondary border" title="Set Alert Threshold" onclick="openThresholdModal(this, 'vaccine')" data-name="{{ vac_name }}" data-limit="{{ stock.alert_level }}" data-unit="{{ stock.unit }}">
-                            <i class="bi bi-bell"></i>
-                        </button>
-                        <!-- Delete -->
-                        <form action="{{ url_for('delete_stock_item') }}" method="POST" class="d-inline" data-confirm="Are you sure you want to completely delete '{{ vac_name }}' and all associated inventory records?">
-                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                            <input type="hidden" name="item_type" value="vaccine">
-                            <input type="hidden" name="item_name" value="{{ vac_name }}">
-                            <button type="submit" class="btn btn-light btn-action-icon text-danger border" title="Delete {{ vac_name }}">
-                                <i class="bi bi-trash"></i>
+                        <div class="stock-actions-group">
+                            <button type="button" class="btn-action-icon btn-action-restock-vac" title="Restock {{ vac_name }}" onclick="openBuyModal(this, 'vaccine')" data-name="{{ vac_name }}" data-unit="{{ stock.unit }}">
+                                <i class="bi bi-cart-plus"></i>
                             </button>
-                        </form>
+                            <button type="button" class="btn-action-icon btn-action-edit" title="Edit {{ vac_name }}" onclick="openEditModal(this, 'vaccine')" data-name="{{ vac_name }}" data-stock="{{ stock.closing_stock }}" data-unit="{{ stock.unit }}" data-limit="{{ stock.alert_level }}">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button type="button" class="btn-action-icon btn-action-alert" title="Set Alert Threshold" onclick="openThresholdModal(this, 'vaccine')" data-name="{{ vac_name }}" data-limit="{{ stock.alert_level }}" data-unit="{{ stock.unit }}">
+                                <i class="bi bi-bell"></i>
+                            </button>
+                            <form action="{{ url_for('delete_stock_item') }}" method="POST" data-confirm="Are you sure you want to completely delete '{{ vac_name }}' and all associated inventory records?">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <input type="hidden" name="item_type" value="vaccine">
+                                <input type="hidden" name="item_name" value="{{ vac_name }}">
+                                <button type="submit" class="btn-action-icon btn-action-delete" title="Delete {{ vac_name }}">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </div>
                     </div>
                 </div>
                 {% else %}
-                <div class="text-muted text-center py-5 my-auto">
-                    <i class="bi bi-patch-check text-muted fs-1 d-block mb-2"></i>
-                    No vaccine items registered yet.<br>
-                    <button type="button" class="btn btn-sm btn-outline-info mt-2 rounded-pill" data-bs-toggle="modal" data-bs-target="#quickBuyModal" onclick="openBuyModal(null, 'vaccine')">+ Add First Vaccine</button>
+                <div class="stock-empty-state">
+                    <div class="empty-icon-circle bg-info bg-opacity-10 text-info mb-3">
+                        <i class="bi bi-patch-check"></i>
+                    </div>
+                    <h6 class="fw-bold text-dark mb-1">No Vaccine Items Yet</h6>
+                    <p class="text-muted small text-center mb-3">Track PPR, ET, FMD and seasonal vaccinations here.</p>
+                    <button type="button" class="btn btn-sm btn-info text-white rounded-pill px-3 py-1.5 fw-semibold shadow-sm" data-bs-toggle="modal" data-bs-target="#quickBuyModal" onclick="openBuyModal(null, 'vaccine')">
+                        <i class="bi bi-plus-lg me-1"></i>Add First Vaccine
+                    </button>
                 </div>
                 {% endfor %}
-                <div id="vaccine-no-results" class="text-muted text-center py-5 d-none my-auto">
+                <div id="vaccine-no-results" class="stock-empty-state d-none">
                     <i class="bi bi-search fs-2 d-block mb-1 text-muted"></i>
-                    No matching vaccine items found.
+                    <span class="text-muted small">No matching vaccine items found.</span>
                 </div>
             </div>
 
             <!-- Card Pagination Footer -->
-            <div class="p-2.5 px-3 bg-light border-top d-flex align-items-center justify-content-between card-pagination" id="vaccine-pagination-bar">
+            <div class="card-footer-pagination" id="vaccine-pagination-bar">
                 <span class="text-muted small" id="vaccine-page-info">Showing 0-0</span>
                 <div class="btn-group btn-group-sm">
                     <button type="button" class="btn btn-outline-secondary" id="vaccine-prev-btn" onclick="changePage('vaccine', -1)"><i class="bi bi-chevron-left"></i></button>
