@@ -4,328 +4,43 @@
 
 {% block content %}
 <style>
-    /* =================================================== */
-    /* 3-CARD INVENTORY SYSTEM STYLING */
-    /* =================================================== */
-    .inventory-card {
-        border: 1px solid #e2e8f0;
-        border-radius: 18px;
-        background: #ffffff;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+    /* Global Card Hover & Transition */
+    .inventory-card-wrapper {
         transition: transform 0.2s ease, box-shadow 0.2s ease;
-        overflow: hidden;
-        display: flex;
-        flex-direction: column;
-        height: 100%;
     }
-
-    .inventory-card:hover {
-        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+    .inventory-card-wrapper:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08) !important;
     }
-
-    /* Card Headers */
-    .card-header-custom {
-        padding: 16px 18px;
-        min-height: 80px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
+    .stock-row-item {
+        transition: background-color 0.15s ease, border-color 0.15s ease;
     }
-
-    .card-header-feed {
-        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-        color: #ffffff;
+    .stock-row-item:hover {
+        background-color: #f8fafc !important;
+        border-color: #cbd5e1 !important;
     }
-
-    .card-header-medicine {
-        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-        color: #ffffff;
-    }
-
-    .card-header-vaccine {
-        background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
-        color: #ffffff;
-    }
-
-    .card-header-icon {
-        width: 44px;
-        height: 44px;
-        min-width: 44px;
-        min-height: 44px;
-        border-radius: 12px;
-        background: rgba(255, 255, 255, 0.22);
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-        font-size: 1.25rem;
-        color: #ffffff;
-    }
-
-    .card-header-title-box {
-        min-width: 0;
-        flex: 1 1 auto;
-    }
-
-    .card-header-title-box h5 {
-        font-weight: 700;
-        font-size: 1.05rem;
-        line-height: 1.2;
-        margin: 0;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    .card-header-title-box small {
-        font-size: 0.78rem;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        display: block;
-    }
-
-    .category-badge-chip {
-        font-size: 0.76rem;
-        font-weight: 700;
-        padding: 4px 12px;
-        border-radius: 20px;
-        background: rgba(255, 255, 255, 0.2);
-        backdrop-filter: blur(4px);
-        color: #ffffff;
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        flex-shrink: 0;
-        white-space: nowrap;
-    }
-
-    /* Controls Bar (Search + Add) */
-    .card-controls-bar {
-        padding: 12px 16px;
-        background-color: #f8fafc;
-        border-bottom: 1px solid #e2e8f0;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        min-height: 58px;
-    }
-
-    .search-input-card {
-        border-radius: 10px;
-        background-color: #ffffff;
-        border: 1px solid #e2e8f0;
-        font-size: 0.84rem;
-        height: 36px;
-    }
-
-    .search-input-card:focus {
-        background-color: #ffffff;
-        border-color: #94a3b8;
-        box-shadow: none;
-    }
-
-    /* Items List Container */
-    .card-items-container {
-        padding: 14px 16px;
-        min-height: 440px;
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-    }
-
-    /* Stock List Items */
-    .stock-item-row {
-        border-radius: 12px;
-        background-color: #ffffff;
-        border: 1px solid #edf2f7;
-        padding: 10px 12px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 10px;
-        transition: all 0.2s ease;
-        min-height: 66px;
-    }
-
-    .stock-item-row:hover {
-        background-color: #f8fafc;
-        border-color: #cbd5e1;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
-    }
-
-    .stock-info-col {
-        min-width: 0;
-        flex: 1 1 auto;
-    }
-
-    .stock-item-name {
-        font-size: 0.90rem;
-        font-weight: 700;
-        color: #1e293b;
-        max-width: 125px;
-        display: inline-block;
-        vertical-align: middle;
-    }
-
-    .stock-item-threshold {
-        font-size: 0.74rem;
-        color: #64748b;
-        line-height: 1.2;
-    }
-
-    .stock-val-pill {
-        min-width: 60px;
-        text-align: right;
-        flex-shrink: 0;
-    }
-
-    .stock-val-num {
-        font-size: 1.02rem;
-        font-weight: 800;
-        line-height: 1.1;
-    }
-
-    .stock-val-unit {
-        font-size: 0.68rem;
-        font-weight: 600;
-        color: #64748b;
-    }
-
-    /* Status Badges */
-    .badge-out-stock, .badge-low-stock, .badge-ok-stock {
-        font-size: 0.68rem;
-        font-weight: 700;
-        padding: 2px 6px;
-        border-radius: 5px;
-        display: inline-flex;
-        align-items: center;
-        gap: 3px;
-        white-space: nowrap;
-        flex-shrink: 0;
-        vertical-align: middle;
-    }
-
-    .badge-out-stock {
-        background-color: #fee2e2;
-        color: #b91c1c;
-        border: 1px solid #fecaca;
-    }
-
-    .badge-low-stock {
-        background-color: #fef3c7;
-        color: #b45309;
-        border: 1px solid #fde68a;
-    }
-
-    .badge-ok-stock {
-        background-color: #dcfce7;
-        color: #15803d;
-        border: 1px solid #bbf7d0;
-    }
-
-    /* Action Buttons */
-    .stock-actions-group {
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-        flex-shrink: 0;
-    }
-
-    .stock-actions-group form {
-        margin: 0;
-        padding: 0;
-        display: inline-flex;
-    }
-
-    .btn-action-icon {
-        width: 29px;
-        height: 29px;
-        min-width: 29px;
-        min-height: 29px;
+    .btn-icon-action {
+        width: 30px;
+        height: 30px;
+        min-width: 30px;
+        min-height: 30px;
         padding: 0;
         margin: 0;
         display: inline-flex;
         align-items: center;
         justify-content: center;
         border-radius: 7px;
-        font-size: 0.80rem;
-        border: 1px solid #e2e8f0;
-        background-color: #f8fafc;
-        color: #475569;
-        transition: all 0.15s ease;
-        cursor: pointer;
-        line-height: 1;
-    }
-
-    .btn-action-icon:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.06);
-    }
-
-    .btn-action-restock { color: #10b981; border-color: #d1fae5; background: #f0fdf4; }
-    .btn-action-restock:hover { background: #10b981; color: #ffffff; border-color: #10b981; }
-
-    .btn-action-restock-med { color: #3b82f6; border-color: #dbeafe; background: #eff6ff; }
-    .btn-action-restock-med:hover { background: #3b82f6; color: #ffffff; border-color: #3b82f6; }
-
-    .btn-action-restock-vac { color: #06b6d4; border-color: #cffafe; background: #ecfeff; }
-    .btn-action-restock-vac:hover { background: #06b6d4; color: #ffffff; border-color: #06b6d4; }
-
-    .btn-action-edit { color: #f59e0b; border-color: #fef3c7; background: #fffbeb; }
-    .btn-action-edit:hover { background: #f59e0b; color: #ffffff; border-color: #f59e0b; }
-
-    .btn-action-alert { color: #64748b; border-color: #e2e8f0; background: #f8fafc; }
-    .btn-action-alert:hover { background: #64748b; color: #ffffff; border-color: #64748b; }
-
-    .btn-action-delete { color: #ef4444; border-color: #fee2e2; background: #fef2f2; }
-    .btn-action-delete:hover { background: #ef4444; color: #ffffff; border-color: #ef4444; }
-
-    /* Empty States */
-    .stock-empty-state {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        margin: auto 0;
-        padding: 36px 16px;
-    }
-
-    .empty-icon-circle {
-        width: 54px;
-        height: 54px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.45rem;
-    }
-
-    /* Pagination Bar */
-    .card-footer-pagination {
-        padding: 10px 16px;
-        background-color: #f8fafc;
-        border-top: 1px solid #e2e8f0;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
         font-size: 0.82rem;
-        min-height: 48px;
+        transition: all 0.15s ease;
     }
-
-    /* Summary Metric Pills */
-    .metric-summary-card {
-        border-radius: 14px;
-        background: #ffffff;
-        border: 1px solid #e2e8f0;
-        padding: 12px 18px;
-        display: flex;
-        align-items: center;
-        gap: 14px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+    .btn-icon-action:hover {
+        transform: translateY(-1px);
     }
 </style>
 
-<!-- PAGE HEADER -->
+<!-- ========================================== -->
+<!-- PAGE HEADER & ACTION BUTTONS -->
+<!-- ========================================== -->
 <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-4">
     <div class="d-flex align-items-center gap-3">
         <div class="bg-success bg-opacity-10 text-success p-3 rounded-4">
@@ -352,7 +67,9 @@
     </div>
 </div>
 
-<!-- TOTAL METRICS & SUMMARY COUNTERS -->
+<!-- ========================================== -->
+<!-- TOP METRICS SUMMARY COUNTERS -->
+<!-- ========================================== -->
 {% set total_feed = feed_stocks|length %}
 {% set total_med = med_stocks|length %}
 {% set total_vac = vac_stocks|length %}
@@ -377,10 +94,9 @@
     {% endif %}
 {% endfor %}
 
-<!-- TOP SUMMARY BAR -->
 <div class="row g-3 mb-4">
     <div class="col-6 col-md-3">
-        <div class="metric-summary-card">
+        <div class="card border rounded-4 p-3 bg-white shadow-sm d-flex flex-row align-items-center gap-3">
             <div class="rounded-3 bg-success bg-opacity-10 text-success p-2.5 fs-4"><i class="bi bi-basket3-fill"></i></div>
             <div>
                 <div class="text-muted small fw-semibold">Feed Stocks</div>
@@ -389,7 +105,7 @@
         </div>
     </div>
     <div class="col-6 col-md-3">
-        <div class="metric-summary-card">
+        <div class="card border rounded-4 p-3 bg-white shadow-sm d-flex flex-row align-items-center gap-3">
             <div class="rounded-3 bg-primary bg-opacity-10 text-primary p-2.5 fs-4"><i class="bi bi-capsule"></i></div>
             <div>
                 <div class="text-muted small fw-semibold">Medicine Stocks</div>
@@ -398,7 +114,7 @@
         </div>
     </div>
     <div class="col-6 col-md-3">
-        <div class="metric-summary-card">
+        <div class="card border rounded-4 p-3 bg-white shadow-sm d-flex flex-row align-items-center gap-3">
             <div class="rounded-3 bg-info bg-opacity-10 text-info p-2.5 fs-4"><i class="bi bi-patch-check-fill"></i></div>
             <div>
                 <div class="text-muted small fw-semibold">Vaccine Stocks</div>
@@ -407,7 +123,7 @@
         </div>
     </div>
     <div class="col-6 col-md-3">
-        <div class="metric-summary-card {% if ns.low_alert_total > 0 %}border-warning bg-warning bg-opacity-10{% endif %}">
+        <div class="card border rounded-4 p-3 bg-white shadow-sm d-flex flex-row align-items-center gap-3 {% if ns.low_alert_total > 0 %}border-warning bg-warning bg-opacity-10{% endif %}">
             <div class="rounded-3 {% if ns.low_alert_total > 0 %}bg-warning text-dark{% else %}bg-secondary bg-opacity-10 text-secondary{% endif %} p-2.5 fs-4">
                 <i class="bi bi-exclamation-triangle-fill"></i>
             </div>
@@ -421,7 +137,9 @@
     </div>
 </div>
 
-<!-- THRESHOLD ALERT BANNER -->
+<!-- ========================================== -->
+<!-- ACTIVE LOW STOCK ALERT BANNER -->
+<!-- ========================================== -->
 {% if ns.low_alert_total > 0 %}
 <div class="alert alert-warning border-0 rounded-4 shadow-sm p-3 mb-4 d-flex align-items-center justify-content-between flex-wrap gap-2">
     <div class="d-flex align-items-center gap-3">
@@ -433,96 +151,101 @@
             <span class="text-secondary small ms-1">{{ ns.low_alert_total }} item(s) have reached or fallen below minimum threshold stock levels.</span>
         </div>
     </div>
-    <button type="button" class="btn btn-sm btn-warning text-dark rounded-pill px-3 fw-bold" onclick="showLowStockModal()">
+    <button type="button" class="btn btn-sm btn-warning text-dark rounded-pill px-3 fw-bold shadow-sm" onclick="showLowStockModal()">
         <i class="bi bi-eye-fill me-1"></i>View Low Stock List ({{ ns.low_alert_total }})
     </button>
 </div>
 {% endif %}
 
 <!-- ========================================== -->
-<!-- 3 MAIN CARDS CONTAINER (EQUAL 3-COLUMN) -->
+<!-- 3 MAIN DYNAMIC STOCK CARDS -->
 <!-- ========================================== -->
 <div class="row g-4 mb-4 align-items-stretch">
     
-    <!-- ========================================== -->
-    <!-- CARD 1: FEED INVENTORY CARD -->
-    <!-- ========================================== -->
+    <!-- -------------------------------------- -->
+    <!-- CARD 1: FEED INVENTORY (EMERALD) -->
+    <!-- -------------------------------------- -->
     <div class="col-12 col-lg-4 d-flex">
-        <div class="inventory-card w-100">
+        <div class="card shadow-sm border rounded-4 w-100 overflow-hidden d-flex flex-column inventory-card-wrapper bg-white">
             <!-- Card Header -->
-            <div class="card-header-custom card-header-feed">
+            <div class="p-3 d-flex align-items-center justify-content-between text-white" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); min-height: 76px;">
                 <div class="d-flex align-items-center gap-3 min-w-0">
-                    <div class="card-header-icon">
+                    <div class="bg-white bg-opacity-25 p-2 rounded-3 text-white fs-4 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 44px; height: 44px;">
                         <i class="bi bi-basket3-fill"></i>
                     </div>
-                    <div class="card-header-title-box">
-                        <h5 class="text-white mb-0">Feed Inventory</h5>
-                        <small class="text-white-50">Grains, Fodder & Concentrates</small>
+                    <div class="min-w-0">
+                        <h5 class="fw-bold mb-0 text-white text-truncate">Feed Inventory</h5>
+                        <small class="text-white text-opacity-75 d-block text-truncate" style="font-size: 0.76rem;">Grains, Fodder & Concentrates</small>
                     </div>
                 </div>
-                <span class="category-badge-chip" id="feed-count-badge">{{ total_feed }} Items</span>
+                <span class="badge bg-white bg-opacity-25 text-white rounded-pill px-3 py-1.5 fw-bold flex-shrink-0" id="feed-count-badge">{{ total_feed }} Items</span>
             </div>
 
-            <!-- Card Controls (Search + Add) -->
-            <div class="card-controls-bar">
+            <!-- Card Search & Add Bar -->
+            <div class="p-2.5 px-3 bg-light border-bottom d-flex align-items-center gap-2">
                 <div class="input-group input-group-sm flex-grow-1">
                     <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
-                    <input type="text" id="search-feed" class="form-control search-input-card border-start-0 ps-0" placeholder="Search feed items..." onkeyup="paginateCategory('feed')">
+                    <input type="text" id="search-feed" class="form-control bg-white border-start-0 ps-0" placeholder="Search feed items..." onkeyup="paginateCategory('feed')">
                 </div>
-                <button type="button" class="btn btn-sm btn-success rounded-pill px-3 fw-semibold text-nowrap d-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#quickBuyModal" onclick="openBuyModal(null, 'feed')">
+                <button type="button" class="btn btn-sm btn-success rounded-pill px-3 fw-semibold text-nowrap d-flex align-items-center gap-1 shadow-sm" data-bs-toggle="modal" data-bs-target="#quickBuyModal" onclick="openBuyModal(null, 'feed')">
                     <i class="bi bi-plus-lg"></i> Add
                 </button>
             </div>
 
-            <!-- Items List Container (Handles 500+ items with pagination) -->
-            <div class="card-items-container flex-grow-1" id="feed-list-container">
+            <!-- Items List Container (Handles 500+ Items with Pagination) -->
+            <div class="p-3 flex-grow-1 d-flex flex-column gap-2" id="feed-list-container" style="min-height: 420px;">
                 {% for feed_name, stock in feed_stocks.items() %}
                 {% set is_low = stock.alert_level > 0 and stock.closing_stock <= stock.alert_level %}
                 {% set is_out = stock.closing_stock <= 0 %}
-                <div class="stock-item-row feed-item-node"
+                <div class="feed-item-node p-2.5 px-3 rounded-3 border bg-white d-flex align-items-center justify-content-between gap-2 stock-row-item"
                      data-name="{{ feed_name|lower }}"
                      data-stock="{{ stock.closing_stock }}"
                      data-unit="{{ stock.unit }}"
                      data-limit="{{ stock.alert_level }}">
                     
-                    <div class="stock-info-col">
-                        <div class="d-flex align-items-center gap-1.5 mb-0.5">
-                            <span class="stock-item-name text-truncate" title="{{ feed_name }}">{{ feed_name }}</span>
+                    <!-- Left: Item info & Threshold -->
+                    <div class="min-w-0 flex-grow-1">
+                        <div class="d-flex align-items-center gap-1.5 mb-1 flex-wrap">
+                            <span class="fw-bold text-dark text-truncate" style="max-width: 125px;" title="{{ feed_name }}">{{ feed_name }}</span>
                             {% if is_out %}
-                                <span class="badge-out-stock">Out of Stock</span>
+                                <span class="badge bg-danger text-white rounded-pill px-2 py-0.5" style="font-size: 0.68rem;">Out of Stock</span>
                             {% elif is_low %}
-                                <span class="badge-low-stock"><i class="bi bi-exclamation-circle-fill"></i>Low</span>
+                                <span class="badge bg-warning text-dark rounded-pill px-2 py-0.5 fw-bold" style="font-size: 0.68rem;"><i class="bi bi-exclamation-circle-fill me-1"></i>Low</span>
                             {% else %}
-                                <span class="badge-ok-stock">OK</span>
+                                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-2 py-0.5 fw-bold" style="font-size: 0.68rem;">OK</span>
                             {% endif %}
                         </div>
-                        <div class="stock-item-threshold">
+                        <div class="text-muted small" style="font-size: 0.74rem;">
                             Threshold: <span class="fw-semibold text-dark">{{ "%.1f"|format(stock.alert_level) if stock.alert_level else "0" }}</span> {{ stock.unit }}
                         </div>
                     </div>
 
-                    <!-- Quantity & Actions -->
+                    <!-- Right: Quantity Pill & Action Buttons -->
                     <div class="d-flex align-items-center gap-2 flex-shrink-0">
-                        <div class="stock-val-pill">
-                            <div class="stock-val-num text-success">{{ "%.2f"|format(stock.closing_stock) }}</div>
-                            <div class="stock-val-unit">{{ stock.unit }}</div>
+                        <div class="text-end pe-1" style="min-width: 60px;">
+                            <div class="fs-5 fw-bold text-success lh-1 mb-0">{{ "%.2f"|format(stock.closing_stock) }}</div>
+                            <small class="text-muted fw-semibold" style="font-size: 0.68rem;">{{ stock.unit }}</small>
                         </div>
 
-                        <div class="stock-actions-group">
-                            <button type="button" class="btn-action-icon btn-action-restock" title="Restock {{ feed_name }}" onclick="openBuyModal(this, 'feed')" data-name="{{ feed_name }}" data-unit="{{ stock.unit }}">
+                        <div class="d-flex align-items-center gap-1">
+                            <!-- Restock -->
+                            <button type="button" class="btn btn-sm btn-light border text-success btn-icon-action" title="Restock {{ feed_name }}" onclick="openBuyModal(this, 'feed')" data-name="{{ feed_name }}" data-unit="{{ stock.unit }}">
                                 <i class="bi bi-cart-plus"></i>
                             </button>
-                            <button type="button" class="btn-action-icon btn-action-edit" title="Edit {{ feed_name }}" onclick="openEditModal(this, 'feed')" data-name="{{ feed_name }}" data-stock="{{ stock.closing_stock }}" data-unit="{{ stock.unit }}" data-limit="{{ stock.alert_level }}">
+                            <!-- Edit -->
+                            <button type="button" class="btn btn-sm btn-light border text-warning btn-icon-action" title="Edit {{ feed_name }}" onclick="openEditModal(this, 'feed')" data-name="{{ feed_name }}" data-stock="{{ stock.closing_stock }}" data-unit="{{ stock.unit }}" data-limit="{{ stock.alert_level }}">
                                 <i class="bi bi-pencil"></i>
                             </button>
-                            <button type="button" class="btn-action-icon btn-action-alert" title="Set Alert Threshold" onclick="openThresholdModal(this, 'feed')" data-name="{{ feed_name }}" data-limit="{{ stock.alert_level }}" data-unit="{{ stock.unit }}">
+                            <!-- Threshold -->
+                            <button type="button" class="btn btn-sm btn-light border text-secondary btn-icon-action" title="Set Alert Threshold" onclick="openThresholdModal(this, 'feed')" data-name="{{ feed_name }}" data-limit="{{ stock.alert_level }}" data-unit="{{ stock.unit }}">
                                 <i class="bi bi-bell"></i>
                             </button>
-                            <form action="{{ url_for('delete_stock_item') }}" method="POST" data-confirm="Are you sure you want to completely delete '{{ feed_name }}' and all associated inventory records?">
+                            <!-- Delete -->
+                            <form action="{{ url_for('delete_stock_item') }}" method="POST" class="m-0 p-0 d-inline-flex" data-confirm="Are you sure you want to completely delete '{{ feed_name }}' and all associated inventory records?">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                 <input type="hidden" name="item_type" value="feed">
                                 <input type="hidden" name="item_name" value="{{ feed_name }}">
-                                <button type="submit" class="btn-action-icon btn-action-delete" title="Delete {{ feed_name }}">
+                                <button type="submit" class="btn btn-sm btn-light border text-danger btn-icon-action" title="Delete {{ feed_name }}">
                                     <i class="bi bi-trash"></i>
                                 </button>
                             </form>
@@ -530,8 +253,8 @@
                     </div>
                 </div>
                 {% else %}
-                <div class="stock-empty-state">
-                    <div class="empty-icon-circle bg-success bg-opacity-10 text-success mb-3">
+                <div class="text-center my-auto py-5 px-3">
+                    <div class="bg-success bg-opacity-10 text-success rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 56px; height: 56px; font-size: 1.5rem;">
                         <i class="bi bi-basket3"></i>
                     </div>
                     <h6 class="fw-bold text-dark mb-1">No Feed Items Yet</h6>
@@ -541,14 +264,14 @@
                     </button>
                 </div>
                 {% endfor %}
-                <div id="feed-no-results" class="stock-empty-state d-none">
+                <div id="feed-no-results" class="text-center py-5 d-none my-auto">
                     <i class="bi bi-search fs-2 d-block mb-1 text-muted"></i>
                     <span class="text-muted small">No matching feed items found.</span>
                 </div>
             </div>
 
             <!-- Card Pagination Footer -->
-            <div class="card-footer-pagination" id="feed-pagination-bar">
+            <div class="p-2.5 px-3 bg-light border-top d-flex align-items-center justify-content-between" id="feed-pagination-bar">
                 <span class="text-muted small" id="feed-page-info">Showing 0-0</span>
                 <div class="btn-group btn-group-sm">
                     <button type="button" class="btn btn-outline-secondary" id="feed-prev-btn" onclick="changePage('feed', -1)"><i class="bi bi-chevron-left"></i></button>
@@ -559,85 +282,90 @@
     </div>
 
 
-    <!-- ========================================== -->
-    <!-- CARD 2: MEDICINE INVENTORY CARD -->
-    <!-- ========================================== -->
+    <!-- -------------------------------------- -->
+    <!-- CARD 2: MEDICINE INVENTORY (BLUE) -->
+    <!-- -------------------------------------- -->
     <div class="col-12 col-lg-4 d-flex">
-        <div class="inventory-card w-100">
+        <div class="card shadow-sm border rounded-4 w-100 overflow-hidden d-flex flex-column inventory-card-wrapper bg-white">
             <!-- Card Header -->
-            <div class="card-header-custom card-header-medicine">
+            <div class="p-3 d-flex align-items-center justify-content-between text-white" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); min-height: 76px;">
                 <div class="d-flex align-items-center gap-3 min-w-0">
-                    <div class="card-header-icon">
+                    <div class="bg-white bg-opacity-25 p-2 rounded-3 text-white fs-4 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 44px; height: 44px;">
                         <i class="bi bi-capsule"></i>
                     </div>
-                    <div class="card-header-title-box">
-                        <h5 class="text-white mb-0">Medicine Inventory</h5>
-                        <small class="text-white-50">Antibiotics, Tonics & Tablets</small>
+                    <div class="min-w-0">
+                        <h5 class="fw-bold mb-0 text-white text-truncate">Medicine Inventory</h5>
+                        <small class="text-white text-opacity-75 d-block text-truncate" style="font-size: 0.76rem;">Antibiotics, Tonics & Tablets</small>
                     </div>
                 </div>
-                <span class="category-badge-chip" id="medicine-count-badge">{{ total_med }} Items</span>
+                <span class="badge bg-white bg-opacity-25 text-white rounded-pill px-3 py-1.5 fw-bold flex-shrink-0" id="medicine-count-badge">{{ total_med }} Items</span>
             </div>
 
-            <!-- Card Controls (Search + Add) -->
-            <div class="card-controls-bar">
+            <!-- Card Search & Add Bar -->
+            <div class="p-2.5 px-3 bg-light border-bottom d-flex align-items-center gap-2">
                 <div class="input-group input-group-sm flex-grow-1">
                     <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
-                    <input type="text" id="search-medicine" class="form-control search-input-card border-start-0 ps-0" placeholder="Search medicine items..." onkeyup="paginateCategory('medicine')">
+                    <input type="text" id="search-medicine" class="form-control bg-white border-start-0 ps-0" placeholder="Search medicine items..." onkeyup="paginateCategory('medicine')">
                 </div>
-                <button type="button" class="btn btn-sm btn-primary rounded-pill px-3 fw-semibold text-nowrap d-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#quickBuyModal" onclick="openBuyModal(null, 'medicine')">
+                <button type="button" class="btn btn-sm btn-primary rounded-pill px-3 fw-semibold text-nowrap d-flex align-items-center gap-1 shadow-sm" data-bs-toggle="modal" data-bs-target="#quickBuyModal" onclick="openBuyModal(null, 'medicine')">
                     <i class="bi bi-plus-lg"></i> Add
                 </button>
             </div>
 
-            <!-- Items List Container (Handles 500+ items with pagination) -->
-            <div class="card-items-container flex-grow-1" id="medicine-list-container">
+            <!-- Items List Container (Handles 500+ Items with Pagination) -->
+            <div class="p-3 flex-grow-1 d-flex flex-column gap-2" id="medicine-list-container" style="min-height: 420px;">
                 {% for med_name, stock in med_stocks.items() %}
                 {% set is_low = stock.alert_level > 0 and stock.closing_stock <= stock.alert_level %}
                 {% set is_out = stock.closing_stock <= 0 %}
-                <div class="stock-item-row medicine-item-node"
+                <div class="medicine-item-node p-2.5 px-3 rounded-3 border bg-white d-flex align-items-center justify-content-between gap-2 stock-row-item"
                      data-name="{{ med_name|lower }}"
                      data-stock="{{ stock.closing_stock }}"
                      data-unit="{{ stock.unit }}"
                      data-limit="{{ stock.alert_level }}">
                     
-                    <div class="stock-info-col">
-                        <div class="d-flex align-items-center gap-1.5 mb-0.5">
-                            <span class="stock-item-name text-truncate" title="{{ med_name }}">{{ med_name }}</span>
+                    <!-- Left: Item info & Threshold -->
+                    <div class="min-w-0 flex-grow-1">
+                        <div class="d-flex align-items-center gap-1.5 mb-1 flex-wrap">
+                            <span class="fw-bold text-dark text-truncate" style="max-width: 125px;" title="{{ med_name }}">{{ med_name }}</span>
                             {% if is_out %}
-                                <span class="badge-out-stock">Out of Stock</span>
+                                <span class="badge bg-danger text-white rounded-pill px-2 py-0.5" style="font-size: 0.68rem;">Out of Stock</span>
                             {% elif is_low %}
-                                <span class="badge-low-stock"><i class="bi bi-exclamation-circle-fill"></i>Low</span>
+                                <span class="badge bg-warning text-dark rounded-pill px-2 py-0.5 fw-bold" style="font-size: 0.68rem;"><i class="bi bi-exclamation-circle-fill me-1"></i>Low</span>
                             {% else %}
-                                <span class="badge-ok-stock">OK</span>
+                                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-2 py-0.5 fw-bold" style="font-size: 0.68rem;">OK</span>
                             {% endif %}
                         </div>
-                        <div class="stock-item-threshold">
+                        <div class="text-muted small" style="font-size: 0.74rem;">
                             Threshold: <span class="fw-semibold text-dark">{{ "%.1f"|format(stock.alert_level) if stock.alert_level else "0" }}</span> {{ stock.unit }}
                         </div>
                     </div>
 
-                    <!-- Quantity & Actions -->
+                    <!-- Right: Quantity Pill & Action Buttons -->
                     <div class="d-flex align-items-center gap-2 flex-shrink-0">
-                        <div class="stock-val-pill">
-                            <div class="stock-val-num text-primary">{{ "%.2f"|format(stock.closing_stock) }}</div>
-                            <div class="stock-val-unit">{{ stock.unit }}</div>
+                        <div class="text-end pe-1" style="min-width: 60px;">
+                            <div class="fs-5 fw-bold text-primary lh-1 mb-0">{{ "%.2f"|format(stock.closing_stock) }}</div>
+                            <small class="text-muted fw-semibold" style="font-size: 0.68rem;">{{ stock.unit }}</small>
                         </div>
 
-                        <div class="stock-actions-group">
-                            <button type="button" class="btn-action-icon btn-action-restock-med" title="Restock {{ med_name }}" onclick="openBuyModal(this, 'medicine')" data-name="{{ med_name }}" data-unit="{{ stock.unit }}">
+                        <div class="d-flex align-items-center gap-1">
+                            <!-- Restock -->
+                            <button type="button" class="btn btn-sm btn-light border text-primary btn-icon-action" title="Restock {{ med_name }}" onclick="openBuyModal(this, 'medicine')" data-name="{{ med_name }}" data-unit="{{ stock.unit }}">
                                 <i class="bi bi-cart-plus"></i>
                             </button>
-                            <button type="button" class="btn-action-icon btn-action-edit" title="Edit {{ med_name }}" onclick="openEditModal(this, 'medicine')" data-name="{{ med_name }}" data-stock="{{ stock.closing_stock }}" data-unit="{{ stock.unit }}" data-limit="{{ stock.alert_level }}">
+                            <!-- Edit -->
+                            <button type="button" class="btn btn-sm btn-light border text-warning btn-icon-action" title="Edit {{ med_name }}" onclick="openEditModal(this, 'medicine')" data-name="{{ med_name }}" data-stock="{{ stock.closing_stock }}" data-unit="{{ stock.unit }}" data-limit="{{ stock.alert_level }}">
                                 <i class="bi bi-pencil"></i>
                             </button>
-                            <button type="button" class="btn-action-icon btn-action-alert" title="Set Alert Threshold" onclick="openThresholdModal(this, 'medicine')" data-name="{{ med_name }}" data-limit="{{ stock.alert_level }}" data-unit="{{ stock.unit }}">
+                            <!-- Threshold -->
+                            <button type="button" class="btn btn-sm btn-light border text-secondary btn-icon-action" title="Set Alert Threshold" onclick="openThresholdModal(this, 'medicine')" data-name="{{ med_name }}" data-limit="{{ stock.alert_level }}" data-unit="{{ stock.unit }}">
                                 <i class="bi bi-bell"></i>
                             </button>
-                            <form action="{{ url_for('delete_stock_item') }}" method="POST" data-confirm="Are you sure you want to completely delete '{{ med_name }}' and all associated inventory records?">
+                            <!-- Delete -->
+                            <form action="{{ url_for('delete_stock_item') }}" method="POST" class="m-0 p-0 d-inline-flex" data-confirm="Are you sure you want to completely delete '{{ med_name }}' and all associated inventory records?">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                 <input type="hidden" name="item_type" value="medicine">
                                 <input type="hidden" name="item_name" value="{{ med_name }}">
-                                <button type="submit" class="btn-action-icon btn-action-delete" title="Delete {{ med_name }}">
+                                <button type="submit" class="btn btn-sm btn-light border text-danger btn-icon-action" title="Delete {{ med_name }}">
                                     <i class="bi bi-trash"></i>
                                 </button>
                             </form>
@@ -645,8 +373,8 @@
                     </div>
                 </div>
                 {% else %}
-                <div class="stock-empty-state">
-                    <div class="empty-icon-circle bg-primary bg-opacity-10 text-primary mb-3">
+                <div class="text-center my-auto py-5 px-3">
+                    <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 56px; height: 56px; font-size: 1.5rem;">
                         <i class="bi bi-capsule"></i>
                     </div>
                     <h6 class="fw-bold text-dark mb-1">No Medicine Items Yet</h6>
@@ -656,14 +384,14 @@
                     </button>
                 </div>
                 {% endfor %}
-                <div id="medicine-no-results" class="stock-empty-state d-none">
+                <div id="medicine-no-results" class="text-center py-5 d-none my-auto">
                     <i class="bi bi-search fs-2 d-block mb-1 text-muted"></i>
                     <span class="text-muted small">No matching medicine items found.</span>
                 </div>
             </div>
 
             <!-- Card Pagination Footer -->
-            <div class="card-footer-pagination" id="medicine-pagination-bar">
+            <div class="p-2.5 px-3 bg-light border-top d-flex align-items-center justify-content-between" id="medicine-pagination-bar">
                 <span class="text-muted small" id="medicine-page-info">Showing 0-0</span>
                 <div class="btn-group btn-group-sm">
                     <button type="button" class="btn btn-outline-secondary" id="medicine-prev-btn" onclick="changePage('medicine', -1)"><i class="bi bi-chevron-left"></i></button>
@@ -674,85 +402,90 @@
     </div>
 
 
-    <!-- ========================================== -->
-    <!-- CARD 3: VACCINE INVENTORY CARD -->
-    <!-- ========================================== -->
+    <!-- -------------------------------------- -->
+    <!-- CARD 3: VACCINE INVENTORY (CYAN) -->
+    <!-- -------------------------------------- -->
     <div class="col-12 col-lg-4 d-flex">
-        <div class="inventory-card w-100">
+        <div class="card shadow-sm border rounded-4 w-100 overflow-hidden d-flex flex-column inventory-card-wrapper bg-white">
             <!-- Card Header -->
-            <div class="card-header-custom card-header-vaccine">
+            <div class="p-3 d-flex align-items-center justify-content-between text-white" style="background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%); min-height: 76px;">
                 <div class="d-flex align-items-center gap-3 min-w-0">
-                    <div class="card-header-icon">
+                    <div class="bg-white bg-opacity-25 p-2 rounded-3 text-white fs-4 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 44px; height: 44px;">
                         <i class="bi bi-patch-check-fill"></i>
                     </div>
-                    <div class="card-header-title-box">
-                        <h5 class="text-white mb-0">Vaccine Inventory</h5>
-                        <small class="text-white-50">PPR, ET, FMD & Injections</small>
+                    <div class="min-w-0">
+                        <h5 class="fw-bold mb-0 text-white text-truncate">Vaccine Inventory</h5>
+                        <small class="text-white text-opacity-75 d-block text-truncate" style="font-size: 0.76rem;">PPR, ET, FMD & Injections</small>
                     </div>
                 </div>
-                <span class="category-badge-chip" id="vaccine-count-badge">{{ total_vac }} Items</span>
+                <span class="badge bg-white bg-opacity-25 text-white rounded-pill px-3 py-1.5 fw-bold flex-shrink-0" id="vaccine-count-badge">{{ total_vac }} Items</span>
             </div>
 
-            <!-- Card Controls (Search + Add) -->
-            <div class="card-controls-bar">
+            <!-- Card Search & Add Bar -->
+            <div class="p-2.5 px-3 bg-light border-bottom d-flex align-items-center gap-2">
                 <div class="input-group input-group-sm flex-grow-1">
                     <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
-                    <input type="text" id="search-vaccine" class="form-control search-input-card border-start-0 ps-0" placeholder="Search vaccine items..." onkeyup="paginateCategory('vaccine')">
+                    <input type="text" id="search-vaccine" class="form-control bg-white border-start-0 ps-0" placeholder="Search vaccine items..." onkeyup="paginateCategory('vaccine')">
                 </div>
-                <button type="button" class="btn btn-sm btn-info text-white rounded-pill px-3 fw-semibold text-nowrap d-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#quickBuyModal" onclick="openBuyModal(null, 'vaccine')">
+                <button type="button" class="btn btn-sm btn-info text-white rounded-pill px-3 fw-semibold text-nowrap d-flex align-items-center gap-1 shadow-sm" data-bs-toggle="modal" data-bs-target="#quickBuyModal" onclick="openBuyModal(null, 'vaccine')">
                     <i class="bi bi-plus-lg"></i> Add
                 </button>
             </div>
 
-            <!-- Items List Container (Handles 500+ items with pagination) -->
-            <div class="card-items-container flex-grow-1" id="vaccine-list-container">
+            <!-- Items List Container (Handles 500+ Items with Pagination) -->
+            <div class="p-3 flex-grow-1 d-flex flex-column gap-2" id="vaccine-list-container" style="min-height: 420px;">
                 {% for vac_name, stock in vac_stocks.items() %}
                 {% set is_low = stock.alert_level > 0 and stock.closing_stock <= stock.alert_level %}
                 {% set is_out = stock.closing_stock <= 0 %}
-                <div class="stock-item-row vaccine-item-node"
+                <div class="vaccine-item-node p-2.5 px-3 rounded-3 border bg-white d-flex align-items-center justify-content-between gap-2 stock-row-item"
                      data-name="{{ vac_name|lower }}"
                      data-stock="{{ stock.closing_stock }}"
                      data-unit="{{ stock.unit }}"
                      data-limit="{{ stock.alert_level }}">
                     
-                    <div class="stock-info-col">
-                        <div class="d-flex align-items-center gap-1.5 mb-0.5">
-                            <span class="stock-item-name text-truncate" title="{{ vac_name }}">{{ vac_name }}</span>
+                    <!-- Left: Item info & Threshold -->
+                    <div class="min-w-0 flex-grow-1">
+                        <div class="d-flex align-items-center gap-1.5 mb-1 flex-wrap">
+                            <span class="fw-bold text-dark text-truncate" style="max-width: 125px;" title="{{ vac_name }}">{{ vac_name }}</span>
                             {% if is_out %}
-                                <span class="badge-out-stock">Out of Stock</span>
+                                <span class="badge bg-danger text-white rounded-pill px-2 py-0.5" style="font-size: 0.68rem;">Out of Stock</span>
                             {% elif is_low %}
-                                <span class="badge-low-stock"><i class="bi bi-exclamation-circle-fill"></i>Low</span>
+                                <span class="badge bg-warning text-dark rounded-pill px-2 py-0.5 fw-bold" style="font-size: 0.68rem;"><i class="bi bi-exclamation-circle-fill me-1"></i>Low</span>
                             {% else %}
-                                <span class="badge-ok-stock">OK</span>
+                                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-2 py-0.5 fw-bold" style="font-size: 0.68rem;">OK</span>
                             {% endif %}
                         </div>
-                        <div class="stock-item-threshold">
+                        <div class="text-muted small" style="font-size: 0.74rem;">
                             Threshold: <span class="fw-semibold text-dark">{{ "%.1f"|format(stock.alert_level) if stock.alert_level else "0" }}</span> {{ stock.unit }}
                         </div>
                     </div>
 
-                    <!-- Quantity & Actions -->
+                    <!-- Right: Quantity Pill & Action Buttons -->
                     <div class="d-flex align-items-center gap-2 flex-shrink-0">
-                        <div class="stock-val-pill">
-                            <div class="stock-val-num text-info">{{ "%.2f"|format(stock.closing_stock) }}</div>
-                            <div class="stock-val-unit">{{ stock.unit }}</div>
+                        <div class="text-end pe-1" style="min-width: 60px;">
+                            <div class="fs-5 fw-bold text-info lh-1 mb-0">{{ "%.2f"|format(stock.closing_stock) }}</div>
+                            <small class="text-muted fw-semibold" style="font-size: 0.68rem;">{{ stock.unit }}</small>
                         </div>
 
-                        <div class="stock-actions-group">
-                            <button type="button" class="btn-action-icon btn-action-restock-vac" title="Restock {{ vac_name }}" onclick="openBuyModal(this, 'vaccine')" data-name="{{ vac_name }}" data-unit="{{ stock.unit }}">
+                        <div class="d-flex align-items-center gap-1">
+                            <!-- Restock -->
+                            <button type="button" class="btn btn-sm btn-light border text-info btn-icon-action" title="Restock {{ vac_name }}" onclick="openBuyModal(this, 'vaccine')" data-name="{{ vac_name }}" data-unit="{{ stock.unit }}">
                                 <i class="bi bi-cart-plus"></i>
                             </button>
-                            <button type="button" class="btn-action-icon btn-action-edit" title="Edit {{ vac_name }}" onclick="openEditModal(this, 'vaccine')" data-name="{{ vac_name }}" data-stock="{{ stock.closing_stock }}" data-unit="{{ stock.unit }}" data-limit="{{ stock.alert_level }}">
+                            <!-- Edit -->
+                            <button type="button" class="btn btn-sm btn-light border text-warning btn-icon-action" title="Edit {{ vac_name }}" onclick="openEditModal(this, 'vaccine')" data-name="{{ vac_name }}" data-stock="{{ stock.closing_stock }}" data-unit="{{ stock.unit }}" data-limit="{{ stock.alert_level }}">
                                 <i class="bi bi-pencil"></i>
                             </button>
-                            <button type="button" class="btn-action-icon btn-action-alert" title="Set Alert Threshold" onclick="openThresholdModal(this, 'vaccine')" data-name="{{ vac_name }}" data-limit="{{ stock.alert_level }}" data-unit="{{ stock.unit }}">
+                            <!-- Threshold -->
+                            <button type="button" class="btn btn-sm btn-light border text-secondary btn-icon-action" title="Set Alert Threshold" onclick="openThresholdModal(this, 'vaccine')" data-name="{{ vac_name }}" data-limit="{{ stock.alert_level }}" data-unit="{{ stock.unit }}">
                                 <i class="bi bi-bell"></i>
                             </button>
-                            <form action="{{ url_for('delete_stock_item') }}" method="POST" data-confirm="Are you sure you want to completely delete '{{ vac_name }}' and all associated inventory records?">
+                            <!-- Delete -->
+                            <form action="{{ url_for('delete_stock_item') }}" method="POST" class="m-0 p-0 d-inline-flex" data-confirm="Are you sure you want to completely delete '{{ vac_name }}' and all associated inventory records?">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                 <input type="hidden" name="item_type" value="vaccine">
                                 <input type="hidden" name="item_name" value="{{ vac_name }}">
-                                <button type="submit" class="btn-action-icon btn-action-delete" title="Delete {{ vac_name }}">
+                                <button type="submit" class="btn btn-sm btn-light border text-danger btn-icon-action" title="Delete {{ vac_name }}">
                                     <i class="bi bi-trash"></i>
                                 </button>
                             </form>
@@ -760,8 +493,8 @@
                     </div>
                 </div>
                 {% else %}
-                <div class="stock-empty-state">
-                    <div class="empty-icon-circle bg-info bg-opacity-10 text-info mb-3">
+                <div class="text-center my-auto py-5 px-3">
+                    <div class="bg-info bg-opacity-10 text-info rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 56px; height: 56px; font-size: 1.5rem;">
                         <i class="bi bi-patch-check"></i>
                     </div>
                     <h6 class="fw-bold text-dark mb-1">No Vaccine Items Yet</h6>
@@ -771,14 +504,14 @@
                     </button>
                 </div>
                 {% endfor %}
-                <div id="vaccine-no-results" class="stock-empty-state d-none">
+                <div id="vaccine-no-results" class="text-center py-5 d-none my-auto">
                     <i class="bi bi-search fs-2 d-block mb-1 text-muted"></i>
                     <span class="text-muted small">No matching vaccine items found.</span>
                 </div>
             </div>
 
             <!-- Card Pagination Footer -->
-            <div class="card-footer-pagination" id="vaccine-pagination-bar">
+            <div class="p-2.5 px-3 bg-light border-top d-flex align-items-center justify-content-between" id="vaccine-pagination-bar">
                 <span class="text-muted small" id="vaccine-page-info">Showing 0-0</span>
                 <div class="btn-group btn-group-sm">
                     <button type="button" class="btn btn-outline-secondary" id="vaccine-prev-btn" onclick="changePage('vaccine', -1)"><i class="bi bi-chevron-left"></i></button>
@@ -1294,7 +1027,8 @@
             if (!query || name.includes(query)) {
                 matchingNodes.push(node);
             } else {
-                node.style.display = 'none';
+                node.classList.add('d-none');
+                node.classList.remove('d-flex');
             }
         });
 
@@ -1326,9 +1060,11 @@
 
         matchingNodes.forEach((node, idx) => {
             if (idx >= startIndex && idx < endIndex) {
-                node.style.display = 'flex';
+                node.classList.remove('d-none');
+                node.classList.add('d-flex');
             } else {
-                node.style.display = 'none';
+                node.classList.add('d-none');
+                node.classList.remove('d-flex');
             }
         });
 
