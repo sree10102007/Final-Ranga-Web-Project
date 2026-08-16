@@ -677,7 +677,7 @@
 <!-- ========================================== -->
 <div class="modal fade" id="thresholdModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-sm">
-        <form action="{{ url_for('set_stock_limit') }}" method="POST" class="w-100">
+        <form action="{{ url_for('update_stock_limit') }}" method="POST" class="w-100">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <input type="hidden" name="item_type" id="threshold_item_type">
             <input type="hidden" name="item_name" id="threshold_item_name">
