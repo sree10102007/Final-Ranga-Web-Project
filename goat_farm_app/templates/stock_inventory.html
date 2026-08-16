@@ -4,7 +4,9 @@
 
 {% block content %}
 <style>
-    /* Card Styles */
+    /* =================================================== */
+    /* 3-CARD INVENTORY SYSTEM STYLING */
+    /* =================================================== */
     .inventory-card {
         border: 1px solid #e2e8f0;
         border-radius: 18px;
@@ -14,8 +16,9 @@
         overflow: hidden;
         display: flex;
         flex-direction: column;
+        height: 100%;
     }
-    
+
     .inventory-card:hover {
         box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
     }
@@ -114,7 +117,7 @@
         font-size: 0.84rem;
         height: 36px;
     }
-    
+
     .search-input-card:focus {
         background-color: #ffffff;
         border-color: #94a3b8;
@@ -188,7 +191,7 @@
         color: #64748b;
     }
 
-    /* Badges */
+    /* Status Badges */
     .badge-out-stock, .badge-low-stock, .badge-ok-stock {
         font-size: 0.68rem;
         font-weight: 700;
@@ -308,6 +311,18 @@
         font-size: 0.82rem;
         min-height: 48px;
     }
+
+    /* Summary Metric Pills */
+    .metric-summary-card {
+        border-radius: 14px;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        padding: 12px 18px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+    }
 </style>
 
 <!-- PAGE HEADER -->
@@ -318,7 +333,7 @@
         </div>
         <div>
             <h3 class="fw-bold text-dark mb-0">Stock Inventory</h3>
-            <p class="text-muted small mb-0">Centralized control for Feed, Medicine, and Vaccine inventories, measurement units, and threshold alerts.</p>
+            <p class="text-muted small mb-0">Centralized control for Feed, Medicine, and Vaccine inventories with threshold alerts & Expense Master units.</p>
         </div>
     </div>
     <div class="d-flex gap-2 flex-wrap">
@@ -337,44 +352,96 @@
     </div>
 </div>
 
-<!-- TOP TOTAL METRICS -->
+<!-- TOTAL METRICS & SUMMARY COUNTERS -->
 {% set total_feed = feed_stocks|length %}
 {% set total_med = med_stocks|length %}
 {% set total_vac = vac_stocks|length %}
 
-{% set ns = namespace(low_alert_total=0) %}
+{% set ns = namespace(low_alert_total=0, low_items=[]) %}
 {% for f_name, st in feed_stocks.items() %}
-    {% if st.closing_stock <= (st.alert_level or 0) %}
+    {% if st.alert_level and st.closing_stock <= st.alert_level %}
         {% set ns.low_alert_total = ns.low_alert_total + 1 %}
+        {% set _ = ns.low_items.append({'name': f_name, 'type': 'Feed', 'stock': st.closing_stock, 'unit': st.unit, 'alert': st.alert_level}) %}
     {% endif %}
 {% endfor %}
 {% for m_name, st in med_stocks.items() %}
-    {% if st.closing_stock <= (st.alert_level or 0) %}
+    {% if st.alert_level and st.closing_stock <= st.alert_level %}
         {% set ns.low_alert_total = ns.low_alert_total + 1 %}
+        {% set _ = ns.low_items.append({'name': m_name, 'type': 'Medicine', 'stock': st.closing_stock, 'unit': st.unit, 'alert': st.alert_level}) %}
     {% endif %}
 {% endfor %}
 {% for v_name, st in vac_stocks.items() %}
-    {% if st.closing_stock <= (st.alert_level or 0) %}
+    {% if st.alert_level and st.closing_stock <= st.alert_level %}
         {% set ns.low_alert_total = ns.low_alert_total + 1 %}
+        {% set _ = ns.low_items.append({'name': v_name, 'type': 'Vaccine', 'stock': st.closing_stock, 'unit': st.unit, 'alert': st.alert_level}) %}
     {% endif %}
 {% endfor %}
 
+<!-- TOP SUMMARY BAR -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="metric-summary-card">
+            <div class="rounded-3 bg-success bg-opacity-10 text-success p-2.5 fs-4"><i class="bi bi-basket3-fill"></i></div>
+            <div>
+                <div class="text-muted small fw-semibold">Feed Stocks</div>
+                <h4 class="fw-bold text-dark mb-0">{{ total_feed }} <span class="fs-6 fw-normal text-muted">Items</span></h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="metric-summary-card">
+            <div class="rounded-3 bg-primary bg-opacity-10 text-primary p-2.5 fs-4"><i class="bi bi-capsule"></i></div>
+            <div>
+                <div class="text-muted small fw-semibold">Medicine Stocks</div>
+                <h4 class="fw-bold text-dark mb-0">{{ total_med }} <span class="fs-6 fw-normal text-muted">Items</span></h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="metric-summary-card">
+            <div class="rounded-3 bg-info bg-opacity-10 text-info p-2.5 fs-4"><i class="bi bi-patch-check-fill"></i></div>
+            <div>
+                <div class="text-muted small fw-semibold">Vaccine Stocks</div>
+                <h4 class="fw-bold text-dark mb-0">{{ total_vac }} <span class="fs-6 fw-normal text-muted">Items</span></h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="metric-summary-card {% if ns.low_alert_total > 0 %}border-warning bg-warning bg-opacity-10{% endif %}">
+            <div class="rounded-3 {% if ns.low_alert_total > 0 %}bg-warning text-dark{% else %}bg-secondary bg-opacity-10 text-secondary{% endif %} p-2.5 fs-4">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+            </div>
+            <div>
+                <div class="text-muted small fw-semibold">Threshold Alerts</div>
+                <h4 class="fw-bold {% if ns.low_alert_total > 0 %}text-warning{% else %}text-dark{% endif %} mb-0">
+                    {{ ns.low_alert_total }} <span class="fs-6 fw-normal text-muted">Low</span>
+                </h4>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- THRESHOLD ALERT BANNER -->
 {% if ns.low_alert_total > 0 %}
-<div class="alert alert-warning border-0 rounded-4 shadow-sm p-3 mb-4 d-flex align-items-center justify-content-between">
+<div class="alert alert-warning border-0 rounded-4 shadow-sm p-3 mb-4 d-flex align-items-center justify-content-between flex-wrap gap-2">
     <div class="d-flex align-items-center gap-3">
         <div class="bg-warning text-white p-2 rounded-3 fs-5">
-            <i class="bi bi-exclamation-triangle-fill"></i>
+            <i class="bi bi-bell-fill"></i>
         </div>
         <div>
             <strong class="text-dark">Threshold Alert:</strong>
-            <span class="text-secondary small ms-1">{{ ns.low_alert_total }} item(s) are currently at or below minimum threshold alert levels across your inventory.</span>
+            <span class="text-secondary small ms-1">{{ ns.low_alert_total }} item(s) have reached or fallen below minimum threshold stock levels.</span>
         </div>
     </div>
-    <span class="badge bg-warning text-dark rounded-pill px-3 py-2 fw-bold">{{ ns.low_alert_total }} Low Stock</span>
+    <button type="button" class="btn btn-sm btn-warning text-dark rounded-pill px-3 fw-bold" onclick="showLowStockModal()">
+        <i class="bi bi-eye-fill me-1"></i>View Low Stock List ({{ ns.low_alert_total }})
+    </button>
 </div>
 {% endif %}
 
-<!-- 3 MAIN CARDS CONTAINER -->
+<!-- ========================================== -->
+<!-- 3 MAIN CARDS CONTAINER (EQUAL 3-COLUMN) -->
+<!-- ========================================== -->
 <div class="row g-4 mb-4 align-items-stretch">
     
     <!-- ========================================== -->
@@ -407,7 +474,7 @@
                 </button>
             </div>
 
-            <!-- Items List Container -->
+            <!-- Items List Container (Handles 500+ items with pagination) -->
             <div class="card-items-container flex-grow-1" id="feed-list-container">
                 {% for feed_name, stock in feed_stocks.items() %}
                 {% set is_low = stock.alert_level > 0 and stock.closing_stock <= stock.alert_level %}
@@ -522,7 +589,7 @@
                 </button>
             </div>
 
-            <!-- Items List Container -->
+            <!-- Items List Container (Handles 500+ items with pagination) -->
             <div class="card-items-container flex-grow-1" id="medicine-list-container">
                 {% for med_name, stock in med_stocks.items() %}
                 {% set is_low = stock.alert_level > 0 and stock.closing_stock <= stock.alert_level %}
@@ -637,7 +704,7 @@
                 </button>
             </div>
 
-            <!-- Items List Container -->
+            <!-- Items List Container (Handles 500+ items with pagination) -->
             <div class="card-items-container flex-grow-1" id="vaccine-list-container">
                 {% for vac_name, stock in vac_stocks.items() %}
                 {% set is_low = stock.alert_level > 0 and stock.closing_stock <= stock.alert_level %}
@@ -789,8 +856,8 @@
                     </div>
                 </div>
                 <div class="modal-footer bg-light px-4 py-3 border-0">
-                    <button type="button" class="btn btn-outline-secondary rounded-pill px-3" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-success rounded-pill px-4 fw-semibold" id="buy_submit_btn">Save & Update Stock</button>
+                    <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success rounded-pill px-4 fw-semibold" id="buy_submit_btn">Save Purchase</button>
                 </div>
             </div>
         </form>
@@ -799,7 +866,7 @@
 
 
 <!-- ========================================== -->
-<!-- MODAL 2: EDIT STOCK ITEM (PRE-FILLED) -->
+<!-- MODAL 2: EDIT STOCK ITEM -->
 <!-- ========================================== -->
 <div class="modal fade" id="editStockModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -807,44 +874,42 @@
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <input type="hidden" name="item_type" id="edit_item_type">
             <input type="hidden" name="old_item_name" id="edit_old_item_name">
-
             <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
-                <div class="modal-header text-white" id="editModalHeader" style="background: #f59e0b;">
-                    <h5 class="modal-title fw-bold" id="editModalTitle"><i class="bi bi-pencil-square me-2"></i>Edit Stock Item</h5>
+                <div class="modal-header text-white" id="editModalHeader" style="background: #10b981;">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-pencil-square me-2"></i>Edit Stock Item</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body p-4">
                     <div class="mb-3">
                         <label class="form-label small text-muted fw-bold">Item Name <span class="text-danger">*</span></label>
                         <input type="text" name="item_name" id="edit_item_name" class="form-control" required>
-                        <div class="form-text text-muted" style="font-size: 0.78rem;">Renaming updates this item's historical ledger and allocations.</div>
                     </div>
 
                     <div class="row g-2 mb-3">
-                        <div class="col-6">
-                            <label class="form-label small text-muted fw-bold">Current Closing Stock <span class="text-danger">*</span></label>
-                            <input type="number" step="0.01" name="closing_stock" id="edit_closing_stock" class="form-control" required>
+                        <div class="col-7">
+                            <label class="form-label small text-muted fw-bold">Closing Stock Quantity <span class="text-danger">*</span></label>
+                            <input type="number" step="0.01" min="0" name="closing_stock" id="edit_closing_stock" class="form-control" required>
                         </div>
-                        <div class="col-6">
-                            <label class="form-label small text-muted fw-bold">Unit of Measure (Expense Master)</label>
+                        <div class="col-5">
+                            <label class="form-label small text-muted fw-bold">Unit of Measure <span class="text-danger">*</span></label>
                             <select name="unit" id="edit_unit_select" class="form-select" required>
-                                <!-- Loaded from Expense Master units -->
+                                <!-- Loaded dynamically from Expense Master units -->
                             </select>
                         </div>
                     </div>
 
-                    <div class="mb-3">
+                    <div class="mb-2">
                         <label class="form-label small text-muted fw-bold">Minimum Threshold Alert Level</label>
                         <div class="input-group">
                             <input type="number" step="0.01" min="0" name="alert_limit" id="edit_alert_limit" class="form-control" placeholder="0.00">
                             <span class="input-group-text bg-light text-muted small" id="edit_unit_display">Unit</span>
                         </div>
-                        <div class="form-text text-muted" style="font-size: 0.78rem;">Receive a low stock warning when quantity is at or below this value.</div>
+                        <div class="form-text text-muted" style="font-size: 0.76rem;">An alert will trigger when stock reduces to this value.</div>
                     </div>
                 </div>
                 <div class="modal-footer bg-light px-4 py-3 border-0">
-                    <button type="button" class="btn btn-outline-secondary rounded-pill px-3" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-warning rounded-pill px-4 fw-bold text-dark">Save Changes</button>
+                    <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-semibold">Save Changes</button>
                 </div>
             </div>
         </form>
@@ -853,7 +918,7 @@
 
 
 <!-- ========================================== -->
-<!-- MODAL 3: THRESHOLD ALERT SETTING -->
+<!-- MODAL 3: SET ALERT THRESHOLD -->
 <!-- ========================================== -->
 <div class="modal fade" id="thresholdModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-sm">
@@ -861,30 +926,29 @@
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <input type="hidden" name="item_type" id="threshold_item_type">
             <input type="hidden" name="item_name" id="threshold_item_name">
-
             <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
-                <div class="modal-header bg-secondary text-white py-3">
-                    <h6 class="modal-title fw-bold mb-0"><i class="bi bi-bell-fill me-2 text-warning"></i>Threshold Alert</h6>
+                <div class="modal-header bg-dark text-white p-3">
+                    <h6 class="modal-title fw-bold mb-0"><i class="bi bi-bell-fill me-2 text-warning"></i>Set Alert Threshold</h6>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body p-3.5">
-                    <div class="mb-2">
-                        <small class="text-muted d-block">Target Item:</small>
-                        <strong class="text-dark fs-6" id="threshold_item_label">Item Name</strong>
+                    <div class="mb-3 text-center">
+                        <span class="badge bg-light text-dark border px-3 py-1.5 fw-bold fs-6" id="threshold_item_label">Item Name</span>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label small text-muted fw-bold">Alert Threshold Value</label>
+                        <label class="form-label small text-muted fw-bold">Alert Trigger Level</label>
                         <div class="input-group">
-                            <input type="number" step="0.01" min="0" name="limit" id="threshold_limit_val" class="form-control fw-bold text-dark" required>
+                            <input type="number" step="0.01" min="0" name="limit" id="threshold_limit_val" class="form-control fw-bold" placeholder="0.00" required>
                             <span class="input-group-text bg-light text-muted small" id="threshold_unit_label">Unit</span>
                         </div>
+                        <div class="form-text text-muted" style="font-size: 0.74rem;">Alert fires when stock drops to or below this number.</div>
                     </div>
 
                     <div class="mb-2">
                         <label class="form-label small text-muted fw-bold">Unit of Measure</label>
                         <select name="unit" id="threshold_unit_select" class="form-select form-select-sm">
-                            <!-- Loaded from Expense Master units -->
+                            <!-- Loaded dynamically from Expense Master units -->
                         </select>
                     </div>
                 </div>
@@ -899,7 +963,64 @@
 
 
 <!-- ========================================== -->
-<!-- JAVASCRIPT: DATA SOURCE & CARD PAGINATION -->
+<!-- MODAL 4: LOW STOCK ITEMS OVERVIEW MODAL -->
+<!-- ========================================== -->
+<div class="modal fade" id="lowStockOverviewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="modal-header bg-warning text-dark p-3 px-4">
+                <h5 class="modal-title fw-bold mb-0"><i class="bi bi-exclamation-triangle-fill me-2"></i>Active Threshold Alerts ({{ ns.low_alert_total }})</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <p class="text-muted small mb-3">The following items have closing stock at or below your specified minimum threshold alert level. Quick restock them directly below:</p>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Category</th>
+                                <th>Item Name</th>
+                                <th>Current Stock</th>
+                                <th>Threshold Alert</th>
+                                <th class="text-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in ns.low_items %}
+                            <tr>
+                                <td>
+                                    <span class="badge {% if item.type == 'Feed' %}bg-success{% elif item.type == 'Medicine' %}bg-primary{% else %}bg-info text-white{% endif %} rounded-pill px-2.5 py-1">
+                                        {{ item.type }}
+                                    </span>
+                                </td>
+                                <td class="fw-bold text-dark">{{ item.name }}</td>
+                                <td>
+                                    <span class="fw-bold {% if item.stock <= 0 %}text-danger{% else %}text-warning{% endif %}">
+                                        {{ "%.2f"|format(item.stock) }} {{ item.unit }}
+                                    </span>
+                                </td>
+                                <td class="text-muted">{{ "%.1f"|format(item.alert) }} {{ item.unit }}</td>
+                                <td class="text-end">
+                                    <button type="button" class="btn btn-sm btn-outline-success rounded-pill px-3 fw-semibold" data-bs-dismiss="modal" onclick="openBuyModal(this, '{{ item.type|lower }}')" data-name="{{ item.name }}" data-unit="{{ item.unit }}">
+                                        <i class="bi bi-cart-plus me-1"></i>Restock
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer bg-light px-4 py-3 border-0">
+                <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- ========================================== -->
+<!-- JAVASCRIPT: DATA SOURCE & PAGINATION -->
 <!-- ========================================== -->
 <script id="expense-units-data" type="application/json">
 [
@@ -948,6 +1069,9 @@
     // Existing items data for Restock lookups
     const STOCK_INVENTORY_ITEMS = JSON.parse(document.getElementById('stock-items-data')?.textContent || '{}');
 
+    // Total low stock count from server
+    const LOW_ALERT_COUNT = {{ ns.low_alert_total }};
+
     // Helper: Fill unit select elements from Expense Master
     function fillUnitSelect(selectElementId, selectedValue) {
         const select = document.getElementById(selectElementId);
@@ -985,6 +1109,10 @@
             modalInstance = new bootstrap.Modal(modalEl);
         }
         modalInstance.show();
+    }
+
+    function showLowStockModal() {
+        showModalSafely('lowStockOverviewModal');
     }
 
     // ----------------------------------------------------
@@ -1246,6 +1374,30 @@
         paginateCategory('feed');
         paginateCategory('medicine');
         paginateCategory('vaccine');
+
+        // Alert popup toast if low stock threshold is reached
+        if (LOW_ALERT_COUNT > 0 && typeof bootstrap !== 'undefined') {
+            const toastContainer = document.getElementById('toast-container');
+            if (toastContainer) {
+                const toastHtml = `
+                    <div class="toast farm-toast stock-alert align-items-center show" role="alert" aria-live="assertive" aria-atomic="true">
+                        <div class="toast-header">
+                            <i class="bi bi-bell-fill text-warning me-2 fs-5"></i>
+                            <strong class="me-auto text-dark">Threshold Stock Alert</strong>
+                            <small class="text-muted">Just now</small>
+                            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                        </div>
+                        <div class="toast-body pt-1 pb-3 text-secondary small">
+                            <strong>${LOW_ALERT_COUNT} item(s)</strong> have reached or fallen below the threshold alert limit.
+                            <div class="mt-2">
+                                <button type="button" class="btn btn-xs btn-warning text-dark rounded-pill px-3 fw-bold" onclick="showLowStockModal()">View Items</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+            }
+        }
     });
 </script>
 {% endblock %}
