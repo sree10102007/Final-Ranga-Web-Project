@@ -8122,12 +8122,12 @@ def edit_stock_item():
         return redirect(url_for('auth.login'))
     db = get_db()
     f = request.form
-    item_type = f.get('item_type', '').strip()
-    old_name = f.get('old_item_name', '').strip()
-    new_name = f.get('item_name', '').strip()
+    item_type = (f.get('item_type') or '').strip().lower()
+    old_name = (f.get('old_item_name') or '').strip()
+    new_name = (f.get('item_name') or '').strip()
     if not old_name and new_name:
         old_name = new_name
-    unit = f.get('unit', '').strip()
+    unit = (f.get('unit') or '').strip()
     
     try:
         closing_stock = float(f.get('closing_stock') or 0.0)
@@ -8143,11 +8143,25 @@ def edit_stock_item():
         flash('Item name cannot be empty!', 'danger')
         return redirect(url_for('stock_inventory'))
 
+    # Auto-detect item_type if missing or invalid
+    if item_type not in ['feed', 'medicine', 'vaccine']:
+        lookup_name = old_name or new_name
+        try:
+            if db.execute("SELECT COUNT(*) FROM medicine_inventory WHERE LOWER(TRIM(medicine_name)) = LOWER(TRIM(?))", (lookup_name,)).fetchone()[0] > 0:
+                item_type = 'medicine'
+            elif db.execute("SELECT COUNT(*) FROM vaccine_inventory WHERE LOWER(TRIM(vaccine_name)) = LOWER(TRIM(?))", (lookup_name,)).fetchone()[0] > 0:
+                item_type = 'vaccine'
+            elif db.execute("SELECT COUNT(*) FROM feed_inventory WHERE LOWER(TRIM(feed_name)) = LOWER(TRIM(?))", (lookup_name,)).fetchone()[0] > 0:
+                item_type = 'feed'
+            else:
+                item_type = 'feed'
+        except Exception:
+            item_type = 'feed'
+
     if item_type == 'feed':
-        if old_name.lower().strip() != new_name.lower().strip():
-            db.execute("UPDATE feed_inventory SET feed_name = ? WHERE LOWER(TRIM(feed_name)) = LOWER(TRIM(?))", (new_name, old_name))
-            db.execute("UPDATE feed_purchases SET feed_name = ? WHERE LOWER(TRIM(feed_name)) = LOWER(TRIM(?))", (new_name, old_name))
-            db.execute("UPDATE batch_reminders SET item_name = ? WHERE LOWER(TRIM(item_name)) = LOWER(TRIM(?))", (new_name, old_name))
+        db.execute("UPDATE feed_inventory SET feed_name = ? WHERE LOWER(TRIM(feed_name)) = LOWER(TRIM(?))", (new_name, old_name))
+        db.execute("UPDATE feed_purchases SET feed_name = ? WHERE LOWER(TRIM(feed_name)) = LOWER(TRIM(?))", (new_name, old_name))
+        db.execute("UPDATE batch_reminders SET item_name = ? WHERE LOWER(TRIM(item_name)) = LOWER(TRIM(?))", (new_name, old_name))
         
         if unit:
             db.execute("UPDATE feed_inventory SET unit = ? WHERE LOWER(TRIM(feed_name)) = LOWER(TRIM(?))", (unit, new_name))
@@ -8165,11 +8179,10 @@ def edit_stock_item():
             ''', (new_name, closing_stock, closing_stock, unit or 'KG', date_str, alert_limit))
 
     elif item_type == 'medicine':
-        if old_name.lower().strip() != new_name.lower().strip():
-            db.execute("UPDATE medicine_inventory SET medicine_name = ? WHERE LOWER(TRIM(medicine_name)) = LOWER(TRIM(?))", (new_name, old_name))
-            db.execute("UPDATE medicine_purchases SET medicine_name = ? WHERE LOWER(TRIM(medicine_name)) = LOWER(TRIM(?))", (new_name, old_name))
-            db.execute("UPDATE batch_reminders SET item_name = ? WHERE LOWER(TRIM(item_name)) = LOWER(TRIM(?))", (new_name, old_name))
-            db.execute("UPDATE medicine_history SET medicine_name = ? WHERE LOWER(TRIM(medicine_name)) = LOWER(TRIM(?))", (new_name, old_name))
+        db.execute("UPDATE medicine_inventory SET medicine_name = ? WHERE LOWER(TRIM(medicine_name)) = LOWER(TRIM(?))", (new_name, old_name))
+        db.execute("UPDATE medicine_purchases SET medicine_name = ? WHERE LOWER(TRIM(medicine_name)) = LOWER(TRIM(?))", (new_name, old_name))
+        db.execute("UPDATE batch_reminders SET item_name = ? WHERE LOWER(TRIM(item_name)) = LOWER(TRIM(?))", (new_name, old_name))
+        db.execute("UPDATE medicine_history SET medicine_name = ? WHERE LOWER(TRIM(medicine_name)) = LOWER(TRIM(?))", (new_name, old_name))
             
         if unit:
             db.execute("UPDATE medicine_inventory SET unit = ? WHERE LOWER(TRIM(medicine_name)) = LOWER(TRIM(?))", (unit, new_name))
@@ -8187,11 +8200,10 @@ def edit_stock_item():
             ''', (new_name, closing_stock, closing_stock, unit or 'ML', date_str, alert_limit))
 
     elif item_type == 'vaccine':
-        if old_name.lower().strip() != new_name.lower().strip():
-            db.execute("UPDATE vaccine_inventory SET vaccine_name = ? WHERE LOWER(TRIM(vaccine_name)) = LOWER(TRIM(?))", (new_name, old_name))
-            db.execute("UPDATE vaccine_purchases SET vaccine_name = ? WHERE LOWER(TRIM(vaccine_name)) = LOWER(TRIM(?))", (new_name, old_name))
-            db.execute("UPDATE batch_reminders SET item_name = ? WHERE LOWER(TRIM(item_name)) = LOWER(TRIM(?))", (new_name, old_name))
-            db.execute("UPDATE vaccination_history SET vaccine_name = ? WHERE LOWER(TRIM(vaccine_name)) = LOWER(TRIM(?))", (new_name, old_name))
+        db.execute("UPDATE vaccine_inventory SET vaccine_name = ? WHERE LOWER(TRIM(vaccine_name)) = LOWER(TRIM(?))", (new_name, old_name))
+        db.execute("UPDATE vaccine_purchases SET vaccine_name = ? WHERE LOWER(TRIM(vaccine_name)) = LOWER(TRIM(?))", (new_name, old_name))
+        db.execute("UPDATE batch_reminders SET item_name = ? WHERE LOWER(TRIM(item_name)) = LOWER(TRIM(?))", (new_name, old_name))
+        db.execute("UPDATE vaccination_history SET vaccine_name = ? WHERE LOWER(TRIM(vaccine_name)) = LOWER(TRIM(?))", (new_name, old_name))
             
         if unit:
             db.execute("UPDATE vaccine_inventory SET unit = ? WHERE LOWER(TRIM(vaccine_name)) = LOWER(TRIM(?))", (unit, new_name))
@@ -8206,10 +8218,6 @@ def edit_stock_item():
                 INSERT INTO vaccine_inventory (vaccine_name, opening_stock, purchased_qty, used_qty, wastage_qty, closing_stock, unit, cost_per_unit, total_cost, purchase_date, supplier, alert_level)
                 VALUES (?, ?, 0.0, 0.0, 0.0, ?, ?, 0.0, 0.0, ?, 'Manual Adjustment', ?)
             ''', (new_name, closing_stock, closing_stock, unit or 'Doses', date_str, alert_limit))
-            
-    else:
-        flash('Invalid stock item type.', 'danger')
-        return redirect(url_for('stock_inventory'))
 
     db.commit()
     flash(f'Stock item "{new_name}" updated successfully.', 'success')

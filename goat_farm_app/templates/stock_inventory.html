@@ -984,7 +984,19 @@
         if (!btn) return;
         const btnEl = btn.closest ? (btn.closest('button') || btn) : btn;
         const name = btnEl.getAttribute('data-name') || (btnEl.dataset ? btnEl.dataset.name : '') || '';
-        const detectedType = type || btnEl.getAttribute('data-type') || (btnEl.dataset ? btnEl.dataset.type : '') || 'feed';
+        let detectedType = (typeof type === 'string' && type.trim()) ? type.trim().toLowerCase() : '';
+        if (!detectedType && btnEl.getAttribute) {
+            detectedType = (btnEl.getAttribute('data-type') || (btnEl.dataset ? btnEl.dataset.type : '') || '').toLowerCase();
+        }
+        
+        // Auto-detect type from STOCK_INVENTORY_ITEMS dictionary if still empty
+        if (!detectedType && name && typeof STOCK_INVENTORY_ITEMS === 'object') {
+            const low = name.toLowerCase();
+            if (STOCK_INVENTORY_ITEMS.feed && STOCK_INVENTORY_ITEMS.feed[low]) detectedType = 'feed';
+            else if (STOCK_INVENTORY_ITEMS.medicine && STOCK_INVENTORY_ITEMS.medicine[low]) detectedType = 'medicine';
+            else if (STOCK_INVENTORY_ITEMS.vaccine && STOCK_INVENTORY_ITEMS.vaccine[low]) detectedType = 'vaccine';
+        }
+        if (!detectedType) detectedType = 'feed';
         
         let stock = btnEl.getAttribute('data-stock') || (btnEl.dataset ? btnEl.dataset.stock : '');
         let unit = btnEl.getAttribute('data-unit') || (btnEl.dataset ? btnEl.dataset.unit : '');
