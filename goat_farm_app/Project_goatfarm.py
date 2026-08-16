@@ -6995,26 +6995,41 @@ def pnl():
     try:
         start_date_dt = datetime.strptime(start_date, '%Y-%m-%d')
         prev_day = (start_date_dt - timedelta(days=1)).strftime('%Y-%m-%d')
+        
+        # 1. Look for the most recent valuation record ending on or before start_date (or starting before start_date)
         prev_stock_rec = db.execute('''
             SELECT closing_stock FROM manual_stock_valuations 
-            WHERE to_date <= ?
-            ORDER BY to_date DESC
+            WHERE to_date <= ? OR from_date < ?
+            ORDER BY to_date DESC, id DESC
             LIMIT 1
-        ''', (prev_day,)).fetchone()
-        prev_closing = prev_stock_rec['closing_stock'] if (prev_stock_rec and prev_stock_rec['closing_stock'] is not None) else None
-        if prev_closing is None:
-            prev_closing = get_stock_val(prev_day)
+        ''', (prev_day, start_date)).fetchone()
+        
+        prev_closing = float(prev_stock_rec['closing_stock']) if (prev_stock_rec and prev_stock_rec['closing_stock'] is not None and float(prev_stock_rec['closing_stock']) > 0) else None
+        
+        # 2. If no valid previous closing stock record, compute dynamic stock valuation at start_date or prev_day
+        if prev_closing is None or prev_closing == 0:
+            computed_start_stock = get_stock_val(start_date)
+            if computed_start_stock and float(computed_start_stock) > 0:
+                prev_closing = float(computed_start_stock)
+            else:
+                prev_closing = float(get_stock_val(prev_day))
     except Exception:
         prev_closing = None
 
     if manual_stock_rec:
         include_stock = '1'
-        manual_opening = prev_closing if prev_closing is not None else manual_stock_rec['opening_stock']
-        manual_closing = manual_stock_rec['closing_stock']
+        if prev_closing is not None and float(prev_closing) > 0:
+            manual_opening = prev_closing
+        elif manual_stock_rec['opening_stock'] is not None and float(manual_stock_rec['opening_stock']) > 0:
+            manual_opening = float(manual_stock_rec['opening_stock'])
+        else:
+            manual_opening = float(get_stock_val(start_date))
+            
+        manual_closing = float(manual_stock_rec['closing_stock']) if manual_stock_rec['closing_stock'] is not None else None
         manual_period_name = manual_stock_rec['period_name']
     else:
         include_stock = '1' # Force enable stock valuation inputs
-        manual_opening = prev_closing
+        manual_opening = prev_closing if (prev_closing is not None and float(prev_closing) > 0) else float(get_stock_val(start_date))
         manual_closing = None
         manual_period_name = None
 
