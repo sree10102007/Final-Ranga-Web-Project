@@ -13,20 +13,19 @@
         </div>
         <div>
             <h3 class="fw-bold text-dark mb-0" data-style="font-weight: 800; color: #1e293b; margin: 0; font-size: 1.55rem;">Stock Inventory</h3>
-            <p class="text-muted small mb-0" data-style="color: #64748b; font-size: 0.85rem; margin: 0;">Centralized control for Feed, Medicine, and Vaccine inventories with threshold alerts & Expense Master units.</p>
         </div>
     </div>
-    <div class="d-flex gap-2 flex-wrap" data-style="display: flex; gap: 8px; flex-wrap: wrap;">
-        <button type="button" class="btn btn-success rounded-pill px-4 py-2 fw-semibold shadow-sm" data-style="border-radius: 30px; font-weight: 600; padding: 8px 20px;" data-bs-toggle="modal" data-bs-target="#quickBuyModal" onclick="openBuyModal(null, 'feed')">
+    <div class="d-grid gap-2" data-style="display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 8px !important;">
+        <button type="button" class="btn btn-success rounded-pill px-3 py-2 fw-semibold shadow-sm text-nowrap" data-style="border-radius: 30px; font-weight: 600; padding: 8px 16px; font-size: 0.86rem; text-align: center;" data-bs-toggle="modal" data-bs-target="#quickBuyModal" onclick="openBuyModal(null, 'feed')">
             <i class="bi bi-plus-circle-fill me-1"></i>+ Add / Restock Item
         </button>
-        <a href="{{ url_for('feed') }}" class="btn btn-outline-success rounded-pill px-3 py-2 fw-semibold" data-style="border-radius: 30px; font-weight: 600; padding: 8px 16px;">
+        <a href="{{ url_for('feed') }}" class="btn btn-outline-success rounded-pill px-3 py-2 fw-semibold text-nowrap" data-style="border-radius: 30px; font-weight: 600; padding: 8px 16px; font-size: 0.86rem; text-align: center;">
             <i class="bi bi-arrow-left-right me-1"></i>Batch Allocation
         </a>
-        <a href="{{ url_for('vouchers') }}" class="btn btn-outline-secondary rounded-pill px-3 py-2 fw-semibold" data-style="border-radius: 30px; font-weight: 600; padding: 8px 16px;">
+        <a href="{{ url_for('vouchers') }}" class="btn btn-outline-secondary rounded-pill px-3 py-2 fw-semibold text-nowrap" data-style="border-radius: 30px; font-weight: 600; padding: 8px 16px; font-size: 0.86rem; text-align: center;">
             <i class="bi bi-receipt me-1"></i>Vouchers
         </a>
-        <a href="{{ url_for('download_stock_csv') }}" class="btn btn-outline-primary rounded-pill px-3 py-2 fw-semibold" data-style="border-radius: 30px; font-weight: 600; padding: 8px 16px;">
+        <a href="{{ url_for('download_stock_csv') }}" class="btn btn-outline-primary rounded-pill px-3 py-2 fw-semibold text-nowrap" data-style="border-radius: 30px; font-weight: 600; padding: 8px 16px; font-size: 0.86rem; text-align: center;">
             <i class="bi bi-download me-1"></i>Export CSV
         </a>
     </div>
