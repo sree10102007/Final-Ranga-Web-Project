@@ -199,20 +199,20 @@
 
                     <div class="d-inline-flex align-items-center gap-1.5" data-style="display: inline-flex !important; align-items: center !important; gap: 4px;">
                         <!-- Edit -->
-                        <button type="button" class="btn btn-sm btn-light border text-warning p-0 rounded-2" data-style="width: 30px; height: 30px; min-width: 30px; min-height: 30px; display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 0; font-size: 0.82rem; border: 1px solid #fef3c7; background: #fffbeb; color: #d97706;" title="Edit {{ feed_name }}" data-bs-toggle="modal" data-bs-target="#editStockModal" onclick="openEditModal(this, 'feed')" data-onclick="openEditModal(this, 'feed')" data-name="{{ feed_name }}" data-stock="{{ stock.closing_stock }}" data-unit="{{ stock.unit }}" data-limit="{{ stock.alert_level }}">
-                            <i class="bi bi-pencil"></i>
+                        <button type="button" class="btn btn-sm btn-light border text-warning p-0 rounded-2" data-style="width: 30px; height: 30px; min-width: 30px; min-height: 30px; display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 0; font-size: 0.82rem; border: 1px solid #fef3c7; background: #fffbeb; color: #d97706; cursor: pointer;" title="Edit {{ feed_name }}" data-bs-toggle="modal" data-bs-target="#editStockModal" onclick="openEditModal(this, 'feed')" data-onclick="openEditModal(this, 'feed')" data-name="{{ feed_name }}" data-stock="{{ stock.closing_stock }}" data-unit="{{ stock.unit }}" data-limit="{{ stock.alert_level }}">
+                            <i class="bi bi-pencil" style="pointer-events: none;"></i>
                         </button>
                         <!-- Threshold -->
-                        <button type="button" class="btn btn-sm btn-light border text-secondary p-0 rounded-2" data-style="width: 30px; height: 30px; min-width: 30px; min-height: 30px; display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 0; font-size: 0.82rem; border: 1px solid #e2e8f0; background: #f8fafc; color: #64748b;" title="Set Alert Threshold" data-bs-toggle="modal" data-bs-target="#thresholdModal" onclick="openThresholdModal(this, 'feed')" data-onclick="openThresholdModal(this, 'feed')" data-name="{{ feed_name }}" data-limit="{{ stock.alert_level }}" data-unit="{{ stock.unit }}">
-                            <i class="bi bi-bell"></i>
+                        <button type="button" class="btn btn-sm btn-light border text-secondary p-0 rounded-2" data-style="width: 30px; height: 30px; min-width: 30px; min-height: 30px; display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 0; font-size: 0.82rem; border: 1px solid #e2e8f0; background: #f8fafc; color: #64748b; cursor: pointer;" title="Set Alert Threshold" data-bs-toggle="modal" data-bs-target="#thresholdModal" onclick="openThresholdModal(this, 'feed')" data-onclick="openThresholdModal(this, 'feed')" data-name="{{ feed_name }}" data-limit="{{ stock.alert_level }}" data-unit="{{ stock.unit }}">
+                            <i class="bi bi-bell" style="pointer-events: none;"></i>
                         </button>
                         <!-- Delete -->
                         <form action="{{ url_for('delete_stock_item') }}" method="POST" class="m-0 p-0 d-inline-flex" data-style="margin: 0; padding: 0; display: inline-flex !important;" data-confirm="Are you sure you want to completely delete '{{ feed_name }}' and all associated inventory records?">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <input type="hidden" name="item_type" value="feed">
                             <input type="hidden" name="item_name" value="{{ feed_name }}">
-                            <button type="submit" class="btn btn-sm btn-light border text-danger p-0 rounded-2" data-style="width: 30px; height: 30px; min-width: 30px; min-height: 30px; display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 0; font-size: 0.82rem; border: 1px solid #fee2e2; background: #fef2f2; color: #ef4444;" title="Delete {{ feed_name }}">
-                                <i class="bi bi-trash"></i>
+                            <button type="submit" class="btn btn-sm btn-light border text-danger p-0 rounded-2" data-style="width: 30px; height: 30px; min-width: 30px; min-height: 30px; display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 0; font-size: 0.82rem; border: 1px solid #fee2e2; background: #fef2f2; color: #ef4444; cursor: pointer;" title="Delete {{ feed_name }}">
+                                <i class="bi bi-trash" style="pointer-events: none;"></i>
                             </button>
                         </form>
                     </div>
@@ -308,20 +308,20 @@
 
                     <div class="d-inline-flex align-items-center gap-1.5" data-style="display: inline-flex !important; align-items: center !important; gap: 4px;">
                         <!-- Edit -->
-                        <button type="button" class="btn btn-sm btn-light border text-warning p-0 rounded-2" data-style="width: 30px; height: 30px; min-width: 30px; min-height: 30px; display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 0; font-size: 0.82rem; border: 1px solid #fef3c7; background: #fffbeb; color: #d97706;" title="Edit {{ med_name }}" data-bs-toggle="modal" data-bs-target="#editStockModal" onclick="openEditModal(this, 'medicine')" data-onclick="openEditModal(this, 'medicine')" data-name="{{ med_name }}" data-stock="{{ stock.closing_stock }}" data-unit="{{ stock.unit }}" data-limit="{{ stock.alert_level }}">
-                            <i class="bi bi-pencil"></i>
+                        <button type="button" class="btn btn-sm btn-light border text-warning p-0 rounded-2" data-style="width: 30px; height: 30px; min-width: 30px; min-height: 30px; display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 0; font-size: 0.82rem; border: 1px solid #fef3c7; background: #fffbeb; color: #d97706; cursor: pointer;" title="Edit {{ med_name }}" data-bs-toggle="modal" data-bs-target="#editStockModal" onclick="openEditModal(this, 'medicine')" data-onclick="openEditModal(this, 'medicine')" data-name="{{ med_name }}" data-stock="{{ stock.closing_stock }}" data-unit="{{ stock.unit }}" data-limit="{{ stock.alert_level }}">
+                            <i class="bi bi-pencil" style="pointer-events: none;"></i>
                         </button>
                         <!-- Threshold -->
-                        <button type="button" class="btn btn-sm btn-light border text-secondary p-0 rounded-2" data-style="width: 30px; height: 30px; min-width: 30px; min-height: 30px; display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 0; font-size: 0.82rem; border: 1px solid #e2e8f0; background: #f8fafc; color: #64748b;" title="Set Alert Threshold" data-bs-toggle="modal" data-bs-target="#thresholdModal" onclick="openThresholdModal(this, 'medicine')" data-onclick="openThresholdModal(this, 'medicine')" data-name="{{ med_name }}" data-limit="{{ stock.alert_level }}" data-unit="{{ stock.unit }}">
-                            <i class="bi bi-bell"></i>
+                        <button type="button" class="btn btn-sm btn-light border text-secondary p-0 rounded-2" data-style="width: 30px; height: 30px; min-width: 30px; min-height: 30px; display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 0; font-size: 0.82rem; border: 1px solid #e2e8f0; background: #f8fafc; color: #64748b; cursor: pointer;" title="Set Alert Threshold" data-bs-toggle="modal" data-bs-target="#thresholdModal" onclick="openThresholdModal(this, 'medicine')" data-onclick="openThresholdModal(this, 'medicine')" data-name="{{ med_name }}" data-limit="{{ stock.alert_level }}" data-unit="{{ stock.unit }}">
+                            <i class="bi bi-bell" style="pointer-events: none;"></i>
                         </button>
                         <!-- Delete -->
                         <form action="{{ url_for('delete_stock_item') }}" method="POST" class="m-0 p-0 d-inline-flex" data-style="margin: 0; padding: 0; display: inline-flex !important;" data-confirm="Are you sure you want to completely delete '{{ med_name }}' and all associated inventory records?">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <input type="hidden" name="item_type" value="medicine">
                             <input type="hidden" name="item_name" value="{{ med_name }}">
-                            <button type="submit" class="btn btn-sm btn-light border text-danger p-0 rounded-2" data-style="width: 30px; height: 30px; min-width: 30px; min-height: 30px; display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 0; font-size: 0.82rem; border: 1px solid #fee2e2; background: #fef2f2; color: #ef4444;" title="Delete {{ med_name }}">
-                                <i class="bi bi-trash"></i>
+                            <button type="submit" class="btn btn-sm btn-light border text-danger p-0 rounded-2" data-style="width: 30px; height: 30px; min-width: 30px; min-height: 30px; display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 0; font-size: 0.82rem; border: 1px solid #fee2e2; background: #fef2f2; color: #ef4444; cursor: pointer;" title="Delete {{ med_name }}">
+                                <i class="bi bi-trash" style="pointer-events: none;"></i>
                             </button>
                         </form>
                     </div>
@@ -417,20 +417,20 @@
 
                     <div class="d-inline-flex align-items-center gap-1.5" data-style="display: inline-flex !important; align-items: center !important; gap: 4px;">
                         <!-- Edit -->
-                        <button type="button" class="btn btn-sm btn-light border text-warning btn-icon-action" data-style="width: 30px; height: 30px; min-width: 30px; min-height: 30px; display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 0; font-size: 0.82rem; border: 1px solid #fef3c7; background: #fffbeb; color: #d97706;" title="Edit {{ vac_name }}" data-bs-toggle="modal" data-bs-target="#editStockModal" onclick="openEditModal(this, 'vaccine')" data-onclick="openEditModal(this, 'vaccine')" data-name="{{ vac_name }}" data-stock="{{ stock.closing_stock }}" data-unit="{{ stock.unit }}" data-limit="{{ stock.alert_level }}">
-                            <i class="bi bi-pencil"></i>
+                        <button type="button" class="btn btn-sm btn-light border text-warning btn-icon-action" data-style="width: 30px; height: 30px; min-width: 30px; min-height: 30px; display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 0; font-size: 0.82rem; border: 1px solid #fef3c7; background: #fffbeb; color: #d97706; cursor: pointer;" title="Edit {{ vac_name }}" data-bs-toggle="modal" data-bs-target="#editStockModal" onclick="openEditModal(this, 'vaccine')" data-onclick="openEditModal(this, 'vaccine')" data-name="{{ vac_name }}" data-stock="{{ stock.closing_stock }}" data-unit="{{ stock.unit }}" data-limit="{{ stock.alert_level }}">
+                            <i class="bi bi-pencil" style="pointer-events: none;"></i>
                         </button>
                         <!-- Threshold -->
-                        <button type="button" class="btn btn-sm btn-light border text-secondary btn-icon-action" data-style="width: 30px; height: 30px; min-width: 30px; min-height: 30px; display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 0; font-size: 0.82rem; border: 1px solid #e2e8f0; background: #f8fafc; color: #64748b;" title="Set Alert Threshold" data-bs-toggle="modal" data-bs-target="#thresholdModal" onclick="openThresholdModal(this, 'vaccine')" data-onclick="openThresholdModal(this, 'vaccine')" data-name="{{ vac_name }}" data-limit="{{ stock.alert_level }}" data-unit="{{ stock.unit }}">
-                            <i class="bi bi-bell"></i>
+                        <button type="button" class="btn btn-sm btn-light border text-secondary btn-icon-action" data-style="width: 30px; height: 30px; min-width: 30px; min-height: 30px; display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 0; font-size: 0.82rem; border: 1px solid #e2e8f0; background: #f8fafc; color: #64748b; cursor: pointer;" title="Set Alert Threshold" data-bs-toggle="modal" data-bs-target="#thresholdModal" onclick="openThresholdModal(this, 'vaccine')" data-onclick="openThresholdModal(this, 'vaccine')" data-name="{{ vac_name }}" data-limit="{{ stock.alert_level }}" data-unit="{{ stock.unit }}">
+                            <i class="bi bi-bell" style="pointer-events: none;"></i>
                         </button>
                         <!-- Delete -->
                         <form action="{{ url_for('delete_stock_item') }}" method="POST" class="m-0 p-0 d-inline-flex" data-style="margin: 0; padding: 0; display: inline-flex !important;" data-confirm="Are you sure you want to completely delete '{{ vac_name }}' and all associated inventory records?">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <input type="hidden" name="item_type" value="vaccine">
                             <input type="hidden" name="item_name" value="{{ vac_name }}">
-                            <button type="submit" class="btn btn-sm btn-light border text-danger p-0 rounded-2" data-style="width: 30px; height: 30px; min-width: 30px; min-height: 30px; display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 0; font-size: 0.82rem; border: 1px solid #fee2e2; background: #fef2f2; color: #ef4444;" title="Delete {{ vac_name }}">
-                                <i class="bi bi-trash"></i>
+                            <button type="submit" class="btn btn-sm btn-light border text-danger p-0 rounded-2" data-style="width: 30px; height: 30px; min-width: 30px; min-height: 30px; display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 0; font-size: 0.82rem; border: 1px solid #fee2e2; background: #fef2f2; color: #ef4444; cursor: pointer;" title="Delete {{ vac_name }}">
+                                <i class="bi bi-trash" style="pointer-events: none;"></i>
                             </button>
                         </form>
                     </div>
@@ -798,21 +798,47 @@
         }
 
         if (selectedValue) {
-            let found = false;
+            const target = String(selectedValue).trim().toLowerCase();
+            let matchedIndex = -1;
+
+            // 1. Exact match on value
             for (let i = 0; i < select.options.length; i++) {
-                const opt = select.options[i];
-                if (opt.value.toLowerCase() === selectedValue.toLowerCase() || opt.textContent.toLowerCase().includes(selectedValue.toLowerCase())) {
-                    select.selectedIndex = i;
-                    found = true;
+                if (select.options[i].value.trim().toLowerCase() === target) {
+                    matchedIndex = i;
                     break;
                 }
             }
-            if (!found && selectedValue) {
+
+            // 2. Exact match on textContent
+            if (matchedIndex === -1) {
+                for (let i = 0; i < select.options.length; i++) {
+                    if (select.options[i].textContent.trim().toLowerCase() === target) {
+                        matchedIndex = i;
+                        break;
+                    }
+                }
+            }
+
+            // 3. Match format "Name (Symbol)" or symbol in parentheses
+            if (matchedIndex === -1) {
+                for (let i = 0; i < select.options.length; i++) {
+                    const txt = select.options[i].textContent.trim().toLowerCase();
+                    if (txt.includes(`(${target})`) || txt.startsWith(target + ' ')) {
+                        matchedIndex = i;
+                        break;
+                    }
+                }
+            }
+
+            if (matchedIndex !== -1) {
+                select.selectedIndex = matchedIndex;
+            } else {
                 const customOpt = document.createElement('option');
                 customOpt.value = selectedValue;
                 customOpt.textContent = selectedValue;
                 customOpt.selected = true;
                 select.appendChild(customOpt);
+                select.value = selectedValue;
             }
         }
     }
