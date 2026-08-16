@@ -1,494 +1,616 @@
 {% extends 'layout.html' %}
 
-{% block page_title %}Feed & Medical Stock Control{% endblock %}
+{% block page_title %}Stock Inventory Control{% endblock %}
 
 {% block content %}
 <style>
-    .stock-card {
+    /* Card Styles */
+    .inventory-card {
         border: none;
-        border-radius: 16px;
+        border-radius: 18px;
         background: #ffffff;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.04);
-        transition: all 0.25s ease;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.05);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        overflow: hidden;
     }
-    .stock-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+    
+    .inventory-card:hover {
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
     }
+
+    .card-header-feed {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: #ffffff;
+    }
+
+    .card-header-medicine {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        color: #ffffff;
+    }
+
+    .card-header-vaccine {
+        background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+        color: #ffffff;
+    }
+
+    .category-badge-chip {
+        font-size: 0.8rem;
+        font-weight: 700;
+        padding: 4px 12px;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(4px);
+        color: #ffffff;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    /* Stock List Items */
     .stock-item-row {
         border-radius: 12px;
-        transition: all 0.2s ease;
         background-color: #ffffff;
-        border: 1px solid rgba(0,0,0,0.07);
+        border: 1px solid #eef2f6;
+        transition: all 0.2s ease;
     }
+
     .stock-item-row:hover {
         background-color: #f8fafc;
-        border-color: rgba(16, 185, 129, 0.3);
+        border-color: #cbd5e1;
+        transform: translateX(2px);
     }
-    .badge-no-stock {
-        background-color: #ef4444;
-        color: white;
-        padding: 4px 10px;
-        font-size: 0.75rem;
-        border-radius: 20px;
-        animation: pulse-danger 2s infinite;
+
+    .stock-val-pill {
+        min-width: 110px;
+        text-align: right;
     }
-    .badge-low-stock {
-        background-color: #f59e0b;
-        color: white;
-        padding: 4px 10px;
-        font-size: 0.75rem;
-        border-radius: 20px;
-    }
-    .badge-in-stock {
-        background-color: #10b981;
-        color: white;
-        padding: 4px 10px;
-        font-size: 0.75rem;
-        border-radius: 20px;
-    }
-    @keyframes pulse-danger {
-        0% { transform: scale(1); opacity: 1; }
-        50% { transform: scale(1.03); opacity: 0.85; }
-        100% { transform: scale(1); opacity: 1; }
-    }
-    .category-badge {
-        font-size: 0.75rem;
+
+    /* Badges */
+    .badge-out-stock {
+        background-color: #fee2e2;
+        color: #b91c1c;
+        border: 1px solid #fecaca;
+        font-size: 0.72rem;
         font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        padding: 3px 10px;
+        padding: 3px 8px;
         border-radius: 6px;
     }
-    .cat-feed { background-color: #dcfce7; color: #15803d; }
-    .cat-medicine { background-color: #dbeafe; color: #1e40af; }
-    .cat-vaccine { background-color: #e0f2fe; color: #0369a1; }
+
+    .badge-low-stock {
+        background-color: #fef3c7;
+        color: #b45309;
+        border: 1px solid #fde68a;
+        font-size: 0.72rem;
+        font-weight: 700;
+        padding: 3px 8px;
+        border-radius: 6px;
+    }
+
+    .badge-ok-stock {
+        background-color: #dcfce7;
+        color: #15803d;
+        border: 1px solid #bbf7d0;
+        font-size: 0.72rem;
+        font-weight: 700;
+        padding: 3px 8px;
+        border-radius: 6px;
+    }
+
+    /* Action Buttons */
+    .btn-action-icon {
+        width: 32px;
+        height: 32px;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        transition: all 0.15s ease;
+    }
+
+    .btn-action-icon:hover {
+        transform: scale(1.08);
+    }
+
+    /* Pagination Bar */
+    .card-pagination {
+        font-size: 0.85rem;
+    }
+    
+    .search-input-card {
+        border-radius: 10px;
+        background-color: #f8fafc;
+        border: 1px solid #e2e8f0;
+        font-size: 0.85rem;
+    }
+    
+    .search-input-card:focus {
+        background-color: #ffffff;
+        border-color: #94a3b8;
+        box-shadow: none;
+    }
 </style>
 
-<!-- HEADER SECTION -->
-<div class="page-header mb-4">
-    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
-        <div class="d-flex align-items-center gap-3">
-            <div class="bg-success bg-opacity-10 text-success p-3 rounded-4">
-                <i class="bi bi-box-seam fs-1"></i>
-            </div>
-            <div>
-                <h2 class="fw-800 text-dark mb-1">Feed & Medical Stock Control</h2>
-                <p class="text-muted small mb-0">Manage feed, medicine & vaccine stock levels, update measurement units & minimum alerts.</p>
-            </div>
+<!-- PAGE HEADER -->
+<div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-4">
+    <div class="d-flex align-items-center gap-3">
+        <div class="bg-success bg-opacity-10 text-success p-3 rounded-4">
+            <i class="bi bi-box-seam fs-2"></i>
         </div>
-        <div class="d-flex gap-2 flex-wrap">
-            <button type="button" class="btn btn-success rounded-pill px-4 py-2 fw-semibold shadow-sm" data-bs-toggle="modal" data-bs-target="#quickBuyModal" data-type="feed" onclick="openBuyModal(this)">
-                <i class="bi bi-plus-circle-fill me-1"></i>+ Add Stock Item
-            </button>
-            <a href="{{ url_for('feed') }}" class="btn btn-outline-success rounded-pill px-3 py-2 fw-semibold">
-                <i class="bi bi-people me-1"></i>Batch Allocation
-            </a>
-            <a href="{{ url_for('vouchers') }}" class="btn btn-outline-secondary rounded-pill px-3 py-2 fw-semibold" title="Create Purchase Voucher">
-                <i class="bi bi-receipt me-1"></i>Vouchers
-            </a>
-            <a href="{{ url_for('download_stock_csv') }}" class="btn btn-outline-primary rounded-pill px-3 py-2 fw-semibold" title="Download Stock CSV">
-                <i class="bi bi-download me-1"></i>Download CSV
-            </a>
+        <div>
+            <h3 class="fw-800 text-dark mb-0">Stock Inventory</h3>
+            <p class="text-muted small mb-0">Centralized control for Feed, Medicine, and Vaccine inventories, measurement units, and threshold alerts.</p>
         </div>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+        <button type="button" class="btn btn-success rounded-pill px-4 py-2 fw-semibold shadow-sm" data-bs-toggle="modal" data-bs-target="#quickBuyModal" onclick="openBuyModal(null, 'feed')">
+            <i class="bi bi-plus-circle-fill me-1"></i>+ Add / Restock Item
+        </button>
+        <a href="{{ url_for('feed') }}" class="btn btn-outline-success rounded-pill px-3 py-2 fw-semibold">
+            <i class="bi bi-arrow-left-right me-1"></i>Batch Allocation
+        </a>
+        <a href="{{ url_for('vouchers') }}" class="btn btn-outline-secondary rounded-pill px-3 py-2 fw-semibold">
+            <i class="bi bi-receipt me-1"></i>Vouchers
+        </a>
+        <a href="{{ url_for('download_stock_csv') }}" class="btn btn-outline-primary rounded-pill px-3 py-2 fw-semibold">
+            <i class="bi bi-download me-1"></i>Export CSV
+        </a>
     </div>
 </div>
 
-<!-- METRICS SUMMARY TOP BAR -->
-{% set total_feed_items = feed_stocks|length %}
-{% set total_med_items = med_stocks|length %}
-{% set total_vac_items = vac_stocks|length %}
+<!-- TOP TOTAL METRICS -->
+{% set total_feed = feed_stocks|length %}
+{% set total_med = med_stocks|length %}
+{% set total_vac = vac_stocks|length %}
 
-{% set ns = namespace(low_stock_count=0) %}
+{% set ns = namespace(low_alert_total=0) %}
 {% for f_name, st in feed_stocks.items() %}
     {% if st.closing_stock <= (st.alert_level or 0) %}
-        {% set ns.low_stock_count = ns.low_stock_count + 1 %}
+        {% set ns.low_alert_total = ns.low_alert_total + 1 %}
     {% endif %}
 {% endfor %}
 {% for m_name, st in med_stocks.items() %}
     {% if st.closing_stock <= (st.alert_level or 0) %}
-        {% set ns.low_stock_count = ns.low_stock_count + 1 %}
+        {% set ns.low_alert_total = ns.low_alert_total + 1 %}
     {% endif %}
 {% endfor %}
 {% for v_name, st in vac_stocks.items() %}
     {% if st.closing_stock <= (st.alert_level or 0) %}
-        {% set ns.low_stock_count = ns.low_stock_count + 1 %}
+        {% set ns.low_alert_total = ns.low_alert_total + 1 %}
     {% endif %}
 {% endfor %}
 
-<div class="row g-3 mb-4">
-    <div class="col-6 col-md-3">
-        <div class="stock-card p-3 d-flex align-items-center gap-3 border-start border-4 border-success">
-            <div class="bg-success bg-opacity-10 text-success p-2 rounded-3 fs-3">
-                <i class="bi bi-basket3"></i>
-            </div>
-            <div>
-                <div class="text-muted small fw-bold text-uppercase">Feed Types</div>
-                <div class="fs-4 fw-800 text-dark">{{ total_feed_items }} <span class="fs-6 text-muted font-normal">items</span></div>
-            </div>
+{% if ns.low_alert_total > 0 %}
+<div class="alert alert-warning border-0 rounded-4 shadow-sm p-3 mb-4 d-flex align-items-center justify-content-between">
+    <div class="d-flex align-items-center gap-3">
+        <div class="bg-warning text-white p-2 rounded-3 fs-5">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+        </div>
+        <div>
+            <strong class="text-dark">Threshold Alert:</strong>
+            <span class="text-secondary small ms-1">{{ ns.low_alert_total }} item(s) are currently at or below minimum threshold alert levels across your inventory.</span>
         </div>
     </div>
-    <div class="col-6 col-md-3">
-        <div class="stock-card p-3 d-flex align-items-center gap-3 border-start border-4 border-primary">
-            <div class="bg-primary bg-opacity-10 text-primary p-2 rounded-3 fs-3">
-                <i class="bi bi-capsule"></i>
-            </div>
-            <div>
-                <div class="text-muted small fw-bold text-uppercase">Medicines</div>
-                <div class="fs-4 fw-800 text-dark">{{ total_med_items }} <span class="fs-6 text-muted font-normal">items</span></div>
-            </div>
-        </div>
-    </div>
-    <div class="col-6 col-md-3">
-        <div class="stock-card p-3 d-flex align-items-center gap-3 border-start border-4 border-info">
-            <div class="bg-info bg-opacity-10 text-info p-2 rounded-3 fs-3">
-                <i class="bi bi-patch-check"></i>
-            </div>
-            <div>
-                <div class="text-muted small fw-bold text-uppercase">Vaccines</div>
-                <div class="fs-4 fw-800 text-dark">{{ total_vac_items }} <span class="fs-6 text-muted font-normal">items</span></div>
-            </div>
-        </div>
-    </div>
-    <div class="col-6 col-md-3">
-        <div class="stock-card p-3 d-flex align-items-center gap-3 border-start border-4 {{ 'border-warning' if ns.low_stock_count > 0 else 'border-secondary' }}">
-            <div class="{{ 'bg-warning bg-opacity-10 text-warning' if ns.low_stock_count > 0 else 'bg-secondary bg-opacity-10 text-secondary' }} p-2 rounded-3 fs-3">
-                <i class="bi bi-exclamation-triangle"></i>
-            </div>
-            <div>
-                <div class="text-muted small fw-bold text-uppercase">Low / Out of Stock</div>
-                <div class="fs-4 fw-800 {{ 'text-warning' if ns.low_stock_count > 0 else 'text-dark' }}">{{ ns.low_stock_count }} <span class="fs-6 text-muted font-normal">alerts</span></div>
-            </div>
-        </div>
-    </div>
+    <span class="badge bg-warning text-dark rounded-pill px-3 py-2 fw-bold">{{ ns.low_alert_total }} Low Stock</span>
 </div>
+{% endif %}
 
-<!-- FILTER TABS & SEARCH BAR -->
-<div class="stock-card p-3 mb-4">
-    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
-        <div class="btn-group rounded-pill p-1 bg-light border" role="group">
-            <button type="button" class="btn btn-sm btn-success rounded-pill px-3 filter-btn active" data-filter="all" onclick="setCategoryFilter('all', this)">All Items</button>
-            <button type="button" class="btn btn-sm btn-outline-secondary border-0 rounded-pill px-3 filter-btn" data-filter="feed" onclick="setCategoryFilter('feed', this)">Feed Stock</button>
-            <button type="button" class="btn btn-sm btn-outline-secondary border-0 rounded-pill px-3 filter-btn" data-filter="medicine" onclick="setCategoryFilter('medicine', this)">Medicine Stock</button>
-            <button type="button" class="btn btn-sm btn-outline-secondary border-0 rounded-pill px-3 filter-btn" data-filter="vaccine" onclick="setCategoryFilter('vaccine', this)">Vaccine Stock</button>
-        </div>
-
-        <div class="position-relative style-search" style="min-width: 250px;">
-            <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
-            <input type="text" id="stockSearchInput" class="form-control form-control-sm ps-5 rounded-pill border-light bg-light" placeholder="Search stock items..." onkeyup="filterStockItems()">
-        </div>
-    </div>
-</div>
-
-<!-- STOCK CATEGORY SECTIONS -->
-
-<!-- 🌾 FEED STOCK CARD SECTION -->
-<div class="stock-card p-4 mb-4 stock-section" id="section-feed">
-    <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-2">
-        <div class="d-flex align-items-center gap-2">
-            <h5 class="fw-bold text-success mb-0"><i class="bi bi-basket3 me-2"></i>Feed Stock Items</h5>
-            <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-2.5 py-1 small">{{ feed_stocks|length }} items</span>
-        </div>
-        <button type="button" class="btn btn-sm btn-outline-success rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#quickBuyModal" data-type="feed" onclick="openBuyModal(this)">
-            <i class="bi bi-plus-lg me-1"></i>Add Feed Item
-        </button>
-    </div>
-
-    <div class="d-flex flex-column gap-2" id="feed-items-container">
-        {% for feed_name, stock in feed_stocks.items() %}
-        {% set is_low = stock.alert_level > 0 and stock.closing_stock <= stock.alert_level %}
-        {% set is_out = stock.closing_stock <= 0 %}
-        <div class="stock-item-row p-3 d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3 stock-item-node" 
-             data-name="{{ feed_name|lower }}" 
-             data-type="feed"
-             data-low="{{ 'true' if (is_low or is_out) else 'false' }}">
-            <div>
-                <div class="d-flex align-items-center gap-2 mb-1">
-                    <span class="category-badge cat-feed">Feed</span>
-                    <span class="fw-bold text-dark fs-5">{{ feed_name }}</span>
-                    {% if is_out %}
-                        <span class="badge-no-stock">Out of Stock</span>
-                    {% elif is_low %}
-                        <span class="badge-low-stock"><i class="bi bi-exclamation-triangle-fill me-1"></i>Low Stock</span>
-                    {% else %}
-                        <span class="badge-in-stock">In Stock</span>
-                    {% endif %}
+<!-- 3 MAIN CARDS CONTAINER -->
+<div class="row g-4 mb-4">
+    
+    <!-- ========================================== -->
+    <!-- CARD 1: FEED INVENTORY CARD -->
+    <!-- ========================================== -->
+    <div class="col-12 col-xl-4 col-lg-6">
+        <div class="inventory-card h-100 d-flex flex-column border">
+            <!-- Card Header -->
+            <div class="card-header-feed p-3.5 d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center gap-2.5">
+                    <div class="bg-white bg-opacity-20 p-2 rounded-3 text-white fs-4">
+                        <i class="bi bi-basket3-fill"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-800 text-white mb-0">Feed Inventory</h5>
+                        <small class="text-white-50">Grains, Fodder & Concentrates</small>
+                    </div>
                 </div>
-                <div class="text-muted small">
-                    Minimum Threshold: <span class="fw-semibold text-dark">{{ "%.1f"|format(stock.alert_level) if stock.alert_level else "Not Set" }}</span> {{ stock.unit }}
+                <div class="d-flex align-items-center gap-2">
+                    <span class="category-badge-chip" id="feed-count-badge">{{ total_feed }} Items</span>
                 </div>
             </div>
 
-            <div class="d-flex align-items-center gap-3">
-                <div class="text-end me-2">
-                    <span class="fs-4 fw-800 text-success">{{ "%.2f"|format(stock.closing_stock) }}</span>
-                    <span class="fs-6 fw-semibold text-muted ms-1">{{ stock.unit }}</span>
+            <!-- Card Controls (Search + Add) -->
+            <div class="p-3 bg-light border-bottom d-flex align-items-center gap-2">
+                <div class="input-group input-group-sm flex-grow-1">
+                    <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                    <input type="text" id="search-feed" class="form-control search-input-card border-start-0 ps-0" placeholder="Search feed items..." onkeyup="paginateCategory('feed')">
                 </div>
-                
-                <div class="d-flex align-items-center gap-1">
-                    <button type="button" class="btn btn-sm btn-outline-success rounded-pill px-2.5 fw-semibold" data-bs-toggle="modal" data-bs-target="#quickBuyModal" data-type="feed" data-name="{{ feed_name }}" data-unit="{{ stock.unit }}" title="Restock {{ feed_name }}" onclick="openBuyModal(this)">
-                        <i class="bi bi-cart-plus me-1"></i>Restock
-                    </button>
+                <button type="button" class="btn btn-sm btn-success rounded-pill px-3 fw-semibold text-nowrap" data-bs-toggle="modal" data-bs-target="#quickBuyModal" onclick="openBuyModal(null, 'feed')">
+                    <i class="bi bi-plus-lg me-1"></i>Add
+                </button>
+            </div>
+
+            <!-- Items List Container -->
+            <div class="p-3 flex-grow-1 d-flex flex-column gap-2" id="feed-list-container" style="min-height: 380px;">
+                {% for feed_name, stock in feed_stocks.items() %}
+                {% set is_low = stock.alert_level > 0 and stock.closing_stock <= stock.alert_level %}
+                {% set is_out = stock.closing_stock <= 0 %}
+                <div class="stock-item-row p-3 d-flex align-items-center justify-content-between gap-2 feed-item-node"
+                     data-name="{{ feed_name|lower }}"
+                     data-stock="{{ stock.closing_stock }}"
+                     data-unit="{{ stock.unit }}"
+                     data-limit="{{ stock.alert_level }}">
                     
-                    <button type="button" class="btn btn-sm btn-outline-warning rounded-pill px-2.5 fw-semibold text-dark" data-bs-toggle="modal" data-bs-target="#editStockModal" data-type="feed" data-name="{{ feed_name }}" data-stock="{{ stock.closing_stock }}" data-unit="{{ stock.unit }}" data-limit="{{ stock.alert_level }}" title="Edit {{ feed_name }}" onclick="openEditStockModal(this)">
-                        <i class="bi bi-pencil-square me-1"></i>Edit
-                    </button>
+                    <div class="flex-grow-1 min-w-0">
+                        <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+                            <span class="fw-bold text-dark fs-6 text-truncate" title="{{ feed_name }}">{{ feed_name }}</span>
+                            {% if is_out %}
+                                <span class="badge-out-stock">Out of Stock</span>
+                            {% elif is_low %}
+                                <span class="badge-low-stock"><i class="bi bi-exclamation-circle-fill me-1"></i>Low</span>
+                            {% else %}
+                                <span class="badge-ok-stock">OK</span>
+                            {% endif %}
+                        </div>
+                        <div class="text-muted small" style="font-size: 0.78rem;">
+                            Threshold: <span class="fw-semibold text-dark">{{ "%.1f"|format(stock.alert_level) if stock.alert_level else "0" }}</span> {{ stock.unit }}
+                        </div>
+                    </div>
 
-                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-2" data-bs-toggle="modal" data-bs-target="#limitModal" data-type="feed" data-name="{{ feed_name }}" data-limit="{{ stock.alert_level }}" data-unit="{{ stock.unit }}" title="Set Alert Threshold" onclick="openLimitModal(this)">
-                        <i class="bi bi-bell"></i>
-                    </button>
+                    <!-- Quantity -->
+                    <div class="stock-val-pill pe-2">
+                        <div class="fs-5 fw-800 text-success mb-0">{{ "%.2f"|format(stock.closing_stock) }}</div>
+                        <div class="text-muted fw-semibold" style="font-size: 0.72rem;">{{ stock.unit }}</div>
+                    </div>
 
-                    <a href="{{ url_for('voucher_add', v_type='feed', feed_name=feed_name, unit=stock.unit) }}" class="btn btn-sm btn-outline-secondary rounded-pill px-2" title="Full Purchase Voucher">
-                        <i class="bi bi-receipt"></i>
-                    </a>
-
-                    <form action="{{ url_for('delete_stock_item') }}" method="POST" class="d-inline" data-confirm="Are you sure you want to completely remove '{{ feed_name }}' and all its history from inventory?">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                        <input type="hidden" name="item_type" value="feed">
-                        <input type="hidden" name="item_name" value="{{ feed_name }}">
-                        <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-2" title="Delete {{ feed_name }}"><i class="bi bi-trash"></i></button>
-                    </form>
+                    <!-- Controls -->
+                    <div class="d-flex align-items-center gap-1">
+                        <!-- Restock -->
+                        <button type="button" class="btn btn-light btn-action-icon text-success border" title="Restock {{ feed_name }}" onclick="openBuyModal(this, 'feed')" data-name="{{ feed_name }}" data-unit="{{ stock.unit }}">
+                            <i class="bi bi-cart-plus"></i>
+                        </button>
+                        <!-- Edit -->
+                        <button type="button" class="btn btn-light btn-action-icon text-warning border" title="Edit {{ feed_name }}" onclick="openEditModal(this, 'feed')" data-name="{{ feed_name }}" data-stock="{{ stock.closing_stock }}" data-unit="{{ stock.unit }}" data-limit="{{ stock.alert_level }}">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <!-- Threshold -->
+                        <button type="button" class="btn btn-light btn-action-icon text-secondary border" title="Set Alert Threshold" onclick="openThresholdModal(this, 'feed')" data-name="{{ feed_name }}" data-limit="{{ stock.alert_level }}" data-unit="{{ stock.unit }}">
+                            <i class="bi bi-bell"></i>
+                        </button>
+                        <!-- Delete -->
+                        <form action="{{ url_for('delete_stock_item') }}" method="POST" class="d-inline" data-confirm="Are you sure you want to completely delete '{{ feed_name }}' and all associated inventory records?">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <input type="hidden" name="item_type" value="feed">
+                            <input type="hidden" name="item_name" value="{{ feed_name }}">
+                            <button type="submit" class="btn btn-light btn-action-icon text-danger border" title="Delete {{ feed_name }}">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </form>
+                    </div>
                 </div>
-            </div>
-        </div>
-        {% else %}
-            <div class="text-muted text-center py-4 bg-light rounded-3">No feed stock registered yet. Click "+ Add Stock Item" above to add your first feed.</div>
-        {% endfor %}
-    </div>
-</div>
-
-<!-- 💊 MEDICINE STOCK CARD SECTION -->
-<div class="stock-card p-4 mb-4 stock-section" id="section-medicine">
-    <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-2">
-        <div class="d-flex align-items-center gap-2">
-            <h5 class="fw-bold text-primary mb-0"><i class="bi bi-capsule me-2"></i>Medicine Stock Items</h5>
-            <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-2.5 py-1 small">{{ med_stocks|length }} items</span>
-        </div>
-        <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#quickBuyModal" data-type="medicine" onclick="openBuyModal(this)">
-            <i class="bi bi-plus-lg me-1"></i>Add Medicine Item
-        </button>
-    </div>
-
-    <div class="d-flex flex-column gap-2" id="medicine-items-container">
-        {% for med_name, stock in med_stocks.items() %}
-        {% set is_low = stock.alert_level > 0 and stock.closing_stock <= stock.alert_level %}
-        {% set is_out = stock.closing_stock <= 0 %}
-        <div class="stock-item-row p-3 d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3 stock-item-node" 
-             data-name="{{ med_name|lower }}" 
-             data-type="medicine"
-             data-low="{{ 'true' if (is_low or is_out) else 'false' }}">
-            <div>
-                <div class="d-flex align-items-center gap-2 mb-1">
-                    <span class="category-badge cat-medicine">Medicine</span>
-                    <span class="fw-bold text-dark fs-5">{{ med_name }}</span>
-                    {% if is_out %}
-                        <span class="badge-no-stock">Out of Stock</span>
-                    {% elif is_low %}
-                        <span class="badge-low-stock"><i class="bi bi-exclamation-triangle-fill me-1"></i>Low Stock</span>
-                    {% else %}
-                        <span class="badge-in-stock">In Stock</span>
-                    {% endif %}
+                {% else %}
+                <div class="text-muted text-center py-5 my-auto">
+                    <i class="bi bi-basket text-muted fs-1 d-block mb-2"></i>
+                    No feed items registered yet.<br>
+                    <button type="button" class="btn btn-sm btn-outline-success mt-2 rounded-pill" data-bs-toggle="modal" data-bs-target="#quickBuyModal" onclick="openBuyModal(null, 'feed')">+ Add First Feed</button>
                 </div>
-                <div class="text-muted small">
-                    Minimum Threshold: <span class="fw-semibold text-dark">{{ "%.1f"|format(stock.alert_level) if stock.alert_level else "Not Set" }}</span> {{ stock.unit }}
+                {% endfor %}
+                <div id="feed-no-results" class="text-muted text-center py-5 d-none my-auto">
+                    <i class="bi bi-search fs-2 d-block mb-1 text-muted"></i>
+                    No matching feed items found.
                 </div>
             </div>
 
-            <div class="d-flex align-items-center gap-3">
-                <div class="text-end me-2">
-                    <span class="fs-4 fw-800 text-primary">{{ "%.2f"|format(stock.closing_stock) }}</span>
-                    <span class="fs-6 fw-semibold text-muted ms-1">{{ stock.unit }}</span>
+            <!-- Card Pagination Footer -->
+            <div class="p-2.5 px-3 bg-light border-top d-flex align-items-center justify-content-between card-pagination" id="feed-pagination-bar">
+                <span class="text-muted small" id="feed-page-info">Showing 0-0</span>
+                <div class="btn-group btn-group-sm">
+                    <button type="button" class="btn btn-outline-secondary" id="feed-prev-btn" onclick="changePage('feed', -1)"><i class="bi bi-chevron-left"></i></button>
+                    <button type="button" class="btn btn-outline-secondary" id="feed-next-btn" onclick="changePage('feed', 1)"><i class="bi bi-chevron-right"></i></button>
                 </div>
-                
-                <div class="d-flex align-items-center gap-1">
-                    <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-2.5 fw-semibold" data-bs-toggle="modal" data-bs-target="#quickBuyModal" data-type="medicine" data-name="{{ med_name }}" data-unit="{{ stock.unit }}" title="Restock {{ med_name }}" onclick="openBuyModal(this)">
-                        <i class="bi bi-cart-plus me-1"></i>Restock
-                    </button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- CARD 2: MEDICINE INVENTORY CARD -->
+    <!-- ========================================== -->
+    <div class="col-12 col-xl-4 col-lg-6">
+        <div class="inventory-card h-100 d-flex flex-column border">
+            <!-- Card Header -->
+            <div class="card-header-medicine p-3.5 d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center gap-2.5">
+                    <div class="bg-white bg-opacity-20 p-2 rounded-3 text-white fs-4">
+                        <i class="bi bi-capsule"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-800 text-white mb-0">Medicine Inventory</h5>
+                        <small class="text-white-50">Antibiotics, Tonics & Tablets</small>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="category-badge-chip" id="medicine-count-badge">{{ total_med }} Items</span>
+                </div>
+            </div>
+
+            <!-- Card Controls (Search + Add) -->
+            <div class="p-3 bg-light border-bottom d-flex align-items-center gap-2">
+                <div class="input-group input-group-sm flex-grow-1">
+                    <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                    <input type="text" id="search-medicine" class="form-control search-input-card border-start-0 ps-0" placeholder="Search medicine items..." onkeyup="paginateCategory('medicine')">
+                </div>
+                <button type="button" class="btn btn-sm btn-primary rounded-pill px-3 fw-semibold text-nowrap" data-bs-toggle="modal" data-bs-target="#quickBuyModal" onclick="openBuyModal(null, 'medicine')">
+                    <i class="bi bi-plus-lg me-1"></i>Add
+                </button>
+            </div>
+
+            <!-- Items List Container -->
+            <div class="p-3 flex-grow-1 d-flex flex-column gap-2" id="medicine-list-container" style="min-height: 380px;">
+                {% for med_name, stock in med_stocks.items() %}
+                {% set is_low = stock.alert_level > 0 and stock.closing_stock <= stock.alert_level %}
+                {% set is_out = stock.closing_stock <= 0 %}
+                <div class="stock-item-row p-3 d-flex align-items-center justify-content-between gap-2 medicine-item-node"
+                     data-name="{{ med_name|lower }}"
+                     data-stock="{{ stock.closing_stock }}"
+                     data-unit="{{ stock.unit }}"
+                     data-limit="{{ stock.alert_level }}">
                     
-                    <button type="button" class="btn btn-sm btn-outline-warning rounded-pill px-2.5 fw-semibold text-dark" data-bs-toggle="modal" data-bs-target="#editStockModal" data-type="medicine" data-name="{{ med_name }}" data-stock="{{ stock.closing_stock }}" data-unit="{{ stock.unit }}" data-limit="{{ stock.alert_level }}" title="Edit {{ med_name }}" onclick="openEditStockModal(this)">
-                        <i class="bi bi-pencil-square me-1"></i>Edit
-                    </button>
+                    <div class="flex-grow-1 min-w-0">
+                        <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+                            <span class="fw-bold text-dark fs-6 text-truncate" title="{{ med_name }}">{{ med_name }}</span>
+                            {% if is_out %}
+                                <span class="badge-out-stock">Out of Stock</span>
+                            {% elif is_low %}
+                                <span class="badge-low-stock"><i class="bi bi-exclamation-circle-fill me-1"></i>Low</span>
+                            {% else %}
+                                <span class="badge-ok-stock">OK</span>
+                            {% endif %}
+                        </div>
+                        <div class="text-muted small" style="font-size: 0.78rem;">
+                            Threshold: <span class="fw-semibold text-dark">{{ "%.1f"|format(stock.alert_level) if stock.alert_level else "0" }}</span> {{ stock.unit }}
+                        </div>
+                    </div>
 
-                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-2" data-bs-toggle="modal" data-bs-target="#limitModal" data-type="medicine" data-name="{{ med_name }}" data-limit="{{ stock.alert_level }}" data-unit="{{ stock.unit }}" title="Set Alert Threshold" onclick="openLimitModal(this)">
-                        <i class="bi bi-bell"></i>
-                    </button>
+                    <!-- Quantity -->
+                    <div class="stock-val-pill pe-2">
+                        <div class="fs-5 fw-800 text-primary mb-0">{{ "%.2f"|format(stock.closing_stock) }}</div>
+                        <div class="text-muted fw-semibold" style="font-size: 0.72rem;">{{ stock.unit }}</div>
+                    </div>
 
-                    <a href="{{ url_for('voucher_add', v_type='health', sub_type='medicine', health_name=med_name, dose_unit=stock.unit) }}" class="btn btn-sm btn-outline-secondary rounded-pill px-2" title="Full Purchase Voucher">
-                        <i class="bi bi-receipt"></i>
-                    </a>
-
-                    <form action="{{ url_for('delete_stock_item') }}" method="POST" class="d-inline" data-confirm="Are you sure you want to completely remove '{{ med_name }}' and all its history from inventory?">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                        <input type="hidden" name="item_type" value="medicine">
-                        <input type="hidden" name="item_name" value="{{ med_name }}">
-                        <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-2" title="Delete {{ med_name }}"><i class="bi bi-trash"></i></button>
-                    </form>
+                    <!-- Controls -->
+                    <div class="d-flex align-items-center gap-1">
+                        <!-- Restock -->
+                        <button type="button" class="btn btn-light btn-action-icon text-primary border" title="Restock {{ med_name }}" onclick="openBuyModal(this, 'medicine')" data-name="{{ med_name }}" data-unit="{{ stock.unit }}">
+                            <i class="bi bi-cart-plus"></i>
+                        </button>
+                        <!-- Edit -->
+                        <button type="button" class="btn btn-light btn-action-icon text-warning border" title="Edit {{ med_name }}" onclick="openEditModal(this, 'medicine')" data-name="{{ med_name }}" data-stock="{{ stock.closing_stock }}" data-unit="{{ stock.unit }}" data-limit="{{ stock.alert_level }}">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <!-- Threshold -->
+                        <button type="button" class="btn btn-light btn-action-icon text-secondary border" title="Set Alert Threshold" onclick="openThresholdModal(this, 'medicine')" data-name="{{ med_name }}" data-limit="{{ stock.alert_level }}" data-unit="{{ stock.unit }}">
+                            <i class="bi bi-bell"></i>
+                        </button>
+                        <!-- Delete -->
+                        <form action="{{ url_for('delete_stock_item') }}" method="POST" class="d-inline" data-confirm="Are you sure you want to completely delete '{{ med_name }}' and all associated inventory records?">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <input type="hidden" name="item_type" value="medicine">
+                            <input type="hidden" name="item_name" value="{{ med_name }}">
+                            <button type="submit" class="btn btn-light btn-action-icon text-danger border" title="Delete {{ med_name }}">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </form>
+                    </div>
                 </div>
-            </div>
-        </div>
-        {% else %}
-            <div class="text-muted text-center py-4 bg-light rounded-3">No medicine stock registered yet. Click "+ Add Stock Item" above to add medicine.</div>
-        {% endfor %}
-    </div>
-</div>
-
-<!-- 💉 VACCINE STOCK CARD SECTION -->
-<div class="stock-card p-4 mb-4 stock-section" id="section-vaccine">
-    <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-2">
-        <div class="d-flex align-items-center gap-2">
-            <h5 class="fw-bold text-info mb-0"><i class="bi bi-patch-check me-2"></i>Vaccine Stock Items</h5>
-            <span class="badge bg-info bg-opacity-10 text-info rounded-pill px-2.5 py-1 small">{{ vac_stocks|length }} items</span>
-        </div>
-        <button type="button" class="btn btn-sm btn-outline-info rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#quickBuyModal" data-type="vaccine" onclick="openBuyModal(this)">
-            <i class="bi bi-plus-lg me-1"></i>Add Vaccine Item
-        </button>
-    </div>
-
-    <div class="d-flex flex-column gap-2" id="vaccine-items-container">
-        {% for vac_name, stock in vac_stocks.items() %}
-        {% set is_low = stock.alert_level > 0 and stock.closing_stock <= stock.alert_level %}
-        {% set is_out = stock.closing_stock <= 0 %}
-        <div class="stock-item-row p-3 d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3 stock-item-node" 
-             data-name="{{ vac_name|lower }}" 
-             data-type="vaccine"
-             data-low="{{ 'true' if (is_low or is_out) else 'false' }}">
-            <div>
-                <div class="d-flex align-items-center gap-2 mb-1">
-                    <span class="category-badge cat-vaccine">Vaccine</span>
-                    <span class="fw-bold text-dark fs-5">{{ vac_name }}</span>
-                    {% if is_out %}
-                        <span class="badge-no-stock">Out of Stock</span>
-                    {% elif is_low %}
-                        <span class="badge-low-stock"><i class="bi bi-exclamation-triangle-fill me-1"></i>Low Stock</span>
-                    {% else %}
-                        <span class="badge-in-stock">In Stock</span>
-                    {% endif %}
+                {% else %}
+                <div class="text-muted text-center py-5 my-auto">
+                    <i class="bi bi-capsule text-muted fs-1 d-block mb-2"></i>
+                    No medicine items registered yet.<br>
+                    <button type="button" class="btn btn-sm btn-outline-primary mt-2 rounded-pill" data-bs-toggle="modal" data-bs-target="#quickBuyModal" onclick="openBuyModal(null, 'medicine')">+ Add First Medicine</button>
                 </div>
-                <div class="text-muted small">
-                    Minimum Threshold: <span class="fw-semibold text-dark">{{ "%.1f"|format(stock.alert_level) if stock.alert_level else "Not Set" }}</span> {{ stock.unit }}
+                {% endfor %}
+                <div id="medicine-no-results" class="text-muted text-center py-5 d-none my-auto">
+                    <i class="bi bi-search fs-2 d-block mb-1 text-muted"></i>
+                    No matching medicine items found.
                 </div>
             </div>
 
-            <div class="d-flex align-items-center gap-3">
-                <div class="text-end me-2">
-                    <span class="fs-4 fw-800 text-info">{{ "%.2f"|format(stock.closing_stock) }}</span>
-                    <span class="fs-6 fw-semibold text-muted ms-1">{{ stock.unit }}</span>
+            <!-- Card Pagination Footer -->
+            <div class="p-2.5 px-3 bg-light border-top d-flex align-items-center justify-content-between card-pagination" id="medicine-pagination-bar">
+                <span class="text-muted small" id="medicine-page-info">Showing 0-0</span>
+                <div class="btn-group btn-group-sm">
+                    <button type="button" class="btn btn-outline-secondary" id="medicine-prev-btn" onclick="changePage('medicine', -1)"><i class="bi bi-chevron-left"></i></button>
+                    <button type="button" class="btn btn-outline-secondary" id="medicine-next-btn" onclick="changePage('medicine', 1)"><i class="bi bi-chevron-right"></i></button>
                 </div>
-                
-                <div class="d-flex align-items-center gap-1">
-                    <button type="button" class="btn btn-sm btn-outline-info rounded-pill px-2.5 fw-semibold" data-bs-toggle="modal" data-bs-target="#quickBuyModal" data-type="vaccine" data-name="{{ vac_name }}" data-unit="{{ stock.unit }}" title="Restock {{ vac_name }}" onclick="openBuyModal(this)">
-                        <i class="bi bi-cart-plus me-1"></i>Restock
-                    </button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- CARD 3: VACCINE INVENTORY CARD -->
+    <!-- ========================================== -->
+    <div class="col-12 col-xl-4 col-lg-12">
+        <div class="inventory-card h-100 d-flex flex-column border">
+            <!-- Card Header -->
+            <div class="card-header-vaccine p-3.5 d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center gap-2.5">
+                    <div class="bg-white bg-opacity-20 p-2 rounded-3 text-white fs-4">
+                        <i class="bi bi-patch-check-fill"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-800 text-white mb-0">Vaccine Inventory</h5>
+                        <small class="text-white-50">PPR, ET, FMD & Injections</small>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="category-badge-chip" id="vaccine-count-badge">{{ total_vac }} Items</span>
+                </div>
+            </div>
+
+            <!-- Card Controls (Search + Add) -->
+            <div class="p-3 bg-light border-bottom d-flex align-items-center gap-2">
+                <div class="input-group input-group-sm flex-grow-1">
+                    <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                    <input type="text" id="search-vaccine" class="form-control search-input-card border-start-0 ps-0" placeholder="Search vaccine items..." onkeyup="paginateCategory('vaccine')">
+                </div>
+                <button type="button" class="btn btn-sm btn-info text-white rounded-pill px-3 fw-semibold text-nowrap" data-bs-toggle="modal" data-bs-target="#quickBuyModal" onclick="openBuyModal(null, 'vaccine')">
+                    <i class="bi bi-plus-lg me-1"></i>Add
+                </button>
+            </div>
+
+            <!-- Items List Container -->
+            <div class="p-3 flex-grow-1 d-flex flex-column gap-2" id="vaccine-list-container" style="min-height: 380px;">
+                {% for vac_name, stock in vac_stocks.items() %}
+                {% set is_low = stock.alert_level > 0 and stock.closing_stock <= stock.alert_level %}
+                {% set is_out = stock.closing_stock <= 0 %}
+                <div class="stock-item-row p-3 d-flex align-items-center justify-content-between gap-2 vaccine-item-node"
+                     data-name="{{ vac_name|lower }}"
+                     data-stock="{{ stock.closing_stock }}"
+                     data-unit="{{ stock.unit }}"
+                     data-limit="{{ stock.alert_level }}">
                     
-                    <button type="button" class="btn btn-sm btn-outline-warning rounded-pill px-2.5 fw-semibold text-dark" data-bs-toggle="modal" data-bs-target="#editStockModal" data-type="vaccine" data-name="{{ vac_name }}" data-stock="{{ stock.closing_stock }}" data-unit="{{ stock.unit }}" data-limit="{{ stock.alert_level }}" title="Edit {{ vac_name }}" onclick="openEditStockModal(this)">
-                        <i class="bi bi-pencil-square me-1"></i>Edit
-                    </button>
+                    <div class="flex-grow-1 min-w-0">
+                        <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+                            <span class="fw-bold text-dark fs-6 text-truncate" title="{{ vac_name }}">{{ vac_name }}</span>
+                            {% if is_out %}
+                                <span class="badge-out-stock">Out of Stock</span>
+                            {% elif is_low %}
+                                <span class="badge-low-stock"><i class="bi bi-exclamation-circle-fill me-1"></i>Low</span>
+                            {% else %}
+                                <span class="badge-ok-stock">OK</span>
+                            {% endif %}
+                        </div>
+                        <div class="text-muted small" style="font-size: 0.78rem;">
+                            Threshold: <span class="fw-semibold text-dark">{{ "%.1f"|format(stock.alert_level) if stock.alert_level else "0" }}</span> {{ stock.unit }}
+                        </div>
+                    </div>
 
-                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-2" data-bs-toggle="modal" data-bs-target="#limitModal" data-type="vaccine" data-name="{{ vac_name }}" data-limit="{{ stock.alert_level }}" data-unit="{{ stock.unit }}" title="Set Alert Threshold" onclick="openLimitModal(this)">
-                        <i class="bi bi-bell"></i>
-                    </button>
+                    <!-- Quantity -->
+                    <div class="stock-val-pill pe-2">
+                        <div class="fs-5 fw-800 text-info mb-0">{{ "%.2f"|format(stock.closing_stock) }}</div>
+                        <div class="text-muted fw-semibold" style="font-size: 0.72rem;">{{ stock.unit }}</div>
+                    </div>
 
-                    <a href="{{ url_for('voucher_add', v_type='health', sub_type='vaccine', health_name=vac_name, unit=stock.unit) }}" class="btn btn-sm btn-outline-secondary rounded-pill px-2" title="Full Purchase Voucher">
-                        <i class="bi bi-receipt"></i>
-                    </a>
+                    <!-- Controls -->
+                    <div class="d-flex align-items-center gap-1">
+                        <!-- Restock -->
+                        <button type="button" class="btn btn-light btn-action-icon text-info border" title="Restock {{ vac_name }}" onclick="openBuyModal(this, 'vaccine')" data-name="{{ vac_name }}" data-unit="{{ stock.unit }}">
+                            <i class="bi bi-cart-plus"></i>
+                        </button>
+                        <!-- Edit -->
+                        <button type="button" class="btn btn-light btn-action-icon text-warning border" title="Edit {{ vac_name }}" onclick="openEditModal(this, 'vaccine')" data-name="{{ vac_name }}" data-stock="{{ stock.closing_stock }}" data-unit="{{ stock.unit }}" data-limit="{{ stock.alert_level }}">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <!-- Threshold -->
+                        <button type="button" class="btn btn-light btn-action-icon text-secondary border" title="Set Alert Threshold" onclick="openThresholdModal(this, 'vaccine')" data-name="{{ vac_name }}" data-limit="{{ stock.alert_level }}" data-unit="{{ stock.unit }}">
+                            <i class="bi bi-bell"></i>
+                        </button>
+                        <!-- Delete -->
+                        <form action="{{ url_for('delete_stock_item') }}" method="POST" class="d-inline" data-confirm="Are you sure you want to completely delete '{{ vac_name }}' and all associated inventory records?">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <input type="hidden" name="item_type" value="vaccine">
+                            <input type="hidden" name="item_name" value="{{ vac_name }}">
+                            <button type="submit" class="btn btn-light btn-action-icon text-danger border" title="Delete {{ vac_name }}">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {% else %}
+                <div class="text-muted text-center py-5 my-auto">
+                    <i class="bi bi-patch-check text-muted fs-1 d-block mb-2"></i>
+                    No vaccine items registered yet.<br>
+                    <button type="button" class="btn btn-sm btn-outline-info mt-2 rounded-pill" data-bs-toggle="modal" data-bs-target="#quickBuyModal" onclick="openBuyModal(null, 'vaccine')">+ Add First Vaccine</button>
+                </div>
+                {% endfor %}
+                <div id="vaccine-no-results" class="text-muted text-center py-5 d-none my-auto">
+                    <i class="bi bi-search fs-2 d-block mb-1 text-muted"></i>
+                    No matching vaccine items found.
+                </div>
+            </div>
 
-                    <form action="{{ url_for('delete_stock_item') }}" method="POST" class="d-inline" data-confirm="Are you sure you want to completely remove '{{ vac_name }}' and all its history from inventory?">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                        <input type="hidden" name="item_type" value="vaccine">
-                        <input type="hidden" name="item_name" value="{{ vac_name }}">
-                        <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-2" title="Delete {{ vac_name }}"><i class="bi bi-trash"></i></button>
-                    </form>
+            <!-- Card Pagination Footer -->
+            <div class="p-2.5 px-3 bg-light border-top d-flex align-items-center justify-content-between card-pagination" id="vaccine-pagination-bar">
+                <span class="text-muted small" id="vaccine-page-info">Showing 0-0</span>
+                <div class="btn-group btn-group-sm">
+                    <button type="button" class="btn btn-outline-secondary" id="vaccine-prev-btn" onclick="changePage('vaccine', -1)"><i class="bi bi-chevron-left"></i></button>
+                    <button type="button" class="btn btn-outline-secondary" id="vaccine-next-btn" onclick="changePage('vaccine', 1)"><i class="bi bi-chevron-right"></i></button>
                 </div>
             </div>
         </div>
-        {% else %}
-            <div class="text-muted text-center py-4 bg-light rounded-3">No vaccine stock registered yet. Click "+ Add Stock Item" above to add vaccine.</div>
-        {% endfor %}
     </div>
+
 </div>
 
 
-<!-- 🛒 MODAL 1: ADD / RESTOCK ITEM MODAL -->
+<!-- ========================================== -->
+<!-- MODAL 1: ADD / RESTOCK ITEM -->
+<!-- ========================================== -->
 <div class="modal fade" id="quickBuyModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <form action="{{ url_for('buy_stock') }}" method="POST">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <div class="modal-content border-0 shadow-lg rounded-4">
-                <div class="modal-header text-white bg-success" id="buyModalHeader">
+    <div class="modal-dialog modal-dialog-centered">
+        <form action="{{ url_for('buy_stock') }}" method="POST" class="w-100">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+                <div class="modal-header text-white" id="buyModalHeader" style="background: #10b981;">
                     <h5 class="modal-title fw-bold" id="buyModalTitle"><i class="bi bi-box-seam me-2"></i>Add / Restock Stock Item</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body p-4">
-                    
                     <div class="mb-3">
-                        <label class="form-label small text-muted fw-bold">Stock Item Category <span class="text-danger">*</span></label>
-                        <select name="item_type" id="buy_item_type" class="form-select" onchange="updateBuyUnit()" required>
-                            <option value="feed">Feed Stock</option>
-                            <option value="medicine">Medicine Stock</option>
-                            <option value="vaccine">Vaccine Stock</option>
+                        <label class="form-label small text-muted fw-bold">Category <span class="text-danger">*</span></label>
+                        <select name="item_type" id="buy_item_type" class="form-select" onchange="onBuyCategoryChange()" required>
+                            <option value="feed">Feed</option>
+                            <option value="medicine">Medicine</option>
+                            <option value="vaccine">Vaccine</option>
                         </select>
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label small text-muted fw-bold">Item Name <span class="text-danger">*</span></label>
-                        <input type="text" name="item_name" id="buy_item_name" class="form-control" list="existing_stock_list" placeholder="Enter stock item name..." required onchange="onItemNameChange(this.value)">
-                        <datalist id="existing_stock_list">
-                            <!-- Populated dynamically via JS -->
-                        </datalist>
-                        <div class="form-text text-muted" style="font-size: 0.8rem;">Type a new name or select existing item to add quantity.</div>
+                        <input type="text" name="item_name" id="buy_item_name" class="form-control" list="buy_item_datalist" placeholder="e.g. Maize Powder / Paracetamol / PPR..." required oninput="onBuyNameInput(this.value)">
+                        <datalist id="buy_item_datalist"></datalist>
+                        <div class="form-text text-muted" style="font-size: 0.78rem;">Type a new item name or select an existing item to restock.</div>
                     </div>
-                    
-                    <div class="mb-3">
-                        <label class="form-label small text-muted fw-bold">Quantity & Unit of Measure <span class="text-danger">*</span></label>
-                        <div class="input-group mb-1">
-                            <input type="number" step="0.01" name="quantity" class="form-control" placeholder="0.00" required>
-                            <select name="unit" class="form-select bg-light border" id="buy_unit_select" style="max-width: 170px;">
-                                {% if expense_units %}
-                                    {% for u in expense_units %}
-                                        <option value="{{ u.unit_name }}">{{ u.unit_name }}{% if u.unit_symbol and u.unit_symbol != u.unit_name %} ({{ u.unit_symbol }}){% endif %}</option>
-                                    {% endfor %}
-                                {% else %}
-                                    <option value="KG">KG (Kilograms)</option>
-                                    <option value="ML">ML (Millilitres)</option>
-                                    <option value="Doses">Doses</option>
-                                    <option value="Bags">Bags</option>
-                                    <option value="Grams">Grams (g)</option>
-                                    <option value="Litres">Litres (L)</option>
-                                {% endif %}
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-7">
+                            <label class="form-label small text-muted fw-bold">Quantity <span class="text-danger">*</span></label>
+                            <input type="number" step="0.01" min="0.01" name="quantity" class="form-control" placeholder="0.00" required>
+                        </div>
+                        <div class="col-5">
+                            <label class="form-label small text-muted fw-bold">Unit of Measure <span class="text-danger">*</span></label>
+                            <select name="unit" id="buy_unit_select" class="form-select" required>
+                                <!-- Loaded dynamically from Expense Master units -->
                             </select>
                         </div>
-                        <div class="form-text text-muted" style="font-size: 0.8rem;">
-                            Units synced from <a href="{{ url_for('expense_units_view') }}" target="_blank" class="text-decoration-none fw-semibold"><i class="bi bi-rulers me-1"></i>Expenses Master</a>.
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label small text-muted fw-bold">Total Cost (₹) <span class="text-danger">*</span></label>
+                            <input type="number" step="0.01" min="0" name="cost" class="form-control" placeholder="0.00" required>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small text-muted fw-bold">Purchase Date <span class="text-danger">*</span></label>
+                            <input type="date" name="purchase_date" id="buy_purchase_date" class="form-control" required>
                         </div>
                     </div>
-                    
-                    <div class="mb-3">
-                        <label class="form-label small text-muted fw-bold">Total Cost (₹) <span class="text-muted font-normal">(Optional)</span></label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-light border">₹</span>
-                            <input type="number" step="0.01" name="cost" class="form-control" placeholder="0.00" value="0.00">
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label small text-muted fw-bold">Supplier / Vendor</label>
+                            <input type="text" name="supplier" class="form-control" placeholder="Market / Vendor Name">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small text-muted fw-bold">Min Threshold Alert</label>
+                            <input type="number" step="0.01" min="0" name="alert_limit" id="buy_alert_limit" class="form-control" placeholder="e.g. 10.00">
                         </div>
                     </div>
-
-                    <div class="mb-3">
-                        <label class="form-label small text-muted fw-bold">Supplier / Vendor <span class="text-muted font-normal">(Optional)</span></label>
-                        <input type="text" name="supplier" class="form-control" placeholder="e.g. Local Agro Market / Veterinary Supplier">
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label small text-muted fw-bold">Stock Date</label>
-                        <input type="date" name="purchase_date" id="purchase_date" class="form-control" required>
-                    </div>
-
-                    <div class="mb-3 border-top pt-2">
-                        <label class="form-label small text-muted fw-bold"><i class="bi bi-bell-fill text-warning me-1"></i>Low Stock Reminder Limit <span class="text-muted font-normal">(Optional)</span></label>
-                        <input type="number" step="0.01" name="alert_limit" class="form-control" placeholder="Trigger notification when stock reaches this limit">
-                    </div>
-
                 </div>
-                <div class="modal-footer border-0">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-success px-4 fw-bold"><i class="bi bi-check-circle me-1"></i>Save Stock Item</button>
+                <div class="modal-footer bg-light px-4 py-3 border-0">
+                    <button type="button" class="btn btn-outline-secondary rounded-pill px-3" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success rounded-pill px-4 fw-semibold" id="buy_submit_btn">Save & Update Stock</button>
                 </div>
             </div>
         </form>
@@ -496,121 +618,53 @@
 </div>
 
 
-<!-- ✏️ MODAL 2: EDIT STOCK ITEM MODAL -->
+<!-- ========================================== -->
+<!-- MODAL 2: EDIT STOCK ITEM (PRE-FILLED) -->
+<!-- ========================================== -->
 <div class="modal fade" id="editStockModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <form action="{{ url_for('edit_stock_item') }}" method="POST">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <div class="modal-content border-0 shadow-lg rounded-4">
-                <div class="modal-header text-white bg-warning text-dark" id="editModalHeader">
-                    <h5 class="modal-title fw-bold text-dark" id="editModalTitle"><i class="bi bi-pencil-square me-2"></i>Edit Stock Item</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body p-4">
-                    <input type="hidden" name="item_type" id="edit_item_type">
-                    <input type="hidden" name="old_item_name" id="edit_old_item_name">
-                    
-                    <div class="mb-3">
-                        <label class="form-label small text-muted fw-bold">Item Name <span class="text-danger">*</span></label>
-                        <input type="text" name="item_name" id="edit_item_name" class="form-control" required placeholder="Item Name">
-                    </div>
+    <div class="modal-dialog modal-dialog-centered">
+        <form action="{{ url_for('edit_stock_item') }}" method="POST" class="w-100">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="item_type" id="edit_item_type">
+            <input type="hidden" name="old_item_name" id="edit_old_item_name">
 
-                    <div class="mb-3">
-                        <label class="form-label small text-muted fw-bold">Current Closing Stock Quantity <span class="text-danger">*</span></label>
-                        <div class="input-group mb-1">
-                            <input type="number" step="0.01" name="closing_stock" id="edit_closing_stock" class="form-control" placeholder="0.00" required>
-                            <span class="input-group-text bg-light border" id="edit_stock_unit_label">Unit</span>
-                        </div>
-                        <div class="form-text text-muted" style="font-size: 0.8rem;">Adjust current total available quantity balance in stock.</div>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label class="form-label small text-muted fw-bold">Units of measure in the expenses master <span class="text-danger">*</span></label>
-                        <select name="unit" id="edit_unit_select" class="form-select mb-1" onchange="handleEditUnitChange()">
-                            {% if expense_units %}
-                                {% for u in expense_units %}
-                                    <option value="{{ u.unit_name }}">{{ u.unit_name }}{% if u.unit_symbol and u.unit_symbol != u.unit_name %} ({{ u.unit_symbol }}){% endif %}</option>
-                                {% endfor %}
-                            {% else %}
-                                <option value="KG">KG (Kilograms)</option>
-                                <option value="ML">ML (Millilitres)</option>
-                                <option value="Doses">Doses</option>
-                                <option value="Bags">Bags</option>
-                                <option value="Grams">Grams (g)</option>
-                                <option value="Litres">Litres (L)</option>
-                            {% endif %}
-                        </select>
-                        <div class="form-text text-muted" style="font-size: 0.8rem;">
-                            Units synced from <a href="{{ url_for('expense_units_view') }}" target="_blank" class="text-decoration-none fw-semibold"><i class="bi bi-rulers me-1"></i>Expenses Master</a>.
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label small text-muted fw-bold"><i class="bi bi-bell-fill text-warning me-1"></i>Low Stock Reminder Limit</label>
-                        <div class="input-group mb-1">
-                            <input type="number" step="0.01" name="alert_limit" id="edit_alert_limit" class="form-control" placeholder="0.00">
-                            <span class="input-group-text bg-light border" id="edit_alert_unit_label">Unit</span>
-                        </div>
-                        <div class="form-text text-muted" style="font-size: 0.8rem;">Alert notification triggers when stock falls at or below this level.</div>
-                    </div>
-
-                </div>
-                <div class="modal-footer border-0">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-warning px-4 fw-bold text-dark"><i class="bi bi-check-lg me-1"></i>Save Changes</button>
-                </div>
-            </div>
-        </form>
-    </div>
-</div>
-
-
-<!-- 🔔 MODAL 3: SET ALERT LIMIT MODAL -->
-<div class="modal fade" id="limitModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <form action="{{ url_for('update_stock_limit') }}" method="POST">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <div class="modal-content border-0 shadow-lg rounded-4">
-                <div class="modal-header text-white bg-dark">
-                    <h5 class="modal-title fw-bold"><i class="bi bi-gear-fill me-2"></i>Stock Unit & Alert Settings</h5>
+            <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+                <div class="modal-header text-white" id="editModalHeader" style="background: #f59e0b;">
+                    <h5 class="modal-title fw-bold" id="editModalTitle"><i class="bi bi-pencil-square me-2"></i>Edit Stock Item</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body p-4">
-                    <input type="hidden" name="item_type" id="limit_item_type">
-                    <input type="hidden" name="item_name" id="limit_item_name">
-                    
                     <div class="mb-3">
-                        <label class="form-label small text-muted fw-bold">Units of measure in the expenses master</label>
-                        <select name="unit" id="limit_unit_select" class="form-select mb-1">
-                            {% if expense_units %}
-                                {% for u in expense_units %}
-                                    <option value="{{ u.unit_name }}">{{ u.unit_name }}{% if u.unit_symbol and u.unit_symbol != u.unit_name %} ({{ u.unit_symbol }}){% endif %}</option>
-                                {% endfor %}
-                            {% else %}
-                                <option value="KG">KG (Kilograms)</option>
-                                <option value="ML">ML (Millilitres)</option>
-                                <option value="Doses">Doses</option>
-                                <option value="Bags">Bags</option>
-                                <option value="Grams">Grams (g)</option>
-                                <option value="Litres">Litres (L)</option>
-                            {% endif %}
-                        </select>
-                        <div class="form-text text-muted" style="font-size: 0.8rem;">
-                            Units synced from <a href="{{ url_for('expense_units_view') }}" target="_blank" class="text-decoration-none fw-semibold"><i class="bi bi-rulers me-1"></i>Expenses Master</a>.
+                        <label class="form-label small text-muted fw-bold">Item Name <span class="text-danger">*</span></label>
+                        <input type="text" name="item_name" id="edit_item_name" class="form-control" required>
+                        <div class="form-text text-muted" style="font-size: 0.78rem;">Renaming updates this item's historical ledger and allocations.</div>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label small text-muted fw-bold">Current Closing Stock <span class="text-danger">*</span></label>
+                            <input type="number" step="0.01" name="closing_stock" id="edit_closing_stock" class="form-control" required>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small text-muted fw-bold">Unit of Measure (Expense Master)</label>
+                            <select name="unit" id="edit_unit_select" class="form-select" required>
+                                <!-- Loaded from Expense Master units -->
+                            </select>
                         </div>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label small text-muted fw-bold">Reminder Threshold Limit</label>
+                        <label class="form-label small text-muted fw-bold">Minimum Threshold Alert Level</label>
                         <div class="input-group">
-                            <input type="number" step="0.01" name="limit" id="limit_val" class="form-control" placeholder="0.00" required>
-                            <span class="input-group-text bg-light border" id="limit_unit_label">KG</span>
+                            <input type="number" step="0.01" min="0" name="alert_limit" id="edit_alert_limit" class="form-control" placeholder="0.00">
+                            <span class="input-group-text bg-light text-muted small" id="edit_unit_display">Unit</span>
                         </div>
+                        <div class="form-text text-muted" style="font-size: 0.78rem;">Receive a low stock warning when quantity is at or below this value.</div>
                     </div>
                 </div>
-                <div class="modal-footer border-0">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-dark px-4">Save Alert Settings</button>
+                <div class="modal-footer bg-light px-4 py-3 border-0">
+                    <button type="button" class="btn btn-outline-secondary rounded-pill px-3" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-warning rounded-pill px-4 fw-bold text-dark">Save Changes</button>
                 </div>
             </div>
         </form>
@@ -618,363 +672,392 @@
 </div>
 
 
-<!-- JSON STOCKS DATA -->
-<script id="stocks-data" type="application/json" nonce="{{ csp_nonce }}">
-{
-    "feed": {{ (feed_stocks or {})|tojson|safe }},
-    "medicine": {{ (med_stocks or {})|tojson|safe }},
-    "vaccine": {{ (vac_stocks or {})|tojson|safe }},
-    "expense_units": [
+<!-- ========================================== -->
+<!-- MODAL 3: THRESHOLD ALERT SETTING -->
+<!-- ========================================== -->
+<div class="modal fade" id="thresholdModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <form action="{{ url_for('set_stock_limit') }}" method="POST" class="w-100">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="item_type" id="threshold_item_type">
+            <input type="hidden" name="item_name" id="threshold_item_name">
+
+            <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+                <div class="modal-header bg-secondary text-white py-3">
+                    <h6 class="modal-title fw-bold mb-0"><i class="bi bi-bell-fill me-2 text-warning"></i>Threshold Alert</h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-3.5">
+                    <div class="mb-2">
+                        <small class="text-muted d-block">Target Item:</small>
+                        <strong class="text-dark fs-6" id="threshold_item_label">Item Name</strong>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small text-muted fw-bold">Alert Threshold Value</label>
+                        <div class="input-group">
+                            <input type="number" step="0.01" min="0" name="limit" id="threshold_limit_val" class="form-control fw-bold text-dark" required>
+                            <span class="input-group-text bg-light text-muted small" id="threshold_unit_label">Unit</span>
+                        </div>
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label small text-muted fw-bold">Unit of Measure</label>
+                        <select name="unit" id="threshold_unit_select" class="form-select form-select-sm">
+                            <!-- Loaded from Expense Master units -->
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light p-2.5 border-0">
+                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-sm btn-primary rounded-pill px-3 fw-semibold">Save Alert</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<!-- ========================================== -->
+<!-- JAVASCRIPT: DATA SOURCE & CARD PAGINATION -->
+<!-- ========================================== -->
+<script>
+    // 1. Shared Units of Measure from Expense Master
+    const EXPENSE_MASTER_UNITS = [
         {% if expense_units %}
-        {% for u in expense_units %}
-        {
-            "value": {{ u.unit_name|tojson }},
-            "label": {{ (u.unit_name ~ ((' (' ~ u.unit_symbol ~ ')') if u.unit_symbol and u.unit_symbol != u.unit_name else ''))|tojson }}
-        }{{ "," if not loop.last }}
-        {% endfor %}
+            {% for u in expense_units %}
+                { name: "{{ u.unit_name }}", symbol: "{{ u.unit_symbol or u.unit_name }}" },
+            {% endfor %}
+        {% else %}
+            { name: "KG", symbol: "KG" },
+            { name: "Grams", symbol: "g" },
+            { name: "Litre", symbol: "L" },
+            { name: "ML", symbol: "ml" },
+            { name: "Doses", symbol: "Doses" },
+            { name: "Vials", symbol: "Vials" },
+            { name: "Bottles", symbol: "Bottles" },
+            { name: "Bags", symbol: "Bags" },
+            { name: "Nos", symbol: "Nos" }
         {% endif %}
-    ]
-}
-</script>
+    ];
 
-<script nonce="{{ csp_nonce }}">
-    function getTodayString() {
-        const d = new Date();
-        const year = d.getFullYear();
-        const month = String(d.getMonth() + 1).padStart(2, '0');
-        const day = String(d.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
-    }
-
-    const STOCKS_DATA = JSON.parse(document.getElementById('stocks-data').textContent || '{}');
-    const EXISTING_STOCKS = STOCKS_DATA;
-
-    const DEFAULT_UNITS = {
-        feed: 'KG',
-        medicine: 'ML',
-        vaccine: 'Doses'
+    // Existing items data for Restock lookups
+    const STOCK_INVENTORY_ITEMS = {
+        feed: {
+            {% for name, s in feed_stocks.items() %}
+                "{{ name|lower }}": { name: "{{ name }}", unit: "{{ s.unit }}", alert_level: {{ s.alert_level or 0.0 }}, stock: {{ s.closing_stock or 0.0 }} },
+            {% endfor %}
+        },
+        medicine: {
+            {% for name, s in med_stocks.items() %}
+                "{{ name|lower }}": { name: "{{ name }}", unit: "{{ s.unit }}", alert_level: {{ s.alert_level or 0.0 }}, stock: {{ s.closing_stock or 0.0 }} },
+            {% endfor %}
+        },
+        vaccine: {
+            {% for name, s in vac_stocks.items() %}
+                "{{ name|lower }}": { name: "{{ name }}", unit: "{{ s.unit }}", alert_level: {{ s.alert_level or 0.0 }}, stock: {{ s.closing_stock or 0.0 }} },
+            {% endfor %}
+        }
     };
 
-    function showModalById(id) {
-        const modalEl = document.getElementById(id);
-        if (!modalEl) return;
-        if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-            const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
-            modal.show();
-        } else if (window.jQuery && typeof window.jQuery.fn.modal === 'function') {
-            window.jQuery(modalEl).modal('show');
-        }
-    }
-
-    function getExpenseMasterUnits() {
-        if (STOCKS_DATA.expense_units && STOCKS_DATA.expense_units.length > 0) {
-            return STOCKS_DATA.expense_units;
-        }
-        return [
-            { value: 'KG', label: 'KG (Kilograms)' },
-            { value: 'ML', label: 'ML (Millilitres)' },
-            { value: 'Doses', label: 'Doses' },
-            { value: 'Bags', label: 'Bags' },
-            { value: 'Grams', label: 'Grams (g)' },
-            { value: 'Litres', label: 'Litres (L)' },
-            { value: 'Bottles', label: 'Bottles' },
-            { value: 'Vials', label: 'Vials' },
-            { value: 'Tablets', label: 'Tablets' },
-            { value: 'Packets', label: 'Packets' },
-            { value: 'Boxes', label: 'Boxes' },
-            { value: 'Tons', label: 'Tons' }
-        ];
-    }
-
-    function populateExistingDatalist(type) {
-        const datalist = document.getElementById('existing_stock_list');
-        if (!datalist) return;
-        datalist.innerHTML = '';
-        const stocks = EXISTING_STOCKS[type] || {};
-        for (const [itemName, info] of Object.entries(stocks)) {
-            const opt = document.createElement('option');
-            opt.value = itemName;
-            opt.label = `Current Stock: ${parseFloat(info.closing_stock).toFixed(2)} ${info.unit}`;
-            datalist.appendChild(opt);
-        }
-    }
-
-    function onItemNameChange(val) {
-        const type = document.getElementById('buy_item_type').value;
-        const stocks = EXISTING_STOCKS[type] || {};
-        if (stocks[val]) {
-            const item = stocks[val];
-            if (item.unit) {
-                populateUnits(type, item.unit);
-            }
-            if (item.alert_level !== undefined && item.alert_level !== null) {
-                const alertInput = document.querySelector('#quickBuyModal input[name="alert_limit"]');
-                if (alertInput) alertInput.value = item.alert_level > 0 ? item.alert_level : '';
-            }
-        }
-    }
-
-    function populateUnits(type, selectedValue) {
-        const select = document.getElementById('buy_unit_select');
+    // Helper: Fill unit select elements from Expense Master
+    function fillUnitSelect(selectElementId, selectedValue) {
+        const select = document.getElementById(selectElementId);
         if (!select) return;
         select.innerHTML = '';
         
-        const options = getExpenseMasterUnits();
-        options.forEach(opt => {
-            const el = document.createElement('option');
-            el.value = opt.value;
-            el.textContent = opt.label;
-            select.appendChild(el);
+        EXPENSE_MASTER_UNITS.forEach(u => {
+            const opt = document.createElement('option');
+            opt.value = u.name;
+            opt.textContent = (u.symbol && u.symbol !== u.name) ? `${u.name} (${u.symbol})` : u.name;
+            select.appendChild(opt);
         });
-        
-        const targetValue = selectedValue || DEFAULT_UNITS[type] || 'KG';
-        if (targetValue) {
-            const exists = options.some(o => o.value.toLowerCase() === targetValue.toLowerCase());
-            if (exists) {
-                const matched = options.find(o => o.value.toLowerCase() === targetValue.toLowerCase());
-                select.value = matched.value;
+
+        if (selectedValue) {
+            const match = EXPENSE_MASTER_UNITS.find(u => u.name.toLowerCase() === selectedValue.toLowerCase() || (u.symbol && u.symbol.toLowerCase() === selectedValue.toLowerCase()));
+            if (match) {
+                select.value = match.name;
             } else {
-                const opt = document.createElement('option');
-                opt.value = targetValue;
-                opt.textContent = targetValue;
-                select.appendChild(opt);
-                select.value = targetValue;
+                // If custom legacy unit not in expense_units, add it temporarily so data isn't lost
+                const customOpt = document.createElement('option');
+                customOpt.value = selectedValue;
+                customOpt.textContent = selectedValue;
+                select.appendChild(customOpt);
+                select.value = selectedValue;
             }
-        } else if (options.length > 0) {
-            select.value = options[0].value;
         }
     }
 
-    function openBuyModal(btnOrType) {
-        let type = 'feed';
+    // Modal Helper to avoid Backdrop lock
+    function showModalSafely(modalId) {
+        const modalEl = document.getElementById(modalId);
+        if (!modalEl) return;
+        let modalInstance = bootstrap.Modal.getInstance(modalEl);
+        if (!modalInstance) {
+            modalInstance = new bootstrap.Modal(modalEl);
+        }
+        modalInstance.show();
+    }
+
+    // ----------------------------------------------------
+    // MODAL OPENERS
+    // ----------------------------------------------------
+
+    // A. Open Buy/Add Modal
+    function openBuyModal(btn, defaultCategory) {
+        let type = defaultCategory || 'feed';
         let name = '';
         let unit = '';
 
-        if (typeof btnOrType === 'object' && btnOrType.dataset) {
-            type = btnOrType.dataset.type || 'feed';
-            name = btnOrType.dataset.name || '';
-            unit = btnOrType.dataset.unit || '';
-        } else if (typeof btnOrType === 'string') {
-            type = btnOrType;
+        if (btn && btn.dataset) {
+            name = btn.dataset.name || '';
+            unit = btn.dataset.unit || '';
         }
 
         const typeSelect = document.getElementById('buy_item_type');
-        if (typeSelect) typeSelect.value = type || 'feed';
-        populateExistingDatalist(type || 'feed');
-        
+        if (typeSelect) typeSelect.value = type;
+
         const nameInput = document.getElementById('buy_item_name');
-        if (nameInput) nameInput.value = name || '';
-        
-        if (name) {
-            onItemNameChange(name);
-        } else {
-            populateUnits(type || 'feed', unit);
-        }
-        
+        if (nameInput) nameInput.value = name;
+
+        // Populate Datalist for autocomplete
+        populateBuyDatalist(type);
+
+        // Header color per category
         const header = document.getElementById('buyModalHeader');
-        const title = document.getElementById('buyModalTitle');
-        if (header && title) {
-            header.className = "modal-header text-white";
-            if (type === 'feed') {
-                header.classList.add('bg-success');
-                title.innerHTML = '<i class="bi bi-basket3-fill me-2"></i>Add / Restock Feed Item';
-            } else if (type === 'medicine') {
-                header.classList.add('bg-primary');
-                title.innerHTML = '<i class="bi bi-capsule me-2"></i>Add / Restock Medicine Item';
-            } else {
-                header.classList.add('bg-info');
-                title.innerHTML = '<i class="bi bi-patch-check me-2"></i>Add / Restock Vaccine Item';
-            }
+        const submitBtn = document.getElementById('buy_submit_btn');
+        if (type === 'feed') {
+            header.style.background = '#10b981';
+            submitBtn.className = 'btn btn-success rounded-pill px-4 fw-semibold';
+        } else if (type === 'medicine') {
+            header.style.background = '#3b82f6';
+            submitBtn.className = 'btn btn-primary rounded-pill px-4 fw-semibold';
+        } else {
+            header.style.background = '#06b6d4';
+            submitBtn.className = 'btn btn-info text-white rounded-pill px-4 fw-semibold';
         }
 
-        showModalById('quickBuyModal');
+        // Set unit
+        if (!unit) {
+            unit = type === 'feed' ? 'KG' : (type === 'medicine' ? 'ML' : 'Doses');
+        }
+        fillUnitSelect('buy_unit_select', unit);
+
+        // Alert limit prefill if item exists
+        if (name) {
+            const lowKey = name.toLowerCase().trim();
+            if (STOCK_INVENTORY_ITEMS[type] && STOCK_INVENTORY_ITEMS[type][lowKey]) {
+                document.getElementById('buy_alert_limit').value = STOCK_INVENTORY_ITEMS[type][lowKey].alert_level || '';
+            }
+        } else {
+            document.getElementById('buy_alert_limit').value = '';
+        }
+
+        showModalSafely('quickBuyModal');
     }
 
-    function populateLimitUnits(selectedValue) {
-        const limitSelect = document.getElementById('limit_unit_select');
-        if (!limitSelect) return;
-        limitSelect.innerHTML = '';
-        const options = getExpenseMasterUnits();
-        options.forEach(opt => {
-            const el = document.createElement('option');
-            el.value = opt.value;
-            el.textContent = opt.label;
-            limitSelect.appendChild(el);
+    function onBuyCategoryChange() {
+        const type = document.getElementById('buy_item_type').value;
+        populateBuyDatalist(type);
+        const defaultUnit = type === 'feed' ? 'KG' : (type === 'medicine' ? 'ML' : 'Doses');
+        fillUnitSelect('buy_unit_select', defaultUnit);
+
+        const header = document.getElementById('buyModalHeader');
+        const submitBtn = document.getElementById('buy_submit_btn');
+        if (type === 'feed') {
+            header.style.background = '#10b981';
+            submitBtn.className = 'btn btn-success rounded-pill px-4 fw-semibold';
+        } else if (type === 'medicine') {
+            header.style.background = '#3b82f6';
+            submitBtn.className = 'btn btn-primary rounded-pill px-4 fw-semibold';
+        } else {
+            header.style.background = '#06b6d4';
+            submitBtn.className = 'btn btn-info text-white rounded-pill px-4 fw-semibold';
+        }
+    }
+
+    function populateBuyDatalist(type) {
+        const datalist = document.getElementById('buy_item_datalist');
+        if (!datalist) return;
+        datalist.innerHTML = '';
+        const items = STOCK_INVENTORY_ITEMS[type] || {};
+        Object.values(items).forEach(item => {
+            const opt = document.createElement('option');
+            opt.value = item.name;
+            datalist.appendChild(opt);
         });
-        if (selectedValue) {
-            const exists = options.some(o => o.value.toLowerCase() === selectedValue.toLowerCase());
-            if (exists) {
-                const matched = options.find(o => o.value.toLowerCase() === selectedValue.toLowerCase());
-                limitSelect.value = matched.value;
-            } else {
-                const opt = document.createElement('option');
-                opt.value = selectedValue;
-                opt.textContent = selectedValue;
-                limitSelect.appendChild(opt);
-                limitSelect.value = selectedValue;
-            }
-        } else if (options.length > 0) {
-            limitSelect.value = options[0].value;
+    }
+
+    function onBuyNameInput(val) {
+        const type = document.getElementById('buy_item_type').value;
+        const lowKey = (val || '').toLowerCase().trim();
+        if (STOCK_INVENTORY_ITEMS[type] && STOCK_INVENTORY_ITEMS[type][lowKey]) {
+            const found = STOCK_INVENTORY_ITEMS[type][lowKey];
+            fillUnitSelect('buy_unit_select', found.unit);
+            document.getElementById('buy_alert_limit').value = found.alert_level || '';
         }
     }
 
-    function openLimitModal(btn) {
-        let itemType = '';
-        let itemName = '';
-        let currentLimit = '0';
-        let unit = '';
+    // B. Open Edit Modal (Pre-filled with correct existing values)
+    function openEditModal(btn, type) {
+        if (!btn || !btn.dataset) return;
+        const name = btn.dataset.name || '';
+        const stock = btn.dataset.stock || '0';
+        const unit = btn.dataset.unit || '';
+        const limit = btn.dataset.limit || '0';
 
-        if (typeof btn === 'object' && btn.dataset) {
-            itemType = btn.dataset.type || '';
-            itemName = btn.dataset.name || '';
-            currentLimit = btn.dataset.limit || '0';
-            unit = btn.dataset.unit || '';
-        }
+        document.getElementById('edit_item_type').value = type;
+        document.getElementById('edit_old_item_name').value = name;
+        document.getElementById('edit_item_name').value = name;
+        document.getElementById('edit_closing_stock').value = parseFloat(stock) || 0;
+        document.getElementById('edit_alert_limit').value = parseFloat(limit) || 0;
+        document.getElementById('edit_unit_display').textContent = unit || 'Unit';
 
-        document.getElementById('limit_item_type').value = itemType;
-        document.getElementById('limit_item_name').value = itemName;
-        document.getElementById('limit_val').value = parseFloat(currentLimit) || 0.00;
-        document.getElementById('limit_unit_label').textContent = unit || '';
-        
-        populateLimitUnits(unit);
-        showModalById('limitModal');
-    }
+        fillUnitSelect('edit_unit_select', unit);
 
-    function populateEditUnits(selectedValue) {
-        const select = document.getElementById('edit_unit_select');
-        if (!select) return;
-        select.innerHTML = '';
-        
-        const options = getExpenseMasterUnits();
-        options.forEach(opt => {
-            const el = document.createElement('option');
-            el.value = opt.value;
-            el.textContent = opt.label;
-            select.appendChild(el);
-        });
-
-        if (selectedValue) {
-            const exists = options.some(o => o.value.toLowerCase() === selectedValue.toLowerCase());
-            if (exists) {
-                const matched = options.find(o => o.value.toLowerCase() === selectedValue.toLowerCase());
-                select.value = matched.value;
-            } else {
-                const opt = document.createElement('option');
-                opt.value = selectedValue;
-                opt.textContent = selectedValue;
-                select.appendChild(opt);
-                select.value = selectedValue;
-            }
-        } else if (options.length > 0) {
-            select.value = options[0].value;
-        }
-    }
-
-    function openEditStockModal(btn) {
-        let itemType = '';
-        let itemName = '';
-        let closingStock = '0';
-        let unit = '';
-        let alertLevel = '0';
-
-        if (typeof btn === 'object' && btn.dataset) {
-            itemType = btn.dataset.type || '';
-            itemName = btn.dataset.name || '';
-            closingStock = btn.dataset.stock || '0';
-            unit = btn.dataset.unit || '';
-            alertLevel = btn.dataset.limit || '0';
-        }
-
-        document.getElementById('edit_item_type').value = itemType;
-        document.getElementById('edit_old_item_name').value = itemName;
-        document.getElementById('edit_item_name').value = itemName;
-        
-        const stockNum = parseFloat(closingStock);
-        document.getElementById('edit_closing_stock').value = (!isNaN(stockNum)) ? stockNum : 0;
-        
-        const alertNum = parseFloat(alertLevel);
-        document.getElementById('edit_alert_limit').value = (!isNaN(alertNum)) ? alertNum : 0;
-        
-        document.getElementById('edit_stock_unit_label').textContent = unit || '';
-        document.getElementById('edit_alert_unit_label').textContent = unit || '';
-
-        populateEditUnits(unit);
+        const editSelect = document.getElementById('edit_unit_select');
+        editSelect.onchange = function() {
+            document.getElementById('edit_unit_display').textContent = this.value;
+        };
 
         const header = document.getElementById('editModalHeader');
-        const title = document.getElementById('editModalTitle');
-        if (header && title) {
-            header.className = "modal-header text-white";
-            if (itemType === 'feed') {
-                header.classList.add('bg-success');
-                title.innerHTML = '<i class="bi bi-pencil-square me-2"></i>Edit Feed Stock Item';
-            } else if (itemType === 'medicine') {
-                header.classList.add('bg-primary');
-                title.innerHTML = '<i class="bi bi-pencil-square me-2"></i>Edit Medicine Stock Item';
-            } else {
-                header.classList.add('bg-info');
-                title.innerHTML = '<i class="bi bi-pencil-square me-2"></i>Edit Vaccine Stock Item';
-            }
+        if (type === 'feed') {
+            header.style.background = '#10b981';
+        } else if (type === 'medicine') {
+            header.style.background = '#3b82f6';
+        } else {
+            header.style.background = '#06b6d4';
         }
-        showModalById('editStockModal');
+
+        showModalSafely('editStockModal');
     }
 
-    function handleEditUnitChange() {
-        const select = document.getElementById('edit_unit_select');
-        if (!select) return;
-        const val = select.value;
-        document.getElementById('edit_stock_unit_label').textContent = val;
-        document.getElementById('edit_alert_unit_label').textContent = val;
+    // C. Open Threshold Alert Modal
+    function openThresholdModal(btn, type) {
+        if (!btn || !btn.dataset) return;
+        const name = btn.dataset.name || '';
+        const limit = btn.dataset.limit || '0';
+        const unit = btn.dataset.unit || '';
+
+        document.getElementById('threshold_item_type').value = type;
+        document.getElementById('threshold_item_name').value = name;
+        document.getElementById('threshold_item_label').textContent = name;
+        document.getElementById('threshold_limit_val').value = parseFloat(limit) || 0;
+        document.getElementById('threshold_unit_label').textContent = unit || 'Unit';
+
+        fillUnitSelect('threshold_unit_select', unit);
+
+        const threshSelect = document.getElementById('threshold_unit_select');
+        threshSelect.onchange = function() {
+            document.getElementById('threshold_unit_label').textContent = this.value;
+        };
+
+        showModalSafely('thresholdModal');
     }
 
-    function updateBuyUnit() {
-        const type = document.getElementById('buy_item_type').value;
-        populateUnits(type);
-        populateExistingDatalist(type);
-    }
 
-    function setCategoryFilter(category, btn) {
-        document.querySelectorAll('.filter-btn').forEach(b => {
-            b.classList.remove('btn-success', 'btn-primary', 'btn-info', 'active');
-            b.classList.add('btn-outline-secondary');
-        });
-        btn.classList.remove('btn-outline-secondary');
-        if (category === 'feed') btn.classList.add('btn-success', 'active');
-        else if (category === 'medicine') btn.classList.add('btn-primary', 'active');
-        else if (category === 'vaccine') btn.classList.add('btn-info', 'active');
-        else btn.classList.add('btn-success', 'active');
+    // ----------------------------------------------------
+    // SCALE HANDLING: PER-CARD PAGINATION & SEARCH (500+ ITEMS)
+    // ----------------------------------------------------
+    const PAGE_SIZE = 10;
+    const paginationState = {
+        feed: { currentPage: 1, totalPages: 1 },
+        medicine: { currentPage: 1, totalPages: 1 },
+        vaccine: { currentPage: 1, totalPages: 1 }
+    };
 
-        const sections = ['feed', 'medicine', 'vaccine'];
-        sections.forEach(sec => {
-            const el = document.getElementById(`section-${sec}`);
-            if (el) {
-                if (category === 'all' || category === sec) {
-                    el.style.display = 'block';
-                } else {
-                    el.style.display = 'none';
-                }
-            }
-        });
-
-        filterStockItems();
-    }
-
-    function filterStockItems() {
-        const query = (document.getElementById('stockSearchInput').value || '').toLowerCase().trim();
-        const items = document.querySelectorAll('.stock-item-node');
-        items.forEach(item => {
-            const name = item.dataset.name || '';
+    function paginateCategory(category) {
+        const searchInput = document.getElementById(`search-${category}`);
+        const query = (searchInput ? searchInput.value : '').toLowerCase().trim();
+        const nodes = document.querySelectorAll(`.${category}-item-node`);
+        const noResultsEl = document.getElementById(`${category}-no-results`);
+        
+        let matchingNodes = [];
+        nodes.forEach(node => {
+            const name = node.dataset.name || '';
             if (!query || name.includes(query)) {
-                item.style.display = 'flex';
+                matchingNodes.push(node);
             } else {
-                item.style.display = 'none';
+                node.style.display = 'none';
             }
         });
+
+        // Update count badge
+        const countBadge = document.getElementById(`${category}-count-badge`);
+        if (countBadge) {
+            countBadge.textContent = `${matchingNodes.length} Items`;
+        }
+
+        // Handle empty search results
+        if (matchingNodes.length === 0 && nodes.length > 0) {
+            if (noResultsEl) noResultsEl.classList.remove('d-none');
+        } else {
+            if (noResultsEl) noResultsEl.classList.add('d-none');
+        }
+
+        // Compute pagination
+        const total = matchingNodes.length;
+        const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+        paginationState[category].totalPages = totalPages;
+
+        if (paginationState[category].currentPage > totalPages) {
+            paginationState[category].currentPage = 1;
+        }
+
+        const currentPage = paginationState[category].currentPage;
+        const startIndex = (currentPage - 1) * PAGE_SIZE;
+        const endIndex = startIndex + PAGE_SIZE;
+
+        matchingNodes.forEach((node, idx) => {
+            if (idx >= startIndex && idx < endIndex) {
+                node.style.display = 'flex';
+            } else {
+                node.style.display = 'none';
+            }
+        });
+
+        // Update pagination bar text & buttons
+        const pageInfo = document.getElementById(`${category}-page-info`);
+        const prevBtn = document.getElementById(`${category}-prev-btn`);
+        const nextBtn = document.getElementById(`${category}-next-btn`);
+        const paginationBar = document.getElementById(`${category}-pagination-bar`);
+
+        if (total === 0) {
+            if (pageInfo) pageInfo.textContent = 'Showing 0-0 of 0';
+            if (prevBtn) prevBtn.disabled = true;
+            if (nextBtn) nextBtn.disabled = true;
+            if (paginationBar) paginationBar.classList.add('d-none');
+        } else {
+            if (paginationBar) paginationBar.classList.remove('d-none');
+            const showStart = startIndex + 1;
+            const showEnd = Math.min(endIndex, total);
+            if (pageInfo) pageInfo.textContent = `Showing ${showStart}-${showEnd} of ${total}`;
+            if (prevBtn) prevBtn.disabled = (currentPage <= 1);
+            if (nextBtn) nextBtn.disabled = (currentPage >= totalPages);
+        }
     }
 
+    function changePage(category, delta) {
+        const state = paginationState[category];
+        const newPage = state.currentPage + delta;
+        if (newPage >= 1 && newPage <= state.totalPages) {
+            state.currentPage = newPage;
+            paginateCategory(category);
+        }
+    }
+
+    // Initialize all 3 cards on page load
     document.addEventListener("DOMContentLoaded", function() {
-        const dateInput = document.getElementById('purchase_date');
-        if (dateInput) dateInput.value = getTodayString();
-        updateBuyUnit();
+        const dateInput = document.getElementById('buy_purchase_date');
+        if (dateInput) {
+            const today = new Date().toISOString().split('T')[0];
+            dateInput.value = today;
+        }
+
+        // Initialize pagination for Feed, Medicine, and Vaccine cards
+        paginateCategory('feed');
+        paginateCategory('medicine');
+        paginateCategory('vaccine');
     });
 </script>
 {% endblock %}
