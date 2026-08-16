@@ -781,7 +781,7 @@
     const STOCK_INVENTORY_ITEMS = JSON.parse(document.getElementById('stock-items-data')?.textContent || '{}');
 
     // Total low stock count from server
-    const LOW_ALERT_COUNT = {{ ns.low_alert_total }};
+    const LOW_ALERT_COUNT = Number('{{ ns.low_alert_total or 0 }}');
 
     // Helper: Select unit in dropdown (or dynamically populate if empty)
     function fillUnitSelect(selectElementId, selectedValue) {
