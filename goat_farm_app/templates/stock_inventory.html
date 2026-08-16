@@ -199,11 +199,11 @@
 
                     <div class="d-inline-flex align-items-center gap-1.5" data-style="display: inline-flex !important; align-items: center !important; gap: 4px;">
                         <!-- Edit -->
-                        <button type="button" class="btn btn-sm btn-light border text-warning p-0 rounded-2" data-style="width: 30px; height: 30px; min-width: 30px; min-height: 30px; display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 0; font-size: 0.82rem; border: 1px solid #fef3c7; background: #fffbeb; color: #d97706; cursor: pointer;" title="Edit {{ feed_name }}" data-bs-toggle="modal" data-bs-target="#editStockModal" onclick="openEditDirect('{{ feed_name|escape }}', 'feed', '{{ stock.closing_stock }}', '{{ stock.unit|escape }}', '{{ stock.alert_level }}')" data-onclick="openEditDirect('{{ feed_name|escape }}', 'feed', '{{ stock.closing_stock }}', '{{ stock.unit|escape }}', '{{ stock.alert_level }}')" data-type="feed" data-name="{{ feed_name }}" data-stock="{{ stock.closing_stock }}" data-unit="{{ stock.unit }}" data-limit="{{ stock.alert_level }}">
+                        <button type="button" class="btn btn-sm btn-light border text-warning p-0 rounded-2" data-style="width: 30px; height: 30px; min-width: 30px; min-height: 30px; display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 0; font-size: 0.82rem; border: 1px solid #fef3c7; background: #fffbeb; color: #d97706; cursor: pointer;" title="Edit {{ feed_name }}" data-bs-toggle="modal" data-bs-target="#editStockModal" onclick="openEditModal(this, 'feed')" data-onclick="openEditModal(this, 'feed')" data-type="feed" data-name="{{ feed_name|e }}" data-stock="{{ stock.closing_stock }}" data-unit="{{ stock.unit|e }}" data-limit="{{ stock.alert_level }}">
                             <i class="bi bi-pencil" style="pointer-events: none;"></i>
                         </button>
                         <!-- Threshold -->
-                        <button type="button" class="btn btn-sm btn-light border text-secondary p-0 rounded-2" data-style="width: 30px; height: 30px; min-width: 30px; min-height: 30px; display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 0; font-size: 0.82rem; border: 1px solid #e2e8f0; background: #f8fafc; color: #64748b; cursor: pointer;" title="Set Alert Threshold" data-bs-toggle="modal" data-bs-target="#thresholdModal" onclick="openThresholdDirect('{{ feed_name|escape }}', 'feed', '{{ stock.alert_level }}', '{{ stock.unit|escape }}')" data-onclick="openThresholdDirect('{{ feed_name|escape }}', 'feed', '{{ stock.alert_level }}', '{{ stock.unit|escape }}')" data-type="feed" data-name="{{ feed_name }}" data-limit="{{ stock.alert_level }}" data-unit="{{ stock.unit }}">
+                        <button type="button" class="btn btn-sm btn-light border text-secondary p-0 rounded-2" data-style="width: 30px; height: 30px; min-width: 30px; min-height: 30px; display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 0; font-size: 0.82rem; border: 1px solid #e2e8f0; background: #f8fafc; color: #64748b; cursor: pointer;" title="Set Alert Threshold" data-bs-toggle="modal" data-bs-target="#thresholdModal" onclick="openThresholdModal(this, 'feed')" data-onclick="openThresholdModal(this, 'feed')" data-type="feed" data-name="{{ feed_name|e }}" data-limit="{{ stock.alert_level }}" data-unit="{{ stock.unit|e }}">
                             <i class="bi bi-bell" style="pointer-events: none;"></i>
                         </button>
                         <!-- Delete -->
@@ -308,11 +308,11 @@
 
                     <div class="d-inline-flex align-items-center gap-1.5" data-style="display: inline-flex !important; align-items: center !important; gap: 4px;">
                         <!-- Edit -->
-                        <button type="button" class="btn btn-sm btn-light border text-warning p-0 rounded-2" data-style="width: 30px; height: 30px; min-width: 30px; min-height: 30px; display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 0; font-size: 0.82rem; border: 1px solid #fef3c7; background: #fffbeb; color: #d97706; cursor: pointer;" title="Edit {{ med_name }}" data-bs-toggle="modal" data-bs-target="#editStockModal" onclick="openEditDirect('{{ med_name|escape }}', 'medicine', '{{ stock.closing_stock }}', '{{ stock.unit|escape }}', '{{ stock.alert_level }}')" data-onclick="openEditDirect('{{ med_name|escape }}', 'medicine', '{{ stock.closing_stock }}', '{{ stock.unit|escape }}', '{{ stock.alert_level }}')" data-type="medicine" data-name="{{ med_name }}" data-stock="{{ stock.closing_stock }}" data-unit="{{ stock.unit }}" data-limit="{{ stock.alert_level }}">
+                        <button type="button" class="btn btn-sm btn-light border text-warning p-0 rounded-2" data-style="width: 30px; height: 30px; min-width: 30px; min-height: 30px; display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 0; font-size: 0.82rem; border: 1px solid #fef3c7; background: #fffbeb; color: #d97706; cursor: pointer;" title="Edit {{ med_name }}" data-bs-toggle="modal" data-bs-target="#editStockModal" onclick="openEditModal(this, 'medicine')" data-onclick="openEditModal(this, 'medicine')" data-type="medicine" data-name="{{ med_name|e }}" data-stock="{{ stock.closing_stock }}" data-unit="{{ stock.unit|e }}" data-limit="{{ stock.alert_level }}">
                             <i class="bi bi-pencil" style="pointer-events: none;"></i>
                         </button>
                         <!-- Threshold -->
-                        <button type="button" class="btn btn-sm btn-light border text-secondary p-0 rounded-2" data-style="width: 30px; height: 30px; min-width: 30px; min-height: 30px; display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 0; font-size: 0.82rem; border: 1px solid #e2e8f0; background: #f8fafc; color: #64748b; cursor: pointer;" title="Set Alert Threshold" data-bs-toggle="modal" data-bs-target="#thresholdModal" onclick="openThresholdDirect('{{ med_name|escape }}', 'medicine', '{{ stock.alert_level }}', '{{ stock.unit|escape }}')" data-onclick="openThresholdDirect('{{ med_name|escape }}', 'medicine', '{{ stock.alert_level }}', '{{ stock.unit|escape }}')" data-type="medicine" data-name="{{ med_name }}" data-limit="{{ stock.alert_level }}" data-unit="{{ stock.unit }}">
+                        <button type="button" class="btn btn-sm btn-light border text-secondary p-0 rounded-2" data-style="width: 30px; height: 30px; min-width: 30px; min-height: 30px; display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 0; font-size: 0.82rem; border: 1px solid #e2e8f0; background: #f8fafc; color: #64748b; cursor: pointer;" title="Set Alert Threshold" data-bs-toggle="modal" data-bs-target="#thresholdModal" onclick="openThresholdModal(this, 'medicine')" data-onclick="openThresholdModal(this, 'medicine')" data-type="medicine" data-name="{{ med_name|e }}" data-limit="{{ stock.alert_level }}" data-unit="{{ stock.unit|e }}">
                             <i class="bi bi-bell" style="pointer-events: none;"></i>
                         </button>
                         <!-- Delete -->
@@ -417,11 +417,11 @@
 
                     <div class="d-inline-flex align-items-center gap-1.5" data-style="display: inline-flex !important; align-items: center !important; gap: 4px;">
                         <!-- Edit -->
-                        <button type="button" class="btn btn-sm btn-light border text-warning btn-icon-action" data-style="width: 30px; height: 30px; min-width: 30px; min-height: 30px; display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 0; font-size: 0.82rem; border: 1px solid #fef3c7; background: #fffbeb; color: #d97706; cursor: pointer;" title="Edit {{ vac_name }}" data-bs-toggle="modal" data-bs-target="#editStockModal" onclick="openEditDirect('{{ vac_name|escape }}', 'vaccine', '{{ stock.closing_stock }}', '{{ stock.unit|escape }}', '{{ stock.alert_level }}')" data-onclick="openEditDirect('{{ vac_name|escape }}', 'vaccine', '{{ stock.closing_stock }}', '{{ stock.unit|escape }}', '{{ stock.alert_level }}')" data-type="vaccine" data-name="{{ vac_name }}" data-stock="{{ stock.closing_stock }}" data-unit="{{ stock.unit }}" data-limit="{{ stock.alert_level }}">
+                        <button type="button" class="btn btn-sm btn-light border text-warning btn-icon-action" data-style="width: 30px; height: 30px; min-width: 30px; min-height: 30px; display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 0; font-size: 0.82rem; border: 1px solid #fef3c7; background: #fffbeb; color: #d97706; cursor: pointer;" title="Edit {{ vac_name }}" data-bs-toggle="modal" data-bs-target="#editStockModal" onclick="openEditModal(this, 'vaccine')" data-onclick="openEditModal(this, 'vaccine')" data-type="vaccine" data-name="{{ vac_name|e }}" data-stock="{{ stock.closing_stock }}" data-unit="{{ stock.unit|e }}" data-limit="{{ stock.alert_level }}">
                             <i class="bi bi-pencil" style="pointer-events: none;"></i>
                         </button>
                         <!-- Threshold -->
-                        <button type="button" class="btn btn-sm btn-light border text-secondary btn-icon-action" data-style="width: 30px; height: 30px; min-width: 30px; min-height: 30px; display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 0; font-size: 0.82rem; border: 1px solid #e2e8f0; background: #f8fafc; color: #64748b; cursor: pointer;" title="Set Alert Threshold" data-bs-toggle="modal" data-bs-target="#thresholdModal" onclick="openThresholdDirect('{{ vac_name|escape }}', 'vaccine', '{{ stock.alert_level }}', '{{ stock.unit|escape }}')" data-onclick="openThresholdDirect('{{ vac_name|escape }}', 'vaccine', '{{ stock.alert_level }}', '{{ stock.unit|escape }}')" data-type="vaccine" data-name="{{ vac_name }}" data-limit="{{ stock.alert_level }}" data-unit="{{ stock.unit }}">
+                        <button type="button" class="btn btn-sm btn-light border text-secondary btn-icon-action" data-style="width: 30px; height: 30px; min-width: 30px; min-height: 30px; display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 0; font-size: 0.82rem; border: 1px solid #e2e8f0; background: #f8fafc; color: #64748b; cursor: pointer;" title="Set Alert Threshold" data-bs-toggle="modal" data-bs-target="#thresholdModal" onclick="openThresholdModal(this, 'vaccine')" data-onclick="openThresholdModal(this, 'vaccine')" data-type="vaccine" data-name="{{ vac_name|e }}" data-limit="{{ stock.alert_level }}" data-unit="{{ stock.unit|e }}">
                             <i class="bi bi-bell" style="pointer-events: none;"></i>
                         </button>
                         <!-- Delete -->
@@ -1035,12 +1035,24 @@
             openEditDirect(btn, type || 'feed', 0, '', 0);
             return;
         }
-        const btnEl = btn.closest ? (btn.closest('button') || btn.closest('.feed-item-node, .medicine-item-node, .vaccine-item-node') || btn) : btn;
-        const name = btnEl.getAttribute('data-name') || (btnEl.dataset ? btnEl.dataset.name : '') || '';
-        const detectedType = type || btnEl.getAttribute('data-type') || (btnEl.dataset ? btnEl.dataset.type : '') || 'feed';
-        const stock = btnEl.getAttribute('data-stock') || (btnEl.dataset ? btnEl.dataset.stock : 0);
-        const unit = btnEl.getAttribute('data-unit') || (btnEl.dataset ? btnEl.dataset.unit : '');
-        const limit = btnEl.getAttribute('data-limit') || (btnEl.dataset ? btnEl.dataset.limit : 0);
+        const btnEl = (btn.nodeType ? btn : (btn.target || btn)).closest ? ((btn.nodeType ? btn : (btn.target || btn)).closest('button') || (btn.nodeType ? btn : (btn.target || btn))) : btn;
+        let name = btnEl.getAttribute('data-name') || (btnEl.dataset ? btnEl.dataset.name : '') || '';
+        let detectedType = (type || btnEl.getAttribute('data-type') || (btnEl.dataset ? btnEl.dataset.type : '') || 'feed').toLowerCase();
+        let stock = btnEl.getAttribute('data-stock') ?? (btnEl.dataset ? btnEl.dataset.stock : '0');
+        let unit = btnEl.getAttribute('data-unit') || (btnEl.dataset ? btnEl.dataset.unit : '');
+        let limit = btnEl.getAttribute('data-limit') ?? (btnEl.dataset ? btnEl.dataset.limit : '0');
+
+        if ((!name || stock === '0' || stock === 0) && window.STOCK_INVENTORY_ITEMS && window.STOCK_INVENTORY_ITEMS[detectedType]) {
+            const lowKey = (name || '').toLowerCase().trim();
+            const itemData = window.STOCK_INVENTORY_ITEMS[detectedType][lowKey];
+            if (itemData) {
+                if (!name) name = itemData.name;
+                if (!stock || stock === '0') stock = itemData.stock;
+                if (!unit) unit = itemData.unit;
+                if (!limit || limit === '0') limit = itemData.alert_level;
+            }
+        }
+
         openEditDirect(name, detectedType, stock, unit, limit);
     }
 
@@ -1082,13 +1094,38 @@
             openThresholdDirect(btn, type || 'feed', 0, '');
             return;
         }
-        const btnEl = btn.closest ? (btn.closest('button') || btn.closest('.feed-item-node, .medicine-item-node, .vaccine-item-node') || btn) : btn;
-        const name = btnEl.getAttribute('data-name') || (btnEl.dataset ? btnEl.dataset.name : '') || '';
-        const detectedType = type || btnEl.getAttribute('data-type') || (btnEl.dataset ? btnEl.dataset.type : '') || 'feed';
-        const limit = btnEl.getAttribute('data-limit') || (btnEl.dataset ? btnEl.dataset.limit : 0);
-        const unit = btnEl.getAttribute('data-unit') || (btnEl.dataset ? btnEl.dataset.unit : '');
+        const btnEl = (btn.nodeType ? btn : (btn.target || btn)).closest ? ((btn.nodeType ? btn : (btn.target || btn)).closest('button') || (btn.nodeType ? btn : (btn.target || btn))) : btn;
+        let name = btnEl.getAttribute('data-name') || (btnEl.dataset ? btnEl.dataset.name : '') || '';
+        let detectedType = (type || btnEl.getAttribute('data-type') || (btnEl.dataset ? btnEl.dataset.type : '') || 'feed').toLowerCase();
+        let limit = btnEl.getAttribute('data-limit') ?? (btnEl.dataset ? btnEl.dataset.limit : '0');
+        let unit = btnEl.getAttribute('data-unit') || (btnEl.dataset ? btnEl.dataset.unit : '');
+
+        if ((!name || limit === '0' || limit === 0) && window.STOCK_INVENTORY_ITEMS && window.STOCK_INVENTORY_ITEMS[detectedType]) {
+            const lowKey = (name || '').toLowerCase().trim();
+            const itemData = window.STOCK_INVENTORY_ITEMS[detectedType][lowKey];
+            if (itemData) {
+                if (!name) name = itemData.name;
+                if (!limit || limit === '0') limit = itemData.alert_level;
+                if (!unit) unit = itemData.unit;
+            }
+        }
+
         openThresholdDirect(name, detectedType, limit, unit);
     }
+
+    // Global capturing click delegation to ensure modal fields are populated before modal opens
+    document.addEventListener('click', function(e) {
+        const editBtn = e.target && e.target.closest ? e.target.closest('button[data-bs-target="#editStockModal"], button[data-bs-target="#thresholdModal"]') : null;
+        if (editBtn) {
+            const targetModal = editBtn.getAttribute('data-bs-target');
+            const type = editBtn.getAttribute('data-type') || 'feed';
+            if (targetModal === '#editStockModal') {
+                openEditModal(editBtn, type);
+            } else if (targetModal === '#thresholdModal') {
+                openThresholdModal(editBtn, type);
+            }
+        }
+    }, true);
 
     // Expose all functions globally on window
     window.fillUnitSelect = fillUnitSelect;
@@ -1116,7 +1153,14 @@
         if (editModalEl) {
             editModalEl.addEventListener('show.bs.modal', function(event) {
                 const button = event.relatedTarget;
-                if (button && button.getAttribute('data-name')) {
+                if (button) {
+                    const type = button.getAttribute('data-type') || 'feed';
+                    openEditModal(button, type);
+                }
+            });
+            editModalEl.addEventListener('shown.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                if (button) {
                     const type = button.getAttribute('data-type') || 'feed';
                     openEditModal(button, type);
                 }
@@ -1127,7 +1171,14 @@
         if (threshModalEl) {
             threshModalEl.addEventListener('show.bs.modal', function(event) {
                 const button = event.relatedTarget;
-                if (button && button.getAttribute('data-name')) {
+                if (button) {
+                    const type = button.getAttribute('data-type') || 'feed';
+                    openThresholdModal(button, type);
+                }
+            });
+            threshModalEl.addEventListener('shown.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                if (button) {
                     const type = button.getAttribute('data-type') || 'feed';
                     openThresholdModal(button, type);
                 }
