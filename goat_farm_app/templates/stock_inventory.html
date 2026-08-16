@@ -733,7 +733,7 @@
 <!-- ========================================== -->
 <!-- JAVASCRIPT: DATA SOURCE & MODAL LOGIC -->
 <!-- ========================================== -->
-<script id="expense-units-data" type="application/json">
+<script id="expense-units-data" type="application/json" nonce="{{ csp_nonce }}">
 [
     {% if expense_units %}
         {% for u in expense_units %}
@@ -753,7 +753,7 @@
 ]
 </script>
 
-<script id="stock-items-data" type="application/json">
+<script id="stock-items-data" type="application/json" nonce="{{ csp_nonce }}">
 {
     "feed": {
         {% for name, s in feed_stocks.items() %}
@@ -773,7 +773,7 @@
 }
 </script>
 
-<script>
+<script nonce="{{ csp_nonce }}">
     // 1. Shared Units of Measure from Expense Master
     const EXPENSE_MASTER_UNITS = JSON.parse(document.getElementById('expense-units-data')?.textContent || '[]');
 
