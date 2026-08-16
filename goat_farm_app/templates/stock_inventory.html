@@ -491,8 +491,24 @@
                         <div class="col-5">
                             <label class="form-label small text-muted fw-bold">Unit of Measure <span class="text-danger">*</span></label>
                             <select name="unit" id="buy_unit_select" class="form-select" required>
-                                <!-- Loaded dynamically from Expense Master units -->
+                                {% if expense_units %}
+                                    {% for u in expense_units %}
+                                        <option value="{{ u.unit_symbol or u.unit_name }}">{{ u.unit_name }}{% if u.unit_symbol and u.unit_symbol != u.unit_name %} ({{ u.unit_symbol }}){% endif %}</option>
+                                    {% endfor %}
+                                {% else %}
+                                    <option value="KG">Kilograms (KG)</option>
+                                    <option value="g">Grams (g)</option>
+                                    <option value="L">Litre (L)</option>
+                                    <option value="ml">Millilitre (ml)</option>
+                                    <option value="Doses">Doses</option>
+                                    <option value="Nos">Nos</option>
+                                {% endif %}
                             </select>
+                            <div class="form-text mt-1">
+                                <a href="{{ url_for('expense_units_view') }}" target="_blank" class="text-decoration-none small text-success">
+                                    <i class="bi bi-plus-circle me-1"></i>Expense Units
+                                </a>
+                            </div>
                         </div>
                     </div>
 
@@ -555,9 +571,25 @@
                         </div>
                         <div class="col-5">
                             <label class="form-label small text-muted fw-bold">Unit of Measure <span class="text-danger">*</span></label>
-                            <select name="unit" id="edit_unit_select" class="form-select" required>
-                                <!-- Loaded dynamically from Expense Master units -->
+                            <select name="unit" id="edit_unit_select" class="form-select" required onchange="document.getElementById('edit_unit_display').textContent = this.value">
+                                {% if expense_units %}
+                                    {% for u in expense_units %}
+                                        <option value="{{ u.unit_symbol or u.unit_name }}">{{ u.unit_name }}{% if u.unit_symbol and u.unit_symbol != u.unit_name %} ({{ u.unit_symbol }}){% endif %}</option>
+                                    {% endfor %}
+                                {% else %}
+                                    <option value="KG">Kilograms (KG)</option>
+                                    <option value="g">Grams (g)</option>
+                                    <option value="L">Litre (L)</option>
+                                    <option value="ml">Millilitre (ml)</option>
+                                    <option value="Doses">Doses</option>
+                                    <option value="Nos">Nos</option>
+                                {% endif %}
                             </select>
+                            <div class="form-text mt-1">
+                                <a href="{{ url_for('expense_units_view') }}" target="_blank" class="text-decoration-none small text-success">
+                                    <i class="bi bi-plus-circle me-1"></i>Expense Units
+                                </a>
+                            </div>
                         </div>
                     </div>
 
@@ -610,9 +642,25 @@
 
                     <div class="mb-2">
                         <label class="form-label small text-muted fw-bold">Unit of Measure</label>
-                        <select name="unit" id="threshold_unit_select" class="form-select form-select-sm">
-                            <!-- Loaded dynamically from Expense Master units -->
+                        <select name="unit" id="threshold_unit_select" class="form-select form-select-sm" onchange="document.getElementById('threshold_unit_label').textContent = this.value">
+                            {% if expense_units %}
+                                {% for u in expense_units %}
+                                    <option value="{{ u.unit_symbol or u.unit_name }}">{{ u.unit_name }}{% if u.unit_symbol and u.unit_symbol != u.unit_name %} ({{ u.unit_symbol }}){% endif %}</option>
+                                {% endfor %}
+                            {% else %}
+                                <option value="KG">Kilograms (KG)</option>
+                                <option value="g">Grams (g)</option>
+                                <option value="L">Litre (L)</option>
+                                <option value="ml">Millilitre (ml)</option>
+                                <option value="Doses">Doses</option>
+                                <option value="Nos">Nos</option>
+                            {% endif %}
                         </select>
+                        <div class="form-text mt-1">
+                            <a href="{{ url_for('expense_units_view') }}" target="_blank" class="text-decoration-none small text-success">
+                                <i class="bi bi-plus-circle me-1"></i>Expense Units
+                            </a>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer bg-light p-2.5 border-0">
@@ -735,29 +783,36 @@
     // Total low stock count from server
     const LOW_ALERT_COUNT = {{ ns.low_alert_total }};
 
-    // Helper: Fill unit select elements from Expense Master
+    // Helper: Select unit in dropdown (or dynamically populate if empty)
     function fillUnitSelect(selectElementId, selectedValue) {
         const select = document.getElementById(selectElementId);
         if (!select) return;
-        select.innerHTML = '';
         
-        EXPENSE_MASTER_UNITS.forEach(u => {
-            const opt = document.createElement('option');
-            opt.value = u.name;
-            opt.textContent = (u.symbol && u.symbol !== u.name) ? `${u.name} (${u.symbol})` : u.name;
-            select.appendChild(opt);
-        });
+        if (select.options.length === 0 && EXPENSE_MASTER_UNITS.length > 0) {
+            EXPENSE_MASTER_UNITS.forEach(u => {
+                const opt = document.createElement('option');
+                opt.value = u.symbol || u.name;
+                opt.textContent = (u.symbol && u.symbol !== u.name) ? `${u.name} (${u.symbol})` : u.name;
+                select.appendChild(opt);
+            });
+        }
 
         if (selectedValue) {
-            const match = EXPENSE_MASTER_UNITS.find(u => u.name.toLowerCase() === selectedValue.toLowerCase() || (u.symbol && u.symbol.toLowerCase() === selectedValue.toLowerCase()));
-            if (match) {
-                select.value = match.name;
-            } else {
+            let found = false;
+            for (let i = 0; i < select.options.length; i++) {
+                const opt = select.options[i];
+                if (opt.value.toLowerCase() === selectedValue.toLowerCase() || opt.textContent.toLowerCase().includes(selectedValue.toLowerCase())) {
+                    select.selectedIndex = i;
+                    found = true;
+                    break;
+                }
+            }
+            if (!found && selectedValue) {
                 const customOpt = document.createElement('option');
                 customOpt.value = selectedValue;
                 customOpt.textContent = selectedValue;
+                customOpt.selected = true;
                 select.appendChild(customOpt);
-                select.value = selectedValue;
             }
         }
     }
