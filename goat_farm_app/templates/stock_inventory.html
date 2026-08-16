@@ -199,11 +199,11 @@
 
                     <div class="d-inline-flex align-items-center gap-1.5" data-style="display: inline-flex !important; align-items: center !important; gap: 4px;">
                         <!-- Edit -->
-                        <button type="button" class="btn btn-sm btn-light border text-warning p-0 rounded-2" data-style="width: 30px; height: 30px; min-width: 30px; min-height: 30px; display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 0; font-size: 0.82rem; border: 1px solid #fef3c7; background: #fffbeb; color: #d97706; cursor: pointer;" title="Edit {{ feed_name }}" data-bs-toggle="modal" data-bs-target="#editStockModal" onclick="openEditModal(this, 'feed')" data-onclick="openEditModal(this, 'feed')" data-name="{{ feed_name }}" data-stock="{{ stock.closing_stock }}" data-unit="{{ stock.unit }}" data-limit="{{ stock.alert_level }}">
+                        <button type="button" class="btn btn-sm btn-light border text-warning p-0 rounded-2" data-style="width: 30px; height: 30px; min-width: 30px; min-height: 30px; display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 0; font-size: 0.82rem; border: 1px solid #fef3c7; background: #fffbeb; color: #d97706; cursor: pointer;" title="Edit {{ feed_name }}" data-bs-toggle="modal" data-bs-target="#editStockModal" onclick="openEditModal(this, 'feed')" data-onclick="openEditModal(this, 'feed')" data-type="feed" data-name="{{ feed_name }}" data-stock="{{ stock.closing_stock }}" data-unit="{{ stock.unit }}" data-limit="{{ stock.alert_level }}">
                             <i class="bi bi-pencil" style="pointer-events: none;"></i>
                         </button>
                         <!-- Threshold -->
-                        <button type="button" class="btn btn-sm btn-light border text-secondary p-0 rounded-2" data-style="width: 30px; height: 30px; min-width: 30px; min-height: 30px; display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 0; font-size: 0.82rem; border: 1px solid #e2e8f0; background: #f8fafc; color: #64748b; cursor: pointer;" title="Set Alert Threshold" data-bs-toggle="modal" data-bs-target="#thresholdModal" onclick="openThresholdModal(this, 'feed')" data-onclick="openThresholdModal(this, 'feed')" data-name="{{ feed_name }}" data-limit="{{ stock.alert_level }}" data-unit="{{ stock.unit }}">
+                        <button type="button" class="btn btn-sm btn-light border text-secondary p-0 rounded-2" data-style="width: 30px; height: 30px; min-width: 30px; min-height: 30px; display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 0; font-size: 0.82rem; border: 1px solid #e2e8f0; background: #f8fafc; color: #64748b; cursor: pointer;" title="Set Alert Threshold" data-bs-toggle="modal" data-bs-target="#thresholdModal" onclick="openThresholdModal(this, 'feed')" data-onclick="openThresholdModal(this, 'feed')" data-type="feed" data-name="{{ feed_name }}" data-limit="{{ stock.alert_level }}" data-unit="{{ stock.unit }}">
                             <i class="bi bi-bell" style="pointer-events: none;"></i>
                         </button>
                         <!-- Delete -->
@@ -308,11 +308,11 @@
 
                     <div class="d-inline-flex align-items-center gap-1.5" data-style="display: inline-flex !important; align-items: center !important; gap: 4px;">
                         <!-- Edit -->
-                        <button type="button" class="btn btn-sm btn-light border text-warning p-0 rounded-2" data-style="width: 30px; height: 30px; min-width: 30px; min-height: 30px; display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 0; font-size: 0.82rem; border: 1px solid #fef3c7; background: #fffbeb; color: #d97706; cursor: pointer;" title="Edit {{ med_name }}" data-bs-toggle="modal" data-bs-target="#editStockModal" onclick="openEditModal(this, 'medicine')" data-onclick="openEditModal(this, 'medicine')" data-name="{{ med_name }}" data-stock="{{ stock.closing_stock }}" data-unit="{{ stock.unit }}" data-limit="{{ stock.alert_level }}">
+                        <button type="button" class="btn btn-sm btn-light border text-warning p-0 rounded-2" data-style="width: 30px; height: 30px; min-width: 30px; min-height: 30px; display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 0; font-size: 0.82rem; border: 1px solid #fef3c7; background: #fffbeb; color: #d97706; cursor: pointer;" title="Edit {{ med_name }}" data-bs-toggle="modal" data-bs-target="#editStockModal" onclick="openEditModal(this, 'medicine')" data-onclick="openEditModal(this, 'medicine')" data-type="medicine" data-name="{{ med_name }}" data-stock="{{ stock.closing_stock }}" data-unit="{{ stock.unit }}" data-limit="{{ stock.alert_level }}">
                             <i class="bi bi-pencil" style="pointer-events: none;"></i>
                         </button>
                         <!-- Threshold -->
-                        <button type="button" class="btn btn-sm btn-light border text-secondary p-0 rounded-2" data-style="width: 30px; height: 30px; min-width: 30px; min-height: 30px; display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 0; font-size: 0.82rem; border: 1px solid #e2e8f0; background: #f8fafc; color: #64748b; cursor: pointer;" title="Set Alert Threshold" data-bs-toggle="modal" data-bs-target="#thresholdModal" onclick="openThresholdModal(this, 'medicine')" data-onclick="openThresholdModal(this, 'medicine')" data-name="{{ med_name }}" data-limit="{{ stock.alert_level }}" data-unit="{{ stock.unit }}">
+                        <button type="button" class="btn btn-sm btn-light border text-secondary p-0 rounded-2" data-style="width: 30px; height: 30px; min-width: 30px; min-height: 30px; display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 0; font-size: 0.82rem; border: 1px solid #e2e8f0; background: #f8fafc; color: #64748b; cursor: pointer;" title="Set Alert Threshold" data-bs-toggle="modal" data-bs-target="#thresholdModal" onclick="openThresholdModal(this, 'medicine')" data-onclick="openThresholdModal(this, 'medicine')" data-type="medicine" data-name="{{ med_name }}" data-limit="{{ stock.alert_level }}" data-unit="{{ stock.unit }}">
                             <i class="bi bi-bell" style="pointer-events: none;"></i>
                         </button>
                         <!-- Delete -->
@@ -417,11 +417,11 @@
 
                     <div class="d-inline-flex align-items-center gap-1.5" data-style="display: inline-flex !important; align-items: center !important; gap: 4px;">
                         <!-- Edit -->
-                        <button type="button" class="btn btn-sm btn-light border text-warning btn-icon-action" data-style="width: 30px; height: 30px; min-width: 30px; min-height: 30px; display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 0; font-size: 0.82rem; border: 1px solid #fef3c7; background: #fffbeb; color: #d97706; cursor: pointer;" title="Edit {{ vac_name }}" data-bs-toggle="modal" data-bs-target="#editStockModal" onclick="openEditModal(this, 'vaccine')" data-onclick="openEditModal(this, 'vaccine')" data-name="{{ vac_name }}" data-stock="{{ stock.closing_stock }}" data-unit="{{ stock.unit }}" data-limit="{{ stock.alert_level }}">
+                        <button type="button" class="btn btn-sm btn-light border text-warning btn-icon-action" data-style="width: 30px; height: 30px; min-width: 30px; min-height: 30px; display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 0; font-size: 0.82rem; border: 1px solid #fef3c7; background: #fffbeb; color: #d97706; cursor: pointer;" title="Edit {{ vac_name }}" data-bs-toggle="modal" data-bs-target="#editStockModal" onclick="openEditModal(this, 'vaccine')" data-onclick="openEditModal(this, 'vaccine')" data-type="vaccine" data-name="{{ vac_name }}" data-stock="{{ stock.closing_stock }}" data-unit="{{ stock.unit }}" data-limit="{{ stock.alert_level }}">
                             <i class="bi bi-pencil" style="pointer-events: none;"></i>
                         </button>
                         <!-- Threshold -->
-                        <button type="button" class="btn btn-sm btn-light border text-secondary btn-icon-action" data-style="width: 30px; height: 30px; min-width: 30px; min-height: 30px; display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 0; font-size: 0.82rem; border: 1px solid #e2e8f0; background: #f8fafc; color: #64748b; cursor: pointer;" title="Set Alert Threshold" data-bs-toggle="modal" data-bs-target="#thresholdModal" onclick="openThresholdModal(this, 'vaccine')" data-onclick="openThresholdModal(this, 'vaccine')" data-name="{{ vac_name }}" data-limit="{{ stock.alert_level }}" data-unit="{{ stock.unit }}">
+                        <button type="button" class="btn btn-sm btn-light border text-secondary btn-icon-action" data-style="width: 30px; height: 30px; min-width: 30px; min-height: 30px; display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 0; font-size: 0.82rem; border: 1px solid #e2e8f0; background: #f8fafc; color: #64748b; cursor: pointer;" title="Set Alert Threshold" data-bs-toggle="modal" data-bs-target="#thresholdModal" onclick="openThresholdModal(this, 'vaccine')" data-onclick="openThresholdModal(this, 'vaccine')" data-type="vaccine" data-name="{{ vac_name }}" data-limit="{{ stock.alert_level }}" data-unit="{{ stock.unit }}">
                             <i class="bi bi-bell" style="pointer-events: none;"></i>
                         </button>
                         <!-- Delete -->
@@ -984,20 +984,35 @@
         if (!btn) return;
         const btnEl = btn.closest ? (btn.closest('button') || btn) : btn;
         const name = btnEl.getAttribute('data-name') || (btnEl.dataset ? btnEl.dataset.name : '') || '';
-        const stock = btnEl.getAttribute('data-stock') || (btnEl.dataset ? btnEl.dataset.stock : '') || '0';
-        const unit = btnEl.getAttribute('data-unit') || (btnEl.dataset ? btnEl.dataset.unit : '') || '';
-        const limit = btnEl.getAttribute('data-limit') || (btnEl.dataset ? btnEl.dataset.limit : '') || '0';
+        const detectedType = type || btnEl.getAttribute('data-type') || (btnEl.dataset ? btnEl.dataset.type : '') || 'feed';
+        
+        let stock = btnEl.getAttribute('data-stock') || (btnEl.dataset ? btnEl.dataset.stock : '');
+        let unit = btnEl.getAttribute('data-unit') || (btnEl.dataset ? btnEl.dataset.unit : '');
+        let limit = btnEl.getAttribute('data-limit') || (btnEl.dataset ? btnEl.dataset.limit : '');
+
+        // Fallback to stock dictionary lookup if any value is missing
+        if (name && STOCK_INVENTORY_ITEMS && STOCK_INVENTORY_ITEMS[detectedType]) {
+            const itemData = STOCK_INVENTORY_ITEMS[detectedType][name.toLowerCase()];
+            if (itemData) {
+                if (stock === null || stock === undefined || stock === '') stock = itemData.stock;
+                if (!unit) unit = itemData.unit;
+                if (limit === null || limit === undefined || limit === '') limit = itemData.alert_level;
+            }
+        }
 
         const typeInput = document.getElementById('edit_item_type');
-        if (typeInput) typeInput.value = type;
+        if (typeInput) typeInput.value = detectedType;
         const oldNameInput = document.getElementById('edit_old_item_name');
         if (oldNameInput) oldNameInput.value = name;
         const nameInput = document.getElementById('edit_item_name');
         if (nameInput) nameInput.value = name;
+        
         const stockInput = document.getElementById('edit_closing_stock');
-        if (stockInput) stockInput.value = parseFloat(stock) || 0;
+        if (stockInput) stockInput.value = (stock !== undefined && stock !== null && stock !== '') ? parseFloat(stock) : 0;
+        
         const limitInput = document.getElementById('edit_alert_limit');
-        if (limitInput) limitInput.value = parseFloat(limit) || 0;
+        if (limitInput) limitInput.value = (limit !== undefined && limit !== null && limit !== '') ? parseFloat(limit) : 0;
+        
         const unitDisplay = document.getElementById('edit_unit_display');
         if (unitDisplay) unitDisplay.textContent = unit || 'Unit';
 
@@ -1012,10 +1027,10 @@
 
         const header = document.getElementById('editModalHeader');
         if (header) {
-            if (type === 'feed') {
+            if (detectedType === 'feed') {
                 header.setAttribute('data-style', 'background-color: #10b981; color: #ffffff;');
                 header.style.backgroundColor = '#10b981';
-            } else if (type === 'medicine') {
+            } else if (detectedType === 'medicine') {
                 header.setAttribute('data-style', 'background-color: #3b82f6; color: #ffffff;');
                 header.style.backgroundColor = '#3b82f6';
             } else {
@@ -1032,17 +1047,26 @@
         if (!btn) return;
         const btnEl = btn.closest ? (btn.closest('button') || btn) : btn;
         const name = btnEl.getAttribute('data-name') || (btnEl.dataset ? btnEl.dataset.name : '') || '';
-        const limit = btnEl.getAttribute('data-limit') || (btnEl.dataset ? btnEl.dataset.limit : '') || '0';
-        const unit = btnEl.getAttribute('data-unit') || (btnEl.dataset ? btnEl.dataset.unit : '') || '';
+        const detectedType = type || btnEl.getAttribute('data-type') || (btnEl.dataset ? btnEl.dataset.type : '') || 'feed';
+        let limit = btnEl.getAttribute('data-limit') || (btnEl.dataset ? btnEl.dataset.limit : '');
+        let unit = btnEl.getAttribute('data-unit') || (btnEl.dataset ? btnEl.dataset.unit : '');
+
+        if (name && STOCK_INVENTORY_ITEMS && STOCK_INVENTORY_ITEMS[detectedType]) {
+            const itemData = STOCK_INVENTORY_ITEMS[detectedType][name.toLowerCase()];
+            if (itemData) {
+                if (!unit) unit = itemData.unit;
+                if (limit === null || limit === undefined || limit === '') limit = itemData.alert_level;
+            }
+        }
 
         const typeInput = document.getElementById('threshold_item_type');
-        if (typeInput) typeInput.value = type;
+        if (typeInput) typeInput.value = detectedType;
         const nameInput = document.getElementById('threshold_item_name');
         if (nameInput) nameInput.value = name;
         const labelEl = document.getElementById('threshold_item_label');
         if (labelEl) labelEl.textContent = name;
         const limitInput = document.getElementById('threshold_limit_val');
-        if (limitInput) limitInput.value = parseFloat(limit) || 0;
+        if (limitInput) limitInput.value = (limit !== undefined && limit !== null && limit !== '') ? parseFloat(limit) : 0;
         const unitLabel = document.getElementById('threshold_unit_label');
         if (unitLabel) unitLabel.textContent = unit || 'Unit';
 
@@ -1075,6 +1099,29 @@
         if (dateInput) {
             const today = new Date().toISOString().split('T')[0];
             dateInput.value = today;
+        }
+
+        // Bootstrap event listeners for seamless opening
+        const editModalEl = document.getElementById('editStockModal');
+        if (editModalEl) {
+            editModalEl.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                if (button && button.getAttribute('data-name')) {
+                    const type = button.getAttribute('data-type') || 'feed';
+                    openEditModal(button, type);
+                }
+            });
+        }
+
+        const threshModalEl = document.getElementById('thresholdModal');
+        if (threshModalEl) {
+            threshModalEl.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                if (button && button.getAttribute('data-name')) {
+                    const type = button.getAttribute('data-type') || 'feed';
+                    openThresholdModal(button, type);
+                }
+            });
         }
 
         // Alert popup toast if low stock threshold is reached
