@@ -774,16 +774,16 @@
 
                         <div class="row g-2 mb-3">
                             <div class="col-7">
-                                <label class="form-label small text-muted fw-bold">Closing Stock Quantity <span
+                                <label class="form-label small text-muted fw-bold">Current Closing Stock <span
                                         class="text-danger">*</span></label>
                                 <input type="number" step="0.01" min="0" name="closing_stock" id="edit_closing_stock"
-                                    class="form-control" required>
+                                    class="form-control font-monospace fw-bold" required>
                             </div>
                             <div class="col-5">
                                 <label class="form-label small text-muted fw-bold">Unit of Measure <span
                                         class="text-danger">*</span></label>
                                 <select name="unit" id="edit_unit_select" class="form-select" required
-                                    onchange="document.getElementById('edit_unit_display').textContent = this.value">
+                                    onchange="onEditUnitSelectChange(this.value)">
                                     {% if expense_units %}
                                     {% for u in expense_units %}
                                     <option value="{{ u.unit_symbol or u.unit_name }}">{{ u.unit_name }}{% if
@@ -805,6 +805,42 @@
                                         <i class="bi bi-plus-circle me-1"></i>Expense Units
                                     </a>
                                 </div>
+                            </div>
+                        </div>
+
+                        <!-- Record Past Stock Consumption Box -->
+                        <div class="p-3 mb-3 rounded-4 bg-light border border-warning border-opacity-50">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <span class="fw-bold text-dark small">
+                                    <i class="bi bi-fire text-danger me-1"></i>Record Past Stock Consumption
+                                </span>
+                                <span class="badge bg-warning bg-opacity-10 text-dark border border-warning border-opacity-50 rounded-pill px-2.5 py-0.5 small fw-bold">
+                                    Auto-deducts &amp; reflects in P&amp;L
+                                </span>
+                            </div>
+                            
+                            <div class="row g-2 mb-2">
+                                <div class="col-7">
+                                    <label class="form-label small text-muted fw-bold mb-1">Consumed Quantity</label>
+                                    <div class="input-group">
+                                        <input type="number" step="0.01" min="0" name="consumed_quantity" id="edit_consumed_quantity" class="form-control font-monospace" placeholder="0.00" oninput="onConsumptionQtyChange(this.value)" data-oninput="onConsumptionQtyChange(this.value)">
+                                        <span class="input-group-text bg-white text-muted small" id="edit_consumption_unit_label">Unit</span>
+                                    </div>
+                                </div>
+                                <div class="col-5">
+                                    <label class="form-label small text-muted fw-bold mb-1">Consumption Date</label>
+                                    <input type="date" name="consumption_date" id="edit_consumption_date" class="form-control rounded-3">
+                                </div>
+                            </div>
+
+                            <div class="mb-2">
+                                <label class="form-label small text-muted fw-bold mb-1">Details / Notes</label>
+                                <input type="text" name="consumption_notes" id="edit_consumption_notes" class="form-control form-control-sm rounded-3" placeholder="e.g. Batch 1 Allocation / Vet Treatment">
+                            </div>
+
+                            <div class="p-2 px-3 rounded-3 bg-white border d-flex align-items-center justify-content-between text-muted small" style="font-size:0.78rem;">
+                                <span><i class="bi bi-info-circle text-primary me-1"></i>Remaining Stock Preview:</span>
+                                <strong class="text-dark font-monospace" id="preview_remaining_stock">--</strong>
                             </div>
                         </div>
 
@@ -1221,6 +1257,32 @@
                 fillUnitSelect('buy_unit_select', found.unit);
                 const alInput = document.getElementById('buy_alert_limit');
                 if (alInput) alInput.value = found.alert_level || '';
+        // Helper: Unit change in Edit Modal
+        function onEditUnitSelectChange(val) {
+            const unitDisplay = document.getElementById('edit_unit_display');
+            if (unitDisplay) unitDisplay.textContent = val || 'Unit';
+            const consUnit = document.getElementById('edit_consumption_unit_label');
+            if (consUnit) consUnit.textContent = val || 'Unit';
+            onConsumptionQtyChange(document.getElementById('edit_consumed_quantity')?.value || '');
+        }
+
+        // Helper: Live consumption calculation & preview in Edit Modal
+        function onConsumptionQtyChange(val) {
+            const stockInput = document.getElementById('edit_closing_stock');
+            if (!stockInput) return;
+            const orig = parseFloat(stockInput.dataset.originalStock || 0);
+            const consumed = parseFloat(val || 0);
+            const remaining = Math.max(0, orig - consumed);
+            stockInput.value = remaining.toFixed(2);
+            
+            const preview = document.getElementById('preview_remaining_stock');
+            const unit = document.getElementById('edit_unit_display')?.textContent || '';
+            if (preview) {
+                if (consumed > 0) {
+                    preview.innerHTML = `<span class="text-danger fw-bold">${remaining.toFixed(2)} ${unit}</span> <span class="text-muted">(-${consumed.toFixed(2)} consumed)</span>`;
+                } else {
+                    preview.textContent = `${remaining.toFixed(2)} ${unit}`;
+                }
             }
         }
 
@@ -1242,7 +1304,28 @@
             if (nameInput) nameInput.value = name;
 
             const stockInput = document.getElementById('edit_closing_stock');
-            if (stockInput) stockInput.value = stock;
+            if (stockInput) {
+                stockInput.value = stock.toFixed(2);
+                stockInput.dataset.originalStock = stock;
+            }
+
+            const consumedQtyInput = document.getElementById('edit_consumed_quantity');
+            if (consumedQtyInput) consumedQtyInput.value = '';
+
+            const consumedDateInput = document.getElementById('edit_consumption_date');
+            if (consumedDateInput) {
+                const today = new Date().toISOString().split('T')[0];
+                consumedDateInput.value = today;
+            }
+
+            const consumedNotesInput = document.getElementById('edit_consumption_notes');
+            if (consumedNotesInput) consumedNotesInput.value = '';
+
+            const consUnitLabel = document.getElementById('edit_consumption_unit_label');
+            if (consUnitLabel) consUnitLabel.textContent = unit || 'Unit';
+
+            const preview = document.getElementById('preview_remaining_stock');
+            if (preview) preview.textContent = `${stock.toFixed(2)} ${unit || ''}`;
 
             const limitInput = document.getElementById('edit_alert_limit');
             if (limitInput) limitInput.value = limit;
@@ -1251,13 +1334,6 @@
             if (unitDisplay) unitDisplay.textContent = unit || 'Unit';
 
             fillUnitSelect('edit_unit_select', unit);
-
-            const editSelect = document.getElementById('edit_unit_select');
-            if (editSelect) {
-                editSelect.onchange = function () {
-                    if (unitDisplay) unitDisplay.textContent = this.value;
-                };
-            }
 
             const header = document.getElementById('editModalHeader');
             if (header) {
@@ -1380,6 +1456,8 @@
         window.onBuyCategoryChange = onBuyCategoryChange;
         window.populateBuyDatalist = populateBuyDatalist;
         window.onBuyNameInput = onBuyNameInput;
+        window.onConsumptionQtyChange = onConsumptionQtyChange;
+        window.onEditUnitSelectChange = onEditUnitSelectChange;
         window.openEditDirect = openEditDirect;
         window.openEditModal = openEditModal;
         window.openThresholdDirect = openThresholdDirect;

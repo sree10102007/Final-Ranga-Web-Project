@@ -8139,6 +8139,14 @@ def edit_stock_item():
     except ValueError:
         alert_limit = 0.0
 
+    try:
+        consumed_qty = float(f.get('consumed_quantity') or 0.0)
+    except ValueError:
+        consumed_qty = 0.0
+        
+    consumption_date = (f.get('consumption_date') or '').strip() or datetime.now().strftime('%Y-%m-%d')
+    consumption_notes = (f.get('consumption_notes') or '').strip()
+
     if not new_name:
         flash('Item name cannot be empty!', 'danger')
         return redirect(url_for('stock_inventory'))
@@ -8168,15 +8176,39 @@ def edit_stock_item():
             db.execute("UPDATE feed_purchases SET unit = ? WHERE LOWER(TRIM(feed_name)) = LOWER(TRIM(?))", (unit, new_name))
         db.execute("UPDATE feed_inventory SET alert_level = ? WHERE LOWER(TRIM(feed_name)) = LOWER(TRIM(?))", (alert_limit, new_name))
         
-        count = db.execute("SELECT COUNT(*) FROM feed_inventory WHERE LOWER(TRIM(feed_name)) = LOWER(TRIM(?))", (new_name,)).fetchone()[0]
-        if count > 0:
-            db.execute("UPDATE feed_inventory SET closing_stock = ? WHERE LOWER(TRIM(feed_name)) = LOWER(TRIM(?))", (closing_stock, new_name))
-        else:
-            date_str = datetime.now().strftime('%Y-%m-%d')
+        last_rec = db.execute("SELECT closing_stock, cost_per_unit, unit FROM feed_inventory WHERE LOWER(TRIM(feed_name)) = LOWER(TRIM(?)) ORDER BY id DESC LIMIT 1", (new_name,)).fetchone()
+        cost_per_unit = float(last_rec['cost_per_unit']) if (last_rec and last_rec['cost_per_unit']) else 0.0
+        prev_closing = float(last_rec['closing_stock']) if (last_rec and last_rec['closing_stock'] is not None) else closing_stock
+        
+        if consumed_qty > 0:
+            final_closing = max(0.0, prev_closing - consumed_qty)
+            consumed_val = consumed_qty * cost_per_unit
+            desc = consumption_notes or f"Past stock consumption of {consumed_qty} {unit or 'KG'}"
+            
             db.execute('''
                 INSERT INTO feed_inventory (feed_name, opening_stock, purchased_qty, used_qty, wastage_qty, closing_stock, unit, cost_per_unit, total_cost, purchase_date, supplier, alert_level)
-                VALUES (?, ?, 0.0, 0.0, 0.0, ?, ?, 0.0, 0.0, ?, 'Manual Adjustment', ?)
-            ''', (new_name, closing_stock, closing_stock, unit or 'KG', date_str, alert_limit))
+                VALUES (?, ?, 0.0, ?, 0.0, ?, ?, ?, ?, ?, ?, ?)
+            ''', (new_name, prev_closing, consumed_qty, final_closing, unit or 'KG', cost_per_unit, consumed_val, consumption_date, desc, alert_limit))
+            
+            if consumed_val > 0:
+                db.execute('''
+                    INSERT INTO goats_data (tag_number, date, category, type, amount, notes)
+                    VALUES ('All', ?, 'expense', 'Feed Consumption', ?, ?)
+                ''', (consumption_date, consumed_val, f"Feed: {new_name} - {desc}"))
+                
+            db.execute("UPDATE feed_inventory SET closing_stock = ? WHERE LOWER(TRIM(feed_name)) = LOWER(TRIM(?))", (final_closing, new_name))
+            flash(f'Successfully recorded past consumption of {consumed_qty} {unit or "KG"} (₹{consumed_val:.2f}) on {consumption_date}. Stock updated to {final_closing:.2f} and synced to P&L!', 'success')
+        else:
+            count = db.execute("SELECT COUNT(*) FROM feed_inventory WHERE LOWER(TRIM(feed_name)) = LOWER(TRIM(?))", (new_name,)).fetchone()[0]
+            if count > 0:
+                db.execute("UPDATE feed_inventory SET closing_stock = ? WHERE LOWER(TRIM(feed_name)) = LOWER(TRIM(?))", (closing_stock, new_name))
+            else:
+                date_str = datetime.now().strftime('%Y-%m-%d')
+                db.execute('''
+                    INSERT INTO feed_inventory (feed_name, opening_stock, purchased_qty, used_qty, wastage_qty, closing_stock, unit, cost_per_unit, total_cost, purchase_date, supplier, alert_level)
+                    VALUES (?, ?, 0.0, 0.0, 0.0, ?, ?, 0.0, 0.0, ?, 'Manual Adjustment', ?)
+                ''', (new_name, closing_stock, closing_stock, unit or 'KG', date_str, alert_limit))
+            flash(f'Stock item "{new_name}" updated successfully.', 'success')
 
     elif item_type == 'medicine':
         db.execute("UPDATE medicine_inventory SET medicine_name = ? WHERE LOWER(TRIM(medicine_name)) = LOWER(TRIM(?))", (new_name, old_name))
@@ -8189,15 +8221,39 @@ def edit_stock_item():
             db.execute("UPDATE medicine_purchases SET dose_unit = ? WHERE LOWER(TRIM(medicine_name)) = LOWER(TRIM(?))", (unit, new_name))
         db.execute("UPDATE medicine_inventory SET alert_level = ? WHERE LOWER(TRIM(medicine_name)) = LOWER(TRIM(?))", (alert_limit, new_name))
         
-        count = db.execute("SELECT COUNT(*) FROM medicine_inventory WHERE LOWER(TRIM(medicine_name)) = LOWER(TRIM(?))", (new_name,)).fetchone()[0]
-        if count > 0:
-            db.execute("UPDATE medicine_inventory SET closing_stock = ? WHERE LOWER(TRIM(medicine_name)) = LOWER(TRIM(?))", (closing_stock, new_name))
-        else:
-            date_str = datetime.now().strftime('%Y-%m-%d')
+        last_rec = db.execute("SELECT closing_stock, cost_per_unit, unit FROM medicine_inventory WHERE LOWER(TRIM(medicine_name)) = LOWER(TRIM(?)) ORDER BY id DESC LIMIT 1", (new_name,)).fetchone()
+        cost_per_unit = float(last_rec['cost_per_unit']) if (last_rec and last_rec['cost_per_unit']) else 0.0
+        prev_closing = float(last_rec['closing_stock']) if (last_rec and last_rec['closing_stock'] is not None) else closing_stock
+        
+        if consumed_qty > 0:
+            final_closing = max(0.0, prev_closing - consumed_qty)
+            consumed_val = consumed_qty * cost_per_unit
+            desc = consumption_notes or f"Past stock consumption of {consumed_qty} {unit or 'Doses'}"
+            
             db.execute('''
                 INSERT INTO medicine_inventory (medicine_name, opening_stock, purchased_qty, used_qty, wastage_qty, closing_stock, unit, cost_per_unit, total_cost, purchase_date, supplier, alert_level)
-                VALUES (?, ?, 0.0, 0.0, 0.0, ?, ?, 0.0, 0.0, ?, 'Manual Adjustment', ?)
-            ''', (new_name, closing_stock, closing_stock, unit or 'ML', date_str, alert_limit))
+                VALUES (?, ?, 0.0, ?, 0.0, ?, ?, ?, ?, ?, ?, ?)
+            ''', (new_name, prev_closing, consumed_qty, final_closing, unit or 'Doses', cost_per_unit, consumed_val, consumption_date, desc, alert_limit))
+            
+            if consumed_val > 0:
+                db.execute('''
+                    INSERT INTO goats_data (tag_number, date, category, type, amount, notes)
+                    VALUES ('All', ?, 'expense', 'Medicine Consumption', ?, ?)
+                ''', (consumption_date, consumed_val, f"Medicine: {new_name} - {desc}"))
+                
+            db.execute("UPDATE medicine_inventory SET closing_stock = ? WHERE LOWER(TRIM(medicine_name)) = LOWER(TRIM(?))", (final_closing, new_name))
+            flash(f'Successfully recorded past consumption of {consumed_qty} {unit or "Doses"} (₹{consumed_val:.2f}) on {consumption_date}. Stock updated to {final_closing:.2f} and synced to P&L!', 'success')
+        else:
+            count = db.execute("SELECT COUNT(*) FROM medicine_inventory WHERE LOWER(TRIM(medicine_name)) = LOWER(TRIM(?))", (new_name,)).fetchone()[0]
+            if count > 0:
+                db.execute("UPDATE medicine_inventory SET closing_stock = ? WHERE LOWER(TRIM(medicine_name)) = LOWER(TRIM(?))", (closing_stock, new_name))
+            else:
+                date_str = datetime.now().strftime('%Y-%m-%d')
+                db.execute('''
+                    INSERT INTO medicine_inventory (medicine_name, opening_stock, purchased_qty, used_qty, wastage_qty, closing_stock, unit, cost_per_unit, total_cost, purchase_date, supplier, alert_level)
+                    VALUES (?, ?, 0.0, 0.0, 0.0, ?, ?, 0.0, 0.0, ?, 'Manual Adjustment', ?)
+                ''', (new_name, closing_stock, closing_stock, unit or 'ML', date_str, alert_limit))
+            flash(f'Stock item "{new_name}" updated successfully.', 'success')
 
     elif item_type == 'vaccine':
         db.execute("UPDATE vaccine_inventory SET vaccine_name = ? WHERE LOWER(TRIM(vaccine_name)) = LOWER(TRIM(?))", (new_name, old_name))
@@ -8209,18 +8265,41 @@ def edit_stock_item():
             db.execute("UPDATE vaccine_inventory SET unit = ? WHERE LOWER(TRIM(vaccine_name)) = LOWER(TRIM(?))", (unit, new_name))
         db.execute("UPDATE vaccine_inventory SET alert_level = ? WHERE LOWER(TRIM(vaccine_name)) = LOWER(TRIM(?))", (alert_limit, new_name))
         
-        count = db.execute("SELECT COUNT(*) FROM vaccine_inventory WHERE LOWER(TRIM(vaccine_name)) = LOWER(TRIM(?))", (new_name,)).fetchone()[0]
-        if count > 0:
-            db.execute("UPDATE vaccine_inventory SET closing_stock = ? WHERE LOWER(TRIM(vaccine_name)) = LOWER(TRIM(?))", (closing_stock, new_name))
-        else:
-            date_str = datetime.now().strftime('%Y-%m-%d')
+        last_rec = db.execute("SELECT closing_stock, cost_per_unit, unit FROM vaccine_inventory WHERE LOWER(TRIM(vaccine_name)) = LOWER(TRIM(?)) ORDER BY id DESC LIMIT 1", (new_name,)).fetchone()
+        cost_per_unit = float(last_rec['cost_per_unit']) if (last_rec and last_rec['cost_per_unit']) else 0.0
+        prev_closing = float(last_rec['closing_stock']) if (last_rec and last_rec['closing_stock'] is not None) else closing_stock
+        
+        if consumed_qty > 0:
+            final_closing = max(0.0, prev_closing - consumed_qty)
+            consumed_val = consumed_qty * cost_per_unit
+            desc = consumption_notes or f"Past stock consumption of {consumed_qty} {unit or 'Doses'}"
+            
             db.execute('''
                 INSERT INTO vaccine_inventory (vaccine_name, opening_stock, purchased_qty, used_qty, wastage_qty, closing_stock, unit, cost_per_unit, total_cost, purchase_date, supplier, alert_level)
-                VALUES (?, ?, 0.0, 0.0, 0.0, ?, ?, 0.0, 0.0, ?, 'Manual Adjustment', ?)
-            ''', (new_name, closing_stock, closing_stock, unit or 'Doses', date_str, alert_limit))
+                VALUES (?, ?, 0.0, ?, 0.0, ?, ?, ?, ?, ?, ?, ?)
+            ''', (new_name, prev_closing, consumed_qty, final_closing, unit or 'Doses', cost_per_unit, consumed_val, consumption_date, desc, alert_limit))
+            
+            if consumed_val > 0:
+                db.execute('''
+                    INSERT INTO goats_data (tag_number, date, category, type, amount, notes)
+                    VALUES ('All', ?, 'expense', 'Vaccine Consumption', ?, ?)
+                ''', (consumption_date, consumed_val, f"Vaccine: {new_name} - {desc}"))
+                
+            db.execute("UPDATE vaccine_inventory SET closing_stock = ? WHERE LOWER(TRIM(vaccine_name)) = LOWER(TRIM(?))", (final_closing, new_name))
+            flash(f'Successfully recorded past consumption of {consumed_qty} {unit or "Doses"} (₹{consumed_val:.2f}) on {consumption_date}. Stock updated to {final_closing:.2f} and synced to P&L!', 'success')
+        else:
+            count = db.execute("SELECT COUNT(*) FROM vaccine_inventory WHERE LOWER(TRIM(vaccine_name)) = LOWER(TRIM(?))", (new_name,)).fetchone()[0]
+            if count > 0:
+                db.execute("UPDATE vaccine_inventory SET closing_stock = ? WHERE LOWER(TRIM(vaccine_name)) = LOWER(TRIM(?))", (closing_stock, new_name))
+            else:
+                date_str = datetime.now().strftime('%Y-%m-%d')
+                db.execute('''
+                    INSERT INTO vaccine_inventory (vaccine_name, opening_stock, purchased_qty, used_qty, wastage_qty, closing_stock, unit, cost_per_unit, total_cost, purchase_date, supplier, alert_level)
+                    VALUES (?, ?, 0.0, 0.0, 0.0, ?, ?, 0.0, 0.0, ?, 'Manual Adjustment', ?)
+                ''', (new_name, closing_stock, closing_stock, unit or 'Doses', date_str, alert_limit))
+            flash(f'Stock item "{new_name}" updated successfully.', 'success')
 
     db.commit()
-    flash(f'Stock item "{new_name}" updated successfully.', 'success')
     return redirect(url_for('stock_inventory'))
 
 
