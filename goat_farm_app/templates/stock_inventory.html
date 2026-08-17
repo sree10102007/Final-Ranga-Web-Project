@@ -1243,6 +1243,9 @@
                 fillUnitSelect('buy_unit_select', found.unit);
                 const alInput = document.getElementById('buy_alert_limit');
                 if (alInput) alInput.value = found.alert_level || '';
+            }
+        }
+
         // Helper: Unit change in Edit Modal
         function onEditUnitSelectChange(val) {
             const unitDisplay = document.getElementById('edit_unit_display');
