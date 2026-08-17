@@ -15,10 +15,13 @@
             <h3 class="fw-bold text-dark mb-0" data-style="font-weight: 800; color: #1e293b; margin: 0; font-size: 1.55rem;">Stock Inventory</h3>
         </div>
     </div>
-    <div class="d-grid gap-2" data-style="display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 8px !important;">
+    <div class="d-grid gap-2" data-style="display: flex !important; flex-wrap: wrap !important; gap: 8px !important;">
         <button type="button" class="btn btn-success rounded-pill px-3 py-2 fw-semibold shadow-sm text-nowrap" data-style="border-radius: 30px; font-weight: 600; padding: 8px 16px; font-size: 0.86rem; text-align: center;" data-bs-toggle="modal" data-bs-target="#quickBuyModal" onclick="openBuyModal(null, 'feed')" data-onclick="openBuyModal(null, 'feed')">
             <i class="bi bi-plus-circle-fill me-1"></i>+ Add / Restock Item
         </button>
+        <a href="{{ url_for('stock_valuations') }}" class="btn btn-warning rounded-pill px-3 py-2 fw-semibold text-dark text-nowrap shadow-sm" data-style="border-radius: 30px; font-weight: 600; padding: 8px 16px; font-size: 0.86rem; text-align: center; background-color: #f59e0b; border-color: #f59e0b; color: #1e293b;">
+            <i class="bi bi-calculator me-1"></i>Stock Valuations &amp; Consumptions
+        </a>
         <a href="{{ url_for('feed') }}" class="btn btn-outline-success rounded-pill px-3 py-2 fw-semibold text-nowrap" data-style="border-radius: 30px; font-weight: 600; padding: 8px 16px; font-size: 0.86rem; text-align: center;">
             <i class="bi bi-arrow-left-right me-1"></i>Batch Allocation
         </a>
@@ -119,10 +122,33 @@
     </div>
 </div>
 
-
-<!-- ========================================== -->
-<!-- 3 MAIN INVENTORY ROW CARDS (FULL WIDTH ROW-WISE) -->
-<!-- ========================================== -->
+<!-- Stock Valuation Metric Bar -->
+{% if current_valuation %}
+<div class="card border-0 shadow-sm rounded-4 p-3 bg-light mb-4 border-start border-4 border-success" data-style="background-color: #f8fafc; border-radius: 16px; padding: 14px 20px; border-left: 4px solid #10b981; margin-bottom: 24px; box-shadow: 0 4px 14px rgba(0,0,0,0.03);">
+    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+        <div class="d-flex align-items-center gap-3">
+            <div class="bg-success bg-opacity-10 text-success p-2 rounded-3 fs-3 d-flex align-items-center justify-content-center" data-style="width: 44px; height: 44px; background-color: rgba(16, 185, 129, 0.12); color: #10b981; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                <i class="bi bi-currency-rupee"></i>
+            </div>
+            <div>
+                <small class="text-muted text-uppercase fw-bold d-block" data-style="font-size: 0.72rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Current Consumables Stock Valuation</small>
+                <div class="d-flex flex-wrap align-items-baseline gap-2">
+                    <h4 class="fw-bold text-dark mb-0 font-monospace" data-style="font-weight: 800; font-size: 1.4rem; color: #1e293b; margin: 0;">₹{{ "%.2f"|format(current_valuation.consumables_total) }}</h4>
+                    <span class="text-muted small" data-style="font-size: 0.8rem; color: #64748b;">(Feed: ₹{{ "%.2f"|format(current_valuation.feed) }} &bull; Med: ₹{{ "%.2f"|format(current_valuation.medicine) }} &bull; Vac: ₹{{ "%.2f"|format(current_valuation.vaccine) }})</span>
+                </div>
+            </div>
+        </div>
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+            <a href="{{ url_for('stock_valuations') }}" class="btn btn-sm btn-outline-warning text-dark rounded-pill px-3 py-1.5 fw-semibold" data-style="border-radius: 20px; font-weight: 600; font-size: 0.82rem; padding: 6px 14px; background-color: #fffbeb; border: 1px solid #fde68a; color: #92400e;">
+                <i class="bi bi-calculator me-1"></i>Monthly Valuations &amp; Consumptions
+            </a>
+            <a href="{{ url_for('pnl') }}" class="btn btn-sm btn-success rounded-pill px-3 py-1.5 fw-semibold text-white" data-style="border-radius: 20px; font-weight: 600; font-size: 0.82rem; padding: 6px 14px;">
+                <i class="bi bi-file-earmark-spreadsheet me-1"></i>View in P&amp;L
+            </a>
+        </div>
+    </div>
+</div>
+{% endif %}
 <div class="d-flex flex-column gap-4 w-100" data-style="display: flex !important; flex-direction: column !important; gap: 24px; width: 100%;">
 
     <!-- -------------------------------------- -->
