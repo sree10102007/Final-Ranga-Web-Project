@@ -7761,16 +7761,36 @@ def api_pnl_drilldown():
                     'type': 'income'
                 })
 
-        # 9. Expenses
+        # 9. Other Vouchers & Expenses
+        ovs = db.execute("""
+            SELECT ov.id, ov.voucher_date AS date, ov.particular_name AS reference, ov.notes AS detail, ov.amount, ov.pnl_category, ov.particular_id, ov.supplier_name, ov.bill_no
+            FROM other_vouchers ov
+            WHERE ov.voucher_date BETWEEN ? AND ?
+            ORDER BY ov.voucher_date DESC
+        """, (from_date, to_date)).fetchall()
+        for ov in ovs:
+            acct = get_account_name(particular_id=ov['particular_id'], particular_name=ov['reference'], pnl_cat=ov['pnl_category'], fallback_name='General Expense')
+            cat_norm = category.strip().lower()
+            if category == 'All' or acct == category or acct.strip().lower() == cat_norm or (ov['pnl_category'] and ov['pnl_category'].strip().lower() == cat_norm) or (ov['reference'] and ov['reference'].strip().lower() == cat_norm):
+                transactions.append({
+                    'date': ov['date'],
+                    'reference': ov['reference'] or 'General Expense',
+                    'detail': ov['detail'] or f"Supplier: {ov['supplier_name'] or 'N/A'}, Bill: {ov['bill_no'] or 'N/A'}",
+                    'amount': ov['amount'],
+                    'category': acct,
+                    'type': 'expense'
+                })
+
         rows = db.execute("SELECT id, date, category AS reference, description AS detail, amount, pnl_category, particular_id FROM expenses WHERE status IN ('Approved', 'Paid') AND date BETWEEN ? AND ? ORDER BY date DESC", (from_date, to_date)).fetchall()
         for r in rows:
             if r['reference'] and ('labor' in r['reference'].lower() or 'labour' in r['reference'].lower()):
                 continue
             acct = get_account_name(particular_id=r['particular_id'], pnl_cat=r['pnl_category'], particular_name=r['reference'], fallback_name='General Expense')
-            if category == 'All' or acct == category:
+            cat_norm = category.strip().lower()
+            if category == 'All' or acct == category or acct.strip().lower() == cat_norm or (r['pnl_category'] and r['pnl_category'].strip().lower() == cat_norm) or (r['reference'] and r['reference'].strip().lower() == cat_norm):
                 transactions.append({'date': r['date'], 'reference': r['reference'], 'detail': r['detail'] or 'General Expense', 'amount': r['amount'], 'category': acct, 'type': 'expense'})
             
-        transactions.sort(key=lambda x: x['date'], reverse=True)
+        transactions.sort(key=lambda x: str(x['date']), reverse=True)
         return jsonify({'success': True, 'transactions': transactions})
 
 
