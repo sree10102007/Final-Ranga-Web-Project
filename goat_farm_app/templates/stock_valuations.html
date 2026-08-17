@@ -1,343 +1,158 @@
 {% extends 'layout.html' %}
-{% block title %}Stock Valuations & Consumptions - Expenses Master{% endblock %}
-{% block page_title %}STOCK VALUATIONS & CONSUMPTIONS{% endblock %}
+{% block title %}Stock Valuations - Expenses Master{% endblock %}
+{% block page_title %}STOCK VALUATIONS{% endblock %}
 {% block content %}
 <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
     <div class="d-flex align-items-center gap-3">
-        <a href="{{ url_for('stock_inventory') }}" class="btn btn-outline-secondary rounded-circle d-flex align-items-center justify-content-center" style="width:40px;height:40px;padding:0;" title="Back to Stock Inventory">
+        <a href="{{ url_for('expenses_master') }}"
+            class="btn btn-outline-secondary rounded-circle d-flex align-items-center justify-content-center"
+            style="width:40px;height:40px;padding:0;">
             <i class="bi bi-arrow-left fs-5"></i>
         </a>
         <div>
-            <h2 class="fw-bold mb-0 text-warning" style="color:#ea580c !important;">Stock Valuations &amp; Consumptions</h2>
-            <p class="text-muted small mb-0">Record and review periodic stock valuations. Automatically track stock consumed by goats across past months and reflect in P&amp;L.</p>
-        </div>
-    </div>
-    <div class="d-flex gap-2">
-        <a href="{{ url_for('pnl') }}" class="btn btn-outline-success rounded-pill px-3 py-2 fw-semibold">
-            <i class="bi bi-file-earmark-spreadsheet me-1"></i>View P&amp;L Statement
-        </a>
-        <a href="{{ url_for('stock_inventory') }}" class="btn btn-success rounded-pill px-3 py-2 fw-semibold text-white">
-            <i class="bi bi-box-seam me-1"></i>Stock Inventory
-        </a>
-    </div>
-</div>
-
-<!-- Formula Info Card (Row 1) -->
-<div class="card border-0 shadow-sm rounded-4 mb-4 bg-light border-start border-4 border-warning">
-    <div class="card-body p-3 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
-        <div class="d-flex align-items-center gap-3">
-            <div class="bg-warning bg-opacity-10 text-warning p-2 rounded-3 fs-3 d-flex align-items-center justify-content-center" style="width:44px;height:44px;">
-                <i class="bi bi-calculator"></i>
-            </div>
-            <div>
-                <h6 class="fw-bold mb-1 text-dark">Accrual Stock Consumption Formula (Option 2)</h6>
-                <div class="text-muted small">
-                    <span class="badge bg-warning text-dark me-1 font-monospace">Opening Stock (₹)</span> + 
-                    <span class="badge bg-primary text-white mx-1 font-monospace">Purchases in Period (₹)</span> &minus; 
-                    <span class="badge bg-success text-white mx-1 font-monospace">Closing Stock (₹)</span> = 
-                    <span class="badge bg-danger text-white ms-1 font-monospace">Stock Consumed / P&amp;L Impact (₹)</span>
-                </div>
-            </div>
-        </div>
-        <div class="text-md-end">
-            <small class="text-muted d-block">Used by Profit &amp; Loss reporting to reflect actual farm feed &amp; medical consumption.</small>
+            <h2 class="fw-bold mb-0 text-warning" style="color:#ea580c !important;">Stock Valuations</h2>
+            <p class="text-muted small mb-0">Configure opening &amp; closing stock values for specific periods (years,
+                months, or custom date ranges) for P&amp;L reports</p>
         </div>
     </div>
 </div>
 
-<!-- Main Row-Wise Layout -->
-<div class="d-flex flex-column gap-4 w-100">
-
-    <!-- ROW 1: Add / Auto-Calculate Stock Valuation Form Card (Full Width) -->
-    <div class="card border-0 shadow-sm rounded-4 overflow-hidden w-100 bg-white">
-        <div class="card-header border-0 p-3 px-4 d-flex align-items-center justify-content-between flex-wrap gap-2 text-white" style="background: linear-gradient(135deg, #ea580c 0%, #f97316 100%) !important; color: #ffffff !important;">
-            <div class="d-flex align-items-center gap-2">
-                <i class="bi bi-plus-circle-fill fs-5 text-white"></i>
-                <div>
-                    <h6 class="fw-bold mb-0 text-white" style="color: #ffffff !important;">Add / Auto-Calculate Stock Valuation Period</h6>
-                    <small class="text-white text-opacity-90" style="color: rgba(255,255,255,0.9) !important;">Calculate or record stock for past months or custom periods</small>
-                </div>
+<div class="row g-4">
+    <!-- Add Stock Valuation Form -->
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-header border-0 rounded-top-4 p-4 text-white"
+                style="background: linear-gradient(135deg,#ea580c,#f97316);">
+                <h6 class="fw-bold mb-0"><i class="bi bi-plus-circle me-2"></i>Add Valuation Period</h6>
             </div>
-            <button type="button" class="btn btn-sm btn-light text-dark fw-bold rounded-pill px-3 shadow-sm" onclick="autoCalculateStockValuation()" data-onclick="autoCalculateStockValuation()" id="topCalcBtn">
-                <i class="bi bi-arrow-repeat me-1 text-primary"></i>Auto-Fetch From Inventory Logs
-            </button>
-        </div>
-        
-        <div class="card-body p-4">
-            <!-- Quick Past Month Selector Bar -->
-            <div class="p-3 bg-light rounded-4 border mb-4">
-                <div class="row g-3 align-items-center">
-                    <div class="col-12 col-md-3">
-                        <label class="form-label small fw-bold text-dark mb-0">
-                            <i class="bi bi-calendar-event text-warning me-1"></i>Quick Past Month Preset:
-                        </label>
+            <div class="card-body p-4">
+                <form method="post">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="action" value="add">
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark">Period Name <span
+                                class="text-danger">*</span></label>
+                        <input type="text" name="period_name" class="form-control rounded-3" required
+                            placeholder="e.g. FY 2026, July 2026, Custom Range">
                     </div>
-                    <div class="col-6 col-md-3">
-                        <select id="quickMonthSelect" class="form-select form-select-sm rounded-pill fw-semibold">
-                            <option value="1">January</option>
-                            <option value="2">February</option>
-                            <option value="3">March</option>
-                            <option value="4">April</option>
-                            <option value="5">May</option>
-                            <option value="6">June</option>
-                            <option value="7">July</option>
-                            <option value="8">August</option>
-                            <option value="9">September</option>
-                            <option value="10">October</option>
-                            <option value="11">November</option>
-                            <option value="12">December</option>
-                        </select>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark">Start Date <span
+                                class="text-danger">*</span></label>
+                        <input type="date" name="from_date" class="form-control rounded-3" required>
                     </div>
-                    <div class="col-6 col-md-2">
-                        <select id="quickYearSelect" class="form-select form-select-sm rounded-pill fw-semibold">
-                            {% for y in range(2023, 2031) %}
-                            <option value="{{ y }}" {% if y == 2026 %}selected{% endif %}>{{ y }}</option>
-                            {% endfor %}
-                        </select>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark">End Date <span
+                                class="text-danger">*</span></label>
+                        <input type="date" name="to_date" class="form-control rounded-3" required>
                     </div>
-                    <div class="col-12 col-md-4 text-md-end">
-                        <button type="button" class="btn btn-sm btn-warning text-dark rounded-pill px-3 fw-bold shadow-sm w-100 w-md-auto" onclick="applyQuickMonth()" data-onclick="applyQuickMonth()">
-                            <i class="bi bi-magic me-1"></i>Set Dates &amp; Auto-Calculate
-                        </button>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark">Opening Stock Value (₹) <span
+                                class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-dark">₹</span>
+                            <input type="number" step="0.01" name="opening_stock" class="form-control" required
+                                placeholder="0.00">
+                        </div>
                     </div>
-                </div>
+
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold text-dark">Closing Stock Value (₹) <span
+                                class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-dark">₹</span>
+                            <input type="number" step="0.01" name="closing_stock" class="form-control" required
+                                placeholder="0.00">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn w-100 rounded-pill fw-bold shadow-sm text-white"
+                        style="background:#ea580c;">
+                        <i class="bi bi-check2-circle me-2"></i>Save Stock Valuation
+                    </button>
+                </form>
             </div>
-
-            <!-- Full-Width Horizontal Form -->
-            <form method="post" id="valuationForm">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <input type="hidden" name="action" value="add">
-                
-                <div class="row g-3 mb-3">
-                    <div class="col-12 col-md-4">
-                        <label class="form-label small fw-bold text-dark">Period Name <span class="text-danger">*</span></label>
-                        <input type="text" name="period_name" id="period_name" class="form-control rounded-3 fw-semibold" required placeholder="e.g. August 2026, Q2 2026, FY 2026">
-                    </div>
-                    <div class="col-6 col-md-4">
-                        <label class="form-label small fw-bold text-dark">Start Date <span class="text-danger">*</span></label>
-                        <input type="date" name="from_date" id="from_date" class="form-control rounded-3" required onchange="triggerAutoCalc()" data-onchange="triggerAutoCalc()">
-                    </div>
-                    <div class="col-6 col-md-4">
-                        <label class="form-label small fw-bold text-dark">End Date <span class="text-danger">*</span></label>
-                        <input type="date" name="to_date" id="to_date" class="form-control rounded-3" required onchange="triggerAutoCalc()" data-onchange="triggerAutoCalc()">
-                    </div>
-                </div>
-
-                <div class="row g-3 align-items-end mb-4">
-                    <div class="col-12 col-md-3">
-                        <label class="form-label small fw-bold text-dark">Opening Stock (₹) <span class="text-danger">*</span></label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-light text-dark fw-bold">₹</span>
-                            <input type="number" step="0.01" name="opening_stock" id="opening_stock" class="form-control font-monospace fw-bold text-warning" style="color:#d97706 !important;" required placeholder="0.00" oninput="updateConsumedPreview()" data-oninput="updateConsumedPreview()">
-                        </div>
-                    </div>
-
-                    <div class="col-12 col-md-3">
-                        <label class="form-label small fw-bold text-dark">Purchases in Period (₹)</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-light text-dark fw-bold">₹</span>
-                            <input type="number" step="0.01" id="purchases_val" class="form-control font-monospace bg-light fw-bold text-primary" readonly placeholder="0.00" value="0.00">
-                        </div>
-                    </div>
-
-                    <div class="col-12 col-md-3">
-                        <label class="form-label small fw-bold text-dark">Closing Stock (₹) <span class="text-danger">*</span></label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-light text-dark fw-bold">₹</span>
-                            <input type="number" step="0.01" name="closing_stock" id="closing_stock" class="form-control font-monospace fw-bold text-success" required placeholder="0.00" oninput="updateConsumedPreview()" data-oninput="updateConsumedPreview()">
-                        </div>
-                    </div>
-
-                    <div class="col-12 col-md-3">
-                        <div class="p-2 px-3 rounded-3 bg-danger bg-opacity-10 border border-danger border-opacity-25 d-flex justify-content-between align-items-center" style="min-height: 38px;">
-                            <span class="small fw-bold text-danger"><i class="bi bi-fire me-1"></i>Stock Consumed:</span>
-                            <span class="fw-bold font-monospace text-danger fs-6" id="previewConsumed">₹0.00</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="d-flex justify-content-end gap-2">
-                    <button type="button" class="btn btn-outline-secondary rounded-pill px-4 fw-semibold" onclick="document.getElementById('valuationForm').reset(); updateConsumedPreview();" data-onclick="document.getElementById('valuationForm').reset(); updateConsumedPreview();">
-                        Clear
-                    </button>
-                    <button type="submit" class="btn rounded-pill px-4 fw-bold shadow-sm text-white" style="background:#ea580c;">
-                        <i class="bi bi-check2-circle me-1"></i>Save Stock Valuation
-                    </button>
-                </div>
-            </form>
         </div>
     </div>
 
-    <!-- ROW 2: Configured Stock Valuations & Consumptions Table Card (Full Width) -->
-    <div class="card border-0 shadow-sm rounded-4 overflow-hidden w-100 bg-white">
-        <div class="card-header bg-white border-bottom p-3 px-4 d-flex align-items-center justify-content-between flex-wrap gap-2">
-            <div class="d-flex align-items-center gap-2">
-                <div class="bg-warning bg-opacity-10 text-warning p-2 rounded-3 fs-5 d-flex align-items-center justify-content-center" style="width:36px;height:36px; color:#ea580c !important;">
-                    <i class="bi bi-box-seam"></i>
-                </div>
-                <div>
-                    <h6 class="fw-bold mb-0 text-dark">Configured Stock Valuations &amp; Consumptions History ({{ records|length }})</h6>
-                    <small class="text-muted">Historical monthly/periodic records reflecting directly on Profit &amp; Loss statements</small>
-                </div>
+    <!-- Stock Valuations List -->
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+            <div class="card-header bg-white border-bottom p-4">
+                <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-box-seam me-2" style="color:#ea580c;"></i>Configured
+                    Stock Valuations ({{ records|length }})</h6>
             </div>
-            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-3 py-1.5 fw-bold">
-                <i class="bi bi-check-circle-fill me-1"></i>Active in P&amp;L
-            </span>
-        </div>
-        
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0 text-start">
-                <thead class="table-light text-uppercase small text-muted border-bottom">
-                    <tr>
-                        <th class="ps-4" style="min-width:180px;">Period Name</th>
-                        <th style="min-width:220px;">Date Range</th>
-                        <th class="text-end" style="min-width:140px;">Opening Stock (₹)</th>
-                        <th class="text-end" style="min-width:140px;">Purchases (₹)</th>
-                        <th class="text-end" style="min-width:140px;">Closing Stock (₹)</th>
-                        <th class="text-end" style="min-width:160px;">Stock Consumed (₹)</th>
-                        <th class="text-end pe-4" style="min-width:140px;">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for r in records %}
-                    <tr>
-                        <td class="ps-4">
-                            <span class="fw-bold text-dark d-block">{{ r.period_name }}</span>
-                            <small class="text-muted font-monospace" style="font-size:0.72rem;">Record #{{ r.id }}</small>
-                        </td>
-                        <td>
-                            <span class="badge bg-light text-dark border font-monospace small px-2.5 py-1.5">
-                                {{ r.from_date }} to {{ r.to_date }}
-                            </span>
-                        </td>
-                        <td class="text-end font-monospace fw-semibold text-warning" style="color:#ea580c !important;">
-                            ₹{{ "%.2f"|format(r.opening_stock or 0) }}
-                        </td>
-                        <td class="text-end font-monospace fw-semibold text-primary">
-                            ₹{{ "%.2f"|format(r.purchases or 0) }}
-                        </td>
-                        <td class="text-end font-monospace fw-semibold text-success">
-                            ₹{{ "%.2f"|format(r.closing_stock or 0) }}
-                        </td>
-                        <td class="text-end font-monospace fw-bold text-danger">
-                            <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-2.5 py-1.5 rounded-pill fs-6">
-                                ₹{{ "%.2f"|format(r.stock_consumed or 0) }}
-                            </span>
-                        </td>
-                        <td class="text-end pe-4">
-                            <div class="d-inline-flex align-items-center gap-1.5">
-                                <a href="{{ url_for('pnl', from_date=r.from_date, to_date=r.to_date, filter_type='custom') }}" class="btn btn-outline-success btn-sm rounded-pill px-3 py-1 text-nowrap fw-semibold" title="View P&L for this period" style="font-size:0.8rem;">
-                                    <i class="bi bi-file-earmark-spreadsheet me-1"></i>View P&amp;L
-                                </a>
-                                <form action="{{ url_for('stock_valuation_delete', svid=r.id) }}" method="post" class="d-inline m-0" data-confirm="Delete this stock valuation record?">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 text-start">
+                    <thead class="table-light text-uppercase small text-muted border-bottom">
+                        <tr>
+                            <th class="ps-4">Period</th>
+                            <th>Date Range</th>
+                            <th class="text-end">Opening Stock (₹)</th>
+                            <th class="text-end">Closing Stock (₹)</th>
+                            <th class="text-end pe-4">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for r in records %}
+                        <tr>
+                            <td class="ps-4">
+                                <span class="fw-bold text-dark">{{ r.period_name }}</span>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-dark border font-monospace small">
+                                    {{ r.from_date }} to {{ r.to_date }}
+                                </span>
+                            </td>
+                            <td class="text-end font-monospace fw-semibold text-warning"
+                                style="color:#ea580c !important;">
+                                ₹{{ "%.2f"|format(r.opening_stock) }}
+                            </td>
+                            <td class="text-end font-monospace fw-semibold text-success">
+                                ₹{{ "%.2f"|format(r.closing_stock) }}
+                            </td>
+                            <td class="text-end pe-4">
+                                <form action="{{ url_for('stock_valuation_delete', svid=r.id) }}" method="post"
+                                    class="d-inline" data-confirm="Delete this stock valuation record?">
                                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                    <button type="submit" class="btn btn-outline-danger btn-sm rounded-circle p-1" style="width:32px;height:32px;" title="Delete">
-                                        <i class="bi bi-trash" style="font-size:0.8rem;"></i>
+                                    <button type="submit" class="btn btn-outline-danger btn-sm rounded-circle p-1"
+                                        style="width:30px;height:30px;" title="Delete">
+                                        <i class="bi bi-trash" style="font-size:0.75rem;"></i>
                                     </button>
                                 </form>
-                            </div>
-                        </td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="7" class="text-center py-5 text-muted">
-                            <i class="bi bi-box-seam fs-1 d-block mb-3 opacity-25"></i>
-                            No stock valuations configured yet. Use the tool above to select any past month and auto-calculate.
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center py-5 text-muted">
+                                <i class="bi bi-box-seam fs-1 d-block mb-3 opacity-25"></i>
+                                No stock valuations configured. Create your first valuation on the left.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
-
 </div>
-
-<script nonce="{{ csp_nonce }}">
-function applyQuickMonth() {
-    const month = parseInt(document.getElementById('quickMonthSelect').value, 10);
-    const year = parseInt(document.getElementById('quickYearSelect').value, 10);
-    
-    const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-    const lastDay = new Date(year, month, 0).getDate();
-    
-    const fDate = `${year}-${String(month).padStart(2, '0')}-01`;
-    const tDate = `${year}-${String(month).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
-    
-    document.getElementById('period_name').value = `${monthNames[month - 1]} ${year}`;
-    document.getElementById('from_date').value = fDate;
-    document.getElementById('to_date').value = tDate;
-    
-    autoCalculateStockValuation();
-}
-
-function triggerAutoCalc() {
-    const fDate = document.getElementById('from_date').value;
-    const tDate = document.getElementById('to_date').value;
-    if (fDate && tDate) {
-        autoCalculateStockValuation();
-    }
-}
-
-function updateConsumedPreview() {
-    const op = parseFloat(document.getElementById('opening_stock').value || 0);
-    const purch = parseFloat(document.getElementById('purchases_val').value || 0);
-    const cl = parseFloat(document.getElementById('closing_stock').value || 0);
-    const consumed = Math.max(0, op + purch - cl);
-    document.getElementById('previewConsumed').textContent = '₹' + consumed.toFixed(2);
-}
-
-async function autoCalculateStockValuation() {
-    const fDate = document.getElementById('from_date').value;
-    const tDate = document.getElementById('to_date').value;
-    const topBtn = document.getElementById('topCalcBtn');
-    
-    if (!fDate || !tDate) {
-        alert('Please select both Start Date and End Date first.');
-        return;
-    }
-    
-    if (topBtn) {
-        topBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Fetching logs...';
-        topBtn.disabled = true;
-    }
-    
-    try {
-        const res = await fetch(`{{ url_for('api_calculate_stock_valuation') }}?from_date=${encodeURIComponent(fDate)}&to_date=${encodeURIComponent(tDate)}`);
-        const data = await res.json();
-        
-        if (data.error) {
-            alert('Error: ' + data.error);
-        } else {
-            document.getElementById('opening_stock').value = data.opening_stock.toFixed(2);
-            document.getElementById('purchases_val').value = data.purchases.toFixed(2);
-            document.getElementById('closing_stock').value = data.closing_stock.toFixed(2);
-            updateConsumedPreview();
-        }
-    } catch (err) {
-        console.error('Failed to auto-calculate stock valuation', err);
-    } finally {
-        if (topBtn) {
-            topBtn.innerHTML = '<i class="bi bi-arrow-repeat me-1 text-primary"></i>Auto-Fetch From Inventory Logs';
-            topBtn.disabled = false;
-        }
-    }
-}
-
-// Pre-fill with current month dates if empty
+{% endblock %}
 document.addEventListener('DOMContentLoaded', () => {
-    const now = new Date();
-    const curMonth = now.getMonth() + 1;
-    const curYear = now.getFullYear();
-    
-    const mSelect = document.getElementById('quickMonthSelect');
-    const ySelect = document.getElementById('quickYearSelect');
-    if (mSelect) mSelect.value = curMonth;
-    if (ySelect) ySelect.value = curYear;
-    
-    if (!document.getElementById('from_date').value) {
-        applyQuickMonth();
-    }
+const now = new Date();
+const curMonth = now.getMonth() + 1;
+const curYear = now.getFullYear();
+
+const mSelect = document.getElementById('quickMonthSelect');
+const ySelect = document.getElementById('quickYearSelect');
+if (mSelect) mSelect.value = curMonth;
+if (ySelect) ySelect.value = curYear;
+
+if (!document.getElementById('from_date').value) {
+applyQuickMonth();
+}
 });
 </script>
 {% endblock %}

@@ -3022,84 +3022,6 @@ def feed():
                            vac_stocks=vac_stocks,
                            batch_counts=batch_counts)
 
-def compute_inventory_valuation_at_date(db, target_date, include_goats=True):
-    feed_val = db.execute("""
-        SELECT SUM(f.closing_stock * f.cost_per_unit)
-        FROM feed_inventory f
-        INNER JOIN (
-            SELECT feed_name, MAX(id) as max_id
-            FROM feed_inventory
-            WHERE purchase_date <= ?
-            GROUP BY feed_name
-        ) latest ON f.id = latest.max_id
-    """, (target_date,)).fetchone()[0] or 0.0
-
-    med_val = db.execute("""
-        SELECT SUM(m.closing_stock * m.cost_per_unit)
-        FROM medicine_inventory m
-        INNER JOIN (
-            SELECT medicine_name, MAX(id) as max_id
-            FROM medicine_inventory
-            WHERE purchase_date <= ?
-            GROUP BY medicine_name
-        ) latest ON m.id = latest.max_id
-    """, (target_date,)).fetchone()[0] or 0.0
-
-    vac_val = db.execute("""
-        SELECT SUM(v.closing_stock * v.cost_per_unit)
-        FROM vaccine_inventory v
-        INNER JOIN (
-            SELECT vaccine_name, MAX(id) as max_id
-            FROM vaccine_inventory
-            WHERE purchase_date <= ?
-            GROUP BY vaccine_name
-        ) latest ON v.id = latest.max_id
-    """, (target_date,)).fetchone()[0] or 0.0
-
-    goat_val = 0.0
-    if include_goats:
-        goat_val = db.execute("""
-            SELECT SUM(COALESCE(purchase_amount, 0))
-            FROM master_records
-            WHERE (status IS NULL OR status = '' OR status = 'Active' OR status = 'In Stock')
-              AND purchase_date <= ?
-        """, (target_date,)).fetchone()[0] or 0.0
-
-    return {
-        'total': float(feed_val + med_val + vac_val + goat_val),
-        'feed': float(feed_val),
-        'medicine': float(med_val),
-        'vaccine': float(vac_val),
-        'goats': float(goat_val),
-        'consumables_total': float(feed_val + med_val + vac_val)
-    }
-
-def compute_purchases_between_dates(db, start_date, end_date, include_goats=True):
-    exp_feed = db.execute("SELECT SUM(cost) FROM feed_purchases WHERE purchase_date BETWEEN ? AND ?", (start_date, end_date)).fetchone()[0] or 0.0
-    exp_med = db.execute("SELECT SUM(cost) FROM medicine_purchases WHERE purchase_date BETWEEN ? AND ?", (start_date, end_date)).fetchone()[0] or 0.0
-    exp_vac = db.execute("SELECT SUM(cost) FROM vaccine_purchases WHERE purchase_date BETWEEN ? AND ?", (start_date, end_date)).fetchone()[0] or 0.0
-    
-    exp_goat = 0.0
-    if include_goats:
-        exp_goat_p = db.execute("SELECT SUM(price) FROM purchases WHERE purchase_date BETWEEN ? AND ?", (start_date, end_date)).fetchone()[0] or 0.0
-        master_goat_purch = db.execute("""
-            SELECT SUM(purchase_amount) 
-            FROM master_records 
-            WHERE purchase_amount > 0 
-              AND purchase_date BETWEEN ? AND ?
-              AND tag_no NOT IN (SELECT COALESCE(tag_id, '') FROM purchases WHERE tag_id IS NOT NULL)
-        """, (start_date, end_date)).fetchone()[0] or 0.0
-        exp_goat = exp_goat_p + master_goat_purch
-        
-    return {
-        'total': float(exp_feed + exp_med + exp_vac + exp_goat),
-        'feed': float(exp_feed),
-        'medicine': float(exp_med),
-        'vaccine': float(exp_vac),
-        'goats': float(exp_goat),
-        'consumables_total': float(exp_feed + exp_med + exp_vac)
-    }
-
 @app.route('/stock_inventory')
 def stock_inventory():
     db = get_db()
@@ -3147,9 +3069,6 @@ def stock_inventory():
             }
 
     expense_units = db.execute("SELECT * FROM expense_units ORDER BY unit_name").fetchall()
-    
-    current_date = datetime.now().strftime('%Y-%m-%d')
-    current_valuation = compute_inventory_valuation_at_date(db, current_date, include_goats=True)
 
     return render_template('stock_inventory.html',
                            feed_records=feed_records,
@@ -3158,8 +3077,7 @@ def stock_inventory():
                            med_stocks=med_stocks,
                            vaccine_records=vaccine_records,
                            vac_stocks=vac_stocks,
-                           expense_units=expense_units,
-                           current_valuation=current_valuation)
+                           expense_units=expense_units)
 
 @app.route('/buy_stock', methods=['POST'])
 def buy_stock():
@@ -6690,99 +6608,20 @@ def stock_valuations():
             
             if pname and fdate and tdate:
                 try:
-                    # Check if entry with same date range exists, update if so, else insert
-                    existing = db.execute('SELECT id FROM manual_stock_valuations WHERE from_date = ? AND to_date = ?', (fdate, tdate)).fetchone()
-                    if existing:
-                        db.execute('''
-                            UPDATE manual_stock_valuations 
-                            SET period_name = ?, opening_stock = ?, closing_stock = ?
-                            WHERE id = ?
-                        ''', (pname, opstock, clstock, existing['id']))
-                    else:
-                        db.execute('''
-                            INSERT INTO manual_stock_valuations (period_name, from_date, to_date, opening_stock, closing_stock)
-                            VALUES (?, ?, ?, ?, ?)
-                        ''', (pname, fdate, tdate, opstock, clstock))
+                    db.execute('''
+                        INSERT INTO manual_stock_valuations (period_name, from_date, to_date, opening_stock, closing_stock)
+                        VALUES (?, ?, ?, ?, ?)
+                    ''', (pname, fdate, tdate, opstock, clstock))
                     db.commit()
-                    flash(f'Stock Valuation for "{pname}" saved successfully!', 'success')
+                    flash(f'Stock Valuation for "{pname}" added successfully!', 'success')
                 except Exception as e:
-                    flash(f'Error saving stock valuation: {str(e)}', 'danger')
+                    flash(f'Error adding stock valuation: {str(e)}', 'danger')
             else:
                 flash('Period Name, Start Date, and End Date are required.', 'danger')
         return redirect(url_for('stock_valuations'))
         
-    raw_records = db.execute('SELECT * FROM manual_stock_valuations ORDER BY from_date DESC').fetchall()
-    records = []
-    for r in raw_records:
-        r_dict = dict(r)
-        f_date = r_dict.get('from_date') or ''
-        t_date = r_dict.get('to_date') or ''
-        op_val = float(r_dict.get('opening_stock') or 0.0)
-        cl_val = float(r_dict.get('closing_stock') or 0.0)
-        
-        # Calculate purchases during that period
-        p_info = compute_purchases_between_dates(db, f_date, t_date, include_goats=True) if (f_date and t_date) else {'total': 0.0}
-        purch_val = p_info['total']
-        
-        # Stock Consumed = Opening + Purchases - Closing
-        consumed_val = max(0.0, op_val + purch_val - cl_val)
-        
-        r_dict['purchases'] = purch_val
-        r_dict['stock_consumed'] = consumed_val
-        records.append(r_dict)
-        
+    records = db.execute('SELECT * FROM manual_stock_valuations ORDER BY from_date DESC').fetchall()
     return render_template('stock_valuations.html', records=records)
-
-@app.route('/api/calculate_stock_valuation')
-def api_calculate_stock_valuation():
-    if 'user_id' not in session:
-        return jsonify({'error': 'Unauthorized'}), 401
-    db = get_db()
-    fdate = request.args.get('from_date', '').strip()
-    tdate = request.args.get('to_date', '').strip()
-    if not fdate or not tdate:
-        return jsonify({'error': 'from_date and to_date are required'}), 400
-    
-    # 1. Opening stock: check if there's a previous manual stock valuation ending on/before fdate, else compute
-    try:
-        f_dt = datetime.strptime(fdate, '%Y-%m-%d')
-        prev_day = (f_dt - timedelta(days=1)).strftime('%Y-%m-%d')
-        prev_rec = db.execute('''
-            SELECT closing_stock FROM manual_stock_valuations 
-            WHERE to_date <= ? OR from_date < ?
-            ORDER BY to_date DESC, id DESC
-            LIMIT 1
-        ''', (prev_day, fdate)).fetchone()
-        if prev_rec and prev_rec['closing_stock'] is not None and float(prev_rec['closing_stock']) > 0:
-            op_val = float(prev_rec['closing_stock'])
-        else:
-            op_info = compute_inventory_valuation_at_date(db, fdate, include_goats=True)
-            op_val = op_info['total']
-    except Exception:
-        op_info = compute_inventory_valuation_at_date(db, fdate, include_goats=True)
-        op_val = op_info['total']
-        
-    purch_info = compute_purchases_between_dates(db, fdate, tdate, include_goats=True)
-    purch_val = purch_info['total']
-    
-    cl_info = compute_inventory_valuation_at_date(db, tdate, include_goats=True)
-    cl_val = cl_info['total']
-    
-    consumed_val = max(0.0, op_val + purch_val - cl_val)
-    
-    return jsonify({
-        'from_date': fdate,
-        'to_date': tdate,
-        'opening_stock': round(op_val, 2),
-        'purchases': round(purch_val, 2),
-        'closing_stock': round(cl_val, 2),
-        'consumed_stock': round(consumed_val, 2),
-        'breakdown': {
-            'opening': compute_inventory_valuation_at_date(db, fdate, include_goats=True),
-            'purchases': purch_info,
-            'closing': cl_info
-        }
-    })
 
 @app.route('/stock_valuation_delete/<int:svid>', methods=['POST'])
 def stock_valuation_delete(svid):

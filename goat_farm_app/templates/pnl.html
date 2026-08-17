@@ -163,48 +163,55 @@
     <div class="row mb-3 d-print-none">
         <div class="col-12">
             <form method="POST" action="{{ url_for('pnl') }}" class="pnl-card p-4 bg-white shadow-sm rounded-3">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <!-- Filter Type Row -->
                 <div class="row g-3 align-items-center mb-3">
                     <div class="col-md-3 col-12">
                         <label class="form-label small fw-bold text-uppercase text-muted mb-1">Filter Type</label>
-                        <select name="filter_type" id="filterTypeSelect" class="form-select form-select-sm rounded-pill text-dark px-3">
-                            <option value="yearly" {% if filter_type == 'yearly' %}selected{% endif %}>Yearly</option>
-                            <option value="monthly" {% if filter_type == 'monthly' %}selected{% endif %}>Monthly</option>
-                            <option value="custom" {% if filter_type == 'custom' %}selected{% endif %}>{{ default_fy_label }}</option>
+                        <select name="filter_type" id="filterTypeSelect"
+                            class="form-select form-select-sm rounded-pill text-dark px-3">
+                            <option value="yearly" {% if filter_type=='yearly' %}selected{% endif %}>Yearly</option>
+                            <option value="monthly" {% if filter_type=='monthly' %}selected{% endif %}>Monthly</option>
+                            <option value="custom" {% if filter_type=='custom' %}selected{% endif %}>{{ default_fy_label
+                                }}</option>
                         </select>
                     </div>
-                    
+
                     <div class="col-md-3 col-6 filter-group" id="yearGroup">
                         <label class="form-label small fw-bold text-uppercase text-muted mb-1">Year</label>
-                        <select name="year" id="yearFilter" class="form-select form-select-sm rounded-pill text-dark px-3">
+                        <select name="year" id="yearFilter"
+                            class="form-select form-select-sm rounded-pill text-dark px-3">
                             {% for y in range(2024, 2061) %}
-                                <option value="{{ y }}" {% if selected_year == y|string %}selected{% endif %}>{{ y }}</option>
+                            <option value="{{ y }}" {% if selected_year==y|string %}selected{% endif %}>{{ y }}</option>
                             {% endfor %}
                         </select>
                     </div>
 
                     <div class="col-md-3 col-6 filter-group" id="monthGroup" style="display: none;">
                         <label class="form-label small fw-bold text-uppercase text-muted mb-1">Month</label>
-                        <select name="month" id="monthFilter" class="form-select form-select-sm rounded-pill text-dark px-3">
+                        <select name="month" id="monthFilter"
+                            class="form-select form-select-sm rounded-pill text-dark px-3">
                             {% for m_num, m_name in [
-                                (1, 'January'), (2, 'February'), (3, 'March'), (4, 'April'),
-                                (5, 'May'), (6, 'June'), (7, 'July'), (8, 'August'),
-                                (9, 'September'), (10, 'October'), (11, 'November'), (12, 'December')
+                            (1, 'January'), (2, 'February'), (3, 'March'), (4, 'April'),
+                            (5, 'May'), (6, 'June'), (7, 'July'), (8, 'August'),
+                            (9, 'September'), (10, 'October'), (11, 'November'), (12, 'December')
                             ] %}
-                                <option value="{{ m_num }}" {% if selected_month == m_num %}selected{% endif %}>{{ m_name }}</option>
+                            <option value="{{ m_num }}" {% if selected_month==m_num %}selected{% endif %}>{{ m_name }}
+                            </option>
                             {% endfor %}
                         </select>
                     </div>
 
                     <div class="col-md-3 col-6 filter-group" id="fromDateGroup" style="display: none;">
                         <label class="form-label small fw-bold text-uppercase text-muted mb-1">From Date</label>
-                        <input type="date" name="from_date" id="fromDateInput" class="form-control form-control-sm rounded-pill text-dark px-3" value="{{ custom_from }}">
+                        <input type="date" name="from_date" id="fromDateInput"
+                            class="form-control form-control-sm rounded-pill text-dark px-3" value="{{ custom_from }}">
                     </div>
 
                     <div class="col-md-3 col-6 filter-group" id="toDateGroup" style="display: none;">
                         <label class="form-label small fw-bold text-uppercase text-muted mb-1">To Date</label>
-                        <input type="date" name="to_date" id="toDateInput" class="form-control form-control-sm rounded-pill text-dark px-3" value="{{ custom_to }}">
+                        <input type="date" name="to_date" id="toDateInput"
+                            class="form-control form-control-sm rounded-pill text-dark px-3" value="{{ custom_to }}">
                     </div>
                 </div>
 
@@ -214,7 +221,8 @@
                         <div>
                         </div>
                         <div class="d-flex gap-2">
-                            <button id="printBtn" class="btn btn-sm btn-primary rounded-pill px-3 fw-bold shadow-sm" type="button">
+                            <button id="printBtn" class="btn btn-sm btn-primary rounded-pill px-3 fw-bold shadow-sm"
+                                type="button">
                                 <i class="bi bi-printer me-1"></i> Print
                             </button>
                             <button class="btn btn-sm btn-success rounded-pill px-4 fw-bold shadow-sm" type="submit">
@@ -228,8 +236,10 @@
     </div>
 
     <!-- T-Format P&L Report Container -->
-    {% set op_stock = (manual_opening|float if manual_opening is not none else computed_opening) if include_stock else 0.0 %}
-    {% set cl_stock = (manual_closing|float if manual_closing is not none else computed_closing) if include_stock else 0.0 %}
+    {% set op_stock = (manual_opening|float if manual_opening is not none else computed_opening) if include_stock else
+    0.0 %}
+    {% set cl_stock = (manual_closing|float if manual_closing is not none else computed_closing) if include_stock else
+    0.0 %}
     <div class="corporate-container" id="pnl-report-view">
         <!-- Brand Header Bar matching the image -->
         <div class="brand-header-bar">
@@ -249,28 +259,32 @@
                 <input type="hidden" name="from_date" value="{{ from_date }}">
                 <input type="hidden" name="to_date" value="{{ to_date }}">
                 <div class="row g-3 align-items-center justify-content-between">
-                    <div class="col-md-4 col-12 d-flex align-items-center gap-2">
-                        <label class="form-label fw-bold text-dark mb-0 text-nowrap small"><i class="bi bi-box-arrow-in-right text-warning me-1"></i>Opening Stock (₹)</label>
-                        <input type="number" step="0.01" name="opening_stock" id="pnl_op_stock" class="form-control form-control-sm rounded-3 fw-semibold text-dark" value="{{ "%.2f"|format(op_stock) }}">
+                    <div class="col-md-5 col-12 d-flex align-items-center gap-2">
+                        <label class="form-label fw-bold text-dark mb-0 text-nowrap small"><i
+                                class="bi bi-box-arrow-in-right text-warning me-1"></i>Opening Stock (₹)</label>
+                        <input type="number" step="0.01" name="opening_stock"
+                            class="form-control form-control-sm rounded-3 fw-semibold text-dark" value="{{ "
+                            %.2f"|format(op_stock) }}">
                     </div>
-                    <div class="col-md-4 col-12 d-flex align-items-center gap-2">
-                        <label class="form-label fw-bold text-dark mb-0 text-nowrap small"><i class="bi bi-box-arrow-left text-success me-1"></i>Closing Stock (₹)</label>
-                        <input type="number" step="0.01" name="closing_stock" id="pnl_cl_stock" class="form-control form-control-sm rounded-3 fw-semibold text-dark" value="{{ "%.2f"|format(cl_stock) }}">
+                    <div class="col-md-5 col-12 d-flex align-items-center gap-2">
+                        <label class="form-label fw-bold text-dark mb-0 text-nowrap small"><i
+                                class="bi bi-box-arrow-left text-success me-1"></i>Closing Stock (₹)</label>
+                        <input type="number" step="0.01" name="closing_stock"
+                            class="form-control form-control-sm rounded-3 fw-semibold text-dark" value="{{ "
+                            %.2f"|format(cl_stock) }}">
                     </div>
-                    <div class="col-md-4 col-12 d-flex align-items-center gap-2">
-                        <button type="submit" class="btn btn-sm btn-success rounded-pill px-3 fw-bold shadow-sm">
+                    <div class="col-md-2 col-12 text-end">
+                        <button type="submit" class="btn btn-sm btn-success rounded-pill px-3 fw-bold w-100 shadow-sm">
                             <i class="bi bi-save me-1"></i> Save
                         </button>
-                        <a href="{{ url_for('stock_valuations') }}" class="btn btn-sm btn-outline-warning text-dark rounded-pill px-3 fw-semibold text-nowrap">
-                            <i class="bi bi-calculator me-1"></i>Stock Valuations &amp; Consumptions Master
-                        </a>
                     </div>
                 </div>
             </form>
         </div>
 
         {% if manual_period_name %}
-        <div class="alert alert-info border-0 rounded-0 mb-0 py-2.5 px-4 d-flex align-items-center justify-content-between small">
+        <div
+            class="alert alert-info border-0 rounded-0 mb-0 py-2.5 px-4 d-flex align-items-center justify-content-between small">
             <div>
                 <i class="bi bi-info-circle-fill me-2 text-info"></i>
                 Stock valuation values applied from master config: <strong>{{ manual_period_name }}</strong>
@@ -285,110 +299,121 @@
             <table class="table-pnl-matrix">
                 <thead>
                     <tr>
-                        <th class="col-particulars" style="width: 35%;"><i class="bi bi-arrow-down-left-circle me-1 text-warning"></i>Particulars (Debit Side - Expenses)</th>
+                        <th class="col-particulars" style="width: 35%;"><i
+                                class="bi bi-arrow-down-left-circle me-1 text-warning"></i>Particulars (Debit Side -
+                            Expenses)</th>
                         <th class="col-amount border-center-divider" style="width: 15%;">Amount (₹)</th>
-                        <th class="col-particulars" style="width: 35%;"><i class="bi bi-arrow-up-right-circle me-1 text-success"></i>Particulars (Credit Side - Income)</th>
+                        <th class="col-particulars" style="width: 35%;"><i
+                                class="bi bi-arrow-up-right-circle me-1 text-success"></i>Particulars (Credit Side -
+                            Income)</th>
                         <th class="col-amount" style="width: 15%;">Amount (₹)</th>
                     </tr>
                 </thead>
                 <tbody>
                     {# Setup variables to balance the Debit and Credit accounts #}
-                    
+
                     {% set raw_inc = pnl_data.total_income.full_year %}
                     {% set raw_exp = pnl_data.total_expenses.full_year %}
-                    
+
                     {% set tot_credit_val = raw_inc + cl_stock %}
                     {% set tot_debit_val = raw_exp + op_stock %}
-                    
+
                     {% set net_val = tot_credit_val - tot_debit_val %}
                     {% set has_profit = 1 if net_val >= 0 else 0 %}
-                    {% set has_loss = 1 if net_val < 0 else 0 %}
+                    {% set has_loss = 1 if net_val < 0 else 0 %} {% set op_stock_row=1 if include_stock and op_stock> 0
+                        else 0 %}
+                        {% set cl_stock_row = 1 if include_stock and cl_stock > 0 else 0 %}
 
-                    {% set op_stock_row = 1 if include_stock and op_stock > 0 else 0 %}
-                    {% set cl_stock_row = 1 if include_stock and cl_stock > 0 else 0 %}
+                        {% set debit_len = op_stock_row + (expense_rows|length) + has_profit %}
+                        {% set credit_len = (income_rows|length) + cl_stock_row + has_loss %}
 
-                    {% set debit_len = op_stock_row + (expense_rows|length) + has_profit %}
-                    {% set credit_len = (income_rows|length) + cl_stock_row + has_loss %}
+                        {% set max_rows = debit_len if debit_len > credit_len else credit_len %}
 
-                    {% set max_rows = debit_len if debit_len > credit_len else credit_len %}
-
-                    {% for i in range(max_rows) %}
+                        {% for i in range(max_rows) %}
                         <tr>
                             {# ── DEBIT SIDE (Expenses & Opening Stock) ── #}
                             {% if op_stock_row and i == 0 %}
-                                {# Opening Stock Row #}
-                                 <td class="col-particulars interactive-cell" data-onclick="viewDrilldown('Opening Stock')">
-                                    <span class="me-2"><i class="bi bi-box-arrow-in-right text-warning"></i></span> Opening Stock Valuation {% if manual_period_name %}({{ manual_period_name }}){% endif %}
-                                </td>
-                                <td class="col-amount border-center-divider">
-                                    {{ "%.2f"|format(op_stock) }}
-                                </td>
-                            {% elif i - op_stock_row < (expense_rows|length) and i - op_stock_row >= 0 %}
+                            {# Opening Stock Row #}
+                            <td class="col-particulars interactive-cell" data-onclick="viewDrilldown('Opening Stock')">
+                                <span class="me-2"><i class="bi bi-box-arrow-in-right text-warning"></i></span> Opening
+                                Stock Valuation {% if manual_period_name %}({{ manual_period_name }}){% endif %}
+                            </td>
+                            <td class="col-amount border-center-divider">
+                                {{ "%.2f"|format(op_stock) }}
+                            </td>
+                            {% elif i - op_stock_row < (expense_rows|length) and i - op_stock_row>= 0 %}
                                 {# Expense Rows #}
                                 {% set exp_item = expense_rows[i - op_stock_row] %}
-                                <td class="col-particulars interactive-cell" data-onclick="viewDrilldown('{{ exp_item.name }}')">
-                                    <span class="me-2"><i class="bi bi-folder-fill text-muted"></i></span> {{ exp_item.name }}
+                                <td class="col-particulars interactive-cell"
+                                    data-onclick="viewDrilldown('{{ exp_item.name }}')">
+                                    <span class="me-2"><i class="bi bi-folder-fill text-muted"></i></span> {{
+                                    exp_item.name }}
                                 </td>
                                 <td class="col-amount border-center-divider">
                                     {{ "%.2f"|format(exp_item.full_year) }}
                                 </td>
-                            {% elif i == (op_stock_row + (expense_rows|length)) and has_profit %}
+                                {% elif i == (op_stock_row + (expense_rows|length)) and has_profit %}
                                 {# Net Profit #}
                                 <td class="col-particulars text-success fw-bold">
-                                    <span class="me-2"><i class="bi bi-plus-circle-fill text-success"></i></span> Net Profit c/o (to P&amp;L A/C)
+                                    <span class="me-2"><i class="bi bi-plus-circle-fill text-success"></i></span> Net
+                                    Profit c/o (to P&amp;L A/C)
                                 </td>
                                 <td class="col-amount text-success fw-bold border-center-divider">
                                     {{ "%.2f"|format(net_val) }}
                                 </td>
-                            {% else %}
+                                {% else %}
                                 {# Empty Spacer #}
                                 <td class="col-particulars text-muted"></td>
                                 <td class="col-amount border-center-divider"></td>
-                            {% endif %}
+                                {% endif %}
 
-                            {# ── CREDIT SIDE (Income & Closing Stock) ── #}
-                            {% if i < (income_rows|length) %}
-                                {# Income Rows #}
-                                {% set inc_item = income_rows[i] %}
-                                <td class="col-particulars interactive-cell" data-onclick="viewDrilldown('{{ inc_item.name }}')">
-                                    <span class="me-2"><i class="bi bi-graph-up-arrow text-success"></i></span> {{ inc_item.name }}
-                                </td>
-                                <td class="col-amount">
-                                    {{ "%.2f"|format(inc_item.full_year) }}
-                                </td>
-                            {% elif cl_stock_row and i == (income_rows|length) %}
-                                {# Closing Stock Row #}
-                                 <td class="col-particulars interactive-cell" data-onclick="viewDrilldown('Closing Stock')">
-                                    <span class="me-2"><i class="bi bi-box-arrow-left text-success"></i></span> Closing Stock Valuation {% if manual_period_name %}({{ manual_period_name }}){% endif %}
-                                </td>
-                                <td class="col-amount">
-                                    {{ "%.2f"|format(cl_stock) }}
-                                </td>
-                            {% elif i == ((income_rows|length) + cl_stock_row) and has_loss %}
-                                {# Net Loss #}
-                                <td class="col-particulars text-danger fw-bold">
-                                    <span class="me-2"><i class="bi bi-dash-circle-fill text-danger"></i></span> Gross Loss c/o (to P&amp;L A/C)
-                                </td>
-                                <td class="col-amount text-danger fw-bold">
-                                    {{ "%.2f"|format(net_val|abs) }}
-                                </td>
-                            {% else %}
-                                {# Empty Spacer #}
-                                <td class="col-particulars text-muted"></td>
-                                <td class="col-amount"></td>
-                            {% endif %}
+                                {# ── CREDIT SIDE (Income & Closing Stock) ── #}
+                                {% if i < (income_rows|length) %} {# Income Rows #} {% set inc_item=income_rows[i] %}
+                                    <td class="col-particulars interactive-cell"
+                                    data-onclick="viewDrilldown('{{ inc_item.name }}')">
+                                    <span class="me-2"><i class="bi bi-graph-up-arrow text-success"></i></span> {{
+                                    inc_item.name }}
+                                    </td>
+                                    <td class="col-amount">
+                                        {{ "%.2f"|format(inc_item.full_year) }}
+                                    </td>
+                                    {% elif cl_stock_row and i == (income_rows|length) %}
+                                    {# Closing Stock Row #}
+                                    <td class="col-particulars interactive-cell"
+                                        data-onclick="viewDrilldown('Closing Stock')">
+                                        <span class="me-2"><i class="bi bi-box-arrow-left text-success"></i></span>
+                                        Closing Stock Valuation {% if manual_period_name %}({{ manual_period_name }}){%
+                                        endif %}
+                                    </td>
+                                    <td class="col-amount">
+                                        {{ "%.2f"|format(cl_stock) }}
+                                    </td>
+                                    {% elif i == ((income_rows|length) + cl_stock_row) and has_loss %}
+                                    {# Net Loss #}
+                                    <td class="col-particulars text-danger fw-bold">
+                                        <span class="me-2"><i class="bi bi-dash-circle-fill text-danger"></i></span>
+                                        Gross Loss c/o (to P&amp;L A/C)
+                                    </td>
+                                    <td class="col-amount text-danger fw-bold">
+                                        {{ "%.2f"|format(net_val|abs) }}
+                                    </td>
+                                    {% else %}
+                                    {# Empty Spacer #}
+                                    <td class="col-particulars text-muted"></td>
+                                    <td class="col-amount"></td>
+                                    {% endif %}
                         </tr>
-                    {% endfor %}
+                        {% endfor %}
 
-                    {# Balance totals #}
-                    {% set total_balanced = tot_credit_val if net_val >= 0 else tot_debit_val %}
+                        {# Balance totals #}
+                        {% set total_balanced = tot_credit_val if net_val >= 0 else tot_debit_val %}
 
-                    <tr class="row-grand-total">
-                        <td class="col-particulars text-uppercase fw-bold">Total</td>
-                        <td class="col-amount border-center-divider">{{ "%.2f"|format(total_balanced) }}</td>
-                        <td class="col-particulars text-uppercase fw-bold">Total</td>
-                        <td class="col-amount">{{ "%.2f"|format(total_balanced) }}</td>
-                    </tr>
+                        <tr class="row-grand-total">
+                            <td class="col-particulars text-uppercase fw-bold">Total</td>
+                            <td class="col-amount border-center-divider">{{ "%.2f"|format(total_balanced) }}</td>
+                            <td class="col-particulars text-uppercase fw-bold">Total</td>
+                            <td class="col-amount">{{ "%.2f"|format(total_balanced) }}</td>
+                        </tr>
                 </tbody>
             </table>
         </div>
@@ -407,13 +432,18 @@
     <div class="modal-dialog modal-xl modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
             <div class="modal-header bg-dark text-white border-0 py-3">
-                <h5 class="modal-title fw-bold" id="drilldownTitle"><i class="bi bi-zoom-in me-2"></i>Ledger Statement</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h5 class="modal-title fw-bold" id="drilldownTitle"><i class="bi bi-zoom-in me-2"></i>Ledger Statement
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
             </div>
             <div class="modal-body p-4">
-                <div id="modalActionControls" class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
-                    <h6 class="text-muted mb-0 small"><i class="bi bi-info-circle me-1"></i> Showing all transactions for the selected period.</h6>
-                    <button id="modalPrintLedgerBtn" class="btn btn-sm btn-primary rounded-pill px-3 fw-bold shadow-sm" type="button">
+                <div id="modalActionControls"
+                    class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+                    <h6 class="text-muted mb-0 small"><i class="bi bi-info-circle me-1"></i> Showing all transactions
+                        for the selected period.</h6>
+                    <button id="modalPrintLedgerBtn" class="btn btn-sm btn-primary rounded-pill px-3 fw-bold shadow-sm"
+                        type="button">
                         <i class="bi bi-printer me-1"></i> Print Detailed Ledger
                     </button>
                 </div>
@@ -422,19 +452,22 @@
                 <div id="drilldownSummaryBar" class="row g-3 mb-4" style="display:none;">
                     <div class="col-md-4">
                         <div class="p-3 rounded-3 border bg-light shadow-sm text-center">
-                            <span class="d-block small text-muted text-uppercase fw-bold" style="font-size: 0.7rem;">Total Debits (Dr / Expenses)</span>
+                            <span class="d-block small text-muted text-uppercase fw-bold"
+                                style="font-size: 0.7rem;">Total Debits (Dr / Expenses)</span>
                             <h5 id="drilldownTotalDebit" class="fw-bold mb-0 text-danger mt-1">₹0.00</h5>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="p-3 rounded-3 border bg-light shadow-sm text-center">
-                            <span class="d-block small text-muted text-uppercase fw-bold" style="font-size: 0.7rem;">Total Credits (Cr / Income)</span>
+                            <span class="d-block small text-muted text-uppercase fw-bold"
+                                style="font-size: 0.7rem;">Total Credits (Cr / Income)</span>
                             <h5 id="drilldownTotalCredit" class="fw-bold mb-0 text-success mt-1">₹0.00</h5>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="p-3 rounded-3 border bg-light shadow-sm text-center">
-                            <span class="d-block small text-muted text-uppercase fw-bold" style="font-size: 0.7rem;">Net Balance</span>
+                            <span class="d-block small text-muted text-uppercase fw-bold" style="font-size: 0.7rem;">Net
+                                Balance</span>
                             <h5 id="drilldownNetBalance" class="fw-bold mb-0 mt-1">₹0.00</h5>
                         </div>
                     </div>
@@ -465,95 +498,96 @@
                 </div>
             </div>
             <div class="modal-footer border-0 bg-light py-2">
-                <button type="button" class="btn btn-secondary btn-sm rounded-pill px-4" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary btn-sm rounded-pill px-4"
+                    data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
 </div>
 
 <script nonce="{{ csp_nonce }}">
-document.addEventListener("DOMContentLoaded", function() {
+    document.addEventListener("DOMContentLoaded", function () {
 
-    // Toggle filter inputs visibility based on Filter Type selection
-    const filterTypeSelect = document.getElementById('filterTypeSelect');
-    const yearGroup = document.getElementById('yearGroup');
-    const monthGroup = document.getElementById('monthGroup');
-    const fromDateGroup = document.getElementById('fromDateGroup');
-    const toDateGroup = document.getElementById('toDateGroup');
+        // Toggle filter inputs visibility based on Filter Type selection
+        const filterTypeSelect = document.getElementById('filterTypeSelect');
+        const yearGroup = document.getElementById('yearGroup');
+        const monthGroup = document.getElementById('monthGroup');
+        const fromDateGroup = document.getElementById('fromDateGroup');
+        const toDateGroup = document.getElementById('toDateGroup');
 
-    function updateFilterInputsVisibility() {
-        if (!filterTypeSelect) return;
-        const val = filterTypeSelect.value;
-        if (val === 'yearly') {
-            if (yearGroup) yearGroup.style.display = 'block';
-            if (monthGroup) monthGroup.style.display = 'none';
-            if (fromDateGroup) fromDateGroup.style.display = 'none';
-            if (toDateGroup) toDateGroup.style.display = 'none';
-        } else if (val === 'monthly') {
-            if (yearGroup) yearGroup.style.display = 'block';
-            if (monthGroup) monthGroup.style.display = 'block';
-            if (fromDateGroup) fromDateGroup.style.display = 'none';
-            if (toDateGroup) toDateGroup.style.display = 'none';
-        } else if (val === 'custom') {
-            if (yearGroup) yearGroup.style.display = 'none';
-            if (monthGroup) monthGroup.style.display = 'none';
-            if (fromDateGroup) fromDateGroup.style.display = 'block';
-            if (toDateGroup) toDateGroup.style.display = 'block';
+        function updateFilterInputsVisibility() {
+            if (!filterTypeSelect) return;
+            const val = filterTypeSelect.value;
+            if (val === 'yearly') {
+                if (yearGroup) yearGroup.style.display = 'block';
+                if (monthGroup) monthGroup.style.display = 'none';
+                if (fromDateGroup) fromDateGroup.style.display = 'none';
+                if (toDateGroup) toDateGroup.style.display = 'none';
+            } else if (val === 'monthly') {
+                if (yearGroup) yearGroup.style.display = 'block';
+                if (monthGroup) monthGroup.style.display = 'block';
+                if (fromDateGroup) fromDateGroup.style.display = 'none';
+                if (toDateGroup) toDateGroup.style.display = 'none';
+            } else if (val === 'custom') {
+                if (yearGroup) yearGroup.style.display = 'none';
+                if (monthGroup) monthGroup.style.display = 'none';
+                if (fromDateGroup) fromDateGroup.style.display = 'block';
+                if (toDateGroup) toDateGroup.style.display = 'block';
+            }
         }
-    }
 
-    if (filterTypeSelect) {
-        filterTypeSelect.addEventListener('change', updateFilterInputsVisibility);
-        // run on page load
-        updateFilterInputsVisibility();
-    }
+        if (filterTypeSelect) {
+            filterTypeSelect.addEventListener('change', updateFilterInputsVisibility);
+            // run on page load
+            updateFilterInputsVisibility();
+        }
 
-    // Print Button
-    const printBtn = document.getElementById('printBtn');
-    if (printBtn) {
-        printBtn.addEventListener('click', function() {
-            window.print();
-        });
-    }
+        // Print Button
+        const printBtn = document.getElementById('printBtn');
+        if (printBtn) {
+            printBtn.addEventListener('click', function () {
+                window.print();
+            });
+        }
 
-    // Detailed Ledger Button
-    const detailedLedgerBtn = document.getElementById('detailedLedgerBtn');
-    if (detailedLedgerBtn) {
-        detailedLedgerBtn.addEventListener('click', function() {
-            viewDrilldown('All');
-        });
-    }
+        // Detailed Ledger Button
+        const detailedLedgerBtn = document.getElementById('detailedLedgerBtn');
+        if (detailedLedgerBtn) {
+            detailedLedgerBtn.addEventListener('click', function () {
+                viewDrilldown('All');
+            });
+        }
 
-    // Modal print button
-    const modalPrintLedgerBtn = document.getElementById('modalPrintLedgerBtn');
-    if (modalPrintLedgerBtn) {
-        modalPrintLedgerBtn.addEventListener('click', function() {
-            printDetailedLedger();
-        });
-    }
-});
+        // Modal print button
+        const modalPrintLedgerBtn = document.getElementById('modalPrintLedgerBtn');
+        if (modalPrintLedgerBtn) {
+            modalPrintLedgerBtn.addEventListener('click', function () {
+                printDetailedLedger();
+            });
+        }
+    });
 
-let currentCategoryName = 'All';
-function viewDrilldown(categoryName) {
-    currentCategoryName = categoryName;
-    const title = document.getElementById('drilldownTitle');
-    const content = document.getElementById('drilldownContent');
-    const table = document.getElementById('drilldownTable');
-    const emptyState = document.getElementById('drilldownEmptyState');
-    
-    // Header elements
-    const tableHead = table ? table.querySelector('thead') : null;
-    const summaryBar = document.getElementById('drilldownSummaryBar');
-    const totalDebitEl = document.getElementById('drilldownTotalDebit');
-    const totalCreditEl = document.getElementById('drilldownTotalCredit');
-    const netBalanceEl = document.getElementById('drilldownNetBalance');
-    
-    if (title) title.innerHTML = `<i class="bi bi-zoom-in me-2"></i>Ledger Statement: ${categoryName}`;
-    
-    // Set table head headers dynamically
-    if (tableHead) {
-        if (categoryName === 'All') {
-            tableHead.innerHTML = `
+    let currentCategoryName = 'All';
+    function viewDrilldown(categoryName) {
+        currentCategoryName = categoryName;
+        const title = document.getElementById('drilldownTitle');
+        const content = document.getElementById('drilldownContent');
+        const table = document.getElementById('drilldownTable');
+        const emptyState = document.getElementById('drilldownEmptyState');
+
+        // Header elements
+        const tableHead = table ? table.querySelector('thead') : null;
+        const summaryBar = document.getElementById('drilldownSummaryBar');
+        const totalDebitEl = document.getElementById('drilldownTotalDebit');
+        const totalCreditEl = document.getElementById('drilldownTotalCredit');
+        const netBalanceEl = document.getElementById('drilldownNetBalance');
+
+        if (title) title.innerHTML = `<i class="bi bi-zoom-in me-2"></i>Ledger Statement: ${categoryName}`;
+
+        // Set table head headers dynamically
+        if (tableHead) {
+            if (categoryName === 'All') {
+                tableHead.innerHTML = `
                 <tr>
                     <th style="width: 12%;">Date</th>
                     <th style="width: 18%;">Account / Category</th>
@@ -563,8 +597,8 @@ function viewDrilldown(categoryName) {
                     <th class="text-end" style="width: 10%;">Credit (Cr)</th>
                 </tr>
             `;
-        } else {
-            tableHead.innerHTML = `
+            } else {
+                tableHead.innerHTML = `
                 <tr>
                     <th style="width: 15%;">Date</th>
                     <th style="width: 25%;">Reference</th>
@@ -572,40 +606,40 @@ function viewDrilldown(categoryName) {
                     <th class="text-end" style="width: 15%;">Amount</th>
                 </tr>
             `;
+            }
         }
-    }
-    
-    if (content) content.innerHTML = `<tr><td colspan="6" class="text-center py-4"><span class="spinner-border spinner-border-sm me-2" role="status"></span>Loading transactions...</td></tr>`;
-    if (table) table.style.display = 'table';
-    if (emptyState) emptyState.style.display = 'none';
-    if (summaryBar) summaryBar.style.display = 'none';
-    
-    const myModal = new bootstrap.Modal(document.getElementById('drilldownModal'));
-    myModal.show();
-    
-    const fromDate = "{{ from_date }}";
-    const toDate = "{{ to_date }}";
-    
-    fetch(`/api/pnl/drilldown?from_date=${fromDate}&to_date=${toDate}&category=${encodeURIComponent(categoryName)}`)
-        .then(res => res.json())
-        .then(data => {
-            if (data.success && data.transactions && data.transactions.length > 0) {
-                let html = '';
-                let totalDebit = 0;
-                let totalCredit = 0;
-                
-                data.transactions.forEach(t => {
-                    const amt = parseFloat(t.amount) || 0;
-                    const isExpense = t.type === 'expense';
-                    
-                    if (isExpense) {
-                        totalDebit += amt;
-                    } else {
-                        totalCredit += amt;
-                    }
-                    
-                    if (categoryName === 'All') {
-                        html += `
+
+        if (content) content.innerHTML = `<tr><td colspan="6" class="text-center py-4"><span class="spinner-border spinner-border-sm me-2" role="status"></span>Loading transactions...</td></tr>`;
+        if (table) table.style.display = 'table';
+        if (emptyState) emptyState.style.display = 'none';
+        if (summaryBar) summaryBar.style.display = 'none';
+
+        const myModal = new bootstrap.Modal(document.getElementById('drilldownModal'));
+        myModal.show();
+
+        const fromDate = "{{ from_date }}";
+        const toDate = "{{ to_date }}";
+
+        fetch(`/api/pnl/drilldown?from_date=${fromDate}&to_date=${toDate}&category=${encodeURIComponent(categoryName)}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.success && data.transactions && data.transactions.length > 0) {
+                    let html = '';
+                    let totalDebit = 0;
+                    let totalCredit = 0;
+
+                    data.transactions.forEach(t => {
+                        const amt = parseFloat(t.amount) || 0;
+                        const isExpense = t.type === 'expense';
+
+                        if (isExpense) {
+                            totalDebit += amt;
+                        } else {
+                            totalCredit += amt;
+                        }
+
+                        if (categoryName === 'All') {
+                            html += `
                             <tr>
                                 <td><span class="badge bg-light text-dark font-monospace border" style="font-size: 0.75rem;">${t.date}</span></td>
                                 <td><span class="badge bg-info-subtle text-info-dark border border-info-subtle px-2 py-1 rounded" style="font-size: 0.75rem;">${t.category || 'General'}</span></td>
@@ -615,10 +649,10 @@ function viewDrilldown(categoryName) {
                                 <td class="text-end font-monospace text-success" style="font-size: 0.85rem;">${!isExpense ? '₹' + amt.toFixed(2) : '-'}</td>
                             </tr>
                         `;
-                    } else {
-                        const badgeColor = isExpense ? 'bg-danger-subtle text-danger' : 'bg-success-subtle text-success';
-                        const badgeText = isExpense ? 'Dr' : 'Cr';
-                        html += `
+                        } else {
+                            const badgeColor = isExpense ? 'bg-danger-subtle text-danger' : 'bg-success-subtle text-success';
+                            const badgeText = isExpense ? 'Dr' : 'Cr';
+                            html += `
                             <tr>
                                 <td><span class="badge bg-light text-dark font-monospace border" style="font-size: 0.75rem;">${t.date}</span></td>
                                 <td class="fw-bold text-dark" style="font-size: 0.85rem;">${t.reference}</td>
@@ -629,42 +663,42 @@ function viewDrilldown(categoryName) {
                                 </td>
                             </tr>
                         `;
+                        }
+                    });
+
+                    if (content) content.innerHTML = html;
+
+                    // Show summary
+                    if (summaryBar) {
+                        summaryBar.style.display = 'flex';
+                        if (totalDebitEl) totalDebitEl.innerText = '₹' + totalDebit.toFixed(2);
+                        if (totalCreditEl) totalCreditEl.innerText = '₹' + totalCredit.toFixed(2);
+
+                        const net = totalCredit - totalDebit;
+                        if (netBalanceEl) {
+                            netBalanceEl.innerText = (net >= 0 ? '+' : '') + '₹' + net.toFixed(2);
+                            netBalanceEl.className = 'fw-bold mb-0 mt-1 ' + (net >= 0 ? 'text-success' : 'text-danger');
+                        }
                     }
-                });
-                
-                if (content) content.innerHTML = html;
-                
-                // Show summary
-                if (summaryBar) {
-                    summaryBar.style.display = 'flex';
-                    if (totalDebitEl) totalDebitEl.innerText = '₹' + totalDebit.toFixed(2);
-                    if (totalCreditEl) totalCreditEl.innerText = '₹' + totalCredit.toFixed(2);
-                    
-                    const net = totalCredit - totalDebit;
-                    if (netBalanceEl) {
-                        netBalanceEl.innerText = (net >= 0 ? '+' : '') + '₹' + net.toFixed(2);
-                        netBalanceEl.className = 'fw-bold mb-0 mt-1 ' + (net >= 0 ? 'text-success' : 'text-danger');
-                    }
+                } else {
+                    if (table) table.style.display = 'none';
+                    if (emptyState) emptyState.style.display = 'block';
+                    if (summaryBar) summaryBar.style.display = 'none';
                 }
-            } else {
-                if (table) table.style.display = 'none';
-                if (emptyState) emptyState.style.display = 'block';
-                if (summaryBar) summaryBar.style.display = 'none';
-            }
-        })
-        .catch(err => {
-            if (content) content.innerHTML = `<tr><td colspan="6" class="text-center text-danger py-4"><i class="bi bi-exclamation-triangle-fill me-2"></i>Failed to retrieve details.</td></tr>`;
-        });
-}
+            })
+            .catch(err => {
+                if (content) content.innerHTML = `<tr><td colspan="6" class="text-center text-danger py-4"><i class="bi bi-exclamation-triangle-fill me-2"></i>Failed to retrieve details.</td></tr>`;
+            });
+    }
 
-function printDetailedLedger() {
-    const fromDate = "{{ from_date }}";
-    const toDate = "{{ to_date }}";
-    const tableHeaderHtml = document.getElementById('drilldownTable').querySelector('thead').innerHTML;
-    const contentHtml = document.getElementById('drilldownContent').innerHTML;
+    function printDetailedLedger() {
+        const fromDate = "{{ from_date }}";
+        const toDate = "{{ to_date }}";
+        const tableHeaderHtml = document.getElementById('drilldownTable').querySelector('thead').innerHTML;
+        const contentHtml = document.getElementById('drilldownContent').innerHTML;
 
-    const printWindow = window.open('', '_blank');
-    printWindow.document.write(`
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(`
         <!DOCTYPE html>
         <html>
         <head>
@@ -696,7 +730,7 @@ function printDetailedLedger() {
         </body>
         </html>
     `);
-    printWindow.document.close();
-}
+        printWindow.document.close();
+    }
 </script>
 {% endblock %}

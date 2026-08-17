@@ -6,29 +6,38 @@
 <!-- ========================================== -->
 <!-- PAGE HEADER & ACTION BUTTONS -->
 <!-- ========================================== -->
-<div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-4" data-style="display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 24px;">
+<div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-4"
+    data-style="display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 24px;">
     <div class="d-flex align-items-center gap-3" data-style="display: flex; align-items: center; gap: 14px;">
-        <div class="bg-success bg-opacity-10 text-success p-3 rounded-4" data-style="background-color: rgba(16, 185, 129, 0.12); color: #10b981; padding: 14px; border-radius: 14px;">
+        <div class="bg-success bg-opacity-10 text-success p-3 rounded-4"
+            data-style="background-color: rgba(16, 185, 129, 0.12); color: #10b981; padding: 14px; border-radius: 14px;">
             <i class="bi bi-box-seam fs-2"></i>
         </div>
         <div>
-            <h3 class="fw-bold text-dark mb-0" data-style="font-weight: 800; color: #1e293b; margin: 0; font-size: 1.55rem;">Stock Inventory</h3>
+            <h3 class="fw-bold text-dark mb-0"
+                data-style="font-weight: 800; color: #1e293b; margin: 0; font-size: 1.55rem;">Stock Inventory</h3>
         </div>
     </div>
-    <div class="d-grid gap-2" data-style="display: flex !important; flex-wrap: wrap !important; gap: 8px !important;">
-        <button type="button" class="btn btn-success rounded-pill px-3 py-2 fw-semibold shadow-sm text-nowrap" data-style="border-radius: 30px; font-weight: 600; padding: 8px 16px; font-size: 0.86rem; text-align: center;" data-bs-toggle="modal" data-bs-target="#quickBuyModal" onclick="openBuyModal(null, 'feed')" data-onclick="openBuyModal(null, 'feed')">
+    <div class="d-grid gap-2"
+        data-style="display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 8px !important;">
+        <button type="button" class="btn btn-success rounded-pill px-3 py-2 fw-semibold shadow-sm text-nowrap"
+            data-style="border-radius: 30px; font-weight: 600; padding: 8px 16px; font-size: 0.86rem; text-align: center;"
+            data-bs-toggle="modal" data-bs-target="#quickBuyModal" onclick="openBuyModal(null, 'feed')"
+            data-onclick="openBuyModal(null, 'feed')">
             <i class="bi bi-plus-circle-fill me-1"></i>+ Add / Restock Item
         </button>
-        <a href="{{ url_for('stock_valuations') }}" class="btn btn-warning rounded-pill px-3 py-2 fw-semibold text-dark text-nowrap shadow-sm" data-style="border-radius: 30px; font-weight: 600; padding: 8px 16px; font-size: 0.86rem; text-align: center; background-color: #f59e0b; border-color: #f59e0b; color: #1e293b;">
-            <i class="bi bi-calculator me-1"></i>Stock Valuations &amp; Consumptions
-        </a>
-        <a href="{{ url_for('feed') }}" class="btn btn-outline-success rounded-pill px-3 py-2 fw-semibold text-nowrap" data-style="border-radius: 30px; font-weight: 600; padding: 8px 16px; font-size: 0.86rem; text-align: center;">
+        <a href="{{ url_for('feed') }}" class="btn btn-outline-success rounded-pill px-3 py-2 fw-semibold text-nowrap"
+            data-style="border-radius: 30px; font-weight: 600; padding: 8px 16px; font-size: 0.86rem; text-align: center;">
             <i class="bi bi-arrow-left-right me-1"></i>Batch Allocation
         </a>
-        <a href="{{ url_for('vouchers') }}" class="btn btn-outline-secondary rounded-pill px-3 py-2 fw-semibold text-nowrap" data-style="border-radius: 30px; font-weight: 600; padding: 8px 16px; font-size: 0.86rem; text-align: center;">
+        <a href="{{ url_for('vouchers') }}"
+            class="btn btn-outline-secondary rounded-pill px-3 py-2 fw-semibold text-nowrap"
+            data-style="border-radius: 30px; font-weight: 600; padding: 8px 16px; font-size: 0.86rem; text-align: center;">
             <i class="bi bi-receipt me-1"></i>Vouchers
         </a>
-        <a href="{{ url_for('download_stock_csv') }}" class="btn btn-outline-primary rounded-pill px-3 py-2 fw-semibold text-nowrap" data-style="border-radius: 30px; font-weight: 600; padding: 8px 16px; font-size: 0.86rem; text-align: center;">
+        <a href="{{ url_for('download_stock_csv') }}"
+            class="btn btn-outline-primary rounded-pill px-3 py-2 fw-semibold text-nowrap"
+            data-style="border-radius: 30px; font-weight: 600; padding: 8px 16px; font-size: 0.86rem; text-align: center;">
             <i class="bi bi-download me-1"></i>Export CSV
         </a>
     </div>
@@ -43,76 +52,89 @@
 
 {% set ns = namespace(low_alert_total=0, low_items=[]) %}
 {% for f_name, st in feed_stocks.items() %}
-    {% if st.alert_level and st.closing_stock <= st.alert_level %}
-        {% set ns.low_alert_total = ns.low_alert_total + 1 %}
-        {% set _ = ns.low_items.append({'type': 'Feed', 'name': f_name, 'stock': st.closing_stock, 'unit': st.unit, 'alert': st.alert_level}) %}
-    {% endif %}
-{% endfor %}
-{% for m_name, st in med_stocks.items() %}
-    {% if st.alert_level and st.closing_stock <= st.alert_level %}
-        {% set ns.low_alert_total = ns.low_alert_total + 1 %}
-        {% set _ = ns.low_items.append({'type': 'Medicine', 'name': m_name, 'stock': st.closing_stock, 'unit': st.unit, 'alert': st.alert_level}) %}
-    {% endif %}
-{% endfor %}
-{% for v_name, st in vac_stocks.items() %}
-    {% if st.alert_level and st.closing_stock <= st.alert_level %}
-        {% set ns.low_alert_total = ns.low_alert_total + 1 %}
-        {% set _ = ns.low_items.append({'type': 'Vaccine', 'name': v_name, 'stock': st.closing_stock, 'unit': st.unit, 'alert': st.alert_level}) %}
-    {% endif %}
-{% endfor %}
-
-<div class="row g-3 mb-4" data-style="display: flex; gap: 12px; margin-bottom: 24px;">
+{% if st.alert_level and st.closing_stock <= st.alert_level %} {% set ns.low_alert_total=ns.low_alert_total + 1 %} {%
+    set _=ns.low_items.append({'type': 'Feed' , 'name' : f_name, 'stock' : st.closing_stock, 'unit' : st.unit, 'alert' :
+    st.alert_level}) %} {% endif %} {% endfor %} {% for m_name, st in med_stocks.items() %} {% if st.alert_level and
+    st.closing_stock <=st.alert_level %} {% set ns.low_alert_total=ns.low_alert_total + 1 %} {% set
+    _=ns.low_items.append({'type': 'Medicine' , 'name' : m_name, 'stock' : st.closing_stock, 'unit' : st.unit, 'alert' :
+    st.alert_level}) %} {% endif %} {% endfor %} {% for v_name, st in vac_stocks.items() %} {% if st.alert_level and
+    st.closing_stock <=st.alert_level %} {% set ns.low_alert_total=ns.low_alert_total + 1 %} {% set
+    _=ns.low_items.append({'type': 'Vaccine' , 'name' : v_name, 'stock' : st.closing_stock, 'unit' : st.unit, 'alert' :
+    st.alert_level}) %} {% endif %} {% endfor %} <div class="row g-3 mb-4"
+    data-style="display: flex; gap: 12px; margin-bottom: 24px;">
     <!-- Feed Stat -->
     <div class="col-12 col-sm-6 col-xl-3">
-        <div class="card border-0 shadow-sm rounded-4 p-3.5 bg-white d-flex flex-row align-items-center gap-3" data-style="border-radius: 16px; background-color: #ffffff; padding: 16px; display: flex; flex-direction: row; align-items: center; gap: 14px; box-shadow: 0 4px 14px rgba(0,0,0,0.03); border: 1px solid #f1f5f9;">
-            <div class="bg-success bg-opacity-10 text-success p-3 rounded-3 fs-3 d-flex align-items-center justify-content-center" data-style="width: 48px; height: 48px; border-radius: 12px; background-color: rgba(16, 185, 129, 0.12); color: #10b981; display: flex; align-items: center; justify-content: center;">
+        <div class="card border-0 shadow-sm rounded-4 p-3.5 bg-white d-flex flex-row align-items-center gap-3"
+            data-style="border-radius: 16px; background-color: #ffffff; padding: 16px; display: flex; flex-direction: row; align-items: center; gap: 14px; box-shadow: 0 4px 14px rgba(0,0,0,0.03); border: 1px solid #f1f5f9;">
+            <div class="bg-success bg-opacity-10 text-success p-3 rounded-3 fs-3 d-flex align-items-center justify-content-center"
+                data-style="width: 48px; height: 48px; border-radius: 12px; background-color: rgba(16, 185, 129, 0.12); color: #10b981; display: flex; align-items: center; justify-content: center;">
                 <i class="bi bi-basket3-fill"></i>
             </div>
             <div>
-                <small class="text-muted fw-semibold text-uppercase" data-style="font-size: 0.72rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Feed Items</small>
-                <h4 class="fw-bold text-dark mb-0" data-style="font-weight: 800; font-size: 1.45rem; color: #1e293b; margin: 0;">{{ total_feed }}</h4>
+                <small class="text-muted fw-semibold text-uppercase"
+                    data-style="font-size: 0.72rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Feed
+                    Items</small>
+                <h4 class="fw-bold text-dark mb-0"
+                    data-style="font-weight: 800; font-size: 1.45rem; color: #1e293b; margin: 0;">{{ total_feed }}</h4>
             </div>
         </div>
     </div>
 
     <!-- Medicine Stat -->
     <div class="col-12 col-sm-6 col-xl-3">
-        <div class="card border-0 shadow-sm rounded-4 p-3.5 bg-white d-flex flex-row align-items-center gap-3" data-style="border-radius: 16px; background-color: #ffffff; padding: 16px; display: flex; flex-direction: row; align-items: center; gap: 14px; box-shadow: 0 4px 14px rgba(0,0,0,0.03); border: 1px solid #f1f5f9;">
-            <div class="bg-primary bg-opacity-10 text-primary p-3 rounded-3 fs-3 d-flex align-items-center justify-content-center" data-style="width: 48px; height: 48px; border-radius: 12px; background-color: rgba(59, 130, 246, 0.12); color: #3b82f6; display: flex; align-items: center; justify-content: center;">
+        <div class="card border-0 shadow-sm rounded-4 p-3.5 bg-white d-flex flex-row align-items-center gap-3"
+            data-style="border-radius: 16px; background-color: #ffffff; padding: 16px; display: flex; flex-direction: row; align-items: center; gap: 14px; box-shadow: 0 4px 14px rgba(0,0,0,0.03); border: 1px solid #f1f5f9;">
+            <div class="bg-primary bg-opacity-10 text-primary p-3 rounded-3 fs-3 d-flex align-items-center justify-content-center"
+                data-style="width: 48px; height: 48px; border-radius: 12px; background-color: rgba(59, 130, 246, 0.12); color: #3b82f6; display: flex; align-items: center; justify-content: center;">
                 <i class="bi bi-capsule-pill"></i>
             </div>
             <div>
-                <small class="text-muted fw-semibold text-uppercase" data-style="font-size: 0.72rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Medicine Items</small>
-                <h4 class="fw-bold text-dark mb-0" data-style="font-weight: 800; font-size: 1.45rem; color: #1e293b; margin: 0;">{{ total_med }}</h4>
+                <small class="text-muted fw-semibold text-uppercase"
+                    data-style="font-size: 0.72rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Medicine
+                    Items</small>
+                <h4 class="fw-bold text-dark mb-0"
+                    data-style="font-weight: 800; font-size: 1.45rem; color: #1e293b; margin: 0;">{{ total_med }}</h4>
             </div>
         </div>
     </div>
 
     <!-- Vaccine Stat -->
     <div class="col-12 col-sm-6 col-xl-3">
-        <div class="card border-0 shadow-sm rounded-4 p-3.5 bg-white d-flex flex-row align-items-center gap-3" data-style="border-radius: 16px; background-color: #ffffff; padding: 16px; display: flex; flex-direction: row; align-items: center; gap: 14px; box-shadow: 0 4px 14px rgba(0,0,0,0.03); border: 1px solid #f1f5f9;">
-            <div class="bg-info bg-opacity-10 text-info p-3 rounded-3 fs-3 d-flex align-items-center justify-content-center" data-style="width: 48px; height: 48px; border-radius: 12px; background-color: rgba(6, 182, 212, 0.12); color: #06b6d4; display: flex; align-items: center; justify-content: center;">
+        <div class="card border-0 shadow-sm rounded-4 p-3.5 bg-white d-flex flex-row align-items-center gap-3"
+            data-style="border-radius: 16px; background-color: #ffffff; padding: 16px; display: flex; flex-direction: row; align-items: center; gap: 14px; box-shadow: 0 4px 14px rgba(0,0,0,0.03); border: 1px solid #f1f5f9;">
+            <div class="bg-info bg-opacity-10 text-info p-3 rounded-3 fs-3 d-flex align-items-center justify-content-center"
+                data-style="width: 48px; height: 48px; border-radius: 12px; background-color: rgba(6, 182, 212, 0.12); color: #06b6d4; display: flex; align-items: center; justify-content: center;">
                 <i class="bi bi-shield-check"></i>
             </div>
             <div>
-                <small class="text-muted fw-semibold text-uppercase" data-style="font-size: 0.72rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Vaccine Items</small>
-                <h4 class="fw-bold text-dark mb-0" data-style="font-weight: 800; font-size: 1.45rem; color: #1e293b; margin: 0;">{{ total_vac }}</h4>
+                <small class="text-muted fw-semibold text-uppercase"
+                    data-style="font-size: 0.72rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Vaccine
+                    Items</small>
+                <h4 class="fw-bold text-dark mb-0"
+                    data-style="font-weight: 800; font-size: 1.45rem; color: #1e293b; margin: 0;">{{ total_vac }}</h4>
             </div>
         </div>
     </div>
 
     <!-- Alert Trigger Stat -->
     <div class="col-12 col-sm-6 col-xl-3">
-        <div class="card border-0 shadow-sm rounded-4 p-3.5 {% if ns.low_alert_total > 0 %}bg-warning bg-opacity-10 border border-warning{% else %}bg-white{% endif %} d-flex flex-row align-items-center gap-3" data-style="border-radius: 16px; padding: 16px; display: flex; flex-direction: row; align-items: center; gap: 14px; box-shadow: 0 4px 14px rgba(0,0,0,0.03); border: 1px solid {% if ns.low_alert_total > 0 %}#f59e0b{% else %}#f1f5f9{% endif %}; background-color: {% if ns.low_alert_total > 0 %}rgba(245, 158, 11, 0.08){% else %}#ffffff{% endif %};">
-            <div class="{% if ns.low_alert_total > 0 %}bg-warning text-dark{% else %}bg-secondary bg-opacity-10 text-muted{% endif %} p-3 rounded-3 fs-3 d-flex align-items-center justify-content-center" data-style="width: 48px; height: 48px; border-radius: 12px; background-color: {% if ns.low_alert_total > 0 %}#f59e0b{% else %}#f1f5f9{% endif %}; color: {% if ns.low_alert_total > 0 %}#ffffff{% else %}#64748b{% endif %}; display: flex; align-items: center; justify-content: center;">
+        <div class="card border-0 shadow-sm rounded-4 p-3.5 {% if ns.low_alert_total > 0 %}bg-warning bg-opacity-10 border border-warning{% else %}bg-white{% endif %} d-flex flex-row align-items-center gap-3"
+            data-style="border-radius: 16px; padding: 16px; display: flex; flex-direction: row; align-items: center; gap: 14px; box-shadow: 0 4px 14px rgba(0,0,0,0.03); border: 1px solid {% if ns.low_alert_total > 0 %}#f59e0b{% else %}#f1f5f9{% endif %}; background-color: {% if ns.low_alert_total > 0 %}rgba(245, 158, 11, 0.08){% else %}#ffffff{% endif %};">
+            <div class="{% if ns.low_alert_total > 0 %}bg-warning text-dark{% else %}bg-secondary bg-opacity-10 text-muted{% endif %} p-3 rounded-3 fs-3 d-flex align-items-center justify-content-center"
+                data-style="width: 48px; height: 48px; border-radius: 12px; background-color: {% if ns.low_alert_total > 0 %}#f59e0b{% else %}#f1f5f9{% endif %}; color: {% if ns.low_alert_total > 0 %}#ffffff{% else %}#64748b{% endif %}; display: flex; align-items: center; justify-content: center;">
                 <i class="bi bi-bell-fill"></i>
             </div>
             <div class="flex-grow-1">
-                <small class="text-muted fw-semibold text-uppercase" data-style="font-size: 0.72rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Threshold Alerts</small>
+                <small class="text-muted fw-semibold text-uppercase"
+                    data-style="font-size: 0.72rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Threshold
+                    Alerts</small>
                 <div class="d-flex align-items-center justify-content-between">
-                    <h4 class="fw-bold {% if ns.low_alert_total > 0 %}text-warning{% else %}text-dark{% endif %} mb-0" data-style="font-weight: 800; font-size: 1.45rem; margin: 0;">{{ ns.low_alert_total }}</h4>
+                    <h4 class="fw-bold {% if ns.low_alert_total > 0 %}text-warning{% else %}text-dark{% endif %} mb-0"
+                        data-style="font-weight: 800; font-size: 1.45rem; margin: 0;">{{ ns.low_alert_total }}</h4>
                     {% if ns.low_alert_total > 0 %}
-                    <button type="button" class="btn btn-sm btn-outline-warning rounded-pill px-2.5 py-0.5 fw-bold" data-style="font-size: 0.74rem; font-weight: 700; border-radius: 20px; padding: 2px 10px;" onclick="showLowStockModal()" data-onclick="showLowStockModal()">
+                    <button type="button" class="btn btn-sm btn-outline-warning rounded-pill px-2.5 py-0.5 fw-bold"
+                        data-style="font-size: 0.74rem; font-weight: 700; border-radius: 20px; padding: 2px 10px;"
+                        onclick="showLowStockModal()" data-onclick="showLowStockModal()">
                         Review
                     </button>
                     {% endif %}
@@ -120,138 +142,172 @@
             </div>
         </div>
     </div>
-</div>
-
-<!-- Stock Valuation Metric Bar -->
-{% if current_valuation %}
-<div class="card border-0 shadow-sm rounded-4 p-3 bg-light mb-4 border-start border-4 border-success" data-style="background-color: #f8fafc; border-radius: 16px; padding: 14px 20px; border-left: 4px solid #10b981; margin-bottom: 24px; box-shadow: 0 4px 14px rgba(0,0,0,0.03);">
-    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
-        <div class="d-flex align-items-center gap-3">
-            <div class="bg-success bg-opacity-10 text-success p-2 rounded-3 fs-3 d-flex align-items-center justify-content-center" data-style="width: 44px; height: 44px; background-color: rgba(16, 185, 129, 0.12); color: #10b981; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
-                <i class="bi bi-currency-rupee"></i>
-            </div>
-            <div>
-                <small class="text-muted text-uppercase fw-bold d-block" data-style="font-size: 0.72rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Current Consumables Stock Valuation</small>
-                <div class="d-flex flex-wrap align-items-baseline gap-2">
-                    <h4 class="fw-bold text-dark mb-0 font-monospace" data-style="font-weight: 800; font-size: 1.4rem; color: #1e293b; margin: 0;">₹{{ "%.2f"|format(current_valuation.consumables_total) }}</h4>
-                    <span class="text-muted small" data-style="font-size: 0.8rem; color: #64748b;">(Feed: ₹{{ "%.2f"|format(current_valuation.feed) }} &bull; Med: ₹{{ "%.2f"|format(current_valuation.medicine) }} &bull; Vac: ₹{{ "%.2f"|format(current_valuation.vaccine) }})</span>
-                </div>
-            </div>
-        </div>
-        <div class="d-flex align-items-center gap-2 flex-wrap">
-            <a href="{{ url_for('stock_valuations') }}" class="btn btn-sm btn-outline-warning text-dark rounded-pill px-3 py-1.5 fw-semibold" data-style="border-radius: 20px; font-weight: 600; font-size: 0.82rem; padding: 6px 14px; background-color: #fffbeb; border: 1px solid #fde68a; color: #92400e;">
-                <i class="bi bi-calculator me-1"></i>Monthly Valuations &amp; Consumptions
-            </a>
-            <a href="{{ url_for('pnl') }}" class="btn btn-sm btn-success rounded-pill px-3 py-1.5 fw-semibold text-white" data-style="border-radius: 20px; font-weight: 600; font-size: 0.82rem; padding: 6px 14px;">
-                <i class="bi bi-file-earmark-spreadsheet me-1"></i>View in P&amp;L
-            </a>
-        </div>
     </div>
-</div>
-{% endif %}
-<div class="d-flex flex-column gap-4 w-100" data-style="display: flex !important; flex-direction: column !important; gap: 24px; width: 100%;">
 
-    <!-- -------------------------------------- -->
-    <!-- ROW 1: FEED INVENTORY (EMERALD GREEN) -->
-    <!-- -------------------------------------- -->
-    <div class="card shadow-sm border rounded-4 w-100 overflow-hidden bg-white" data-style="border: 1px solid #e2e8f0; border-radius: 16px; background-color: #ffffff; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.04); overflow: hidden; width: 100%;">
-        <!-- Card Header -->
-        <div class="p-3 px-4 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 text-white" data-style="background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important; color: #ffffff !important; padding: 14px 20px; display: flex !important; align-items: center !important; justify-content: space-between !important; flex-wrap: wrap; gap: 12px;">
-            <div class="d-flex align-items-center gap-3" data-style="display: flex; align-items: center; gap: 12px;">
-                <div class="bg-white bg-opacity-25 p-2 rounded-3 text-white fs-4 d-flex align-items-center justify-content-center flex-shrink-0" data-style="width: 44px; height: 44px; min-width: 44px; border-radius: 10px; background-color: rgba(255, 255, 255, 0.22); color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
-                    <i class="bi bi-basket3"></i>
-                </div>
-                <div>
-                    <div class="d-flex align-items-center gap-2">
-                        <h5 class="fw-bold mb-0 text-white" data-style="font-weight: 700; color: #ffffff; margin: 0; font-size: 1.15rem;">Feed Inventory</h5>
-                        <span class="badge bg-white bg-opacity-25 text-white rounded-pill px-3 py-1 fw-bold" data-style="background-color: rgba(255, 255, 255, 0.2); color: #ffffff; border-radius: 20px; font-weight: 700; padding: 3px 10px; font-size: 0.76rem;">{{ total_feed }} Items</span>
-                    </div>
-                    <small class="text-white text-opacity-75 d-block" data-style="color: rgba(255, 255, 255, 0.8); font-size: 0.78rem;">Grains, Fodder & Concentrates</small>
-                </div>
-            </div>
 
-            <!-- Header Controls -->
-            <div class="d-flex align-items-center gap-2" data-style="display: flex; align-items: center; gap: 8px;">
-                <button type="button" class="btn btn-sm btn-light text-success fw-bold rounded-pill px-3 shadow-sm text-nowrap d-flex align-items-center gap-1" data-style="border-radius: 20px; font-weight: 700; font-size: 0.82rem; height: 34px; padding: 0 16px; background-color: #ffffff; color: #10b981; border: none;" data-bs-toggle="modal" data-bs-target="#quickBuyModal" onclick="openBuyModal(null, 'feed')" data-onclick="openBuyModal(null, 'feed')">
-                    <i class="bi bi-plus-lg"></i> Add Feed Item
-                </button>
-            </div>
-        </div>
+    <!-- ========================================== -->
+    <!-- 3 MAIN INVENTORY ROW CARDS (FULL WIDTH ROW-WISE) -->
+    <!-- ========================================== -->
+    <div class="d-flex flex-column gap-4 w-100"
+        data-style="display: flex !important; flex-direction: column !important; gap: 24px; width: 100%;">
 
-        <!-- Items Container -->
-        <div class="p-3 px-4 d-flex flex-column gap-2" id="feed-list-container" data-style="padding: 14px 20px; display: flex !important; flex-direction: column !important; gap: 8px;">
-            {% for feed_name, stock in feed_stocks.items() %}
-            {% set is_low = stock.alert_level > 0 and stock.closing_stock <= stock.alert_level %}
-            {% set is_out = stock.closing_stock <= 0 %}
-            <div class="feed-item-node p-2.5 px-3 rounded-3 border bg-white d-flex align-items-center justify-content-between gap-3"
-                 data-name="{{ feed_name }}"
-                 data-stock="{{ stock.closing_stock }}"
-                 data-unit="{{ stock.unit }}"
-                 data-limit="{{ stock.alert_level }}"
-                 data-style="display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: space-between !important; flex-wrap: nowrap !important; min-height: 52px; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px 16px; gap: 12px;">
-                
-                <!-- Left: Name & Status -->
-                <div class="d-flex align-items-center gap-3 min-w-0" data-style="display: flex !important; align-items: center !important; gap: 12px; min-width: 0; flex: 1 1 auto;">
-                    <div class="bg-success bg-opacity-10 text-success p-2 rounded-2 d-none d-sm-flex align-items-center justify-content-center" data-style="width: 32px; height: 32px; background-color: rgba(16, 185, 129, 0.12); color: #10b981; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem;">
+        <!-- -------------------------------------- -->
+        <!-- ROW 1: FEED INVENTORY (EMERALD GREEN) -->
+        <!-- -------------------------------------- -->
+        <div class="card shadow-sm border rounded-4 w-100 overflow-hidden bg-white"
+            data-style="border: 1px solid #e2e8f0; border-radius: 16px; background-color: #ffffff; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.04); overflow: hidden; width: 100%;">
+            <!-- Card Header -->
+            <div class="p-3 px-4 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 text-white"
+                data-style="background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important; color: #ffffff !important; padding: 14px 20px; display: flex !important; align-items: center !important; justify-content: space-between !important; flex-wrap: wrap; gap: 12px;">
+                <div class="d-flex align-items-center gap-3"
+                    data-style="display: flex; align-items: center; gap: 12px;">
+                    <div class="bg-white bg-opacity-25 p-2 rounded-3 text-white fs-4 d-flex align-items-center justify-content-center flex-shrink-0"
+                        data-style="width: 44px; height: 44px; min-width: 44px; border-radius: 10px; background-color: rgba(255, 255, 255, 0.22); color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
                         <i class="bi bi-basket3"></i>
                     </div>
-                    <div class="min-w-0">
+                    <div>
                         <div class="d-flex align-items-center gap-2">
-                            <span class="fw-bold text-dark text-truncate" title="{{ feed_name }}" data-style="font-weight: 700; font-size: 0.95rem; color: #1e293b;">{{ feed_name }}</span>
-                            {% if is_out %}
-                                <span class="badge bg-danger text-white rounded-pill" data-style="font-size: 0.68rem; padding: 2px 8px; font-weight: 700;">Out of Stock</span>
-                            {% elif is_low %}
-                                <span class="badge bg-warning text-dark rounded-pill" data-style="font-size: 0.68rem; padding: 2px 8px; font-weight: 700;"><i class="bi bi-exclamation-circle-fill me-1"></i>Low Stock</span>
-                            {% else %}
-                                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill" data-style="font-size: 0.68rem; padding: 2px 8px; font-weight: 700; background-color: #dcfce7; color: #15803d; border: 1px solid #bbf7d0;">In Stock</span>
-                            {% endif %}
+                            <h5 class="fw-bold mb-0 text-white"
+                                data-style="font-weight: 700; color: #ffffff; margin: 0; font-size: 1.15rem;">Feed
+                                Inventory</h5>
+                            <span class="badge bg-white bg-opacity-25 text-white rounded-pill px-3 py-1 fw-bold"
+                                data-style="background-color: rgba(255, 255, 255, 0.2); color: #ffffff; border-radius: 20px; font-weight: 700; padding: 3px 10px; font-size: 0.76rem;">{{
+                                total_feed }} Items</span>
+                        </div>
+                        <small class="text-white text-opacity-75 d-block"
+                            data-style="color: rgba(255, 255, 255, 0.8); font-size: 0.78rem;">Grains, Fodder &
+                            Concentrates</small>
+                    </div>
+                </div>
+
+                <!-- Header Controls -->
+                <div class="d-flex align-items-center gap-2" data-style="display: flex; align-items: center; gap: 8px;">
+                    <button type="button"
+                        class="btn btn-sm btn-light text-success fw-bold rounded-pill px-3 shadow-sm text-nowrap d-flex align-items-center gap-1"
+                        data-style="border-radius: 20px; font-weight: 700; font-size: 0.82rem; height: 34px; padding: 0 16px; background-color: #ffffff; color: #10b981; border: none;"
+                        data-bs-toggle="modal" data-bs-target="#quickBuyModal" onclick="openBuyModal(null, 'feed')"
+                        data-onclick="openBuyModal(null, 'feed')">
+                        <i class="bi bi-plus-lg"></i> Add Feed Item
+                    </button>
+                </div>
+            </div>
+
+            <!-- Items Container -->
+            <div class="p-3 px-4 d-flex flex-column gap-2" id="feed-list-container"
+                data-style="padding: 14px 20px; display: flex !important; flex-direction: column !important; gap: 8px;">
+                {% for feed_name, stock in feed_stocks.items() %}
+                {% set is_low = stock.alert_level > 0 and stock.closing_stock <= stock.alert_level %} {% set
+                    is_out=stock.closing_stock <=0 %} <div
+                    class="feed-item-node p-2.5 px-3 rounded-3 border bg-white d-flex align-items-center justify-content-between gap-3"
+                    data-name="{{ feed_name }}" data-stock="{{ stock.closing_stock }}" data-unit="{{ stock.unit }}"
+                    data-limit="{{ stock.alert_level }}"
+                    data-style="display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: space-between !important; flex-wrap: nowrap !important; min-height: 52px; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px 16px; gap: 12px;">
+
+                    <!-- Left: Name & Status -->
+                    <div class="d-flex align-items-center gap-3 min-w-0"
+                        data-style="display: flex !important; align-items: center !important; gap: 12px; min-width: 0; flex: 1 1 auto;">
+                        <div class="bg-success bg-opacity-10 text-success p-2 rounded-2 d-none d-sm-flex align-items-center justify-content-center"
+                            data-style="width: 32px; height: 32px; background-color: rgba(16, 185, 129, 0.12); color: #10b981; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem;">
+                            <i class="bi bi-basket3"></i>
+                        </div>
+                        <div class="min-w-0">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="fw-bold text-dark text-truncate" title="{{ feed_name }}"
+                                    data-style="font-weight: 700; font-size: 0.95rem; color: #1e293b;">{{ feed_name
+                                    }}</span>
+                                {% if is_out %}
+                                <span class="badge bg-danger text-white rounded-pill"
+                                    data-style="font-size: 0.68rem; padding: 2px 8px; font-weight: 700;">Out of
+                                    Stock</span>
+                                {% elif is_low %}
+                                <span class="badge bg-warning text-dark rounded-pill"
+                                    data-style="font-size: 0.68rem; padding: 2px 8px; font-weight: 700;"><i
+                                        class="bi bi-exclamation-circle-fill me-1"></i>Low Stock</span>
+                                {% else %}
+                                <span
+                                    class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill"
+                                    data-style="font-size: 0.68rem; padding: 2px 8px; font-weight: 700; background-color: #dcfce7; color: #15803d; border: 1px solid #bbf7d0;">In
+                                    Stock</span>
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Middle: Threshold Limit -->
-                <div class="text-center px-3 d-none d-md-block" data-style="min-width: 140px; text-align: center;">
-                    <span class="text-muted small" data-style="font-size: 0.78rem; color: #64748b;">Min Alert: </span>
-                    <strong class="text-dark" data-style="font-weight: 700; color: #1e293b; font-size: 0.88rem;">{{ "%.1f"|format(stock.alert_level) if stock.alert_level else "0" }}</strong>
-                    <small class="text-muted" data-style="font-size: 0.72rem; color: #64748b;">{{ stock.unit }}</small>
-                </div>
-
-                <!-- Right: Quantity + Action Buttons -->
-                <div class="d-flex align-items-center gap-3 flex-shrink-0" data-style="display: flex !important; align-items: center !important; gap: 14px; flex-shrink: 0;">
-                    <div class="text-end" data-style="text-align: right; min-width: 75px;">
-                        <div class="fw-bold text-success" data-style="font-weight: 800; font-size: 1.1rem; color: #10b981; line-height: 1;">{{ "%.2f"|format(stock.closing_stock) }}</div>
-                        <small class="text-muted fw-semibold" data-style="font-size: 0.72rem; font-weight: 600; color: #64748b;">{{ stock.unit }}</small>
+                    <!-- Middle: Threshold Limit -->
+                    <div class="text-center px-3 d-none d-md-block" data-style="min-width: 140px; text-align: center;">
+                        <span class="text-muted small" data-style="font-size: 0.78rem; color: #64748b;">Min Alert:
+                        </span>
+                        <strong class="text-dark" data-style="font-weight: 700; color: #1e293b; font-size: 0.88rem;">{{
+                            "%.1f"|format(stock.alert_level) if stock.alert_level else "0" }}</strong>
+                        <small class="text-muted" data-style="font-size: 0.72rem; color: #64748b;">{{ stock.unit
+                            }}</small>
                     </div>
 
-                    <div class="d-inline-flex align-items-center gap-1.5" data-style="display: inline-flex !important; align-items: center !important; gap: 4px;">
-                        <!-- Edit -->
-                        <button type="button" class="btn btn-sm btn-light border text-warning p-0 rounded-2" data-style="width: 30px; height: 30px; min-width: 30px; min-height: 30px; display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 0; font-size: 0.82rem; border: 1px solid #fef3c7; background: #fffbeb; color: #d97706; cursor: pointer;" title="Edit {{ feed_name }}" data-bs-toggle="modal" data-bs-target="#editStockModal" onclick="openEditModal(this, 'feed')" data-onclick="openEditModal(this, 'feed')" data-type="feed" data-name="{{ feed_name|e }}" data-stock="{{ stock.closing_stock }}" data-unit="{{ stock.unit|e }}" data-limit="{{ stock.alert_level }}">
-                            <i class="bi bi-pencil" style="pointer-events: none;"></i>
-                        </button>
-                        <!-- Threshold -->
-                        <button type="button" class="btn btn-sm btn-light border text-secondary p-0 rounded-2" data-style="width: 30px; height: 30px; min-width: 30px; min-height: 30px; display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 0; font-size: 0.82rem; border: 1px solid #e2e8f0; background: #f8fafc; color: #64748b; cursor: pointer;" title="Set Alert Threshold" data-bs-toggle="modal" data-bs-target="#thresholdModal" onclick="openThresholdModal(this, 'feed')" data-onclick="openThresholdModal(this, 'feed')" data-type="feed" data-name="{{ feed_name|e }}" data-limit="{{ stock.alert_level }}" data-unit="{{ stock.unit|e }}">
-                            <i class="bi bi-bell" style="pointer-events: none;"></i>
-                        </button>
-                        <!-- Delete -->
-                        <form action="{{ url_for('delete_stock_item') }}" method="POST" class="m-0 p-0 d-inline-flex" data-style="margin: 0; padding: 0; display: inline-flex !important;" data-confirm="Are you sure you want to completely delete '{{ feed_name }}' and all associated inventory records?">
-                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                            <input type="hidden" name="item_type" value="feed">
-                            <input type="hidden" name="item_name" value="{{ feed_name }}">
-                            <button type="submit" class="btn btn-sm btn-light border text-danger p-0 rounded-2" data-style="width: 30px; height: 30px; min-width: 30px; min-height: 30px; display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 0; font-size: 0.82rem; border: 1px solid #fee2e2; background: #fef2f2; color: #ef4444; cursor: pointer;" title="Delete {{ feed_name }}">
-                                <i class="bi bi-trash" style="pointer-events: none;"></i>
+                    <!-- Right: Quantity + Action Buttons -->
+                    <div class="d-flex align-items-center gap-3 flex-shrink-0"
+                        data-style="display: flex !important; align-items: center !important; gap: 14px; flex-shrink: 0;">
+                        <div class="text-end" data-style="text-align: right; min-width: 75px;">
+                            <div class="fw-bold text-success"
+                                data-style="font-weight: 800; font-size: 1.1rem; color: #10b981; line-height: 1;">{{
+                                "%.2f"|format(stock.closing_stock) }}</div>
+                            <small class="text-muted fw-semibold"
+                                data-style="font-size: 0.72rem; font-weight: 600; color: #64748b;">{{ stock.unit
+                                }}</small>
+                        </div>
+
+                        <div class="d-inline-flex align-items-center gap-1.5"
+                            data-style="display: inline-flex !important; align-items: center !important; gap: 4px;">
+                            <!-- Edit -->
+                            <button type="button" class="btn btn-sm btn-light border text-warning p-0 rounded-2"
+                                data-style="width: 30px; height: 30px; min-width: 30px; min-height: 30px; display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 0; font-size: 0.82rem; border: 1px solid #fef3c7; background: #fffbeb; color: #d97706; cursor: pointer;"
+                                title="Edit {{ feed_name }}" data-bs-toggle="modal" data-bs-target="#editStockModal"
+                                onclick="openEditModal(this, 'feed')" data-onclick="openEditModal(this, 'feed')"
+                                data-type="feed" data-name="{{ feed_name|e }}" data-stock="{{ stock.closing_stock }}"
+                                data-unit="{{ stock.unit|e }}" data-limit="{{ stock.alert_level }}">
+                                <i class="bi bi-pencil" style="pointer-events: none;"></i>
                             </button>
-                        </form>
+                            <!-- Threshold -->
+                            <button type="button" class="btn btn-sm btn-light border text-secondary p-0 rounded-2"
+                                data-style="width: 30px; height: 30px; min-width: 30px; min-height: 30px; display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 0; font-size: 0.82rem; border: 1px solid #e2e8f0; background: #f8fafc; color: #64748b; cursor: pointer;"
+                                title="Set Alert Threshold" data-bs-toggle="modal" data-bs-target="#thresholdModal"
+                                onclick="openThresholdModal(this, 'feed')"
+                                data-onclick="openThresholdModal(this, 'feed')" data-type="feed"
+                                data-name="{{ feed_name|e }}" data-limit="{{ stock.alert_level }}"
+                                data-unit="{{ stock.unit|e }}">
+                                <i class="bi bi-bell" style="pointer-events: none;"></i>
+                            </button>
+                            <!-- Delete -->
+                            <form action="{{ url_for('delete_stock_item') }}" method="POST"
+                                class="m-0 p-0 d-inline-flex"
+                                data-style="margin: 0; padding: 0; display: inline-flex !important;"
+                                data-confirm="Are you sure you want to completely delete '{{ feed_name }}' and all associated inventory records?">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <input type="hidden" name="item_type" value="feed">
+                                <input type="hidden" name="item_name" value="{{ feed_name }}">
+                                <button type="submit" class="btn btn-sm btn-light border text-danger p-0 rounded-2"
+                                    data-style="width: 30px; height: 30px; min-width: 30px; min-height: 30px; display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 0; font-size: 0.82rem; border: 1px solid #fee2e2; background: #fef2f2; color: #ef4444; cursor: pointer;"
+                                    title="Delete {{ feed_name }}">
+                                    <i class="bi bi-trash" style="pointer-events: none;"></i>
+                                </button>
+                            </form>
+                        </div>
                     </div>
-                </div>
             </div>
             {% else %}
             <div class="text-center py-5 px-3" data-style="text-align: center; padding: 36px 16px;">
-                <div class="bg-success bg-opacity-10 text-success rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" data-style="width: 54px; height: 54px; border-radius: 50%; background-color: rgba(16, 185, 129, 0.12); color: #10b981; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; font-size: 1.45rem;">
+                <div class="bg-success bg-opacity-10 text-success rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3"
+                    data-style="width: 54px; height: 54px; border-radius: 50%; background-color: rgba(16, 185, 129, 0.12); color: #10b981; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; font-size: 1.45rem;">
                     <i class="bi bi-basket3"></i>
                 </div>
-                <h6 class="fw-bold text-dark mb-1" data-style="font-weight: 700; color: #1e293b; margin-bottom: 4px;">No Feed Items Yet</h6>
-                <p class="text-muted small text-center mb-3" data-style="color: #64748b; font-size: 0.82rem; margin-bottom: 14px;">Track grains, fodder, and nutritional supplements here.</p>
-                <button type="button" class="btn btn-sm btn-success rounded-pill px-3 py-1.5 fw-semibold shadow-sm" data-style="border-radius: 20px; font-weight: 600; padding: 6px 16px;" data-bs-toggle="modal" data-bs-target="#quickBuyModal" onclick="openBuyModal(null, 'feed')" data-onclick="openBuyModal(null, 'feed')">
+                <h6 class="fw-bold text-dark mb-1" data-style="font-weight: 700; color: #1e293b; margin-bottom: 4px;">No
+                    Feed Items Yet</h6>
+                <p class="text-muted small text-center mb-3"
+                    data-style="color: #64748b; font-size: 0.82rem; margin-bottom: 14px;">Track grains, fodder, and
+                    nutritional supplements here.</p>
+                <button type="button" class="btn btn-sm btn-success rounded-pill px-3 py-1.5 fw-semibold shadow-sm"
+                    data-style="border-radius: 20px; font-weight: 600; padding: 6px 16px;" data-bs-toggle="modal"
+                    data-bs-target="#quickBuyModal" onclick="openBuyModal(null, 'feed')"
+                    data-onclick="openBuyModal(null, 'feed')">
                     <i class="bi bi-plus-lg me-1"></i>Add First Feed Item
                 </button>
             </div>
@@ -263,56 +319,77 @@
     <!-- -------------------------------------- -->
     <!-- ROW 2: MEDICINE INVENTORY (BLUE) -->
     <!-- -------------------------------------- -->
-    <div class="card shadow-sm border rounded-4 w-100 overflow-hidden bg-white" data-style="border: 1px solid #e2e8f0; border-radius: 16px; background-color: #ffffff; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.04); overflow: hidden; width: 100%;">
+    <div class="card shadow-sm border rounded-4 w-100 overflow-hidden bg-white"
+        data-style="border: 1px solid #e2e8f0; border-radius: 16px; background-color: #ffffff; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.04); overflow: hidden; width: 100%;">
         <!-- Card Header -->
-        <div class="p-3 px-4 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 text-white" data-style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; color: #ffffff !important; padding: 14px 20px; display: flex !important; align-items: center !important; justify-content: space-between !important; flex-wrap: wrap; gap: 12px;">
+        <div class="p-3 px-4 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 text-white"
+            data-style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; color: #ffffff !important; padding: 14px 20px; display: flex !important; align-items: center !important; justify-content: space-between !important; flex-wrap: wrap; gap: 12px;">
             <div class="d-flex align-items-center gap-3" data-style="display: flex; align-items: center; gap: 12px;">
-                <div class="bg-white bg-opacity-25 p-2 rounded-3 text-white fs-4 d-flex align-items-center justify-content-center flex-shrink-0" data-style="width: 44px; height: 44px; min-width: 44px; border-radius: 10px; background-color: rgba(255, 255, 255, 0.22); color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
+                <div class="bg-white bg-opacity-25 p-2 rounded-3 text-white fs-4 d-flex align-items-center justify-content-center flex-shrink-0"
+                    data-style="width: 44px; height: 44px; min-width: 44px; border-radius: 10px; background-color: rgba(255, 255, 255, 0.22); color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
                     <i class="bi bi-capsule"></i>
                 </div>
                 <div>
                     <div class="d-flex align-items-center gap-2">
-                        <h5 class="fw-bold mb-0 text-white" data-style="font-weight: 700; color: #ffffff; margin: 0; font-size: 1.15rem;">Medicine Inventory</h5>
-                        <span class="badge bg-white bg-opacity-25 text-white rounded-pill px-3 py-1 fw-bold" data-style="background-color: rgba(255, 255, 255, 0.2); color: #ffffff; border-radius: 20px; font-weight: 700; padding: 3px 10px; font-size: 0.76rem;">{{ total_med }} Items</span>
+                        <h5 class="fw-bold mb-0 text-white"
+                            data-style="font-weight: 700; color: #ffffff; margin: 0; font-size: 1.15rem;">Medicine
+                            Inventory</h5>
+                        <span class="badge bg-white bg-opacity-25 text-white rounded-pill px-3 py-1 fw-bold"
+                            data-style="background-color: rgba(255, 255, 255, 0.2); color: #ffffff; border-radius: 20px; font-weight: 700; padding: 3px 10px; font-size: 0.76rem;">{{
+                            total_med }} Items</span>
                     </div>
-                    <small class="text-white text-opacity-75 d-block" data-style="color: rgba(255, 255, 255, 0.8); font-size: 0.78rem;">Antibiotics, Tonics & Tablets</small>
+                    <small class="text-white text-opacity-75 d-block"
+                        data-style="color: rgba(255, 255, 255, 0.8); font-size: 0.78rem;">Antibiotics, Tonics &
+                        Tablets</small>
                 </div>
             </div>
 
             <!-- Header Controls -->
             <div class="d-flex align-items-center gap-2" data-style="display: flex; align-items: center; gap: 8px;">
-                <button type="button" class="btn btn-sm btn-light text-primary fw-bold rounded-pill px-3 shadow-sm text-nowrap d-flex align-items-center gap-1" data-style="border-radius: 20px; font-weight: 700; font-size: 0.82rem; height: 34px; padding: 0 16px; background-color: #ffffff; color: #3b82f6; border: none;" data-bs-toggle="modal" data-bs-target="#quickBuyModal" onclick="openBuyModal(null, 'medicine')" data-onclick="openBuyModal(null, 'medicine')">
+                <button type="button"
+                    class="btn btn-sm btn-light text-primary fw-bold rounded-pill px-3 shadow-sm text-nowrap d-flex align-items-center gap-1"
+                    data-style="border-radius: 20px; font-weight: 700; font-size: 0.82rem; height: 34px; padding: 0 16px; background-color: #ffffff; color: #3b82f6; border: none;"
+                    data-bs-toggle="modal" data-bs-target="#quickBuyModal" onclick="openBuyModal(null, 'medicine')"
+                    data-onclick="openBuyModal(null, 'medicine')">
                     <i class="bi bi-plus-lg"></i> Add Medicine
                 </button>
             </div>
         </div>
 
         <!-- Items Container -->
-        <div class="p-3 px-4 d-flex flex-column gap-2" id="medicine-list-container" data-style="padding: 14px 20px; display: flex !important; flex-direction: column !important; gap: 8px;">
+        <div class="p-3 px-4 d-flex flex-column gap-2" id="medicine-list-container"
+            data-style="padding: 14px 20px; display: flex !important; flex-direction: column !important; gap: 8px;">
             {% for med_name, stock in med_stocks.items() %}
-            {% set is_low = stock.alert_level > 0 and stock.closing_stock <= stock.alert_level %}
-            {% set is_out = stock.closing_stock <= 0 %}
-            <div class="medicine-item-node p-2.5 px-3 rounded-3 border bg-white d-flex align-items-center justify-content-between gap-3"
-                 data-name="{{ med_name }}"
-                 data-stock="{{ stock.closing_stock }}"
-                 data-unit="{{ stock.unit }}"
-                 data-limit="{{ stock.alert_level }}"
-                 data-style="display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: space-between !important; flex-wrap: nowrap !important; min-height: 52px; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px 16px; gap: 12px;">
-                
+            {% set is_low = stock.alert_level > 0 and stock.closing_stock <= stock.alert_level %} {% set
+                is_out=stock.closing_stock <=0 %} <div
+                class="medicine-item-node p-2.5 px-3 rounded-3 border bg-white d-flex align-items-center justify-content-between gap-3"
+                data-name="{{ med_name }}" data-stock="{{ stock.closing_stock }}" data-unit="{{ stock.unit }}"
+                data-limit="{{ stock.alert_level }}"
+                data-style="display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: space-between !important; flex-wrap: nowrap !important; min-height: 52px; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px 16px; gap: 12px;">
+
                 <!-- Left: Name & Status -->
-                <div class="d-flex align-items-center gap-3 min-w-0" data-style="display: flex !important; align-items: center !important; gap: 12px; min-width: 0; flex: 1 1 auto;">
-                    <div class="bg-primary bg-opacity-10 text-primary p-2 rounded-2 d-none d-sm-flex align-items-center justify-content-center" data-style="width: 32px; height: 32px; background-color: rgba(59, 130, 246, 0.12); color: #3b82f6; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem;">
+                <div class="d-flex align-items-center gap-3 min-w-0"
+                    data-style="display: flex !important; align-items: center !important; gap: 12px; min-width: 0; flex: 1 1 auto;">
+                    <div class="bg-primary bg-opacity-10 text-primary p-2 rounded-2 d-none d-sm-flex align-items-center justify-content-center"
+                        data-style="width: 32px; height: 32px; background-color: rgba(59, 130, 246, 0.12); color: #3b82f6; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem;">
                         <i class="bi bi-capsule"></i>
                     </div>
                     <div class="min-w-0">
                         <div class="d-flex align-items-center gap-2">
-                            <span class="fw-bold text-dark text-truncate" title="{{ med_name }}" data-style="font-weight: 700; font-size: 0.95rem; color: #1e293b;">{{ med_name }}</span>
+                            <span class="fw-bold text-dark text-truncate" title="{{ med_name }}"
+                                data-style="font-weight: 700; font-size: 0.95rem; color: #1e293b;">{{ med_name }}</span>
                             {% if is_out %}
-                                <span class="badge bg-danger text-white rounded-pill" data-style="font-size: 0.68rem; padding: 2px 8px; font-weight: 700;">Out of Stock</span>
+                            <span class="badge bg-danger text-white rounded-pill"
+                                data-style="font-size: 0.68rem; padding: 2px 8px; font-weight: 700;">Out of Stock</span>
                             {% elif is_low %}
-                                <span class="badge bg-warning text-dark rounded-pill" data-style="font-size: 0.68rem; padding: 2px 8px; font-weight: 700;"><i class="bi bi-exclamation-circle-fill me-1"></i>Low Stock</span>
+                            <span class="badge bg-warning text-dark rounded-pill"
+                                data-style="font-size: 0.68rem; padding: 2px 8px; font-weight: 700;"><i
+                                    class="bi bi-exclamation-circle-fill me-1"></i>Low Stock</span>
                             {% else %}
-                                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill" data-style="font-size: 0.68rem; padding: 2px 8px; font-weight: 700; background-color: #dcfce7; color: #15803d; border: 1px solid #bbf7d0;">In Stock</span>
+                            <span
+                                class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill"
+                                data-style="font-size: 0.68rem; padding: 2px 8px; font-weight: 700; background-color: #dcfce7; color: #15803d; border: 1px solid #bbf7d0;">In
+                                Stock</span>
                             {% endif %}
                         </div>
                     </div>
@@ -321,107 +398,156 @@
                 <!-- Middle: Threshold Limit -->
                 <div class="text-center px-3 d-none d-md-block" data-style="min-width: 140px; text-align: center;">
                     <span class="text-muted small" data-style="font-size: 0.78rem; color: #64748b;">Min Alert: </span>
-                    <strong class="text-dark" data-style="font-weight: 700; color: #1e293b; font-size: 0.88rem;">{{ "%.1f"|format(stock.alert_level) if stock.alert_level else "0" }}</strong>
+                    <strong class="text-dark" data-style="font-weight: 700; color: #1e293b; font-size: 0.88rem;">{{
+                        "%.1f"|format(stock.alert_level) if stock.alert_level else "0" }}</strong>
                     <small class="text-muted" data-style="font-size: 0.72rem; color: #64748b;">{{ stock.unit }}</small>
                 </div>
 
                 <!-- Right: Quantity + Action Buttons -->
-                <div class="d-flex align-items-center gap-3 flex-shrink-0" data-style="display: flex !important; align-items: center !important; gap: 14px; flex-shrink: 0;">
+                <div class="d-flex align-items-center gap-3 flex-shrink-0"
+                    data-style="display: flex !important; align-items: center !important; gap: 14px; flex-shrink: 0;">
                     <div class="text-end" data-style="text-align: right; min-width: 75px;">
-                        <div class="fw-bold text-primary" data-style="font-weight: 800; font-size: 1.1rem; color: #3b82f6; line-height: 1;">{{ "%.2f"|format(stock.closing_stock) }}</div>
-                        <small class="text-muted fw-semibold" data-style="font-size: 0.72rem; font-weight: 600; color: #64748b;">{{ stock.unit }}</small>
+                        <div class="fw-bold text-primary"
+                            data-style="font-weight: 800; font-size: 1.1rem; color: #3b82f6; line-height: 1;">{{
+                            "%.2f"|format(stock.closing_stock) }}</div>
+                        <small class="text-muted fw-semibold"
+                            data-style="font-size: 0.72rem; font-weight: 600; color: #64748b;">{{ stock.unit }}</small>
                     </div>
 
-                    <div class="d-inline-flex align-items-center gap-1.5" data-style="display: inline-flex !important; align-items: center !important; gap: 4px;">
+                    <div class="d-inline-flex align-items-center gap-1.5"
+                        data-style="display: inline-flex !important; align-items: center !important; gap: 4px;">
                         <!-- Edit -->
-                        <button type="button" class="btn btn-sm btn-light border text-warning p-0 rounded-2" data-style="width: 30px; height: 30px; min-width: 30px; min-height: 30px; display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 0; font-size: 0.82rem; border: 1px solid #fef3c7; background: #fffbeb; color: #d97706; cursor: pointer;" title="Edit {{ med_name }}" data-bs-toggle="modal" data-bs-target="#editStockModal" onclick="openEditModal(this, 'medicine')" data-onclick="openEditModal(this, 'medicine')" data-type="medicine" data-name="{{ med_name|e }}" data-stock="{{ stock.closing_stock }}" data-unit="{{ stock.unit|e }}" data-limit="{{ stock.alert_level }}">
+                        <button type="button" class="btn btn-sm btn-light border text-warning p-0 rounded-2"
+                            data-style="width: 30px; height: 30px; min-width: 30px; min-height: 30px; display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 0; font-size: 0.82rem; border: 1px solid #fef3c7; background: #fffbeb; color: #d97706; cursor: pointer;"
+                            title="Edit {{ med_name }}" data-bs-toggle="modal" data-bs-target="#editStockModal"
+                            onclick="openEditModal(this, 'medicine')" data-onclick="openEditModal(this, 'medicine')"
+                            data-type="medicine" data-name="{{ med_name|e }}" data-stock="{{ stock.closing_stock }}"
+                            data-unit="{{ stock.unit|e }}" data-limit="{{ stock.alert_level }}">
                             <i class="bi bi-pencil" style="pointer-events: none;"></i>
                         </button>
                         <!-- Threshold -->
-                        <button type="button" class="btn btn-sm btn-light border text-secondary p-0 rounded-2" data-style="width: 30px; height: 30px; min-width: 30px; min-height: 30px; display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 0; font-size: 0.82rem; border: 1px solid #e2e8f0; background: #f8fafc; color: #64748b; cursor: pointer;" title="Set Alert Threshold" data-bs-toggle="modal" data-bs-target="#thresholdModal" onclick="openThresholdModal(this, 'medicine')" data-onclick="openThresholdModal(this, 'medicine')" data-type="medicine" data-name="{{ med_name|e }}" data-limit="{{ stock.alert_level }}" data-unit="{{ stock.unit|e }}">
+                        <button type="button" class="btn btn-sm btn-light border text-secondary p-0 rounded-2"
+                            data-style="width: 30px; height: 30px; min-width: 30px; min-height: 30px; display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 0; font-size: 0.82rem; border: 1px solid #e2e8f0; background: #f8fafc; color: #64748b; cursor: pointer;"
+                            title="Set Alert Threshold" data-bs-toggle="modal" data-bs-target="#thresholdModal"
+                            onclick="openThresholdModal(this, 'medicine')"
+                            data-onclick="openThresholdModal(this, 'medicine')" data-type="medicine"
+                            data-name="{{ med_name|e }}" data-limit="{{ stock.alert_level }}"
+                            data-unit="{{ stock.unit|e }}">
                             <i class="bi bi-bell" style="pointer-events: none;"></i>
                         </button>
                         <!-- Delete -->
-                        <form action="{{ url_for('delete_stock_item') }}" method="POST" class="m-0 p-0 d-inline-flex" data-style="margin: 0; padding: 0; display: inline-flex !important;" data-confirm="Are you sure you want to completely delete '{{ med_name }}' and all associated inventory records?">
+                        <form action="{{ url_for('delete_stock_item') }}" method="POST" class="m-0 p-0 d-inline-flex"
+                            data-style="margin: 0; padding: 0; display: inline-flex !important;"
+                            data-confirm="Are you sure you want to completely delete '{{ med_name }}' and all associated inventory records?">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <input type="hidden" name="item_type" value="medicine">
                             <input type="hidden" name="item_name" value="{{ med_name }}">
-                            <button type="submit" class="btn btn-sm btn-light border text-danger p-0 rounded-2" data-style="width: 30px; height: 30px; min-width: 30px; min-height: 30px; display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 0; font-size: 0.82rem; border: 1px solid #fee2e2; background: #fef2f2; color: #ef4444; cursor: pointer;" title="Delete {{ med_name }}">
+                            <button type="submit" class="btn btn-sm btn-light border text-danger p-0 rounded-2"
+                                data-style="width: 30px; height: 30px; min-width: 30px; min-height: 30px; display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 0; font-size: 0.82rem; border: 1px solid #fee2e2; background: #fef2f2; color: #ef4444; cursor: pointer;"
+                                title="Delete {{ med_name }}">
                                 <i class="bi bi-trash" style="pointer-events: none;"></i>
                             </button>
                         </form>
                     </div>
                 </div>
-            </div>
-            {% else %}
-            <div class="text-center py-5 px-3" data-style="text-align: center; padding: 36px 16px;">
-                <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" data-style="width: 54px; height: 54px; border-radius: 50%; background-color: rgba(59, 130, 246, 0.12); color: #3b82f6; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; font-size: 1.45rem;">
-                    <i class="bi bi-capsule"></i>
-                </div>
-                <h6 class="fw-bold text-dark mb-1" data-style="font-weight: 700; color: #1e293b; margin-bottom: 4px;">No Medicine Items Yet</h6>
-                <p class="text-muted small text-center mb-3" data-style="color: #64748b; font-size: 0.82rem; margin-bottom: 14px;">Track antibiotics, tonics, and treatments here.</p>
-                <button type="button" class="btn btn-sm btn-primary rounded-pill px-3 py-1.5 fw-semibold shadow-sm" data-style="border-radius: 20px; font-weight: 600; padding: 6px 16px;" data-bs-toggle="modal" data-bs-target="#quickBuyModal" onclick="openBuyModal(null, 'medicine')" data-onclick="openBuyModal(null, 'medicine')">
-                    <i class="bi bi-plus-lg me-1"></i>Add First Medicine
-                </button>
-            </div>
-            {% endfor %}
         </div>
+        {% else %}
+        <div class="text-center py-5 px-3" data-style="text-align: center; padding: 36px 16px;">
+            <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3"
+                data-style="width: 54px; height: 54px; border-radius: 50%; background-color: rgba(59, 130, 246, 0.12); color: #3b82f6; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; font-size: 1.45rem;">
+                <i class="bi bi-capsule"></i>
+            </div>
+            <h6 class="fw-bold text-dark mb-1" data-style="font-weight: 700; color: #1e293b; margin-bottom: 4px;">No
+                Medicine Items Yet</h6>
+            <p class="text-muted small text-center mb-3"
+                data-style="color: #64748b; font-size: 0.82rem; margin-bottom: 14px;">Track antibiotics, tonics, and
+                treatments here.</p>
+            <button type="button" class="btn btn-sm btn-primary rounded-pill px-3 py-1.5 fw-semibold shadow-sm"
+                data-style="border-radius: 20px; font-weight: 600; padding: 6px 16px;" data-bs-toggle="modal"
+                data-bs-target="#quickBuyModal" onclick="openBuyModal(null, 'medicine')"
+                data-onclick="openBuyModal(null, 'medicine')">
+                <i class="bi bi-plus-lg me-1"></i>Add First Medicine
+            </button>
+        </div>
+        {% endfor %}
+    </div>
     </div>
 
 
     <!-- -------------------------------------- -->
     <!-- ROW 3: VACCINE INVENTORY (CYAN) -->
     <!-- -------------------------------------- -->
-    <div class="card shadow-sm border rounded-4 w-100 overflow-hidden bg-white" data-style="border: 1px solid #e2e8f0; border-radius: 16px; background-color: #ffffff; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.04); overflow: hidden; width: 100%;">
+    <div class="card shadow-sm border rounded-4 w-100 overflow-hidden bg-white"
+        data-style="border: 1px solid #e2e8f0; border-radius: 16px; background-color: #ffffff; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.04); overflow: hidden; width: 100%;">
         <!-- Card Header -->
-        <div class="p-3 px-4 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 text-white" data-style="background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%) !important; color: #ffffff !important; padding: 14px 20px; display: flex !important; align-items: center !important; justify-content: space-between !important; flex-wrap: wrap; gap: 12px;">
+        <div class="p-3 px-4 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 text-white"
+            data-style="background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%) !important; color: #ffffff !important; padding: 14px 20px; display: flex !important; align-items: center !important; justify-content: space-between !important; flex-wrap: wrap; gap: 12px;">
             <div class="d-flex align-items-center gap-3" data-style="display: flex; align-items: center; gap: 12px;">
-                <div class="bg-white bg-opacity-25 p-2 rounded-3 text-white fs-4 d-flex align-items-center justify-content-center flex-shrink-0" data-style="width: 44px; height: 44px; min-width: 44px; border-radius: 10px; background-color: rgba(255, 255, 255, 0.22); color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
+                <div class="bg-white bg-opacity-25 p-2 rounded-3 text-white fs-4 d-flex align-items-center justify-content-center flex-shrink-0"
+                    data-style="width: 44px; height: 44px; min-width: 44px; border-radius: 10px; background-color: rgba(255, 255, 255, 0.22); color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
                     <i class="bi bi-patch-check-fill"></i>
                 </div>
                 <div>
                     <div class="d-flex align-items-center gap-2">
-                        <h5 class="fw-bold mb-0 text-white" data-style="font-weight: 700; color: #ffffff; margin: 0; font-size: 1.15rem;">Vaccine Inventory</h5>
-                        <span class="badge bg-white bg-opacity-25 text-white rounded-pill px-3 py-1 fw-bold" data-style="background-color: rgba(255, 255, 255, 0.2); color: #ffffff; border-radius: 20px; font-weight: 700; padding: 3px 10px; font-size: 0.76rem;">{{ total_vac }} Items</span>
+                        <h5 class="fw-bold mb-0 text-white"
+                            data-style="font-weight: 700; color: #ffffff; margin: 0; font-size: 1.15rem;">Vaccine
+                            Inventory</h5>
+                        <span class="badge bg-white bg-opacity-25 text-white rounded-pill px-3 py-1 fw-bold"
+                            data-style="background-color: rgba(255, 255, 255, 0.2); color: #ffffff; border-radius: 20px; font-weight: 700; padding: 3px 10px; font-size: 0.76rem;">{{
+                            total_vac }} Items</span>
                     </div>
-                    <small class="text-white text-opacity-75 d-block" data-style="color: rgba(255, 255, 255, 0.8); font-size: 0.78rem;">PPR, ET, FMD & Injections</small>
+                    <small class="text-white text-opacity-75 d-block"
+                        data-style="color: rgba(255, 255, 255, 0.8); font-size: 0.78rem;">PPR, ET, FMD &
+                        Injections</small>
                 </div>
             </div>
 
             <!-- Header Controls -->
             <div class="d-flex align-items-center gap-2" data-style="display: flex; align-items: center; gap: 8px;">
-                <button type="button" class="btn btn-sm btn-light text-info fw-bold rounded-pill px-3 shadow-sm text-nowrap d-flex align-items-center gap-1" data-style="border-radius: 20px; font-weight: 700; font-size: 0.82rem; height: 34px; padding: 0 16px; background-color: #ffffff; color: #06b6d4; border: none;" data-bs-toggle="modal" data-bs-target="#quickBuyModal" onclick="openBuyModal(null, 'vaccine')" data-onclick="openBuyModal(null, 'vaccine')">
+                <button type="button"
+                    class="btn btn-sm btn-light text-info fw-bold rounded-pill px-3 shadow-sm text-nowrap d-flex align-items-center gap-1"
+                    data-style="border-radius: 20px; font-weight: 700; font-size: 0.82rem; height: 34px; padding: 0 16px; background-color: #ffffff; color: #06b6d4; border: none;"
+                    data-bs-toggle="modal" data-bs-target="#quickBuyModal" onclick="openBuyModal(null, 'vaccine')"
+                    data-onclick="openBuyModal(null, 'vaccine')">
                     <i class="bi bi-plus-lg"></i> Add Vaccine
                 </button>
             </div>
         </div>
 
         <!-- Items Container -->
-        <div class="p-3 px-4 d-flex flex-column gap-2" id="vaccine-list-container" data-style="padding: 14px 20px; display: flex !important; flex-direction: column !important; gap: 8px;">
+        <div class="p-3 px-4 d-flex flex-column gap-2" id="vaccine-list-container"
+            data-style="padding: 14px 20px; display: flex !important; flex-direction: column !important; gap: 8px;">
             {% for vac_name, stock in vac_stocks.items() %}
-            {% set is_low = stock.alert_level > 0 and stock.closing_stock <= stock.alert_level %}
-            {% set is_out = stock.closing_stock <= 0 %}
-            <div class="vaccine-item-node p-2.5 px-3 rounded-3 border bg-white d-flex align-items-center justify-content-between gap-3"
-                 data-name="{{ vac_name }}"
-                 data-stock="{{ stock.closing_stock }}"
-                 data-unit="{{ stock.unit }}"
-                 data-limit="{{ stock.alert_level }}"
-                 data-style="display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: space-between !important; flex-wrap: nowrap !important; min-height: 52px; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px 16px; gap: 12px;">
-                
+            {% set is_low = stock.alert_level > 0 and stock.closing_stock <= stock.alert_level %} {% set
+                is_out=stock.closing_stock <=0 %} <div
+                class="vaccine-item-node p-2.5 px-3 rounded-3 border bg-white d-flex align-items-center justify-content-between gap-3"
+                data-name="{{ vac_name }}" data-stock="{{ stock.closing_stock }}" data-unit="{{ stock.unit }}"
+                data-limit="{{ stock.alert_level }}"
+                data-style="display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: space-between !important; flex-wrap: nowrap !important; min-height: 52px; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px 16px; gap: 12px;">
+
                 <!-- Left: Name & Status -->
-                <div class="d-flex align-items-center gap-3 min-w-0" data-style="display: flex !important; align-items: center !important; gap: 12px; min-width: 0; flex: 1 1 auto;">
-                    <div class="bg-info bg-opacity-10 text-info p-2 rounded-2 d-none d-sm-flex align-items-center justify-content-center" data-style="width: 32px; height: 32px; background-color: rgba(6, 182, 212, 0.12); color: #06b6d4; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem;">
+                <div class="d-flex align-items-center gap-3 min-w-0"
+                    data-style="display: flex !important; align-items: center !important; gap: 12px; min-width: 0; flex: 1 1 auto;">
+                    <div class="bg-info bg-opacity-10 text-info p-2 rounded-2 d-none d-sm-flex align-items-center justify-content-center"
+                        data-style="width: 32px; height: 32px; background-color: rgba(6, 182, 212, 0.12); color: #06b6d4; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem;">
                         <i class="bi bi-patch-check"></i>
                     </div>
                     <div class="min-w-0">
                         <div class="d-flex align-items-center gap-2">
-                            <span class="fw-bold text-dark text-truncate" title="{{ vac_name }}" data-style="font-weight: 700; font-size: 0.95rem; color: #1e293b;">{{ vac_name }}</span>
+                            <span class="fw-bold text-dark text-truncate" title="{{ vac_name }}"
+                                data-style="font-weight: 700; font-size: 0.95rem; color: #1e293b;">{{ vac_name }}</span>
                             {% if is_out %}
-                                <span class="badge bg-danger text-white rounded-pill" data-style="font-size: 0.68rem; padding: 2px 8px; font-weight: 700;">Out of Stock</span>
+                            <span class="badge bg-danger text-white rounded-pill"
+                                data-style="font-size: 0.68rem; padding: 2px 8px; font-weight: 700;">Out of Stock</span>
                             {% elif is_low %}
-                                <span class="badge bg-warning text-dark rounded-pill" data-style="font-size: 0.68rem; padding: 2px 8px; font-weight: 700;"><i class="bi bi-exclamation-circle-fill me-1"></i>Low Stock</span>
+                            <span class="badge bg-warning text-dark rounded-pill"
+                                data-style="font-size: 0.68rem; padding: 2px 8px; font-weight: 700;"><i
+                                    class="bi bi-exclamation-circle-fill me-1"></i>Low Stock</span>
                             {% else %}
-                                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill" data-style="font-size: 0.68rem; padding: 2px 8px; font-weight: 700; background-color: #dcfce7; color: #15803d; border: 1px solid #bbf7d0;">In Stock</span>
+                            <span
+                                class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill"
+                                data-style="font-size: 0.68rem; padding: 2px 8px; font-weight: 700; background-color: #dcfce7; color: #15803d; border: 1px solid #bbf7d0;">In
+                                Stock</span>
                             {% endif %}
                         </div>
                     </div>
@@ -430,336 +556,429 @@
                 <!-- Middle: Threshold Limit -->
                 <div class="text-center px-3 d-none d-md-block" data-style="min-width: 140px; text-align: center;">
                     <span class="text-muted small" data-style="font-size: 0.78rem; color: #64748b;">Min Alert: </span>
-                    <strong class="text-dark" data-style="font-weight: 700; color: #1e293b; font-size: 0.88rem;">{{ "%.1f"|format(stock.alert_level) if stock.alert_level else "0" }}</strong>
+                    <strong class="text-dark" data-style="font-weight: 700; color: #1e293b; font-size: 0.88rem;">{{
+                        "%.1f"|format(stock.alert_level) if stock.alert_level else "0" }}</strong>
                     <small class="text-muted" data-style="font-size: 0.72rem; color: #64748b;">{{ stock.unit }}</small>
                 </div>
 
                 <!-- Right: Quantity + Action Buttons -->
-                <div class="d-flex align-items-center gap-3 flex-shrink-0" data-style="display: flex !important; align-items: center !important; gap: 14px; flex-shrink-0;">
+                <div class="d-flex align-items-center gap-3 flex-shrink-0"
+                    data-style="display: flex !important; align-items: center !important; gap: 14px; flex-shrink-0;">
                     <div class="text-end" data-style="text-align: right; min-width: 75px;">
-                        <div class="fw-bold text-info" data-style="font-weight: 800; font-size: 1.1rem; color: #06b6d4; line-height: 1;">{{ "%.2f"|format(stock.closing_stock) }}</div>
-                        <small class="text-muted fw-semibold" data-style="font-size: 0.72rem; font-weight: 600; color: #64748b;">{{ stock.unit }}</small>
+                        <div class="fw-bold text-info"
+                            data-style="font-weight: 800; font-size: 1.1rem; color: #06b6d4; line-height: 1;">{{
+                            "%.2f"|format(stock.closing_stock) }}</div>
+                        <small class="text-muted fw-semibold"
+                            data-style="font-size: 0.72rem; font-weight: 600; color: #64748b;">{{ stock.unit }}</small>
                     </div>
 
-                    <div class="d-inline-flex align-items-center gap-1.5" data-style="display: inline-flex !important; align-items: center !important; gap: 4px;">
+                    <div class="d-inline-flex align-items-center gap-1.5"
+                        data-style="display: inline-flex !important; align-items: center !important; gap: 4px;">
                         <!-- Edit -->
-                        <button type="button" class="btn btn-sm btn-light border text-warning btn-icon-action" data-style="width: 30px; height: 30px; min-width: 30px; min-height: 30px; display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 0; font-size: 0.82rem; border: 1px solid #fef3c7; background: #fffbeb; color: #d97706; cursor: pointer;" title="Edit {{ vac_name }}" data-bs-toggle="modal" data-bs-target="#editStockModal" onclick="openEditModal(this, 'vaccine')" data-onclick="openEditModal(this, 'vaccine')" data-type="vaccine" data-name="{{ vac_name|e }}" data-stock="{{ stock.closing_stock }}" data-unit="{{ stock.unit|e }}" data-limit="{{ stock.alert_level }}">
+                        <button type="button" class="btn btn-sm btn-light border text-warning btn-icon-action"
+                            data-style="width: 30px; height: 30px; min-width: 30px; min-height: 30px; display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 0; font-size: 0.82rem; border: 1px solid #fef3c7; background: #fffbeb; color: #d97706; cursor: pointer;"
+                            title="Edit {{ vac_name }}" data-bs-toggle="modal" data-bs-target="#editStockModal"
+                            onclick="openEditModal(this, 'vaccine')" data-onclick="openEditModal(this, 'vaccine')"
+                            data-type="vaccine" data-name="{{ vac_name|e }}" data-stock="{{ stock.closing_stock }}"
+                            data-unit="{{ stock.unit|e }}" data-limit="{{ stock.alert_level }}">
                             <i class="bi bi-pencil" style="pointer-events: none;"></i>
                         </button>
                         <!-- Threshold -->
-                        <button type="button" class="btn btn-sm btn-light border text-secondary btn-icon-action" data-style="width: 30px; height: 30px; min-width: 30px; min-height: 30px; display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 0; font-size: 0.82rem; border: 1px solid #e2e8f0; background: #f8fafc; color: #64748b; cursor: pointer;" title="Set Alert Threshold" data-bs-toggle="modal" data-bs-target="#thresholdModal" onclick="openThresholdModal(this, 'vaccine')" data-onclick="openThresholdModal(this, 'vaccine')" data-type="vaccine" data-name="{{ vac_name|e }}" data-limit="{{ stock.alert_level }}" data-unit="{{ stock.unit|e }}">
+                        <button type="button" class="btn btn-sm btn-light border text-secondary btn-icon-action"
+                            data-style="width: 30px; height: 30px; min-width: 30px; min-height: 30px; display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 0; font-size: 0.82rem; border: 1px solid #e2e8f0; background: #f8fafc; color: #64748b; cursor: pointer;"
+                            title="Set Alert Threshold" data-bs-toggle="modal" data-bs-target="#thresholdModal"
+                            onclick="openThresholdModal(this, 'vaccine')"
+                            data-onclick="openThresholdModal(this, 'vaccine')" data-type="vaccine"
+                            data-name="{{ vac_name|e }}" data-limit="{{ stock.alert_level }}"
+                            data-unit="{{ stock.unit|e }}">
                             <i class="bi bi-bell" style="pointer-events: none;"></i>
                         </button>
                         <!-- Delete -->
-                        <form action="{{ url_for('delete_stock_item') }}" method="POST" class="m-0 p-0 d-inline-flex" data-style="margin: 0; padding: 0; display: inline-flex !important;" data-confirm="Are you sure you want to completely delete '{{ vac_name }}' and all associated inventory records?">
+                        <form action="{{ url_for('delete_stock_item') }}" method="POST" class="m-0 p-0 d-inline-flex"
+                            data-style="margin: 0; padding: 0; display: inline-flex !important;"
+                            data-confirm="Are you sure you want to completely delete '{{ vac_name }}' and all associated inventory records?">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <input type="hidden" name="item_type" value="vaccine">
                             <input type="hidden" name="item_name" value="{{ vac_name }}">
-                            <button type="submit" class="btn btn-sm btn-light border text-danger p-0 rounded-2" data-style="width: 30px; height: 30px; min-width: 30px; min-height: 30px; display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 0; font-size: 0.82rem; border: 1px solid #fee2e2; background: #fef2f2; color: #ef4444; cursor: pointer;" title="Delete {{ vac_name }}">
+                            <button type="submit" class="btn btn-sm btn-light border text-danger p-0 rounded-2"
+                                data-style="width: 30px; height: 30px; min-width: 30px; min-height: 30px; display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 0; font-size: 0.82rem; border: 1px solid #fee2e2; background: #fef2f2; color: #ef4444; cursor: pointer;"
+                                title="Delete {{ vac_name }}">
                                 <i class="bi bi-trash" style="pointer-events: none;"></i>
                             </button>
                         </form>
                     </div>
                 </div>
+        </div>
+        {% else %}
+        <div class="text-center py-5 px-3" data-style="text-align: center; padding: 36px 16px;">
+            <div class="bg-info bg-opacity-10 text-info rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3"
+                data-style="width: 54px; height: 54px; border-radius: 50%; background-color: rgba(6, 182, 212, 0.12); color: #06b6d4; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; font-size: 1.45rem;">
+                <i class="bi bi-patch-check"></i>
             </div>
-            {% else %}
-            <div class="text-center py-5 px-3" data-style="text-align: center; padding: 36px 16px;">
-                <div class="bg-info bg-opacity-10 text-info rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" data-style="width: 54px; height: 54px; border-radius: 50%; background-color: rgba(6, 182, 212, 0.12); color: #06b6d4; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; font-size: 1.45rem;">
-                    <i class="bi bi-patch-check"></i>
+            <h6 class="fw-bold text-dark mb-1" data-style="font-weight: 700; color: #1e293b; margin-bottom: 4px;">No
+                Vaccine Items Yet</h6>
+            <p class="text-muted small text-center mb-3"
+                data-style="color: #64748b; font-size: 0.82rem; margin-bottom: 14px;">Track PPR, ET, FMD and seasonal
+                vaccinations here.</p>
+            <button type="button" class="btn btn-sm btn-info text-white rounded-pill px-3 py-1.5 fw-semibold shadow-sm"
+                data-style="border-radius: 20px; font-weight: 600; padding: 6px 16px; background-color: #06b6d4; color: #ffffff;"
+                data-bs-toggle="modal" data-bs-target="#quickBuyModal" onclick="openBuyModal(null, 'vaccine')"
+                data-onclick="openBuyModal(null, 'vaccine')">
+                <i class="bi bi-plus-lg me-1"></i>Add First Vaccine
+            </button>
+        </div>
+        {% endfor %}
+    </div>
+    </div>
+
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- MODAL 1: ADD / RESTOCK ITEM -->
+    <!-- ========================================== -->
+    <div class="modal fade" id="quickBuyModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <form action="{{ url_for('buy_stock') }}" method="POST" class="w-100">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden"
+                    data-style="border-radius: 16px; overflow: hidden; border: none;">
+                    <div class="modal-header text-white" id="buyModalHeader"
+                        data-style="background-color: #10b981; color: #ffffff;">
+                        <h5 class="modal-title fw-bold" id="buyModalTitle"><i class="bi bi-box-seam me-2"></i>Add /
+                            Restock Stock Item</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <div class="mb-3">
+                            <label class="form-label small text-muted fw-bold">Category <span
+                                    class="text-danger">*</span></label>
+                            <select name="item_type" id="buy_item_type" class="form-select"
+                                onchange="onBuyCategoryChange()" data-onchange="onBuyCategoryChange()" required>
+                                <option value="feed">Feed</option>
+                                <option value="medicine">Medicine</option>
+                                <option value="vaccine">Vaccine</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small text-muted fw-bold">Item Name <span
+                                    class="text-danger">*</span></label>
+                            <input type="text" name="item_name" id="buy_item_name" class="form-control"
+                                list="buy_item_datalist" placeholder="e.g. Maize Powder / Paracetamol / PPR..." required
+                                oninput="onBuyNameInput(this.value)" data-oninput="onBuyNameInput(this.value)">
+                            <datalist id="buy_item_datalist"></datalist>
+                            <div class="form-text text-muted" data-style="font-size: 0.78rem;">Type a new item name or
+                                select an existing item to restock.</div>
+                        </div>
+
+                        <div class="row g-2 mb-3">
+                            <div class="col-7">
+                                <label class="form-label small text-muted fw-bold">Quantity <span
+                                        class="text-danger">*</span></label>
+                                <input type="number" step="0.01" min="0.01" name="quantity" class="form-control"
+                                    placeholder="0.00" required>
+                            </div>
+                            <div class="col-5">
+                                <label class="form-label small text-muted fw-bold">Unit of Measure <span
+                                        class="text-danger">*</span></label>
+                                <select name="unit" id="buy_unit_select" class="form-select" required>
+                                    {% if expense_units %}
+                                    {% for u in expense_units %}
+                                    <option value="{{ u.unit_symbol or u.unit_name }}">{{ u.unit_name }}{% if
+                                        u.unit_symbol and u.unit_symbol != u.unit_name %} ({{ u.unit_symbol }}){% endif
+                                        %}</option>
+                                    {% endfor %}
+                                    {% else %}
+                                    <option value="KG">Kilograms (KG)</option>
+                                    <option value="g">Grams (g)</option>
+                                    <option value="L">Litre (L)</option>
+                                    <option value="ml">Millilitre (ml)</option>
+                                    <option value="Doses">Doses</option>
+                                    <option value="Nos">Nos</option>
+                                    {% endif %}
+                                </select>
+                                <div class="form-text mt-1">
+                                    <a href="{{ url_for('expense_units_view') }}" target="_blank"
+                                        class="text-decoration-none small text-success">
+                                        <i class="bi bi-plus-circle me-1"></i>Expense Units
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="form-label small text-muted fw-bold">Total Cost (₹) <span
+                                        class="text-danger">*</span></label>
+                                <input type="number" step="0.01" min="0" name="cost" class="form-control"
+                                    placeholder="0.00" required>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small text-muted fw-bold">Purchase Date <span
+                                        class="text-danger">*</span></label>
+                                <input type="date" name="purchase_date" id="buy_purchase_date" class="form-control"
+                                    required>
+                            </div>
+                        </div>
+
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="form-label small text-muted fw-bold">Supplier / Vendor</label>
+                                <input type="text" name="supplier" class="form-control"
+                                    placeholder="Market / Vendor Name">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small text-muted fw-bold">Min Threshold Alert</label>
+                                <input type="number" step="0.01" min="0" name="alert_limit" id="buy_alert_limit"
+                                    class="form-control" placeholder="e.g. 10.00">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light px-4 py-3 border-0">
+                        <button type="button" class="btn btn-outline-secondary rounded-pill px-4"
+                            data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-success rounded-pill px-4 fw-semibold"
+                            id="buy_submit_btn">Save Purchase</button>
+                    </div>
                 </div>
-                <h6 class="fw-bold text-dark mb-1" data-style="font-weight: 700; color: #1e293b; margin-bottom: 4px;">No Vaccine Items Yet</h6>
-                <p class="text-muted small text-center mb-3" data-style="color: #64748b; font-size: 0.82rem; margin-bottom: 14px;">Track PPR, ET, FMD and seasonal vaccinations here.</p>
-                <button type="button" class="btn btn-sm btn-info text-white rounded-pill px-3 py-1.5 fw-semibold shadow-sm" data-style="border-radius: 20px; font-weight: 600; padding: 6px 16px; background-color: #06b6d4; color: #ffffff;" data-bs-toggle="modal" data-bs-target="#quickBuyModal" onclick="openBuyModal(null, 'vaccine')" data-onclick="openBuyModal(null, 'vaccine')">
-                    <i class="bi bi-plus-lg me-1"></i>Add First Vaccine
-                </button>
-            </div>
-            {% endfor %}
+            </form>
         </div>
     </div>
 
-</div>
 
-
-<!-- ========================================== -->
-<!-- MODAL 1: ADD / RESTOCK ITEM -->
-<!-- ========================================== -->
-<div class="modal fade" id="quickBuyModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <form action="{{ url_for('buy_stock') }}" method="POST" class="w-100">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden" data-style="border-radius: 16px; overflow: hidden; border: none;">
-                <div class="modal-header text-white" id="buyModalHeader" data-style="background-color: #10b981; color: #ffffff;">
-                    <h5 class="modal-title fw-bold" id="buyModalTitle"><i class="bi bi-box-seam me-2"></i>Add / Restock Stock Item</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body p-4">
-                    <div class="mb-3">
-                        <label class="form-label small text-muted fw-bold">Category <span class="text-danger">*</span></label>
-                        <select name="item_type" id="buy_item_type" class="form-select" onchange="onBuyCategoryChange()" data-onchange="onBuyCategoryChange()" required>
-                            <option value="feed">Feed</option>
-                            <option value="medicine">Medicine</option>
-                            <option value="vaccine">Vaccine</option>
-                        </select>
+    <!-- ========================================== -->
+    <!-- MODAL 2: EDIT STOCK ITEM -->
+    <!-- ========================================== -->
+    <div class="modal fade" id="editStockModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <form action="{{ url_for('edit_stock_item') }}" method="POST" class="w-100">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="item_type" id="edit_item_type">
+                <input type="hidden" name="old_item_name" id="edit_old_item_name">
+                <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden"
+                    data-style="border-radius: 16px; overflow: hidden; border: none;">
+                    <div class="modal-header text-white" id="editModalHeader"
+                        data-style="background-color: #10b981; color: #ffffff;">
+                        <h5 class="modal-title fw-bold"><i class="bi bi-pencil-square me-2"></i>Edit Stock Item</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
                     </div>
-
-                    <div class="mb-3">
-                        <label class="form-label small text-muted fw-bold">Item Name <span class="text-danger">*</span></label>
-                        <input type="text" name="item_name" id="buy_item_name" class="form-control" list="buy_item_datalist" placeholder="e.g. Maize Powder / Paracetamol / PPR..." required oninput="onBuyNameInput(this.value)" data-oninput="onBuyNameInput(this.value)">
-                        <datalist id="buy_item_datalist"></datalist>
-                        <div class="form-text text-muted" data-style="font-size: 0.78rem;">Type a new item name or select an existing item to restock.</div>
-                    </div>
-
-                    <div class="row g-2 mb-3">
-                        <div class="col-7">
-                            <label class="form-label small text-muted fw-bold">Quantity <span class="text-danger">*</span></label>
-                            <input type="number" step="0.01" min="0.01" name="quantity" class="form-control" placeholder="0.00" required>
+                    <div class="modal-body p-4">
+                        <div class="mb-3">
+                            <label class="form-label small text-muted fw-bold">Item Name <span
+                                    class="text-danger">*</span></label>
+                            <input type="text" name="item_name" id="edit_item_name" class="form-control" required>
                         </div>
-                        <div class="col-5">
-                            <label class="form-label small text-muted fw-bold">Unit of Measure <span class="text-danger">*</span></label>
-                            <select name="unit" id="buy_unit_select" class="form-select" required>
-                                {% if expense_units %}
+
+                        <div class="row g-2 mb-3">
+                            <div class="col-7">
+                                <label class="form-label small text-muted fw-bold">Closing Stock Quantity <span
+                                        class="text-danger">*</span></label>
+                                <input type="number" step="0.01" min="0" name="closing_stock" id="edit_closing_stock"
+                                    class="form-control" required>
+                            </div>
+                            <div class="col-5">
+                                <label class="form-label small text-muted fw-bold">Unit of Measure <span
+                                        class="text-danger">*</span></label>
+                                <select name="unit" id="edit_unit_select" class="form-select" required
+                                    onchange="document.getElementById('edit_unit_display').textContent = this.value">
+                                    {% if expense_units %}
                                     {% for u in expense_units %}
-                                        <option value="{{ u.unit_symbol or u.unit_name }}">{{ u.unit_name }}{% if u.unit_symbol and u.unit_symbol != u.unit_name %} ({{ u.unit_symbol }}){% endif %}</option>
+                                    <option value="{{ u.unit_symbol or u.unit_name }}">{{ u.unit_name }}{% if
+                                        u.unit_symbol and u.unit_symbol != u.unit_name %} ({{ u.unit_symbol }}){% endif
+                                        %}</option>
                                     {% endfor %}
-                                {% else %}
+                                    {% else %}
                                     <option value="KG">Kilograms (KG)</option>
                                     <option value="g">Grams (g)</option>
                                     <option value="L">Litre (L)</option>
                                     <option value="ml">Millilitre (ml)</option>
                                     <option value="Doses">Doses</option>
                                     <option value="Nos">Nos</option>
-                                {% endif %}
-                            </select>
-                            <div class="form-text mt-1">
-                                <a href="{{ url_for('expense_units_view') }}" target="_blank" class="text-decoration-none small text-success">
-                                    <i class="bi bi-plus-circle me-1"></i>Expense Units
-                                </a>
+                                    {% endif %}
+                                </select>
+                                <div class="form-text mt-1">
+                                    <a href="{{ url_for('expense_units_view') }}" target="_blank"
+                                        class="text-decoration-none small text-success">
+                                        <i class="bi bi-plus-circle me-1"></i>Expense Units
+                                    </a>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="row g-2 mb-3">
-                        <div class="col-6">
-                            <label class="form-label small text-muted fw-bold">Total Cost (₹) <span class="text-danger">*</span></label>
-                            <input type="number" step="0.01" min="0" name="cost" class="form-control" placeholder="0.00" required>
-                        </div>
-                        <div class="col-6">
-                            <label class="form-label small text-muted fw-bold">Purchase Date <span class="text-danger">*</span></label>
-                            <input type="date" name="purchase_date" id="buy_purchase_date" class="form-control" required>
+                        <div class="mb-2">
+                            <label class="form-label small text-muted fw-bold">Minimum Threshold Alert Level</label>
+                            <div class="input-group">
+                                <input type="number" step="0.01" min="0" name="alert_limit" id="edit_alert_limit"
+                                    class="form-control" placeholder="0.00">
+                                <span class="input-group-text bg-light text-muted small"
+                                    id="edit_unit_display">Unit</span>
+                            </div>
+                            <div class="form-text text-muted" data-style="font-size: 0.76rem;">An alert will trigger
+                                when stock reduces to this value.</div>
                         </div>
                     </div>
-
-                    <div class="row g-2 mb-3">
-                        <div class="col-6">
-                            <label class="form-label small text-muted fw-bold">Supplier / Vendor</label>
-                            <input type="text" name="supplier" class="form-control" placeholder="Market / Vendor Name">
-                        </div>
-                        <div class="col-6">
-                            <label class="form-label small text-muted fw-bold">Min Threshold Alert</label>
-                            <input type="number" step="0.01" min="0" name="alert_limit" id="buy_alert_limit" class="form-control" placeholder="e.g. 10.00">
-                        </div>
+                    <div class="modal-footer bg-light px-4 py-3 border-0">
+                        <button type="button" class="btn btn-outline-secondary rounded-pill px-4"
+                            data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary rounded-pill px-4 fw-semibold">Save
+                            Changes</button>
                     </div>
                 </div>
-                <div class="modal-footer bg-light px-4 py-3 border-0">
-                    <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-success rounded-pill px-4 fw-semibold" id="buy_submit_btn">Save Purchase</button>
-                </div>
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
-</div>
 
 
-<!-- ========================================== -->
-<!-- MODAL 2: EDIT STOCK ITEM -->
-<!-- ========================================== -->
-<div class="modal fade" id="editStockModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <form action="{{ url_for('edit_stock_item') }}" method="POST" class="w-100">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <input type="hidden" name="item_type" id="edit_item_type">
-            <input type="hidden" name="old_item_name" id="edit_old_item_name">
-            <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden" data-style="border-radius: 16px; overflow: hidden; border: none;">
-                <div class="modal-header text-white" id="editModalHeader" data-style="background-color: #10b981; color: #ffffff;">
-                    <h5 class="modal-title fw-bold"><i class="bi bi-pencil-square me-2"></i>Edit Stock Item</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body p-4">
-                    <div class="mb-3">
-                        <label class="form-label small text-muted fw-bold">Item Name <span class="text-danger">*</span></label>
-                        <input type="text" name="item_name" id="edit_item_name" class="form-control" required>
+    <!-- ========================================== -->
+    <!-- MODAL 3: SET ALERT THRESHOLD -->
+    <!-- ========================================== -->
+    <div class="modal fade" id="thresholdModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <form action="{{ url_for('update_stock_limit') }}" method="POST" class="w-100">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="item_type" id="threshold_item_type">
+                <input type="hidden" name="item_name" id="threshold_item_name">
+                <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden"
+                    data-style="border-radius: 16px; overflow: hidden; border: none;">
+                    <div class="modal-header bg-dark text-white p-3"
+                        data-style="background-color: #1e293b; color: #ffffff; padding: 12px;">
+                        <h6 class="modal-title fw-bold mb-0"><i class="bi bi-bell-fill me-2 text-warning"></i>Set Alert
+                            Threshold</h6>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
                     </div>
-
-                    <div class="row g-2 mb-3">
-                        <div class="col-7">
-                            <label class="form-label small text-muted fw-bold">Closing Stock Quantity <span class="text-danger">*</span></label>
-                            <input type="number" step="0.01" min="0" name="closing_stock" id="edit_closing_stock" class="form-control" required>
+                    <div class="modal-body p-3.5">
+                        <div class="mb-3 text-center">
+                            <span class="badge bg-light text-dark border px-3 py-1.5 fw-bold fs-6"
+                                id="threshold_item_label">Item Name</span>
                         </div>
-                        <div class="col-5">
-                            <label class="form-label small text-muted fw-bold">Unit of Measure <span class="text-danger">*</span></label>
-                            <select name="unit" id="edit_unit_select" class="form-select" required onchange="document.getElementById('edit_unit_display').textContent = this.value">
+
+                        <div class="mb-3">
+                            <label class="form-label small text-muted fw-bold">Alert Trigger Level</label>
+                            <div class="input-group">
+                                <input type="number" step="0.01" min="0" name="limit" id="threshold_limit_val"
+                                    class="form-control fw-bold" placeholder="0.00" required>
+                                <span class="input-group-text bg-light text-muted small"
+                                    id="threshold_unit_label">Unit</span>
+                            </div>
+                            <div class="form-text text-muted" data-style="font-size: 0.74rem;">Alert fires when stock
+                                drops to or below this number.</div>
+                        </div>
+
+                        <div class="mb-2">
+                            <label class="form-label small text-muted fw-bold">Unit of Measure</label>
+                            <select name="unit" id="threshold_unit_select" class="form-select form-select-sm"
+                                onchange="document.getElementById('threshold_unit_label').textContent = this.value">
                                 {% if expense_units %}
-                                    {% for u in expense_units %}
-                                        <option value="{{ u.unit_symbol or u.unit_name }}">{{ u.unit_name }}{% if u.unit_symbol and u.unit_symbol != u.unit_name %} ({{ u.unit_symbol }}){% endif %}</option>
-                                    {% endfor %}
-                                {% else %}
-                                    <option value="KG">Kilograms (KG)</option>
-                                    <option value="g">Grams (g)</option>
-                                    <option value="L">Litre (L)</option>
-                                    <option value="ml">Millilitre (ml)</option>
-                                    <option value="Doses">Doses</option>
-                                    <option value="Nos">Nos</option>
-                                {% endif %}
-                            </select>
-                            <div class="form-text mt-1">
-                                <a href="{{ url_for('expense_units_view') }}" target="_blank" class="text-decoration-none small text-success">
-                                    <i class="bi bi-plus-circle me-1"></i>Expense Units
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="mb-2">
-                        <label class="form-label small text-muted fw-bold">Minimum Threshold Alert Level</label>
-                        <div class="input-group">
-                            <input type="number" step="0.01" min="0" name="alert_limit" id="edit_alert_limit" class="form-control" placeholder="0.00">
-                            <span class="input-group-text bg-light text-muted small" id="edit_unit_display">Unit</span>
-                        </div>
-                        <div class="form-text text-muted" data-style="font-size: 0.76rem;">An alert will trigger when stock reduces to this value.</div>
-                    </div>
-                </div>
-                <div class="modal-footer bg-light px-4 py-3 border-0">
-                    <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-semibold">Save Changes</button>
-                </div>
-            </div>
-        </form>
-    </div>
-</div>
-
-
-<!-- ========================================== -->
-<!-- MODAL 3: SET ALERT THRESHOLD -->
-<!-- ========================================== -->
-<div class="modal fade" id="thresholdModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-sm">
-        <form action="{{ url_for('update_stock_limit') }}" method="POST" class="w-100">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <input type="hidden" name="item_type" id="threshold_item_type">
-            <input type="hidden" name="item_name" id="threshold_item_name">
-            <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden" data-style="border-radius: 16px; overflow: hidden; border: none;">
-                <div class="modal-header bg-dark text-white p-3" data-style="background-color: #1e293b; color: #ffffff; padding: 12px;">
-                    <h6 class="modal-title fw-bold mb-0"><i class="bi bi-bell-fill me-2 text-warning"></i>Set Alert Threshold</h6>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body p-3.5">
-                    <div class="mb-3 text-center">
-                        <span class="badge bg-light text-dark border px-3 py-1.5 fw-bold fs-6" id="threshold_item_label">Item Name</span>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label small text-muted fw-bold">Alert Trigger Level</label>
-                        <div class="input-group">
-                            <input type="number" step="0.01" min="0" name="limit" id="threshold_limit_val" class="form-control fw-bold" placeholder="0.00" required>
-                            <span class="input-group-text bg-light text-muted small" id="threshold_unit_label">Unit</span>
-                        </div>
-                        <div class="form-text text-muted" data-style="font-size: 0.74rem;">Alert fires when stock drops to or below this number.</div>
-                    </div>
-
-                    <div class="mb-2">
-                        <label class="form-label small text-muted fw-bold">Unit of Measure</label>
-                        <select name="unit" id="threshold_unit_select" class="form-select form-select-sm" onchange="document.getElementById('threshold_unit_label').textContent = this.value">
-                            {% if expense_units %}
                                 {% for u in expense_units %}
-                                    <option value="{{ u.unit_symbol or u.unit_name }}">{{ u.unit_name }}{% if u.unit_symbol and u.unit_symbol != u.unit_name %} ({{ u.unit_symbol }}){% endif %}</option>
+                                <option value="{{ u.unit_symbol or u.unit_name }}">{{ u.unit_name }}{% if u.unit_symbol
+                                    and u.unit_symbol != u.unit_name %} ({{ u.unit_symbol }}){% endif %}</option>
                                 {% endfor %}
-                            {% else %}
+                                {% else %}
                                 <option value="KG">Kilograms (KG)</option>
                                 <option value="g">Grams (g)</option>
                                 <option value="L">Litre (L)</option>
                                 <option value="ml">Millilitre (ml)</option>
                                 <option value="Doses">Doses</option>
                                 <option value="Nos">Nos</option>
-                            {% endif %}
-                        </select>
-                        <div class="form-text mt-1">
-                            <a href="{{ url_for('expense_units_view') }}" target="_blank" class="text-decoration-none small text-success">
-                                <i class="bi bi-plus-circle me-1"></i>Expense Units
-                            </a>
+                                {% endif %}
+                            </select>
+                            <div class="form-text mt-1">
+                                <a href="{{ url_for('expense_units_view') }}" target="_blank"
+                                    class="text-decoration-none small text-success">
+                                    <i class="bi bi-plus-circle me-1"></i>Expense Units
+                                </a>
+                            </div>
                         </div>
                     </div>
+                    <div class="modal-footer bg-light p-2.5 border-0">
+                        <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3"
+                            data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-sm btn-primary rounded-pill px-3 fw-semibold">Save
+                            Alert</button>
+                    </div>
                 </div>
-                <div class="modal-footer bg-light p-2.5 border-0">
-                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-sm btn-primary rounded-pill px-3 fw-semibold">Save Alert</button>
-                </div>
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
-</div>
 
 
-<!-- ========================================== -->
-<!-- MODAL 4: LOW STOCK ITEMS OVERVIEW MODAL -->
-<!-- ========================================== -->
-<div class="modal fade" id="lowStockOverviewModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden" data-style="border-radius: 16px; overflow: hidden; border: none;">
-            <div class="modal-header bg-warning text-dark p-3 px-4" data-style="background-color: #f59e0b; color: #1e293b; padding: 14px 18px;">
-                <h5 class="modal-title fw-bold mb-0"><i class="bi bi-exclamation-triangle-fill me-2"></i>Active Threshold Alerts ({{ ns.low_alert_total }})</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body p-4">
-                <p class="text-muted small mb-3">The following items have closing stock at or below your specified minimum threshold alert level. Quick restock them directly below:</p>
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Category</th>
-                                <th>Item Name</th>
-                                <th>Current Stock</th>
-                                <th>Threshold Alert</th>
-                                <th class="text-end">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for item in ns.low_items %}
-                            <tr>
-                                <td>
-                                    <span class="badge {% if item.type == 'Feed' %}bg-success{% elif item.type == 'Medicine' %}bg-primary{% else %}bg-info text-white{% endif %} rounded-pill px-2.5 py-1">
-                                        {{ item.type }}
-                                    </span>
-                                </td>
-                                <td class="fw-bold text-dark">{{ item.name }}</td>
-                                <td>
-                                    <span class="fw-bold {% if item.stock <= 0 %}text-danger{% else %}text-warning{% endif %}">
-                                        {{ "%.2f"|format(item.stock) }} {{ item.unit }}
-                                    </span>
-                                </td>
-                                <td class="text-muted">{{ "%.1f"|format(item.alert) }} {{ item.unit }}</td>
-                                <td class="text-end">
-                                    <button type="button" class="btn btn-sm btn-outline-success rounded-pill px-3 fw-semibold" data-bs-dismiss="modal" onclick="openBuyModal(this, '{{ item.type|lower }}')" data-onclick="openBuyModal(this, '{{ item.type|lower }}')" data-name="{{ item.name }}" data-unit="{{ item.unit }}">
-                                        <i class="bi bi-cart-plus me-1"></i>Restock
-                                    </button>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+    <!-- ========================================== -->
+    <!-- MODAL 4: LOW STOCK ITEMS OVERVIEW MODAL -->
+    <!-- ========================================== -->
+    <div class="modal fade" id="lowStockOverviewModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden"
+                data-style="border-radius: 16px; overflow: hidden; border: none;">
+                <div class="modal-header bg-warning text-dark p-3 px-4"
+                    data-style="background-color: #f59e0b; color: #1e293b; padding: 14px 18px;">
+                    <h5 class="modal-title fw-bold mb-0"><i class="bi bi-exclamation-triangle-fill me-2"></i>Active
+                        Threshold Alerts ({{ ns.low_alert_total }})</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-            </div>
-            <div class="modal-footer bg-light px-4 py-3 border-0">
-                <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Close</button>
+                <div class="modal-body p-4">
+                    <p class="text-muted small mb-3">The following items have closing stock at or below your specified
+                        minimum threshold alert level. Quick restock them directly below:</p>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Category</th>
+                                    <th>Item Name</th>
+                                    <th>Current Stock</th>
+                                    <th>Threshold Alert</th>
+                                    <th class="text-end">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in ns.low_items %}
+                                <tr>
+                                    <td>
+                                        <span
+                                            class="badge {% if item.type == 'Feed' %}bg-success{% elif item.type == 'Medicine' %}bg-primary{% else %}bg-info text-white{% endif %} rounded-pill px-2.5 py-1">
+                                            {{ item.type }}
+                                        </span>
+                                    </td>
+                                    <td class="fw-bold text-dark">{{ item.name }}</td>
+                                    <td>
+                                        <span
+                                            class="fw-bold {% if item.stock <= 0 %}text-danger{% else %}text-warning{% endif %}">
+                                            {{ "%.2f"|format(item.stock) }} {{ item.unit }}
+                                        </span>
+                                    </td>
+                                    <td class="text-muted">{{ "%.1f"|format(item.alert) }} {{ item.unit }}</td>
+                                    <td class="text-end">
+                                        <button type="button"
+                                            class="btn btn-sm btn-outline-success rounded-pill px-3 fw-semibold"
+                                            data-bs-dismiss="modal"
+                                            onclick="openBuyModal(this, '{{ item.type|lower }}')"
+                                            data-onclick="openBuyModal(this, '{{ item.type|lower }}')"
+                                            data-name="{{ item.name }}" data-unit="{{ item.unit }}">
+                                            <i class="bi bi-cart-plus me-1"></i>Restock
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light px-4 py-3 border-0">
+                    <button type="button" class="btn btn-secondary rounded-pill px-4"
+                        data-bs-dismiss="modal">Close</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
 
-<!-- ========================================== -->
-<!-- JAVASCRIPT: DATA SOURCE & MODAL LOGIC -->
-<!-- ========================================== -->
-<script id="expense-units-data" type="application/json" nonce="{{ csp_nonce }}">
+    <!-- ========================================== -->
+    <!-- JAVASCRIPT: DATA SOURCE & MODAL LOGIC -->
+    <!-- ========================================== -->
+    <script id="expense-units-data" type="application/json" nonce="{{ csp_nonce }}">
 [
     {% if expense_units %}
         {% for u in expense_units %}
@@ -779,7 +998,7 @@
 ]
 </script>
 
-<script id="stock-items-data" type="application/json" nonce="{{ csp_nonce }}">
+    <script id="stock-items-data" type="application/json" nonce="{{ csp_nonce }}">
 {
     "feed": {
         {% for name, s in feed_stocks.items() %}
@@ -799,423 +1018,423 @@
 }
 </script>
 
-<script nonce="{{ csp_nonce }}">
-    // 1. Shared Units of Measure from Expense Master
-    const EXPENSE_MASTER_UNITS = JSON.parse(document.getElementById('expense-units-data')?.textContent || '[]');
+    <script nonce="{{ csp_nonce }}">
+        // 1. Shared Units of Measure from Expense Master
+        const EXPENSE_MASTER_UNITS = JSON.parse(document.getElementById('expense-units-data')?.textContent || '[]');
 
-    // Existing items data for Restock lookups
-    const STOCK_INVENTORY_ITEMS = JSON.parse(document.getElementById('stock-items-data')?.textContent || '{}');
+        // Existing items data for Restock lookups
+        const STOCK_INVENTORY_ITEMS = JSON.parse(document.getElementById('stock-items-data')?.textContent || '{}');
 
-    // Total low stock count from server
-    const LOW_ALERT_COUNT = Number('{{ ns.low_alert_total or 0 }}');
+        // Total low stock count from server
+        const LOW_ALERT_COUNT = Number('{{ ns.low_alert_total or 0 }}');
 
-    // Helper: Select unit in dropdown (or dynamically populate if empty)
-    function fillUnitSelect(selectElementId, selectedValue) {
-        const select = document.getElementById(selectElementId);
-        if (!select) return;
-        
-        if (select.options.length === 0 && EXPENSE_MASTER_UNITS.length > 0) {
-            EXPENSE_MASTER_UNITS.forEach(u => {
-                const opt = document.createElement('option');
-                opt.value = u.symbol || u.name;
-                opt.textContent = (u.symbol && u.symbol !== u.name) ? `${u.name} (${u.symbol})` : u.name;
-                select.appendChild(opt);
-            });
-        }
+        // Helper: Select unit in dropdown (or dynamically populate if empty)
+        function fillUnitSelect(selectElementId, selectedValue) {
+            const select = document.getElementById(selectElementId);
+            if (!select) return;
 
-        if (selectedValue) {
-            const target = String(selectedValue).trim().toLowerCase();
-            let matchedIndex = -1;
-
-            // 1. Exact match on value
-            for (let i = 0; i < select.options.length; i++) {
-                if (select.options[i].value.trim().toLowerCase() === target) {
-                    matchedIndex = i;
-                    break;
-                }
+            if (select.options.length === 0 && EXPENSE_MASTER_UNITS.length > 0) {
+                EXPENSE_MASTER_UNITS.forEach(u => {
+                    const opt = document.createElement('option');
+                    opt.value = u.symbol || u.name;
+                    opt.textContent = (u.symbol && u.symbol !== u.name) ? `${u.name} (${u.symbol})` : u.name;
+                    select.appendChild(opt);
+                });
             }
 
-            // 2. Exact match on textContent
-            if (matchedIndex === -1) {
+            if (selectedValue) {
+                const target = String(selectedValue).trim().toLowerCase();
+                let matchedIndex = -1;
+
+                // 1. Exact match on value
                 for (let i = 0; i < select.options.length; i++) {
-                    if (select.options[i].textContent.trim().toLowerCase() === target) {
+                    if (select.options[i].value.trim().toLowerCase() === target) {
                         matchedIndex = i;
                         break;
                     }
                 }
-            }
 
-            // 3. Match format "Name (Symbol)" or symbol in parentheses
-            if (matchedIndex === -1) {
-                for (let i = 0; i < select.options.length; i++) {
-                    const txt = select.options[i].textContent.trim().toLowerCase();
-                    if (txt.includes(`(${target})`) || txt.startsWith(target + ' ')) {
-                        matchedIndex = i;
-                        break;
+                // 2. Exact match on textContent
+                if (matchedIndex === -1) {
+                    for (let i = 0; i < select.options.length; i++) {
+                        if (select.options[i].textContent.trim().toLowerCase() === target) {
+                            matchedIndex = i;
+                            break;
+                        }
                     }
                 }
-            }
 
-            if (matchedIndex !== -1) {
-                select.selectedIndex = matchedIndex;
-            } else {
-                const customOpt = document.createElement('option');
-                customOpt.value = selectedValue;
-                customOpt.textContent = selectedValue;
-                customOpt.selected = true;
-                select.appendChild(customOpt);
-                select.value = selectedValue;
+                // 3. Match format "Name (Symbol)" or symbol in parentheses
+                if (matchedIndex === -1) {
+                    for (let i = 0; i < select.options.length; i++) {
+                        const txt = select.options[i].textContent.trim().toLowerCase();
+                        if (txt.includes(`(${target})`) || txt.startsWith(target + ' ')) {
+                            matchedIndex = i;
+                            break;
+                        }
+                    }
+                }
+
+                if (matchedIndex !== -1) {
+                    select.selectedIndex = matchedIndex;
+                } else {
+                    const customOpt = document.createElement('option');
+                    customOpt.value = selectedValue;
+                    customOpt.textContent = selectedValue;
+                    customOpt.selected = true;
+                    select.appendChild(customOpt);
+                    select.value = selectedValue;
+                }
             }
         }
-    }
 
-    // Safe modal shower
-    function showModalSafely(modalId) {
-        const modalEl = document.getElementById(modalId);
-        if (!modalEl) return;
-        if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-            let modalInstance = bootstrap.Modal.getInstance(modalEl);
-            if (!modalInstance) {
-                modalInstance = new bootstrap.Modal(modalEl);
+        // Safe modal shower
+        function showModalSafely(modalId) {
+            const modalEl = document.getElementById(modalId);
+            if (!modalEl) return;
+            if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                let modalInstance = bootstrap.Modal.getInstance(modalEl);
+                if (!modalInstance) {
+                    modalInstance = new bootstrap.Modal(modalEl);
+                }
+                modalInstance.show();
             }
-            modalInstance.show();
-        }
-    }
-
-    function showLowStockModal() {
-        showModalSafely('lowStockOverviewModal');
-    }
-
-    // A. Open Buy/Add Modal
-    function openBuyModal(btn, defaultCategory) {
-        let type = defaultCategory || 'feed';
-        let name = '';
-        let unit = '';
-
-        if (btn) {
-            const btnEl = btn.closest ? (btn.closest('button') || btn) : btn;
-            name = btnEl.getAttribute('data-name') || (btnEl.dataset ? btnEl.dataset.name : '') || '';
-            unit = btnEl.getAttribute('data-unit') || (btnEl.dataset ? btnEl.dataset.unit : '') || '';
         }
 
-        const typeSelect = document.getElementById('buy_item_type');
-        if (typeSelect) typeSelect.value = type;
-
-        const nameInput = document.getElementById('buy_item_name');
-        if (nameInput) nameInput.value = name;
-
-        // Populate Datalist for autocomplete
-        populateBuyDatalist(type);
-
-        // Header color per category
-        const header = document.getElementById('buyModalHeader');
-        const submitBtn = document.getElementById('buy_submit_btn');
-        if (type === 'feed') {
-            if (header) {
-                header.setAttribute('data-style', 'background-color: #10b981; color: #ffffff;');
-                header.style.backgroundColor = '#10b981';
-            }
-            if (submitBtn) submitBtn.className = 'btn btn-success rounded-pill px-4 fw-semibold';
-        } else if (type === 'medicine') {
-            if (header) {
-                header.setAttribute('data-style', 'background-color: #3b82f6; color: #ffffff;');
-                header.style.backgroundColor = '#3b82f6';
-            }
-            if (submitBtn) submitBtn.className = 'btn btn-primary rounded-pill px-4 fw-semibold';
-        } else {
-            if (header) {
-                header.setAttribute('data-style', 'background-color: #06b6d4; color: #ffffff;');
-                header.style.backgroundColor = '#06b6d4';
-            }
-            if (submitBtn) submitBtn.className = 'btn btn-info text-white rounded-pill px-4 fw-semibold';
+        function showLowStockModal() {
+            showModalSafely('lowStockOverviewModal');
         }
 
-        // Set unit
-        if (!unit) {
-            unit = type === 'feed' ? 'KG' : (type === 'medicine' ? 'ML' : 'Doses');
-        }
-        fillUnitSelect('buy_unit_select', unit);
+        // A. Open Buy/Add Modal
+        function openBuyModal(btn, defaultCategory) {
+            let type = defaultCategory || 'feed';
+            let name = '';
+            let unit = '';
 
-        // Alert limit prefill if item exists
-        if (name) {
-            const lowKey = name.toLowerCase().trim();
-            if (STOCK_INVENTORY_ITEMS[type] && STOCK_INVENTORY_ITEMS[type][lowKey]) {
-                const alInput = document.getElementById('buy_alert_limit');
-                if (alInput) alInput.value = STOCK_INVENTORY_ITEMS[type][lowKey].alert_level || '';
+            if (btn) {
+                const btnEl = btn.closest ? (btn.closest('button') || btn) : btn;
+                name = btnEl.getAttribute('data-name') || (btnEl.dataset ? btnEl.dataset.name : '') || '';
+                unit = btnEl.getAttribute('data-unit') || (btnEl.dataset ? btnEl.dataset.unit : '') || '';
             }
-        } else {
-            const alInput = document.getElementById('buy_alert_limit');
-            if (alInput) alInput.value = '';
-        }
 
-        showModalSafely('quickBuyModal');
-    }
+            const typeSelect = document.getElementById('buy_item_type');
+            if (typeSelect) typeSelect.value = type;
 
-    function onBuyCategoryChange() {
-        const typeSelect = document.getElementById('buy_item_type');
-        const type = typeSelect ? typeSelect.value : 'feed';
-        populateBuyDatalist(type);
-        const defaultUnit = type === 'feed' ? 'KG' : (type === 'medicine' ? 'ML' : 'Doses');
-        fillUnitSelect('buy_unit_select', defaultUnit);
+            const nameInput = document.getElementById('buy_item_name');
+            if (nameInput) nameInput.value = name;
 
-        const header = document.getElementById('buyModalHeader');
-        const submitBtn = document.getElementById('buy_submit_btn');
-        if (type === 'feed') {
-            if (header) {
-                header.setAttribute('data-style', 'background-color: #10b981; color: #ffffff;');
-                header.style.backgroundColor = '#10b981';
-            }
-            if (submitBtn) submitBtn.className = 'btn btn-success rounded-pill px-4 fw-semibold';
-        } else if (type === 'medicine') {
-            if (header) {
-                header.setAttribute('data-style', 'background-color: #3b82f6; color: #ffffff;');
-                header.style.backgroundColor = '#3b82f6';
-            }
-            if (submitBtn) submitBtn.className = 'btn btn-primary rounded-pill px-4 fw-semibold';
-        } else {
-            if (header) {
-                header.setAttribute('data-style', 'background-color: #06b6d4; color: #ffffff;');
-                header.style.backgroundColor = '#06b6d4';
-            }
-            if (submitBtn) submitBtn.className = 'btn btn-info text-white rounded-pill px-4 fw-semibold';
-        }
-    }
+            // Populate Datalist for autocomplete
+            populateBuyDatalist(type);
 
-    function populateBuyDatalist(type) {
-        const datalist = document.getElementById('buy_item_datalist');
-        if (!datalist) return;
-        datalist.innerHTML = '';
-        const items = STOCK_INVENTORY_ITEMS[type] || {};
-        Object.values(items).forEach(item => {
-            const opt = document.createElement('option');
-            opt.value = item.name;
-            datalist.appendChild(opt);
-        });
-    }
-
-    function onBuyNameInput(val) {
-        const typeSelect = document.getElementById('buy_item_type');
-        const type = typeSelect ? typeSelect.value : 'feed';
-        const lowKey = (val || '').toLowerCase().trim();
-        if (STOCK_INVENTORY_ITEMS[type] && STOCK_INVENTORY_ITEMS[type][lowKey]) {
-            const found = STOCK_INVENTORY_ITEMS[type][lowKey];
-            fillUnitSelect('buy_unit_select', found.unit);
-            const alInput = document.getElementById('buy_alert_limit');
-            if (alInput) alInput.value = found.alert_level || '';
-        }
-    }
-
-    // B. Direct Edit Modal population
-    function openEditDirect(name, type, stock, unit, limit) {
-        name = name || '';
-        type = (type || 'feed').toLowerCase();
-        stock = (stock !== undefined && stock !== null && stock !== '') ? parseFloat(stock) : 0;
-        unit = unit || '';
-        limit = (limit !== undefined && limit !== null && limit !== '') ? parseFloat(limit) : 0;
-
-        const typeInput = document.getElementById('edit_item_type');
-        if (typeInput) typeInput.value = type;
-        
-        const oldNameInput = document.getElementById('edit_old_item_name');
-        if (oldNameInput) oldNameInput.value = name;
-        
-        const nameInput = document.getElementById('edit_item_name');
-        if (nameInput) nameInput.value = name;
-        
-        const stockInput = document.getElementById('edit_closing_stock');
-        if (stockInput) stockInput.value = stock;
-        
-        const limitInput = document.getElementById('edit_alert_limit');
-        if (limitInput) limitInput.value = limit;
-        
-        const unitDisplay = document.getElementById('edit_unit_display');
-        if (unitDisplay) unitDisplay.textContent = unit || 'Unit';
-
-        fillUnitSelect('edit_unit_select', unit);
-
-        const editSelect = document.getElementById('edit_unit_select');
-        if (editSelect) {
-            editSelect.onchange = function() {
-                if (unitDisplay) unitDisplay.textContent = this.value;
-            };
-        }
-
-        const header = document.getElementById('editModalHeader');
-        if (header) {
+            // Header color per category
+            const header = document.getElementById('buyModalHeader');
+            const submitBtn = document.getElementById('buy_submit_btn');
             if (type === 'feed') {
-                header.setAttribute('data-style', 'background-color: #10b981; color: #ffffff;');
-                header.style.backgroundColor = '#10b981';
+                if (header) {
+                    header.setAttribute('data-style', 'background-color: #10b981; color: #ffffff;');
+                    header.style.backgroundColor = '#10b981';
+                }
+                if (submitBtn) submitBtn.className = 'btn btn-success rounded-pill px-4 fw-semibold';
             } else if (type === 'medicine') {
-                header.setAttribute('data-style', 'background-color: #3b82f6; color: #ffffff;');
-                header.style.backgroundColor = '#3b82f6';
+                if (header) {
+                    header.setAttribute('data-style', 'background-color: #3b82f6; color: #ffffff;');
+                    header.style.backgroundColor = '#3b82f6';
+                }
+                if (submitBtn) submitBtn.className = 'btn btn-primary rounded-pill px-4 fw-semibold';
             } else {
-                header.setAttribute('data-style', 'background-color: #06b6d4; color: #ffffff;');
-                header.style.backgroundColor = '#06b6d4';
+                if (header) {
+                    header.setAttribute('data-style', 'background-color: #06b6d4; color: #ffffff;');
+                    header.style.backgroundColor = '#06b6d4';
+                }
+                if (submitBtn) submitBtn.className = 'btn btn-info text-white rounded-pill px-4 fw-semibold';
             }
-        }
-    }
 
-    function openEditModal(btn, type) {
-        if (!btn) return;
-        if (typeof btn === 'string') {
-            openEditDirect(btn, type || 'feed', 0, '', 0);
-            return;
-        }
-        const btnEl = (btn.nodeType ? btn : (btn.target || btn)).closest ? ((btn.nodeType ? btn : (btn.target || btn)).closest('button') || (btn.nodeType ? btn : (btn.target || btn))) : btn;
-        let name = btnEl.getAttribute('data-name') || (btnEl.dataset ? btnEl.dataset.name : '') || '';
-        let detectedType = (type || btnEl.getAttribute('data-type') || (btnEl.dataset ? btnEl.dataset.type : '') || 'feed').toLowerCase();
-        let stock = btnEl.getAttribute('data-stock') ?? (btnEl.dataset ? btnEl.dataset.stock : '0');
-        let unit = btnEl.getAttribute('data-unit') || (btnEl.dataset ? btnEl.dataset.unit : '');
-        let limit = btnEl.getAttribute('data-limit') ?? (btnEl.dataset ? btnEl.dataset.limit : '0');
-
-        if ((!name || stock === '0' || stock === 0) && window.STOCK_INVENTORY_ITEMS && window.STOCK_INVENTORY_ITEMS[detectedType]) {
-            const lowKey = (name || '').toLowerCase().trim();
-            const itemData = window.STOCK_INVENTORY_ITEMS[detectedType][lowKey];
-            if (itemData) {
-                if (!name) name = itemData.name;
-                if (!stock || stock === '0') stock = itemData.stock;
-                if (!unit) unit = itemData.unit;
-                if (!limit || limit === '0') limit = itemData.alert_level;
+            // Set unit
+            if (!unit) {
+                unit = type === 'feed' ? 'KG' : (type === 'medicine' ? 'ML' : 'Doses');
             }
+            fillUnitSelect('buy_unit_select', unit);
+
+            // Alert limit prefill if item exists
+            if (name) {
+                const lowKey = name.toLowerCase().trim();
+                if (STOCK_INVENTORY_ITEMS[type] && STOCK_INVENTORY_ITEMS[type][lowKey]) {
+                    const alInput = document.getElementById('buy_alert_limit');
+                    if (alInput) alInput.value = STOCK_INVENTORY_ITEMS[type][lowKey].alert_level || '';
+                }
+            } else {
+                const alInput = document.getElementById('buy_alert_limit');
+                if (alInput) alInput.value = '';
+            }
+
+            showModalSafely('quickBuyModal');
         }
 
-        openEditDirect(name, detectedType, stock, unit, limit);
-    }
+        function onBuyCategoryChange() {
+            const typeSelect = document.getElementById('buy_item_type');
+            const type = typeSelect ? typeSelect.value : 'feed';
+            populateBuyDatalist(type);
+            const defaultUnit = type === 'feed' ? 'KG' : (type === 'medicine' ? 'ML' : 'Doses');
+            fillUnitSelect('buy_unit_select', defaultUnit);
 
-    // C. Direct Threshold Alert Modal population
-    function openThresholdDirect(name, type, limit, unit) {
-        name = name || '';
-        type = (type || 'feed').toLowerCase();
-        limit = (limit !== undefined && limit !== null && limit !== '') ? parseFloat(limit) : 0;
-        unit = unit || '';
-
-        const typeInput = document.getElementById('threshold_item_type');
-        if (typeInput) typeInput.value = type;
-        
-        const nameInput = document.getElementById('threshold_item_name');
-        if (nameInput) nameInput.value = name;
-        
-        const labelEl = document.getElementById('threshold_item_label');
-        if (labelEl) labelEl.textContent = name;
-        
-        const limitInput = document.getElementById('threshold_limit_val');
-        if (limitInput) limitInput.value = limit;
-        
-        const unitLabel = document.getElementById('threshold_unit_label');
-        if (unitLabel) unitLabel.textContent = unit || 'Unit';
-
-        fillUnitSelect('threshold_unit_select', unit);
-
-        const threshSelect = document.getElementById('threshold_unit_select');
-        if (threshSelect) {
-            threshSelect.onchange = function() {
-                if (unitLabel) unitLabel.textContent = this.value;
-            };
-        }
-    }
-
-    function openThresholdModal(btn, type) {
-        if (!btn) return;
-        if (typeof btn === 'string') {
-            openThresholdDirect(btn, type || 'feed', 0, '');
-            return;
-        }
-        const btnEl = (btn.nodeType ? btn : (btn.target || btn)).closest ? ((btn.nodeType ? btn : (btn.target || btn)).closest('button') || (btn.nodeType ? btn : (btn.target || btn))) : btn;
-        let name = btnEl.getAttribute('data-name') || (btnEl.dataset ? btnEl.dataset.name : '') || '';
-        let detectedType = (type || btnEl.getAttribute('data-type') || (btnEl.dataset ? btnEl.dataset.type : '') || 'feed').toLowerCase();
-        let limit = btnEl.getAttribute('data-limit') ?? (btnEl.dataset ? btnEl.dataset.limit : '0');
-        let unit = btnEl.getAttribute('data-unit') || (btnEl.dataset ? btnEl.dataset.unit : '');
-
-        if ((!name || limit === '0' || limit === 0) && window.STOCK_INVENTORY_ITEMS && window.STOCK_INVENTORY_ITEMS[detectedType]) {
-            const lowKey = (name || '').toLowerCase().trim();
-            const itemData = window.STOCK_INVENTORY_ITEMS[detectedType][lowKey];
-            if (itemData) {
-                if (!name) name = itemData.name;
-                if (!limit || limit === '0') limit = itemData.alert_level;
-                if (!unit) unit = itemData.unit;
+            const header = document.getElementById('buyModalHeader');
+            const submitBtn = document.getElementById('buy_submit_btn');
+            if (type === 'feed') {
+                if (header) {
+                    header.setAttribute('data-style', 'background-color: #10b981; color: #ffffff;');
+                    header.style.backgroundColor = '#10b981';
+                }
+                if (submitBtn) submitBtn.className = 'btn btn-success rounded-pill px-4 fw-semibold';
+            } else if (type === 'medicine') {
+                if (header) {
+                    header.setAttribute('data-style', 'background-color: #3b82f6; color: #ffffff;');
+                    header.style.backgroundColor = '#3b82f6';
+                }
+                if (submitBtn) submitBtn.className = 'btn btn-primary rounded-pill px-4 fw-semibold';
+            } else {
+                if (header) {
+                    header.setAttribute('data-style', 'background-color: #06b6d4; color: #ffffff;');
+                    header.style.backgroundColor = '#06b6d4';
+                }
+                if (submitBtn) submitBtn.className = 'btn btn-info text-white rounded-pill px-4 fw-semibold';
             }
         }
 
-        openThresholdDirect(name, detectedType, limit, unit);
-    }
+        function populateBuyDatalist(type) {
+            const datalist = document.getElementById('buy_item_datalist');
+            if (!datalist) return;
+            datalist.innerHTML = '';
+            const items = STOCK_INVENTORY_ITEMS[type] || {};
+            Object.values(items).forEach(item => {
+                const opt = document.createElement('option');
+                opt.value = item.name;
+                datalist.appendChild(opt);
+            });
+        }
 
-    // Global capturing click delegation to ensure modal fields are populated before modal opens
-    document.addEventListener('click', function(e) {
-        const editBtn = e.target && e.target.closest ? e.target.closest('button[data-bs-target="#editStockModal"], button[data-bs-target="#thresholdModal"]') : null;
-        if (editBtn) {
-            const targetModal = editBtn.getAttribute('data-bs-target');
-            const type = editBtn.getAttribute('data-type') || 'feed';
-            if (targetModal === '#editStockModal') {
-                openEditModal(editBtn, type);
-            } else if (targetModal === '#thresholdModal') {
-                openThresholdModal(editBtn, type);
+        function onBuyNameInput(val) {
+            const typeSelect = document.getElementById('buy_item_type');
+            const type = typeSelect ? typeSelect.value : 'feed';
+            const lowKey = (val || '').toLowerCase().trim();
+            if (STOCK_INVENTORY_ITEMS[type] && STOCK_INVENTORY_ITEMS[type][lowKey]) {
+                const found = STOCK_INVENTORY_ITEMS[type][lowKey];
+                fillUnitSelect('buy_unit_select', found.unit);
+                const alInput = document.getElementById('buy_alert_limit');
+                if (alInput) alInput.value = found.alert_level || '';
             }
         }
-    }, true);
 
-    // Expose all functions globally on window
-    window.fillUnitSelect = fillUnitSelect;
-    window.showModalSafely = showModalSafely;
-    window.showLowStockModal = showLowStockModal;
-    window.openBuyModal = openBuyModal;
-    window.onBuyCategoryChange = onBuyCategoryChange;
-    window.populateBuyDatalist = populateBuyDatalist;
-    window.onBuyNameInput = onBuyNameInput;
-    window.openEditDirect = openEditDirect;
-    window.openEditModal = openEditModal;
-    window.openThresholdDirect = openThresholdDirect;
-    window.openThresholdModal = openThresholdModal;
+        // B. Direct Edit Modal population
+        function openEditDirect(name, type, stock, unit, limit) {
+            name = name || '';
+            type = (type || 'feed').toLowerCase();
+            stock = (stock !== undefined && stock !== null && stock !== '') ? parseFloat(stock) : 0;
+            unit = unit || '';
+            limit = (limit !== undefined && limit !== null && limit !== '') ? parseFloat(limit) : 0;
 
-    // Initialize on page load
-    document.addEventListener("DOMContentLoaded", function() {
-        const dateInput = document.getElementById('buy_purchase_date');
-        if (dateInput) {
-            const today = new Date().toISOString().split('T')[0];
-            dateInput.value = today;
+            const typeInput = document.getElementById('edit_item_type');
+            if (typeInput) typeInput.value = type;
+
+            const oldNameInput = document.getElementById('edit_old_item_name');
+            if (oldNameInput) oldNameInput.value = name;
+
+            const nameInput = document.getElementById('edit_item_name');
+            if (nameInput) nameInput.value = name;
+
+            const stockInput = document.getElementById('edit_closing_stock');
+            if (stockInput) stockInput.value = stock;
+
+            const limitInput = document.getElementById('edit_alert_limit');
+            if (limitInput) limitInput.value = limit;
+
+            const unitDisplay = document.getElementById('edit_unit_display');
+            if (unitDisplay) unitDisplay.textContent = unit || 'Unit';
+
+            fillUnitSelect('edit_unit_select', unit);
+
+            const editSelect = document.getElementById('edit_unit_select');
+            if (editSelect) {
+                editSelect.onchange = function () {
+                    if (unitDisplay) unitDisplay.textContent = this.value;
+                };
+            }
+
+            const header = document.getElementById('editModalHeader');
+            if (header) {
+                if (type === 'feed') {
+                    header.setAttribute('data-style', 'background-color: #10b981; color: #ffffff;');
+                    header.style.backgroundColor = '#10b981';
+                } else if (type === 'medicine') {
+                    header.setAttribute('data-style', 'background-color: #3b82f6; color: #ffffff;');
+                    header.style.backgroundColor = '#3b82f6';
+                } else {
+                    header.setAttribute('data-style', 'background-color: #06b6d4; color: #ffffff;');
+                    header.style.backgroundColor = '#06b6d4';
+                }
+            }
         }
 
-        // Bootstrap event listeners for seamless opening
-        const editModalEl = document.getElementById('editStockModal');
-        if (editModalEl) {
-            editModalEl.addEventListener('show.bs.modal', function(event) {
-                const button = event.relatedTarget;
-                if (button) {
-                    const type = button.getAttribute('data-type') || 'feed';
-                    openEditModal(button, type);
+        function openEditModal(btn, type) {
+            if (!btn) return;
+            if (typeof btn === 'string') {
+                openEditDirect(btn, type || 'feed', 0, '', 0);
+                return;
+            }
+            const btnEl = (btn.nodeType ? btn : (btn.target || btn)).closest ? ((btn.nodeType ? btn : (btn.target || btn)).closest('button') || (btn.nodeType ? btn : (btn.target || btn))) : btn;
+            let name = btnEl.getAttribute('data-name') || (btnEl.dataset ? btnEl.dataset.name : '') || '';
+            let detectedType = (type || btnEl.getAttribute('data-type') || (btnEl.dataset ? btnEl.dataset.type : '') || 'feed').toLowerCase();
+            let stock = btnEl.getAttribute('data-stock') ?? (btnEl.dataset ? btnEl.dataset.stock : '0');
+            let unit = btnEl.getAttribute('data-unit') || (btnEl.dataset ? btnEl.dataset.unit : '');
+            let limit = btnEl.getAttribute('data-limit') ?? (btnEl.dataset ? btnEl.dataset.limit : '0');
+
+            if ((!name || stock === '0' || stock === 0) && window.STOCK_INVENTORY_ITEMS && window.STOCK_INVENTORY_ITEMS[detectedType]) {
+                const lowKey = (name || '').toLowerCase().trim();
+                const itemData = window.STOCK_INVENTORY_ITEMS[detectedType][lowKey];
+                if (itemData) {
+                    if (!name) name = itemData.name;
+                    if (!stock || stock === '0') stock = itemData.stock;
+                    if (!unit) unit = itemData.unit;
+                    if (!limit || limit === '0') limit = itemData.alert_level;
                 }
-            });
-            editModalEl.addEventListener('shown.bs.modal', function(event) {
-                const button = event.relatedTarget;
-                if (button) {
-                    const type = button.getAttribute('data-type') || 'feed';
-                    openEditModal(button, type);
-                }
-            });
+            }
+
+            openEditDirect(name, detectedType, stock, unit, limit);
         }
 
-        const threshModalEl = document.getElementById('thresholdModal');
-        if (threshModalEl) {
-            threshModalEl.addEventListener('show.bs.modal', function(event) {
-                const button = event.relatedTarget;
-                if (button) {
-                    const type = button.getAttribute('data-type') || 'feed';
-                    openThresholdModal(button, type);
-                }
-            });
-            threshModalEl.addEventListener('shown.bs.modal', function(event) {
-                const button = event.relatedTarget;
-                if (button) {
-                    const type = button.getAttribute('data-type') || 'feed';
-                    openThresholdModal(button, type);
-                }
-            });
+        // C. Direct Threshold Alert Modal population
+        function openThresholdDirect(name, type, limit, unit) {
+            name = name || '';
+            type = (type || 'feed').toLowerCase();
+            limit = (limit !== undefined && limit !== null && limit !== '') ? parseFloat(limit) : 0;
+            unit = unit || '';
+
+            const typeInput = document.getElementById('threshold_item_type');
+            if (typeInput) typeInput.value = type;
+
+            const nameInput = document.getElementById('threshold_item_name');
+            if (nameInput) nameInput.value = name;
+
+            const labelEl = document.getElementById('threshold_item_label');
+            if (labelEl) labelEl.textContent = name;
+
+            const limitInput = document.getElementById('threshold_limit_val');
+            if (limitInput) limitInput.value = limit;
+
+            const unitLabel = document.getElementById('threshold_unit_label');
+            if (unitLabel) unitLabel.textContent = unit || 'Unit';
+
+            fillUnitSelect('threshold_unit_select', unit);
+
+            const threshSelect = document.getElementById('threshold_unit_select');
+            if (threshSelect) {
+                threshSelect.onchange = function () {
+                    if (unitLabel) unitLabel.textContent = this.value;
+                };
+            }
         }
 
-        // Alert popup toast if low stock threshold is reached
-        if (LOW_ALERT_COUNT > 0 && typeof bootstrap !== 'undefined') {
-            const toastContainer = document.getElementById('toast-container');
-            if (toastContainer) {
-                const toastHtml = `
+        function openThresholdModal(btn, type) {
+            if (!btn) return;
+            if (typeof btn === 'string') {
+                openThresholdDirect(btn, type || 'feed', 0, '');
+                return;
+            }
+            const btnEl = (btn.nodeType ? btn : (btn.target || btn)).closest ? ((btn.nodeType ? btn : (btn.target || btn)).closest('button') || (btn.nodeType ? btn : (btn.target || btn))) : btn;
+            let name = btnEl.getAttribute('data-name') || (btnEl.dataset ? btnEl.dataset.name : '') || '';
+            let detectedType = (type || btnEl.getAttribute('data-type') || (btnEl.dataset ? btnEl.dataset.type : '') || 'feed').toLowerCase();
+            let limit = btnEl.getAttribute('data-limit') ?? (btnEl.dataset ? btnEl.dataset.limit : '0');
+            let unit = btnEl.getAttribute('data-unit') || (btnEl.dataset ? btnEl.dataset.unit : '');
+
+            if ((!name || limit === '0' || limit === 0) && window.STOCK_INVENTORY_ITEMS && window.STOCK_INVENTORY_ITEMS[detectedType]) {
+                const lowKey = (name || '').toLowerCase().trim();
+                const itemData = window.STOCK_INVENTORY_ITEMS[detectedType][lowKey];
+                if (itemData) {
+                    if (!name) name = itemData.name;
+                    if (!limit || limit === '0') limit = itemData.alert_level;
+                    if (!unit) unit = itemData.unit;
+                }
+            }
+
+            openThresholdDirect(name, detectedType, limit, unit);
+        }
+
+        // Global capturing click delegation to ensure modal fields are populated before modal opens
+        document.addEventListener('click', function (e) {
+            const editBtn = e.target && e.target.closest ? e.target.closest('button[data-bs-target="#editStockModal"], button[data-bs-target="#thresholdModal"]') : null;
+            if (editBtn) {
+                const targetModal = editBtn.getAttribute('data-bs-target');
+                const type = editBtn.getAttribute('data-type') || 'feed';
+                if (targetModal === '#editStockModal') {
+                    openEditModal(editBtn, type);
+                } else if (targetModal === '#thresholdModal') {
+                    openThresholdModal(editBtn, type);
+                }
+            }
+        }, true);
+
+        // Expose all functions globally on window
+        window.fillUnitSelect = fillUnitSelect;
+        window.showModalSafely = showModalSafely;
+        window.showLowStockModal = showLowStockModal;
+        window.openBuyModal = openBuyModal;
+        window.onBuyCategoryChange = onBuyCategoryChange;
+        window.populateBuyDatalist = populateBuyDatalist;
+        window.onBuyNameInput = onBuyNameInput;
+        window.openEditDirect = openEditDirect;
+        window.openEditModal = openEditModal;
+        window.openThresholdDirect = openThresholdDirect;
+        window.openThresholdModal = openThresholdModal;
+
+        // Initialize on page load
+        document.addEventListener("DOMContentLoaded", function () {
+            const dateInput = document.getElementById('buy_purchase_date');
+            if (dateInput) {
+                const today = new Date().toISOString().split('T')[0];
+                dateInput.value = today;
+            }
+
+            // Bootstrap event listeners for seamless opening
+            const editModalEl = document.getElementById('editStockModal');
+            if (editModalEl) {
+                editModalEl.addEventListener('show.bs.modal', function (event) {
+                    const button = event.relatedTarget;
+                    if (button) {
+                        const type = button.getAttribute('data-type') || 'feed';
+                        openEditModal(button, type);
+                    }
+                });
+                editModalEl.addEventListener('shown.bs.modal', function (event) {
+                    const button = event.relatedTarget;
+                    if (button) {
+                        const type = button.getAttribute('data-type') || 'feed';
+                        openEditModal(button, type);
+                    }
+                });
+            }
+
+            const threshModalEl = document.getElementById('thresholdModal');
+            if (threshModalEl) {
+                threshModalEl.addEventListener('show.bs.modal', function (event) {
+                    const button = event.relatedTarget;
+                    if (button) {
+                        const type = button.getAttribute('data-type') || 'feed';
+                        openThresholdModal(button, type);
+                    }
+                });
+                threshModalEl.addEventListener('shown.bs.modal', function (event) {
+                    const button = event.relatedTarget;
+                    if (button) {
+                        const type = button.getAttribute('data-type') || 'feed';
+                        openThresholdModal(button, type);
+                    }
+                });
+            }
+
+            // Alert popup toast if low stock threshold is reached
+            if (LOW_ALERT_COUNT > 0 && typeof bootstrap !== 'undefined') {
+                const toastContainer = document.getElementById('toast-container');
+                if (toastContainer) {
+                    const toastHtml = `
                     <div class="toast farm-toast stock-alert align-items-center show" role="alert" aria-live="assertive" aria-atomic="true">
                         <div class="toast-header">
                             <i class="bi bi-bell-fill text-warning me-2 fs-5"></i>
@@ -1231,9 +1450,9 @@
                         </div>
                     </div>
                 `;
-                toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+                    toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+                }
             }
-        }
-    });
-</script>
-{% endblock %}
+        });
+    </script>
+    {% endblock %}
