@@ -140,19 +140,3 @@
     </div>
 </div>
 {% endblock %}
-document.addEventListener('DOMContentLoaded', () => {
-const now = new Date();
-const curMonth = now.getMonth() + 1;
-const curYear = now.getFullYear();
-
-const mSelect = document.getElementById('quickMonthSelect');
-const ySelect = document.getElementById('quickYearSelect');
-if (mSelect) mSelect.value = curMonth;
-if (ySelect) ySelect.value = curYear;
-
-if (!document.getElementById('from_date').value) {
-applyQuickMonth();
-}
-});
-</script>
-{% endblock %}
